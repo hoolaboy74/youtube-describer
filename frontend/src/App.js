@@ -4,8 +4,6 @@ import axios from 'axios';
 import YouTube from 'react-youtube';
 import './App.css';
 
-const API_BASE_URL = 'http://localhost:4000';
-
 // Helper to check if a string is a valid YouTube URL
 function getYouTubeId(url) {
     try {
@@ -67,7 +65,7 @@ function HomeScreen({ announcePolite, announceAssertive }) {
     const navigate = useNavigate();
 
     useEffect(() => {
-        axios.get(`${API_BASE_URL}/api/cached-videos`)
+        axios.get(`/api/cached-videos`)
             .then(response => setInitialVideos(response.data || []))
             .catch(err => {
                 const errorMsg = '이전 작업 목록을 불러오는 데 실패했습니다. 백엔드 서버가 실행 중인지 확인하세요.';
@@ -80,7 +78,7 @@ function HomeScreen({ announcePolite, announceAssertive }) {
     const handleSearch = (query) => {
         setIsSearching(true);
         announcePolite('검색 중입니다.');
-        axios.get(`${API_BASE_URL}/api/search?query=${query}`)
+        axios.get(`/api/search?query=${query}`)
             .then(response => {
                 const { dbResults = [], youtubeResults = [] } = response.data;
                 setSearchResults({ db: dbResults, youtube: youtubeResults });
@@ -238,7 +236,7 @@ function PlayerScreen({ announcePolite, announceAssertive }) {
         setError('');
         announcePolite('영상 데이터를 불러오는 중입니다.');
 
-        axios.get(`${API_BASE_URL}/api/script/${videoId}`)
+        axios.get(`/api/script/${videoId}`)
             .then(response => {
                 if (response.data && response.data.script) {
                     setScript(response.data.script);
@@ -251,7 +249,7 @@ function PlayerScreen({ announcePolite, announceAssertive }) {
                 if (err.response && err.response.status === 404) {
                     console.log('Script not in cache, starting stream...');
                     announcePolite('캐시된 대본이 없어, 새로 생성을 시작합니다.');
-                    const url = `${API_BASE_URL}/api/process?youtubeUrl=${encodeURIComponent(`https://www.youtube.com/watch?v=${videoId}`)}`;
+                    const url = `/api/process?youtubeUrl=${encodeURIComponent(`https://www.youtube.com/watch?v=${videoId}`)}`;
                     const es = new EventSource(url);
                     eventSourceRef.current = es;
                     let isDuplicate = false;
@@ -371,7 +369,7 @@ function PlayerScreen({ announcePolite, announceAssertive }) {
 
         try {
             const response = await axios.post(
-                `${API_BASE_URL}/api/tts`,
+                `/api/tts`,
                 { text: scriptLine.text },
                 { responseType: 'blob' }
             );
