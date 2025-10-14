@@ -1,0 +1,459 @@
+{
+  "script": [
+    {
+      "time": 9,
+      "text": "검은 화면에서 지구 위성 지도가 서서히 나타납니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/000009_0.mp3"
+    },
+    {
+      "time": 21,
+      "text": "하늘을 나는 비행기의 주황색 꼬리 날개가 보입니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/000021_1.mp3"
+    },
+    {
+      "time": 27,
+      "text": "흐릿한 공항 활주로를 배경으로 'Hapag-Lloyd' 로고와 함께 설명 자막이 나옵니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/000027_2.mp3"
+    },
+    {
+      "time": 49,
+      "text": "활주로에 서 있는 비행기에 화물 트럭이 연결되어 있습니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/000049_3.mp3"
+    },
+    {
+      "time": 56,
+      "text": "주황색과 파란색 줄무늬가 있는 비행기 기수 앞부분을 가까이서 비춥니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/000056_4.mp3"
+    },
+    {
+      "time": 61,
+      "text": "활주로에 서 있는 비행기 옆으로 지상 조업 차량이 지나갑니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/000101_5.mp3"
+    },
+    {
+      "time": 96,
+      "text": "활주로에 서 있는 비행기를 정면에서 비춥니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/000136_6.mp3"
+    },
+    {
+      "time": 110,
+      "text": "비행기 날개 아래에 달린 엔진과 바퀴 부분을 비춥니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/000150_7.mp3"
+    },
+    {
+      "time": 129,
+      "text": "검은 화면에 '랜딩기어 고장'이라는 흰 글씨가 나타납니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/000209_8.mp3"
+    },
+    {
+      "time": 135,
+      "text": "조종석 시점에서 비행기가 활주로를 달리며 이륙을 준비합니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/000215_9.mp3"
+    },
+    {
+      "time": 136,
+      "text": "비행기가 활주로를 박차고 하늘로 날아오릅니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/000216_10.mp3"
+    },
+    {
+      "time": 138,
+      "text": "이륙하는 비행기 조종석 내부를 비추고, '부기장: 포지티브 클라임'이라는 자막이 뜹니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/000218_11.mp3"
+    },
+    {
+      "time": 140,
+      "text": "비행기 동체 아래에서 랜딩기어가 접히는 모습을 보여줍니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/000220_12.mp3"
+    },
+    {
+      "time": 146,
+      "text": "비행기가 상승하면서 조종석이 한쪽으로 기울어집니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/000226_13.mp3"
+    },
+    {
+      "time": 148,
+      "text": "오른쪽 랜딩기어는 접혔지만, 왼쪽 랜딩기어는 그대로 펼쳐져 있습니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/000228_14.mp3"
+    },
+    {
+      "time": 151,
+      "text": "계속해서 상승하는 비행기의 조종석 내부를 보여줍니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/000231_15.mp3"
+    },
+    {
+      "time": 168,
+      "text": "하늘을 나는 비행기 동체 아래로 모든 랜딩기어가 펼쳐져 있습니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/000248_16.mp3"
+    },
+    {
+      "time": 173,
+      "text": "랜딩기어의 부품으로 보이는 설계도가 파란 배경에 흰 선으로 그려져 있습니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/000253_17.mp3"
+    },
+    {
+      "time": 180,
+      "text": "텅 빈 조종석의 조종간과 좌석을 비춥니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/000300_18.mp3"
+    },
+    {
+      "time": 185,
+      "text": "조종석 계기판의 '랜딩기어 경고 테스트' 버튼을 가까이서 비춥니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/000305_19.mp3"
+    },
+    {
+      "time": 201,
+      "text": "랜딩기어를 내린 채 구름 위를 비행하는 비행기의 전신을 보여줍니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/000321_20.mp3"
+    },
+    {
+      "time": 217,
+      "text": "비행 중인 비행기의 왼쪽 엔진과 펼쳐진 랜딩기어를 가까이서 비춥니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/000337_21.mp3"
+    },
+    {
+      "time": 239,
+      "text": "조종석 의자 뒤에서 계기판과 창밖 풍경을 넓게 비춥니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/000359_22.mp3"
+    },
+    {
+      "time": 245,
+      "text": "조종석 중앙에 위치한 스로틀 레버와 각종 제어 장치를 비춥니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/000405_23.mp3"
+    },
+    {
+      "time": 249,
+      "text": "조종석 내부를 비추고, 'ACARS 통신'이라는 자막이 뜹니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/000409_24.mp3"
+    },
+    {
+      "time": 252,
+      "text": "조종석의 기장석과 부기장석을 번갈아 비춥니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/000412_25.mp3"
+    },
+    {
+      "time": 256,
+      "text": "부기장석 쪽에서 창밖으로 보이는 바다와 육지를 비춥니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/000416_26.mp3"
+    },
+    {
+      "time": 261,
+      "text": "위성 지도에 유럽 대륙이 나타납니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/000421_27.mp3"
+    },
+    {
+      "time": 265,
+      "text": "다시 부기장석 쪽에서 창밖 풍경을 비춥니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/000425_28.mp3"
+    },
+    {
+      "time": 271,
+      "text": "조종석 계기판 위로 'PLS TRY RECALC'라는 메시지가 나타납니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/000431_29.mp3"
+    },
+    {
+      "time": 278,
+      "text": "유럽 위성 지도 위에 비행 경로와 '01:52:35'라는 시간이 표시됩니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/000438_30.mp3"
+    },
+    {
+      "time": 285,
+      "text": "조종석 창문 너머로 해안선이 보입니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/000445_31.mp3"
+    },
+    {
+      "time": 301,
+      "text": "조종석 내부의 제어 장치들을 위에서 아래로 내려다보며 회전합니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/000501_32.mp3"
+    },
+    {
+      "time": 340,
+      "text": "비행기가 바다 위를 낮게 날아갑니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/000540_33.mp3"
+    },
+    {
+      "time": 357,
+      "text": "바다 위를 나는 비행기의 기수와 앞바퀴 부분을 가까이서 비춥니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/000557_34.mp3"
+    },
+    {
+      "time": 363,
+      "text": "바다 위를 나는 비행기 동체 아래에서 정면을 비춥니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/000603_35.mp3"
+    },
+    {
+      "time": 365,
+      "text": "조종석 내부의 계기판과 제어 장치를 정면에서 비춥니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/000605_36.mp3"
+    },
+    {
+      "time": 372,
+      "text": "구름 낀 하늘을 배경으로 비행기 동체 아래 부분을 비춥니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/000612_37.mp3"
+    },
+    {
+      "time": 395,
+      "text": "조종석의 부기장석과 계기판을 옆에서 비춥니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/000635_38.mp3"
+    },
+    {
+      "time": 403,
+      "text": "기장석 쪽 계기판 위로 물음표가 담긴 말풍선이 뜹니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/000643_39.mp3"
+    },
+    {
+      "time": 417,
+      "text": "멀리서 구름 위를 나는 비행기를 비추고, '계산기가 좋을 수 있죠'라는 자막이 뜹니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/000657_40.mp3"
+    },
+    {
+      "time": 444,
+      "text": "화면이 검게 변합니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/000724_41.mp3"
+    },
+    {
+      "time": 452,
+      "text": "위성 지도에 아드리아해 상공에서 회항하는 비행 경로가 빨간 선으로 표시됩니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/000732_42.mp3"
+    },
+    {
+      "time": 460,
+      "text": "하늘을 나는 비행기를 뒤쪽 아래에서 올려다봅니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/000740_43.mp3"
+    },
+    {
+      "time": 469,
+      "text": "조종석에서 창밖으로 보이는 구름 낀 하늘을 비춥니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/000749_44.mp3"
+    },
+    {
+      "time": 474,
+      "text": "조종석 뒤편 위쪽에서 내부 전체를 내려다봅니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/000754_45.mp3"
+    },
+    {
+      "time": 479,
+      "text": "발칸반도 위를 지나는 비행 경로를 위성 지도로 보여줍니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/000759_46.mp3"
+    },
+    {
+      "time": 490,
+      "text": "눈 덮인 산맥 위를 나는 비행기를 위에서 내려다봅니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/000810_47.mp3"
+    },
+    {
+      "time": 496,
+      "text": "조종석에서 창밖으로 보이는 산맥과 구름을 비춥니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/000816_48.mp3"
+    },
+    {
+      "time": 501,
+      "text": "산맥 위를 나는 비행기의 기수 부분을 가까이서 비춥니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/000821_49.mp3"
+    },
+    {
+      "time": 517,
+      "text": "다시 조종석에서 창밖 풍경을 비춥니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/000837_50.mp3"
+    },
+    {
+      "time": 520,
+      "text": "구름 위를 나는 비행기의 앞모습을 비스듬히 비춥니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/000840_51.mp3"
+    },
+    {
+      "time": 528,
+      "text": "산맥 위를 나는 비행기의 뒷모습을 비스듬히 비춥니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/000848_52.mp3"
+    },
+    {
+      "time": 538,
+      "text": "조종석 내부와 창밖 풍경을 보여줍니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/000858_53.mp3"
+    },
+    {
+      "time": 547,
+      "text": "선회하는 비행기의 기수 부분을 위쪽에서 가까이 비춥니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/000907_54.mp3"
+    },
+    {
+      "time": 550,
+      "text": "산맥 위에서 선회하는 비행기의 전신을 비춥니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/000910_55.mp3"
+    },
+    {
+      "time": 555,
+      "text": "위성 지도에 크로아티아 상공을 지나는 비행 경로가 표시됩니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/000915_56.mp3"
+    },
+    {
+      "time": 564,
+      "text": "구름 위를 나는 비행기 동체 아래 부분을 비춥니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/000924_57.mp3"
+    },
+    {
+      "time": 576,
+      "text": "산과 구름을 배경으로 비행기가 정면을 향해 날아옵니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/000936_58.mp3"
+    },
+    {
+      "time": 582,
+      "text": "다시 크로아티아 상공의 비행 경로를 위성 지도로 보여줍니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/000942_59.mp3"
+    },
+    {
+      "time": 593,
+      "text": "조종석 뒤편에서 내부를 넓게 비춥니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/000953_60.mp3"
+    },
+    {
+      "time": 614,
+      "text": "푸른 들판 위를 나는 비행기 뒷모습과 함께 설명 자막이 나옵니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/001014_61.mp3"
+    },
+    {
+      "time": 624,
+      "text": "여러 구획으로 나뉜 들판 위를 나는 비행기의 랜딩기어를 가까이서 비춥니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/001024_62.mp3"
+    },
+    {
+      "time": 636,
+      "text": "기장석 뒤편 위쪽에서 조종석 내부를 내려다봅니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/001036_63.mp3"
+    },
+    {
+      "time": 659,
+      "text": "구름 사이를 나는 비행기의 기수와 앞바퀴 부분을 비춥니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/001059_64.mp3"
+    },
+    {
+      "time": 669,
+      "text": "푸른 들판과 구름을 배경으로 비행기가 정면을 향해 날아옵니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/001109_65.mp3"
+    },
+    {
+      "time": 675,
+      "text": "부기장석에서 창밖으로 보이는 바둑판 모양의 들판을 비춥니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/001115_66.mp3"
+    },
+    {
+      "time": 682,
+      "text": "조종석 천장에 있는 제어 장치들과 함께 '기장은 풍력 발전기를 내린다'는 자막이 나옵니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/001122_67.mp3"
+    },
+    {
+      "time": 686,
+      "text": "조종석 정면 모습과 함께 '기장: 비상'이라는 자막이 뜹니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/001126_68.mp3"
+    },
+    {
+      "time": 690,
+      "text": "밝은 하늘을 배경으로 비행기를 아래에서 올려다봅니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/001130_69.mp3"
+    },
+    {
+      "time": 699,
+      "text": "위성 지도에 활주로를 향한 비행기의 마지막 접근 경로가 표시됩니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/001139_70.mp3"
+    },
+    {
+      "time": 703,
+      "text": "활주로를 향해 들판 위를 낮게 나는 비행기의 뒷모습을 보여줍니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/001143_71.mp3"
+    },
+    {
+      "time": 707,
+      "text": "왼쪽 날개 너머로 활주로를 향해 활강하는 비행기와 함께 설명 자막이 나옵니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/001147_72.mp3"
+    },
+    {
+      "time": 710,
+      "text": "착륙을 위해 접근하는 조종석 내부 모습과 함께 설명 자막이 나옵니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/001150_73.mp3"
+    },
+    {
+      "time": 712,
+      "text": "활주로에 접근하는 비행기 뒷모습과 함께 설명 자막이 나옵니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/001152_74.mp3"
+    },
+    {
+      "time": 714,
+      "text": "착륙 직전의 조종석 시점 화면과 함께 설명 자막이 나옵니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/001154_75.mp3"
+    },
+    {
+      "time": 717,
+      "text": "들판에 착륙하는 비행기 뒷모습과 함께 설명 자막이 나옵니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/001157_76.mp3"
+    },
+    {
+      "time": 718,
+      "text": "들판에 착륙하는 동안 거칠게 흔들리는 조종석 내부와 함께 설명 자막이 나옵니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/001158_77.mp3"
+    },
+    {
+      "time": 721,
+      "text": "비행기가 들판을 미끄러지며 나아가는 모습을 멀리서 비춥니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/001201_78.mp3"
+    },
+    {
+      "time": 743,
+      "text": "화면이 검게 변합니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/001223_79.mp3"
+    },
+    {
+      "time": 746,
+      "text": "착륙을 위해 접근하는 비행기를 아래에서 올려다봅니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/001226_80.mp3"
+    },
+    {
+      "time": 758,
+      "text": "착륙 접근 중인 비행기의 조종석 내부를 보여줍니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/001238_81.mp3"
+    },
+    {
+      "time": 788,
+      "text": "조종석 내부를 좀 더 넓은 시야로 비춥니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/001308_82.mp3"
+    },
+    {
+      "time": 810,
+      "text": "조종석의 제어 장치들을 옆에서 비춥니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/001330_83.mp3"
+    },
+    {
+      "time": 826,
+      "text": "위성 지도에 사고 발생 지점으로 추정되는 곳이 빨갛게 표시됩니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/001346_84.mp3"
+    },
+    {
+      "time": 842,
+      "text": "비행기가 섬을 향해 정면으로 날아옵니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/001402_85.mp3"
+    },
+    {
+      "time": 860,
+      "text": "푸른 바다 위를 나는 비행기 기수를 위에서 수직으로 내려다봅니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/001420_86.mp3"
+    },
+    {
+      "time": 867,
+      "text": "구름 낀 바다 위를 나는 비행기의 옆모습을 비춥니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/001427_87.mp3"
+    },
+    {
+      "time": 897,
+      "text": "파란 하늘을 나는 비행기와 함께 '나레이터: 김단'이라는 자막이 나타납니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/001457_88.mp3"
+    },
+    {
+      "time": 910,
+      "text": "산과 구름 위를 나는 비행기를 배경으로 후원자 명단이 올라갑니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/001510_89.mp3"
+    },
+    {
+      "time": 930,
+      "text": "검은 화면에 흰 글씨로 'Anna An'이 나타납니다.",
+      "audioUrl": "http://localhost:3001/audio/ef640e9294374ce7da47bbbb07790b68f8b20647fe5dbbd61dd92f0f524f22ba/001530_90.mp3"
+    }
+  ]
+}

@@ -1,0 +1,362 @@
+body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+        'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+        sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background-color: #f0f2f5;
+    color: #333;
+}
+
+.App {
+    text-align: center;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.App-header {
+    background-color: #282c34;
+    padding: 20px;
+    color: white;
+    border-radius: 8px;
+    margin-bottom: 30px;
+}
+
+.App-header h1 {
+    margin: 0;
+    font-size: 2.5rem;
+}
+
+main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.url-form {
+    display: flex;
+    width: 100%;
+    gap: 10px;
+}
+
+.url-form input[type="text"] {
+    flex-grow: 1;
+    padding: 12px;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.url-form button {
+    padding: 12px 20px;
+    font-size: 1rem;
+    color: white;
+    background-color: #61dafb;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.url-form button:hover {
+    background-color: #4fa8c5;
+}
+
+.url-form button:disabled {
+  background-color: #555;
+  cursor: not-allowed;
+}
+
+.cached-list-container button {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  text-align: left;
+  padding: 10px;
+  background-color: #fff;
+  color: #333;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  margin-bottom: 10px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  transition: box-shadow 0.2s, border-color 0.2s;
+}
+
+.cached-list-container button:hover {
+  border-color: #bbb;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.cached-list-container button:disabled {
+  background-color: #f8f8f8;
+  color: #aaa;
+  cursor: not-allowed;
+}
+
+.thumbnail {
+  width: 120px;
+  height: 68px;
+  object-fit: cover;
+  border-radius: 4px;
+  margin-right: 15px;
+  flex-shrink: 0;
+}
+
+.video-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 4px;
+}
+
+.video-title {
+    font-weight: 600;
+    font-size: 1rem;
+    color: #111;
+}
+
+.video-meta {
+    font-size: 0.85rem;
+    color: #555;
+}
+
+
+.search-results-section {
+  margin-bottom: 30px;
+  width: 100%;
+}
+
+.search-results-section h3 {
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 10px;
+  margin-bottom: 15px;
+  color: #333;
+}
+
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.75);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: #282c34;
+  padding: 30px;
+  border-radius: 8px;
+  text-align: center;
+  border: 1px solid #555;
+}
+
+.modal-content h3 {
+  margin-top: 0;
+}
+
+.video-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  width: 100%;
+  max-width: 960px;
+}
+
+.video-header h2 {
+    margin: 0;
+    flex-grow: 1;
+    text-align: center;
+}
+
+.back-button, .share-button {
+    padding: 8px 16px;
+    font-size: 0.9rem;
+    color: white;
+    background-color: #6c757d;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.back-button:hover, .share-button:hover {
+    background-color: #5a6268;
+}
+
+.share-button {
+    background-color: #007bff;
+}
+
+.share-button:hover {
+    background-color: #0069d9;
+}
+
+.video-container {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    background-color: #000;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.script-container {
+    width: 100%;
+    text-align: left;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+}
+
+.script-container h2 {
+    margin-top: 0;
+}
+
+.script-container ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.script-container li {
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.script-container li:last-child {
+    border-bottom: none;
+}
+
+/* Controls Container */
+.controls-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 10px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+/* TTS Toggle Switch */
+.tts-toggle {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.tts-toggle input {
+    margin-right: 8px;
+}
+
+/* Verbosity Controls */
+.verbosity-control {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.verbosity-control span {
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+.verbosity-control button {
+    padding: 6px 12px;
+    font-size: 0.9rem;
+    color: #333;
+    background-color: #e9ecef;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.verbosity-control button:hover {
+    background-color: #dee2e6;
+}
+
+.verbosity-control button[aria-pressed="true"] {
+    background-color: #61dafb;
+    color: white;
+    border-color: #61dafb;
+    cursor: default;
+}
+
+/* Verbosity Tag in Script List */
+.verbosity-tag {
+    display: inline-block;
+    margin-left: 8px;
+    margin-right: 8px;
+    padding: 2px 6px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    color: white;
+    border-radius: 4px;
+    line-height: 1;
+}
+
+.verbosity-1 { background-color: #28a745; } /* Green */
+.verbosity-2 { background-color: #ffc107; } /* Yellow */
+.verbosity-3 { background-color: #dc3545; } /* Red */
+
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+}
+
+@media (max-width: 600px) {
+    .App {
+        padding: 10px;
+    }
+
+    .App-header h1 {
+        font-size: 1.8rem;
+    }
+
+    .url-form {
+        flex-direction: column;
+    }
+
+    .video-header {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .controls-container {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .script-container ul {
+        max-height: 200px;
+    }
+
+    .thumbnail {
+        width: 100px;
+        height: 56px;
+    }
+}

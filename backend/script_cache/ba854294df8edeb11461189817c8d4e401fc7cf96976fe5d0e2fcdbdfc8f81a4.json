@@ -1,0 +1,304 @@
+{
+  "script": [
+    {
+      "time": 12,
+      "text": "흰색과 붉은색이 섞인 대한민국 공군 훈련기가 하늘을 날고 있습니다.",
+      "audioUrl": "http://localhost:3001/audio/ba854294df8edeb11461189817c8d4e401fc7cf96976fe5d0e2fcdbdfc8f81a4/000012_0.mp3"
+    },
+    {
+      "time": 19,
+      "text": "흰색 셔츠를 입은 남자가 책상에 앉아 노트북을 보며 말하고 있습니다.",
+      "audioUrl": "http://localhost:3001/audio/ba854294df8edeb11461189817c8d4e401fc7cf96976fe5d0e2fcdbdfc8f81a4/000019_1.mp3"
+    },
+    {
+      "time": 36,
+      "text": "입국 도장이 찍힌 펼쳐진 여권과 대한민국 여권이 보이는 애니메이션이 나옵니다.",
+      "audioUrl": "http://localhost:3001/audio/ba854294df8edeb11461189817c8d4e401fc7cf96976fe5d0e2fcdbdfc8f81a4/000036_2.mp3"
+    },
+    {
+      "time": 38,
+      "text": "KT-100 훈련기가 활주로에 서 있습니다.",
+      "audioUrl": "http://localhost:3001/audio/ba854294df8edeb11461189817c8d4e401fc7cf96976fe5d0e2fcdbdfc8f81a4/000038_3.mp3"
+    },
+    {
+      "time": 50,
+      "text": "흰색 KC-100 항공기가 활주로를 달립니다.",
+      "audioUrl": "http://localhost:3001/audio/ba854294df8edeb11461189817c8d4e401fc7cf96976fe5d0e2fcdbdfc8f81a4/000050_4.mp3"
+    },
+    {
+      "time": 55,
+      "text": "프로펠러가 회전하는 KT-100 훈련기가 활주로를 이동합니다.",
+      "audioUrl": "http://localhost:3001/audio/ba854294df8edeb11461189817c8d4e401fc7cf96976fe5d0e2fcdbdfc8f81a4/000055_5.mp3"
+    },
+    {
+      "time": 59,
+      "text": "남자가 카메라를 보며 이야기합니다.",
+      "audioUrl": "http://localhost:3001/audio/ba854294df8edeb11461189817c8d4e401fc7cf96976fe5d0e2fcdbdfc8f81a4/000059_6.mp3"
+    },
+    {
+      "time": 71,
+      "text": "흐릿하게 처리된 항공기 근접 화면이 보입니다.",
+      "audioUrl": "http://localhost:3001/audio/ba854294df8edeb11461189817c8d4e401fc7cf96976fe5d0e2fcdbdfc8f81a4/000111_7.mp3"
+    },
+    {
+      "time": 72,
+      "text": "KT-100의 앞부분을 가까이서 비추고, 화면에 'KT-100 스펙'이라는 자막이 나타납니다.",
+      "audioUrl": "http://localhost:3001/audio/ba854294df8edeb11461189817c8d4e401fc7cf96976fe5d0e2fcdbdfc8f81a4/000112_8.mp3"
+    },
+    {
+      "time": 76,
+      "text": "KT-100이 이륙하는 모습과 함께 순항 속도와 최대 속도 정보가 표시됩니다.",
+      "audioUrl": "http://localhost:3001/audio/ba854294df8edeb11461189817c8d4e401fc7cf96976fe5d0e2fcdbdfc8f81a4/000116_9.mp3"
+    },
+    {
+      "time": 79,
+      "text": "아래에서 올려다본 시점에서 KT-100이 하늘을 날고 있습니다.",
+      "audioUrl": "http://localhost:3001/audio/ba854294df8edeb11461189817c8d4e401fc7cf96976fe5d0e2fcdbdfc8f81a4/000119_10.mp3"
+    },
+    {
+      "time": 80,
+      "text": "항공기 동체 측면을 가까이서 비추고, 항속 거리 정보가 추가됩니다.",
+      "audioUrl": "http://localhost:3001/audio/ba854294df8edeb11461189817c8d4e401fc7cf96976fe5d0e2fcdbdfc8f81a4/000120_11.mp3"
+    },
+    {
+      "time": 81,
+      "text": "여러 대의 KT-100 훈련기가 활주로에 줄지어 서 있습니다.",
+      "audioUrl": "http://localhost:3001/audio/ba854294df8edeb11461189817c8d4e401fc7cf96976fe5d0e2fcdbdfc8f81a4/000121_12.mp3"
+    },
+    {
+      "time": 83,
+      "text": "조종석 내부에서 다른 훈련기들을 바라보는 시점의 화면입니다.",
+      "audioUrl": "http://localhost:3001/audio/ba854294df8edeb11461189817c8d4e401fc7cf96976fe5d0e2fcdbdfc8f81a4/000123_13.mp3"
+    },
+    {
+      "time": 83,
+      "text": "낮은 각도에서 항공기의 착륙 장치를 올려다봅니다.",
+      "audioUrl": "http://localhost:3001/audio/ba854294df8edeb11461189817c8d4e401fc7cf96976fe5d0e2fcdbdfc8f81a4/000123_14.mp3"
+    },
+    {
+      "time": 84,
+      "text": "전투기 세 대가 활주로 위를 편대 비행합니다.",
+      "audioUrl": "http://localhost:3001/audio/ba854294df8edeb11461189817c8d4e401fc7cf96976fe5d0e2fcdbdfc8f81a4/000124_15.mp3"
+    },
+    {
+      "time": 85,
+      "text": "조종석 내부에서 바라보는 1인칭 시점의 비행 장면입니다.",
+      "audioUrl": "http://localhost:3001/audio/ba854294df8edeb11461189817c8d4e401fc7cf96976fe5d0e2fcdbdfc8f81a4/000125_16.mp3"
+    },
+    {
+      "time": 86,
+      "text": "조종석에서 날개 너머로 보이는 비행 장면입니다.",
+      "audioUrl": "http://localhost:3001/audio/ba854294df8edeb11461189817c8d4e401fc7cf96976fe5d0e2fcdbdfc8f81a4/000126_17.mp3"
+    },
+    {
+      "time": 86,
+      "text": "다시 책상에 앉은 남자가 카메라를 보고 말합니다.",
+      "audioUrl": "http://localhost:3001/audio/ba854294df8edeb11461189817c8d4e401fc7cf96976fe5d0e2fcdbdfc8f81a4/000126_18.mp3"
+    },
+    {
+      "time": 88,
+      "text": "정비사가 격납고에서 항공기 엔진을 수리하고 있습니다.",
+      "audioUrl": "http://localhost:3001/audio/ba854294df8edeb11461189817c8d4e401fc7cf96976fe5d0e2fcdbdfc8f81a4/000128_19.mp3"
+    },
+    {
+      "time": 92,
+      "text": "지폐 계수기가 달러 지폐를 세고 있습니다.",
+      "audioUrl": "http://localhost:3001/audio/ba854294df8edeb11461189817c8d4e401fc7cf96976fe5d0e2fcdbdfc8f81a4/000132_20.mp3"
+    },
+    {
+      "time": 98,
+      "text": "남자가 카메라를 보며 계속해서 이야기합니다.",
+      "audioUrl": "http://localhost:3001/audio/ba854294df8edeb11461189817c8d4e401fc7cf96976fe5d0e2fcdbdfc8f81a4/000138_21.mp3"
+    },
+    {
+      "time": 122,
+      "text": "구형 T-41B 훈련기가 야외에 전시되어 있습니다.",
+      "audioUrl": "http://localhost:3001/audio/ba854294df8edeb11461189817c8d4e401fc7cf96976fe5d0e2fcdbdfc8f81a4/000202_22.mp3"
+    },
+    {
+      "time": 131,
+      "text": "IL-103 훈련기가 야외 박물관에 전시되어 있습니다.",
+      "audioUrl": "http://localhost:3001/audio/ba854294df8edeb11461189817c8d4e401fc7cf96976fe5d0e2fcdbdfc8f81a4/000211_23.mp3"
+    },
+    {
+      "time": 140,
+      "text": "박물관 앞에 두 대의 IL-103 훈련기가 전시되어 있습니다.",
+      "audioUrl": "http://localhost:3001/audio/ba854294df8edeb11461189817c8d4e401fc7cf96976fe5d0e2fcdbdfc8f81a4/000220_24.mp3"
+    },
+    {
+      "time": 147,
+      "text": "위장 무늬가 있는 탱크가 보입니다.",
+      "audioUrl": "http://localhost:3001/audio/ba854294df8edeb11461189817c8d4e401fc7cf96976fe5d0e2fcdbdfc8f81a4/000227_25.mp3"
+    },
+    {
+      "time": 149,
+      "text": "남자가 말하고 있고, T-103 훈련기 도입에 관한 자막이 나타납니다.",
+      "audioUrl": "http://localhost:3001/audio/ba854294df8edeb11461189817c8d4e401fc7cf96976fe5d0e2fcdbdfc8f81a4/000229_26.mp3"
+    },
+    {
+      "time": 161,
+      "text": "KT-100 훈련기가 활주로에 있습니다.",
+      "audioUrl": "http://localhost:3001/audio/ba854294df8edeb11461189817c8d4e401fc7cf96976fe5d0e2fcdbdfc8f81a4/000241_27.mp3"
+    },
+    {
+      "time": 167,
+      "text": "남자가 말하고 있고, 기종 교체 결정에 관한 자막이 나타납니다.",
+      "audioUrl": "http://localhost:3001/audio/ba854294df8edeb11461189817c8d4e401fc7cf96976fe5d0e2fcdbdfc8f81a4/000247_28.mp3"
+    },
+    {
+      "time": 171,
+      "text": "단색 배경 위에 자막이 나타납니다.",
+      "audioUrl": "http://localhost:3001/audio/ba854294df8edeb11461189817c8d4e401fc7cf96976fe5d0e2fcdbdfc8f81a4/000251_29.mp3"
+    },
+    {
+      "time": 175,
+      "text": "남자가 손짓을 하며 열정적으로 말합니다.",
+      "audioUrl": "http://localhost:3001/audio/ba854294df8edeb11461189817c8d4e401fc7cf96976fe5d0e2fcdbdfc8f81a4/000255_30.mp3"
+    },
+    {
+      "time": 209,
+      "text": "남자가 말하고, 정보 확인에 대한 자막이 보입니다.",
+      "audioUrl": "http://localhost:3001/audio/ba854294df8edeb11461189817c8d4e401fc7cf96976fe5d0e2fcdbdfc8f81a4/000329_31.mp3"
+    },
+    {
+      "time": 213,
+      "text": "브리스텔 B23-915 IFR 항공기가 비행하는 모습입니다.",
+      "audioUrl": "http://localhost:3001/audio/ba854294df8edeb11461189817c8d4e401fc7cf96976fe5d0e2fcdbdfc8f81a4/000333_32.mp3"
+    },
+    {
+      "time": 219,
+      "text": "항공기의 로탁스 엔진을 가까이서 보여줍니다.",
+      "audioUrl": "http://localhost:3001/audio/ba854294df8edeb11461189817c8d4e401fc7cf96976fe5d0e2fcdbdfc8f81a4/000339_33.mp3"
+    },
+    {
+      "time": 226,
+      "text": "브리스텔 항공기가 푸른 하늘을 배경으로 날고 있습니다.",
+      "audioUrl": "http://localhost:3001/audio/ba854294df8edeb11461189817c8d4e401fc7cf96976fe5d0e2fcdbdfc8f81a4/000346_34.mp3"
+    },
+    {
+      "time": 236,
+      "text": "노란색과 파란색 항공기가 구름 위를 날고 있고, 길이에 대한 자막이 나타납니다.",
+      "audioUrl": "http://localhost:3001/audio/ba854294df8edeb11461189817c8d4e401fc7cf96976fe5d0e2fcdbdfc8f81a4/000356_35.mp3"
+    },
+    {
+      "time": 245,
+      "text": "붉은색과 검은색으로 된 2인승 조종석이 보입니다.",
+      "audioUrl": "http://localhost:3001/audio/ba854294df8edeb11461189817c8d4e401fc7cf96976fe5d0e2fcdbdfc8f81a4/000405_36.mp3"
+    },
+    {
+      "time": 247,
+      "text": "공군 훈련기의 조종석 부분이 원으로 강조 표시됩니다.",
+      "audioUrl": "http://localhost:3001/audio/ba854294df8edeb11461189817c8d4e401fc7cf96976fe5d0e2fcdbdfc8f81a4/000407_37.mp3"
+    },
+    {
+      "time": 251,
+      "text": "남자가 말하고 있고, 최대 이륙 중량에 대한 자막이 나타납니다.",
+      "audioUrl": "http://localhost:3001/audio/ba854294df8edeb11461189817c8d4e401fc7cf96976fe5d0e2fcdbdfc8f81a4/000411_38.mp3"
+    },
+    {
+      "time": 263,
+      "text": "여러 디지털 화면으로 구성된 항공기의 최신 조종석이 보입니다.",
+      "audioUrl": "http://localhost:3001/audio/ba854294df8edeb11461189817c8d4e401fc7cf96976fe5d0e2fcdbdfc8f81a4/000423_39.mp3"
+    },
+    {
+      "time": 268,
+      "text": "안개 낀 날, 눈 덮인 숲을 항공 시점에서 보여줍니다.",
+      "audioUrl": "http://localhost:3001/audio/ba854294df8edeb11461189817c8d4e401fc7cf96976fe5d0e2fcdbdfc8f81a4/000428_40.mp3"
+    },
+    {
+      "time": 272,
+      "text": "먹구름이 가득한 하늘과 함께 '다양한 환경에서 비행 연습'이라는 자막이 보입니다.",
+      "audioUrl": "http://localhost:3001/audio/ba854294df8edeb11461189817c8d4e401fc7cf96976fe5d0e2fcdbdfc8f81a4/000432_41.mp3"
+    },
+    {
+      "time": 276,
+      "text": "책상에 앉은 남자가 말하고 있습니다.",
+      "audioUrl": "http://localhost:3001/audio/ba854294df8edeb11461189817c8d4e401fc7cf96976fe5d0e2fcdbdfc8f81a4/000436_42.mp3"
+    },
+    {
+      "time": 283,
+      "text": "브리스텔 회사의 웹사이트 화면이 보입니다.",
+      "audioUrl": "http://localhost:3001/audio/ba854294df8edeb11461189817c8d4e401fc7cf96976fe5d0e2fcdbdfc8f81a4/000443_43.mp3"
+    },
+    {
+      "time": 300,
+      "text": "남자가 손짓을 하며 설명을 이어갑니다.",
+      "audioUrl": "http://localhost:3001/audio/ba854294df8edeb11461189817c8d4e401fc7cf96976fe5d0e2fcdbdfc8f81a4/000500_44.mp3"
+    },
+    {
+      "time": 311,
+      "text": "남자가 말하고 있고, 가격은 알 수 없다는 내용의 자막이 나타납니다.",
+      "audioUrl": "http://localhost:3001/audio/ba854294df8edeb11461189817c8d4e401fc7cf96976fe5d0e2fcdbdfc8f81a4/000511_45.mp3"
+    },
+    {
+      "time": 338,
+      "text": "G-115E 항공기가 시골 풍경 위를 비행하는 사진이 보입니다.",
+      "audioUrl": "http://localhost:3001/audio/ba854294df8edeb11461189817c8d4e401fc7cf96976fe5d0e2fcdbdfc8f81a4/000538_46.mp3"
+    },
+    {
+      "time": 340,
+      "text": "내부가 보이는 라이커밍 엔진의 근접 화면입니다.",
+      "audioUrl": "http://localhost:3001/audio/ba854294df8edeb11461189817c8d4e401fc7cf96976fe5d0e2fcdbdfc8f81a4/000540_47.mp3"
+    },
+    {
+      "time": 344,
+      "text": "G-115E가 비행하는 모습과 함께 날개 폭에 대한 자막이 나타납니다.",
+      "audioUrl": "http://localhost:3001/audio/ba854294df8edeb11461189817c8d4e401fc7cf96976fe5d0e2fcdbdfc8f81a4/000544_48.mp3"
+    },
+    {
+      "time": 352,
+      "text": "화면이 분할되어 왼쪽에는 G-115E, 오른쪽에는 다른 항공기를 보여주며 비교합니다.",
+      "audioUrl": "http://localhost:3001/audio/ba854294df8edeb11461189817c8d4e401fc7cf96976fe5d0e2fcdbdfc8f81a4/000552_49.mp3"
+    },
+    {
+      "time": 372,
+      "text": "남자가 책상에 앉아 말합니다.",
+      "audioUrl": "http://localhost:3001/audio/ba854294df8edeb11461189817c8d4e401fc7cf96976fe5d0e2fcdbdfc8f81a4/000612_50.mp3"
+    },
+    {
+      "time": 402,
+      "text": "클립보드를 든 정비사가 조립 중인 항공기를 점검합니다.",
+      "audioUrl": "http://localhost:3001/audio/ba854294df8edeb11461189817c8d4e401fc7cf96976fe5d0e2fcdbdfc8f81a4/000642_51.mp3"
+    },
+    {
+      "time": 410,
+      "text": "남자가 말하고 있고, 여러 나라에서 사용된다는 내용의 자막이 보입니다.",
+      "audioUrl": "http://localhost:3001/audio/ba854294df8edeb11461189817c8d4e401fc7cf96976fe5d0e2fcdbdfc8f81a4/000650_52.mp3"
+    },
+    {
+      "time": 480,
+      "text": "남자가 말하고, 화면 상단에 '방사청이 선택한 입문 훈련기는?'이라는 제목이 나타납니다.",
+      "audioUrl": "http://localhost:3001/audio/ba854294df8edeb11461189817c8d4e401fc7cf96976fe5d0e2fcdbdfc8f81a4/000800_53.mp3"
+    },
+    {
+      "time": 482,
+      "text": "한국어로 된 공식 문서 화면이 보입니다.",
+      "audioUrl": "http://localhost:3001/audio/ba854294df8edeb11461189817c8d4e401fc7cf96976fe5d0e2fcdbdfc8f81a4/000802_54.mp3"
+    },
+    {
+      "time": 490,
+      "text": "남자가 계속해서 말합니다.",
+      "audioUrl": "http://localhost:3001/audio/ba854294df8edeb11461189817c8d4e401fc7cf96976fe5d0e2fcdbdfc8f81a4/000810_55.mp3"
+    },
+    {
+      "time": 498,
+      "text": "두 대의 브리스텔 항공기가 활주로에 서 있고, 조종사들이 탑승해 있습니다.",
+      "audioUrl": "http://localhost:3001/audio/ba854294df8edeb11461189817c8d4e401fc7cf96976fe5d0e2fcdbdfc8f81a4/000818_56.mp3"
+    },
+    {
+      "time": 503,
+      "text": "G-115E 항공기가 도시 상공을 비행하고 있습니다.",
+      "audioUrl": "http://localhost:3001/audio/ba854294df8edeb11461189817c8d4e401fc7cf96976fe5d0e2fcdbdfc8f81a4/000823_57.mp3"
+    },
+    {
+      "time": 511,
+      "text": "남자가 말하고 있고, '한국의 차세대 입문 훈련기'라는 자막이 보입니다.",
+      "audioUrl": "http://localhost:3001/audio/ba854294df8edeb11461189817c8d4e401fc7cf96976fe5d0e2fcdbdfc8f81a4/000831_58.mp3"
+    },
+    {
+      "time": 579,
+      "text": "채널 로고와 구독 버튼, 다른 영상 링크가 있는 영상의 마지막 화면입니다.",
+      "audioUrl": "http://localhost:3001/audio/ba854294df8edeb11461189817c8d4e401fc7cf96976fe5d0e2fcdbdfc8f81a4/000939_59.mp3"
+    }
+  ]
+}
