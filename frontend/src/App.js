@@ -486,16 +486,48 @@ function ShareButton({ announcePolite }) {
     const [isCopied, setIsCopied] = useState(false);
     const location = useLocation();
 
-    const handleShare = async () => {
+    const handleShare = () => {
         const shareUrl = window.location.origin + location.pathname;
-        try {
-            await navigator.clipboard.writeText(shareUrl);
-            setIsCopied(true);
-            announcePolite('링크가 클립보드에 복사되었습니다.');
-            setTimeout(() => setIsCopied(false), 2000);
-        } catch (err) {
-            console.error('Failed to copy URL: ', err);
-            alert('URL 복사에 실패했습니다.');
+
+        // Modern, secure context-only API
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(shareUrl).then(() => {
+                setIsCopied(true);
+                announcePolite('링크가 클립보드에 복사되었습니다.');
+                setTimeout(() => setIsCopied(false), 2000);
+            }).catch(err => {
+                console.error('Failed to copy URL with navigator.clipboard: ', err);
+                alert('URL 복사에 실패했습니다. 사이트가 HTTPS로 제공되는지 확인하세요.');
+            });
+        } else {
+            // Fallback for HTTP or older browsers
+            const textArea = document.createElement("textarea");
+            textArea.value = shareUrl;
+            
+            // Make the textarea non-editable and hidden
+            textArea.style.position = "fixed";
+            textArea.style.top = "-9999px";
+            textArea.style.left = "-9999px";
+            
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    setIsCopied(true);
+                    announcePolite('링크가 클립보드에 복사되었습니다.');
+                    setTimeout(() => setIsCopied(false), 2000);
+                } else {
+                    throw new Error('document.execCommand failed');
+                }
+            } catch (err) {
+                console.error('Fallback: Failed to copy URL: ', err);
+                alert('URL 복사에 실패했습니다. 수동으로 복사해주세요.');
+            } finally {
+                document.body.removeChild(textArea);
+            }
         }
     };
 
