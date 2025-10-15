@@ -50,72 +50,72 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
 
         await fs.promises.mkdir(baseTempDir, { recursive: true });
 
-        // Step 1: Extract ALL data upfront (Title, VAD, Frames)
-        console.log(`[${requestHash}] Step 1: Starting initial data extraction (Title, VAD, Frames)...`);
+        // Step 1: Extract ALL data upfront (Title, VAD, Frames) - Sequentially for status updates
+        console.log(`[${requestHash}] Step 1: Starting initial data extraction...`);
         const extractionLabel = `[${requestHash}] Initial Data Extraction Time`;
         console.time(extractionLabel);
 
-        const [videoTitle, nonSpeechIntervals, allTimestamps] = await Promise.all([
-            util.promisify(execFile)('yt-dlp', ['--get-title', '--encoding', 'utf-8', '--no-progress', '--cookies', 'cookies.txt', youtubeUrl]).then(result => result.stdout.trim()),
-            (async () => {
-                const audioPath = path.join(baseTempDir, 'audio.wav');
-                const downloadedAudio = path.join(baseTempDir, 'audio_source.m4a');
-                await util.promisify(execFile)('yt-dlp', ['-f', 'bestaudio', '-o', downloadedAudio, '--no-progress', '--cookies', 'cookies.txt', youtubeUrl]);
-                const metadata = await util.promisify(ffmpeg.ffprobe)(downloadedAudio);
-                const totalDuration = metadata.format.duration;
-                await new Promise((resolve, reject) => {
-                    ffmpeg(downloadedAudio).toFormat('wav').audioFrequency(16000).audioChannels(1).on('end', resolve).on('error', reject).save(audioPath);
+        if (sseHandler) sseHandler('status_update', { message: '영상 정보 확인 중...' });
+        const videoTitle = await util.promisify(execFile)('yt-dlp', ['--get-title', '--encoding', 'utf-8', '--no-progress', '--cookies', 'cookies.txt', youtubeUrl]).then(result => result.stdout.trim());
+
+        if (sseHandler) sseHandler('status_update', { message: '영상 음성 다운로드 및 분석 중...' });
+        const audioPath = path.join(baseTempDir, 'audio.wav');
+        const downloadedAudio = path.join(baseTempDir, 'audio_source.m4a');
+        await util.promisify(execFile)('yt-dlp', ['-f', 'bestaudio', '-o', downloadedAudio, '--no-progress', '--cookies', 'cookies.txt', youtubeUrl]);
+        const metadata = await util.promisify(ffmpeg.ffprobe)(downloadedAudio);
+        const totalDuration = metadata.format.duration;
+        await new Promise((resolve, reject) => {
+            ffmpeg(downloadedAudio).toFormat('wav').audioFrequency(16000).audioChannels(1).on('end', resolve).on('error', reject).save(audioPath);
+        });
+
+        if (sseHandler) sseHandler('status_update', { message: '음성 없는 구간(VAD) 분석 중...' });
+        const speechTimestamps = await new Promise((resolve, reject) => {
+            const vad = new VAD(VAD.Mode.NORMAL);
+            const fileStream = fs.createReadStream(audioPath).pipe(new wav.Reader());
+            const timestamps = [];
+            let isSpeaking = false, speechStart = 0, processedBytes = 0;
+            const bytesPerMs = (16000 * 16 / 8) / 1000;
+            fileStream.on('format', format => {
+                fileStream.on('data', chunk => {
+                    vad.processAudio(chunk, format.sampleRate).then(res => {
+                        const currentTime = processedBytes / bytesPerMs;
+                        if (res === VAD.Event.VOICE && !isSpeaking) { isSpeaking = true; speechStart = currentTime; }
+                        if (res === VAD.Event.SILENCE && isSpeaking) { isSpeaking = false; timestamps.push({ start: speechStart, end: currentTime }); }
+                        processedBytes += chunk.length;
+                    }).catch(reject);
                 });
-                const speechTimestamps = await new Promise((resolve, reject) => {
-                    const vad = new VAD(VAD.Mode.NORMAL);
-                    const fileStream = fs.createReadStream(audioPath).pipe(new wav.Reader());
-                    const timestamps = [];
-                    let isSpeaking = false, speechStart = 0, processedBytes = 0;
-                    const bytesPerMs = (16000 * 16 / 8) / 1000;
-                    fileStream.on('format', format => {
-                        fileStream.on('data', chunk => {
-                            vad.processAudio(chunk, format.sampleRate).then(res => {
-                                const currentTime = processedBytes / bytesPerMs;
-                                if (res === VAD.Event.VOICE && !isSpeaking) { isSpeaking = true; speechStart = currentTime; }
-                                if (res === VAD.Event.SILENCE && isSpeaking) { isSpeaking = false; timestamps.push({ start: speechStart, end: currentTime }); }
-                                processedBytes += chunk.length;
-                            }).catch(reject);
-                        });
-                    });
-                    fileStream.on('end', () => {
-                        if (isSpeaking) { timestamps.push({ start: speechStart, end: processedBytes / bytesPerMs }); }
-                        resolve(timestamps);
-                    });
-                    fileStream.on('error', reject);
-                });
-                return invertSpeechTimestamps(speechTimestamps, totalDuration * 1000);
-            })(),
-            (async () => {
-                const extractedTimestamps = [];
-                await new Promise((resolve, reject) => {
-                    const ytdlpArgs = ['-f', 'bestvideo[height<=720][ext=mp4]/best[height<=720][ext=mp4]', '-o', '-', '--no-progress', '--cookies', 'cookies.txt', youtubeUrl];
-                    const ffmpegArgs = ['-i', '-', '-vf', "select='gt(scene,0.4)',showinfo", '-vsync', 'vfr', path.join(baseTempDir, 'frame-%04d.png')];
-                    const ytdlpProcess = spawn('yt-dlp', ytdlpArgs);
-                    const ffmpegProcess = spawn('ffmpeg', ffmpegArgs);
-                    ytdlpProcess.stdout.pipe(ffmpegProcess.stdin);
-                    let ffmpegStderr = '';
-                    ffmpegProcess.stderr.on('data', (data) => {
-                        ffmpegStderr += data.toString();
-                        const timeMatches = data.toString().matchAll(/pts_time:(\d+\.?\d*)/g);
-                        for (const match of timeMatches) {
-                            extractedTimestamps.push(parseFloat(match[1]));
-                        }
-                    });
-                    ytdlpProcess.on('error', (err) => reject(new Error(`yt-dlp spawn error: ${err.message}`)));
-                    ffmpegProcess.on('error', (err) => reject(new Error(`ffmpeg spawn error: ${err.message}`)));
-                    ffmpegProcess.on('close', (code) => {
-                        if (code === 0) return resolve();
-                        reject(new Error(`ffmpeg frame extraction exited with code ${code}. Stderr: ${ffmpegStderr}`));
-                    });
-                });
-                return extractedTimestamps;
-            })()
-        ]);
+            });
+            fileStream.on('end', () => {
+                if (isSpeaking) { timestamps.push({ start: speechStart, end: processedBytes / bytesPerMs }); }
+                resolve(timestamps);
+            });
+            fileStream.on('error', reject);
+        });
+        const nonSpeechIntervals = invertSpeechTimestamps(speechTimestamps, totalDuration * 1000);
+
+        if (sseHandler) sseHandler('status_update', { message: '주요 장면 프레임 추출 중...' });
+        const allTimestamps = await new Promise((resolve, reject) => {
+            const extractedTimestamps = [];
+            const ytdlpArgs = ['-f', 'bestvideo[height<=720][ext=mp4]/best[height<=720][ext=mp4]', '-o', '-', '--no-progress', '--cookies', 'cookies.txt', youtubeUrl];
+            const ffmpegArgs = ['-i', '-', '-vf', "select='gt(scene,0.4)',showinfo", '-vsync', 'vfr', path.join(baseTempDir, 'frame-%04d.png')];
+            const ytdlpProcess = spawn('yt-dlp', ytdlpArgs);
+            const ffmpegProcess = spawn('ffmpeg', ffmpegArgs);
+            ytdlpProcess.stdout.pipe(ffmpegProcess.stdin);
+            let ffmpegStderr = '';
+            ffmpegProcess.stderr.on('data', (data) => {
+                ffmpegStderr += data.toString();
+                const timeMatches = data.toString().matchAll(/pts_time:(\d+\.?\d*)/g);
+                for (const match of timeMatches) {
+                    extractedTimestamps.push(parseFloat(match[1]));
+                }
+            });
+            ytdlpProcess.on('error', (err) => reject(new Error(`yt-dlp spawn error: ${err.message}`)));
+            ffmpegProcess.on('error', (err) => reject(new Error(`ffmpeg spawn error: ${err.message}`)));
+            ffmpegProcess.on('close', (code) => {
+                if (code === 0) return resolve(extractedTimestamps);
+                reject(new Error(`ffmpeg frame extraction exited with code ${code}. Stderr: ${ffmpegStderr}`));
+            });
+        });
 
         console.timeEnd(extractionLabel);
         console.log(`[${requestHash}] Initial data extraction complete. Title: ${videoTitle}, VAD Intervals: ${nonSpeechIntervals.length}, Total Frames: ${allTimestamps.length}`);
@@ -127,7 +127,6 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
         const CHUNK_DURATION_SECONDS = 180;
         const allFrameFiles = (await fs.promises.readdir(baseTempDir)).filter(f => f.endsWith('.png')).sort();
         
-        let finalScriptData = [];
         let previousScriptText = '';
         let frameIndex = 0;
 
@@ -137,6 +136,7 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
             const chunkEndTime = chunkNumber * CHUNK_DURATION_SECONDS;
 
             console.log(`\n[${requestHash}] Processing AI for chunk ${chunkNumber}...`);
+            if (sseHandler) sseHandler('status_update', { message: `AI로 대본 생성 중... (${chunkNumber}번째 조각)` });
             const aiChunkLabel = `[${requestHash}] AI Chunk ${chunkNumber} Time`;
             console.time(aiChunkLabel);
 
@@ -221,21 +221,24 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
                 return { id, timestamp, text: text.trim(), verbosity: `v${verbosity}` };
             }).filter(Boolean);
 
+            if (chunkScriptData.length > 0) {
+                db.saveVideoChunk({
+                    videoId,
+                    title: chunkNumber === 1 ? videoTitle : null, // Only send title for the first chunk
+                    scriptChunk: chunkScriptData
+                });
+                console.log(`[${requestHash}] Saved ${chunkScriptData.length} script lines from chunk ${chunkNumber} to DB.`);
+            }
+
             if (sseHandler) {
                 sseHandler('script_chunk', chunkScriptData);
             }
-            finalScriptData.push(...chunkScriptData);
             previousScriptText += (previousScriptText ? '\n' : '') + scriptText;
 
             console.timeEnd(aiChunkLabel);
         }
 
-        // 3. Finalize
-        finalScriptData.sort((a, b) => a.timestamp - b.timestamp);
-        const responsePayload = { videoId, title: videoTitle, script: finalScriptData };
-        db.saveVideo(responsePayload);
-
-        console.log(`[${requestHash}] Successfully generated and cached script text.`);
+        console.log(`[${requestHash}] Successfully generated script text.`);
         if (sseHandler) {
             sseHandler('end', { message: 'Processing complete.' });
         }

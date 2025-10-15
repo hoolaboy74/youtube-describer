@@ -1,3 +1,7 @@
 node_modules/
 audio/
 temp/
+db/
+cookies.txt
+.env
+my-tts-service.json

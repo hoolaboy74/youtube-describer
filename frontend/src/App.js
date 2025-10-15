@@ -213,6 +213,11 @@ function PlayerScreen({ announcePolite, announceAssertive }) {
     const [error, setError] = useState('');
     const eventSourceRef = useRef(null);
 
+    // New states for improved UX
+    const [statusMessage, setStatusMessage] = useState('영상 정보를 확인 중입니다...');
+    const [isPlayerReady, setIsPlayerReady] = useState(false);
+    const [isNewGeneration, setIsNewGeneration] = useState(false);
+
     const [player, setPlayer] = useState(null);
     const [isTtsEnabled, setIsTtsEnabled] = useState(true);
     const [verbosity, setVerbosity] = useState(2);
@@ -224,6 +229,7 @@ function PlayerScreen({ announcePolite, announceAssertive }) {
     useEffect(() => { ttsEnabledRef.current = isTtsEnabled; }, [isTtsEnabled]);
 
     const lastSpokenIndexRef = useRef(-1);
+    const hasAnnouncedAiStart = useRef(false); // Ref to track AI start announcement
 
     useEffect(() => {
         if (!videoId) {
@@ -231,28 +237,42 @@ function PlayerScreen({ announcePolite, announceAssertive }) {
             return;
         }
 
+        // Reset states for new video
         setIsLoading(true);
+        setIsNewGeneration(false);
+        setIsPlayerReady(false);
         setScript([]);
         setError('');
+        setStatusMessage('영상 정보를 확인 중입니다...');
         announcePolite('영상 데이터를 불러오는 중입니다.');
+        hasAnnouncedAiStart.current = false; // Reset the flag for each new video
 
         axios.get(`/api/script/${videoId}`)
             .then(response => {
-                if (response.data && response.data.script) {
-                    setScript(response.data.script);
+                if (response.data && response.data.script && response.data.script.length > 0) {
                     setVideoInfo({ videoId: response.data.videoId, title: response.data.title });
-                    setIsLoading(false);
-                    announcePolite('영상 데이터를 모두 불러왔습니다.');
+                    setScript(response.data.script);
+                    setIsPlayerReady(true); // Cached video, ready to play
+                    announcePolite('캐시된 영상 데이터를 불러왔습니다. 바로 재생할 수 있습니다.');
+                } else {
+                    // This case can happen if DB has video entry but no scripts yet
+                    setIsNewGeneration(true);
+                    // Fall through to catch block logic is implicitly handled by SSE
                 }
             })
             .catch(err => {
                 if (err.response && err.response.status === 404) {
-                    console.log('Script not in cache, starting stream...');
+                    console.log('Script not in cache, starting new generation process...');
+                    setIsNewGeneration(true);
+                    setStatusMessage('새로운 화면 해설 대본 생성을 시작합니다...');
                     announcePolite('캐시된 대본이 없어, 새로 생성을 시작합니다.');
-                    const url = `/api/process?youtubeUrl=${encodeURIComponent(`https://www.youtube.com/watch?v=${videoId}`)}`;
+                    
+                    const sseApiHost = process.env.NODE_ENV === 'production' ? '' : 'http://localhost:4000';
+                    const url = `${sseApiHost}/api/process?youtubeUrl=${encodeURIComponent(`https://www.youtube.com/watch?v=${videoId}`)}`;
                     const es = new EventSource(url);
                     eventSourceRef.current = es;
                     let isDuplicate = false;
+                    let isFirstChunk = true;
 
                     es.onopen = () => console.log("SSE connection opened for streaming.");
 
@@ -261,7 +281,27 @@ function PlayerScreen({ announcePolite, announceAssertive }) {
                         setVideoInfo({ videoId: data.videoId, title: data.title });
                     });
 
+                    es.addEventListener('status_update', (event) => {
+                        const data = JSON.parse(event.data);
+                        setStatusMessage(data.message);
+                        
+                        const isAiMessage = data.message.includes('AI로 대본 생성 중');
+                        if (isAiMessage) {
+                            if (!hasAnnouncedAiStart.current) {
+                                announcePolite(data.message);
+                                hasAnnouncedAiStart.current = true;
+                            }
+                        } else {
+                            announcePolite(data.message);
+                        }
+                    });
+
                     es.addEventListener('script_chunk', (event) => {
+                        if (isFirstChunk) {
+                            setIsPlayerReady(true);
+                            announcePolite('재생 준비가 완료되었습니다. 이제 영상을 재생할 수 있습니다.');
+                            isFirstChunk = false;
+                        }
                         const chunk = JSON.parse(event.data);
                         setScript(prevScript => {
                             const scriptMap = new Map();
@@ -271,8 +311,6 @@ function PlayerScreen({ announcePolite, announceAssertive }) {
                             newScript.sort((a, b) => a.timestamp - b.timestamp);
                             return newScript;
                         });
-                        setIsLoading(false);
-                        announcePolite('대본 일부를 수신했습니다.');
                     });
 
                     es.addEventListener('end', () => {
@@ -293,7 +331,6 @@ function PlayerScreen({ announcePolite, announceAssertive }) {
                         const errorMsg = '대본 생성 중 오류가 발생했습니다.';
                         setError(errorMsg);
                         announceAssertive(`오류: ${errorMsg}`);
-                        setIsLoading(false);
                         es.close();
                     };
                 } else {
@@ -301,8 +338,10 @@ function PlayerScreen({ announcePolite, announceAssertive }) {
                     const errorMsg = '스크립트를 불러오는 중 오류가 발생했습니다.';
                     setError(errorMsg);
                     announceAssertive(`오류: ${errorMsg}`);
-                    setIsLoading(false);
                 }
+            })
+            .finally(() => {
+                setIsLoading(false);
             });
 
         return () => {
@@ -421,13 +460,36 @@ function PlayerScreen({ announcePolite, announceAssertive }) {
         announcePolite(`상세 수준이 ${verbosityLabels[level]}로 변경되었습니다.`);
     };
 
-    if (isLoading) {
-        return <p>영상 데이터를 불러오는 중입니다...</p>;
-    }
-
-    if (error) {
-        return <p className="error-message" role="alert">{error}</p>;
-    }
+    const renderContent = () => {
+        if (isLoading) {
+            return <p>영상 데이터를 불러오는 중입니다...</p>;
+        }
+        if (error) {
+            return <p className="error-message" role="alert">{error}</p>;
+        }
+        if (isNewGeneration && !isPlayerReady) {
+            return (
+                <div className="status-container">
+                    <p>새로운 화면 해설을 생성하고 있습니다. 잠시만 기다려주세요...</p>
+                    <p className="status-message">{statusMessage}</p>
+                    <div className="spinner"></div>
+                </div>
+            );
+        }
+        if (isPlayerReady) {
+            return (
+                <div className="video-container">
+                    <YouTube
+                        videoId={videoId}
+                        opts={{ width: '100%', height: '100%' }}
+                        onReady={(e) => setPlayer(e.target)}
+                        onStateChange={(e) => setIsPlaying(e.data === window.YT.PlayerState.PLAYING)}
+                    />
+                </div>
+            );
+        }
+        return <p>알 수 없는 상태입니다. 페이지를 새로고침 해주세요.</p>;
+    };
 
     return (
         <>
@@ -437,14 +499,8 @@ function PlayerScreen({ announcePolite, announceAssertive }) {
                 <ShareButton announcePolite={announcePolite} />
             </div>
 
-            <div className="video-container">
-                <YouTube
-                    videoId={videoId}
-                    opts={{ width: '100%', height: '100%' }}
-                    onReady={(e) => setPlayer(e.target)}
-                    onStateChange={(e) => setIsPlaying(e.data === window.YT.PlayerState.PLAYING)}
-                />
-            </div>
+            {renderContent()}
+
             <div className="controls-container">
                 <label className="tts-toggle">
                     <input 

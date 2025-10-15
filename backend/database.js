@@ -89,10 +89,34 @@ function searchVideosByTitle(query) {
   return rows;
 }
 
+function saveVideoChunk({ videoId, title, scriptChunk }) {
+  const transaction = db.transaction(() => {
+    // Step 1: Ensure the parent video row exists.
+    if (title) {
+        db.prepare('INSERT OR IGNORE INTO videos (videoId, title) VALUES (?, ?)')
+          .run(videoId, title);
+    }
+
+    // Step 2: Insert the new script lines from the chunk.
+    const insertScript = db.prepare('INSERT OR IGNORE INTO scripts (id, videoId, timestamp, text, verbosity) VALUES (?, ?, ?, ?, ?)');
+    for (const line of scriptChunk) {
+      insertScript.run(line.id, videoId, line.timestamp, line.text, line.verbosity);
+    }
+  });
+
+  try {
+    transaction();
+  } catch (error) {
+    console.error(`[Database] Failed to save chunk for video ${videoId}:`, error);
+    throw error;
+  }
+}
+
 module.exports = {
   init,
   getVideo,
   saveVideo,
+  saveVideoChunk,
   listVideos,
   searchVideosByTitle,
 };
