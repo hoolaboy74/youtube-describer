@@ -10,6 +10,7 @@ const wav = require('wav');
 const crypto = require('crypto');
 const db = require('./database');
 const { formatTime, invertSpeechTimestamps } = require('./utils');
+const logger = require('./logger');
 
 const API_KEY = process.env.GOOGLE_API_KEY;
 if (!API_KEY) {
@@ -18,12 +19,26 @@ if (!API_KEY) {
 const genAI = new GoogleGenerativeAI(API_KEY);
 
 const processingLocks = new Set();
+const timers = new Map();
+
+const time = (label) => {
+    timers.set(label, Date.now());
+};
+
+const timeEnd = (label) => {
+    const startTime = timers.get(label);
+    if (startTime) {
+        const duration = (Date.now() - startTime) / 1000;
+        logger.info(`${label}: ${duration.toFixed(3)}s`);
+        timers.delete(label);
+    }
+};
 
 const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
     const requestHash = sseHandler ? videoId.substring(0, 8) : `batch-${videoId.substring(0, 8)}`;
 
     if (processingLocks.has(videoId)) {
-        console.log(`[${requestHash}] Duplicate request for ${videoId}. The process is already running.`);
+        logger.warn(`[${requestHash}] Duplicate request for ${videoId}. The process is already running.`);
         if (sseHandler) {
             sseHandler('duplicate_request', { message: 'This video is already being processed.' });
         }
@@ -33,15 +48,15 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
     processingLocks.add(videoId);
 
     const totalTimeLabel = `[${requestHash}] Total Process Time`;
-    console.log(`[${requestHash}] Starting processing for ${youtubeUrl}`);
-    console.time(totalTimeLabel);
+    logger.info(`[${requestHash}] Starting processing for ${youtubeUrl}`);
+    time(totalTimeLabel);
 
     const baseTempDir = path.join(__dirname, 'temp', videoId);
 
     try {
         const cachedData = db.getVideo(videoId);
         if (cachedData && cachedData.script && cachedData.script.length > 0) {
-            console.log(`[${requestHash}] Cache hit for videoId: ${videoId}.`);
+            logger.info(`[${requestHash}] Cache hit for videoId: ${videoId}.`);
             if (sseHandler) {
                 sseHandler('full_script', cachedData);
             }
@@ -51,9 +66,9 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
         await fs.promises.mkdir(baseTempDir, { recursive: true });
 
         // Step 1: Extract ALL data upfront (Title, VAD, Frames) - Sequentially for status updates
-        console.log(`[${requestHash}] Step 1: Starting initial data extraction...`);
+        logger.info(`[${requestHash}] Step 1: Starting initial data extraction...`);
         const extractionLabel = `[${requestHash}] Initial Data Extraction Time`;
-        console.time(extractionLabel);
+        time(extractionLabel);
 
         if (sseHandler) sseHandler('status_update', { message: '영상 정보 확인 중...' });
         const videoTitle = await util.promisify(execFile)('yt-dlp', ['--get-title', '--encoding', 'utf-8', '--no-progress', '--cookies', 'cookies.txt', youtubeUrl]).then(result => result.stdout.trim());
@@ -117,8 +132,8 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
             });
         });
 
-        console.timeEnd(extractionLabel);
-        console.log(`[${requestHash}] Initial data extraction complete. Title: ${videoTitle}, VAD Intervals: ${nonSpeechIntervals.length}, Total Frames: ${allTimestamps.length}`);
+        timeEnd(extractionLabel);
+        logger.info(`[${requestHash}] Initial data extraction complete. Title: ${videoTitle}, VAD Intervals: ${nonSpeechIntervals.length}, Total Frames: ${allTimestamps.length}`);
         if (sseHandler) {
             sseHandler('start', { videoId, title: videoTitle });
         }
@@ -135,10 +150,10 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
             const chunkStartTime = (chunkNumber - 1) * CHUNK_DURATION_SECONDS;
             const chunkEndTime = chunkNumber * CHUNK_DURATION_SECONDS;
 
-            console.log(`\n[${requestHash}] Processing AI for chunk ${chunkNumber}...`);
+            logger.info(`\n[${requestHash}] Processing AI for chunk ${chunkNumber}...`);
             if (sseHandler) sseHandler('status_update', { message: `AI로 대본 생성 중... (${chunkNumber}번째 조각)` });
             const aiChunkLabel = `[${requestHash}] AI Chunk ${chunkNumber} Time`;
-            console.time(aiChunkLabel);
+            time(aiChunkLabel);
 
             const chunkImageParts = [];
 
@@ -157,8 +172,8 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
             }
 
             if (chunkImageParts.length === 0) {
-                console.log(`[${requestHash}] No frames for AI chunk ${chunkNumber}. Skipping.`);
-                console.timeEnd(aiChunkLabel);
+                logger.warn(`[${requestHash}] No frames for AI chunk ${chunkNumber}. Skipping.`);
+                timeEnd(aiChunkLabel);
                 continue;
             }
 
@@ -204,7 +219,7 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
 
             if (result.response.promptFeedback && result.response.promptFeedback.blockReason) {
                 const reason = result.response.promptFeedback.blockReason;
-                console.error(`[${requestHash}] AI request for chunk ${chunkNumber} was blocked. Reason: ${reason}`);
+                logger.error(`[${requestHash}] AI request for chunk ${chunkNumber} was blocked. Reason: ${reason}`);
                 throw new Error(`The AI prompt for chunk ${chunkNumber} was blocked due to prohibited content: ${reason}`);
             }
 
@@ -227,7 +242,7 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
                     title: chunkNumber === 1 ? videoTitle : null, // Only send title for the first chunk
                     scriptChunk: chunkScriptData
                 });
-                console.log(`[${requestHash}] Saved ${chunkScriptData.length} script lines from chunk ${chunkNumber} to DB.`);
+                logger.info(`[${requestHash}] Saved ${chunkScriptData.length} script lines from chunk ${chunkNumber} to DB.`);
             }
 
             if (sseHandler) {
@@ -235,16 +250,16 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
             }
             previousScriptText += (previousScriptText ? '\n' : '') + scriptText;
 
-            console.timeEnd(aiChunkLabel);
+            timeEnd(aiChunkLabel);
         }
 
-        console.log(`[${requestHash}] Successfully generated script text.`);
+        logger.info(`[${requestHash}] Successfully generated script text.`);
         if (sseHandler) {
             sseHandler('end', { message: 'Processing complete.' });
         }
         
     } catch (error) {
-        console.error(`[${requestHash}] Error processing request:`, error);
+        logger.error(new Error(`[${requestHash}] Error processing request: ${error.message}`));
         if (sseHandler) {
             sseHandler('error', { message: 'Failed to process video', details: error.message });
         }
@@ -253,31 +268,31 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
             await fs.promises.rm(baseTempDir, { recursive: true, force: true });
         }
         processingLocks.delete(videoId); // Release the lock
-        console.timeEnd(totalTimeLabel);
+        timeEnd(totalTimeLabel);
     }
 };
 
 const processVideoBatch = async (videoId, youtubeUrl) => {
     const requestHash = `batch-${videoId.substring(0, 8)}`;
     const totalTimeLabel = `[${requestHash}] Total Batch Process Time`;
-    console.log(`[${requestHash}] Starting batch processing for ${youtubeUrl}`);
-    console.time(totalTimeLabel);
+    logger.info(`[${requestHash}] Starting batch processing for ${youtubeUrl}`);
+    time(totalTimeLabel);
 
     const baseTempDir = path.join(__dirname, 'temp', videoId);
 
     try {
         const cachedData = db.getVideo(videoId);
         if (cachedData && cachedData.script && cachedData.script.length > 0) {
-            console.log(`[${requestHash}] Cache hit for videoId: ${videoId}. Batch processing not needed.`);
+            logger.info(`[${requestHash}] Cache hit for videoId: ${videoId}. Batch processing not needed.`);
             return;
         }
 
         await fs.promises.mkdir(baseTempDir, { recursive: true });
 
         // Step 1: Extract ALL data upfront (Title, VAD, Frames)
-        console.log(`[${requestHash}] Step 1: Starting initial data extraction (Title, VAD, Frames)...`);
+        logger.info(`[${requestHash}] Step 1: Starting initial data extraction (Title, VAD, Frames)...`);
         const extractionLabel = `[${requestHash}] Initial Data Extraction Time`;
-        console.time(extractionLabel);
+        time(extractionLabel);
 
         const [videoTitle, nonSpeechIntervals, allTimestamps] = await Promise.all([
             util.promisify(execFile)('yt-dlp', ['--get-title', '--encoding', 'utf-8', '--no-progress', '--cookies', 'cookies.txt', youtubeUrl]).then(result => result.stdout.trim()),
@@ -341,8 +356,8 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
             })()
         ]);
 
-        console.timeEnd(extractionLabel);
-        console.log(`[${requestHash}] Initial data extraction complete. Title: ${videoTitle}, VAD Intervals: ${nonSpeechIntervals.length}, Total Frames: ${allTimestamps.length}`);
+        timeEnd(extractionLabel);
+        logger.info(`[${requestHash}] Initial data extraction complete. Title: ${videoTitle}, VAD Intervals: ${nonSpeechIntervals.length}, Total Frames: ${allTimestamps.length}`);
 
         // 2. Process AI generation for the entire video
         const aiLabel = `[${requestHash}] Full AI Process Time`;
@@ -398,7 +413,7 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
         
         if (result.response.promptFeedback && result.response.promptFeedback.blockReason) {
             const reason = result.response.promptFeedback.blockReason;
-            console.error(`[${requestHash}] AI request was blocked. Reason: ${reason}`);
+            logger.error(`[${requestHash}] AI request was blocked. Reason: ${reason}`);
             throw new Error(`The AI prompt was blocked due to prohibited content: ${reason}`);
         }
 
@@ -420,15 +435,15 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
         const responsePayload = { videoId, title: videoTitle, script: finalScriptData };
         db.saveVideo(responsePayload);
 
-        console.log(`[${requestHash}] Successfully generated and cached script text for batch processing.`);
+        logger.info(`[${requestHash}] Successfully generated and cached script text for batch processing.`);
         
     } catch (error) {
-        console.error(`[${requestHash}] Error in batch processing:`, error);
+        logger.error(new Error(`[${requestHash}] Error in batch processing: ${error.message}`));
     } finally {
         if (fs.existsSync(baseTempDir)) {
             await fs.promises.rm(baseTempDir, { recursive: true, force: true });
         }
-        console.timeEnd(totalTimeLabel);
+        timeEnd(totalTimeLabel);
     }
 };
 

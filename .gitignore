@@ -5,3 +5,4 @@ db/
 cookies.txt
 .env
 my-tts-service.json
+logs/

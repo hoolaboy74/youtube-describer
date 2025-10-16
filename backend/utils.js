@@ -1,3 +1,5 @@
+const logger = require('./logger');
+
 const getYoutubeVideoId = (url) => {
     try {
         const urlObj = new URL(url);
@@ -9,7 +11,7 @@ const getYoutubeVideoId = (url) => {
         }
         return null;
     } catch (e) {
-        console.error('Invalid URL for video ID extraction:', url);
+        logger.error('Invalid URL for video ID extraction:', url);
         return null;
     }
 };

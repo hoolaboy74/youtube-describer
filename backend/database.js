@@ -1,12 +1,13 @@
 const path = require('path');
 const Database = require('better-sqlite3');
+const logger = require('./logger');
 
 const dbPath = path.join(__dirname, 'db', 'cache.db');
 const db = new Database(dbPath);
 
 // DB 초기화: 테이블 생성
 function init() {
-  console.log('Initializing database...');
+  logger.info('Initializing database...');
   // videos 테이블: 영상의 고유 정보 저장
   db.exec(`
     CREATE TABLE IF NOT EXISTS videos (
@@ -27,7 +28,7 @@ function init() {
       FOREIGN KEY (videoId) REFERENCES videos (videoId) ON DELETE CASCADE
     )
   `);
-  console.log('Database initialized successfully.');
+  logger.info('Database initialized successfully.');
 }
 
 // 특정 영상 정보와 스크립트 전체를 가져오는 함수
@@ -71,7 +72,7 @@ function saveVideo({ videoId, title, script }) {
   try {
     transaction();
   } catch (error) {
-    console.error(`[Database] Failed to save video ${videoId}:`, error);
+    logger.error(`[Database] Failed to save video ${videoId}:`, error);
     throw error; // Re-throw the error to be handled by the caller
   }
 }
@@ -107,7 +108,7 @@ function saveVideoChunk({ videoId, title, scriptChunk }) {
   try {
     transaction();
   } catch (error) {
-    console.error(`[Database] Failed to save chunk for video ${videoId}:`, error);
+    logger.error(`[Database] Failed to save chunk for video ${videoId}:`, error);
     throw error;
   }
 }

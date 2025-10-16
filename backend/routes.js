@@ -6,6 +6,7 @@ const path = require('path');
 const db = require('./database');
 const { getYoutubeVideoId } = require('./utils');
 const { processVideo, processVideoBatch } = require('./videoProcessor');
+const logger = require('./logger');
 
 const router = express.Router();
 const ttsClient = new TextToSpeechClient();
@@ -54,7 +55,7 @@ router.get('/search', async (req, res) => {
         });
 
     } catch (error) {
-        console.error(`Search failed for query "${query}":`, error);
+        logger.error(`Search failed for query "${query}":`, error);
         res.status(500).json({ error: 'Search failed' });
     }
 });
@@ -70,7 +71,7 @@ router.get('/script/:videoId', (req, res) => {
             res.status(404).json({ error: 'Script not found for the given video ID' });
         }
     } catch (error) {
-        console.error(`Failed to fetch script for videoId ${videoId}:`, error);
+        logger.error(`Failed to fetch script for videoId ${videoId}:`, error);
         res.status(500).json({ error: 'Failed to fetch script' });
     }
 });
@@ -80,7 +81,7 @@ router.get('/cached-videos', (req, res) => {
         const videos = db.listVideos();
         res.json(videos);
     } catch (error) {
-        console.error('Failed to fetch cached videos:', error);
+        logger.error('Failed to fetch cached videos:', error);
         res.status(500).json({ error: 'Failed to fetch cached videos' });
     }
 });
@@ -92,7 +93,7 @@ router.get('/video-exists/:videoId', (req, res) => {
         const videoData = db.getVideo(videoId);
         res.json({ exists: !!videoData });
     } catch (error) {
-        console.error(`Failed to check existence for videoId ${videoId}:`, error);
+        logger.error(`Failed to check existence for videoId ${videoId}:`, error);
         res.status(500).json({ error: 'Failed to check video existence' });
     }
 });
@@ -134,7 +135,7 @@ router.post('/tts', async (req, res) => {
         res.send(ttsResponse.audioContent);
 
     } catch (error) {
-        console.error('TTS API Error:', error);
+        logger.error('TTS API Error:', error);
         res.status(500).json({ error: 'Failed to synthesize speech' });
     }
 });
@@ -184,7 +185,7 @@ router.post('/batch-process', (req, res) => {
 
     // Start processing in the background (fire-and-forget)
     processVideoBatch(videoId, youtubeUrl).catch(err => {
-        console.error(`[batch-${videoId.substring(0,8)}] Unhandled error in batch processing:`, err);
+        logger.error(`[batch-${videoId.substring(0,8)}] Unhandled error in batch processing:`, err);
     });
 });
 

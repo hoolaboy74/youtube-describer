@@ -5,6 +5,7 @@ const fs = require('fs');
 const path = require('path');
 const db = require('./database');
 const apiRoutes = require('./routes');
+const logger = require('./logger');
 
 // Initialize the database
 db.init();
@@ -26,7 +27,7 @@ const ttsCacheDir = path.join(audioCacheDir, 'tts_cache');
 const CACHE_MAX_AGE_DAYS = 30;
 
 async function cleanupOldFiles() {
-    console.log('Running cleanup of old audio files...');
+    logger.info('Running cleanup of old audio files...');
     try {
         // This targets the nested directories inside tts_cache
         const firstLevelDirs = await fs.promises.readdir(ttsCacheDir);
@@ -41,7 +42,7 @@ async function cleanupOldFiles() {
                     const stats = await fs.promises.stat(filePath);
                     const ageInDays = (Date.now() - stats.mtime.getTime()) / (1000 * 60 * 60 * 24);
                     if (ageInDays > CACHE_MAX_AGE_DAYS) {
-                        console.log(`Deleting old TTS cache file: ${filePath}`);
+                        logger.info(`Deleting old TTS cache file: ${filePath}`);
                         await fs.promises.rm(filePath, { force: true });
                     }
                 }
@@ -49,7 +50,7 @@ async function cleanupOldFiles() {
         }
     } catch (error) {
         if (error.code !== 'ENOENT') { // Ignore error if a directory doesn't exist
-            console.error('Error during old file cleanup:', error);
+            logger.error('Error during old file cleanup:', error);
         }
     }
 }
@@ -65,7 +66,7 @@ app.use('/api', apiRoutes);
 
 // --- SERVER START ---
 app.listen(port, () => {
-    console.log(`Backend server listening on http://localhost:${port}`);
+    logger.info(`Backend server listening on http://localhost:${port}`);
     // Run cleanup on startup, then periodically
     cleanupOldFiles();
     setInterval(cleanupOldFiles, 24 * 60 * 60 * 1000);
