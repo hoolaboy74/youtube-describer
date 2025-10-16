@@ -150,7 +150,7 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
             const chunkStartTime = (chunkNumber - 1) * CHUNK_DURATION_SECONDS;
             const chunkEndTime = chunkNumber * CHUNK_DURATION_SECONDS;
 
-            logger.info(`\n[${requestHash}] Processing AI for chunk ${chunkNumber}...`);
+            logger.info(`[${requestHash}] Processing AI for chunk ${chunkNumber}...`);
             if (sseHandler) sseHandler('status_update', { message: `AI로 대본 생성 중... (${chunkNumber}번째 조각)` });
             const aiChunkLabel = `[${requestHash}] AI Chunk ${chunkNumber} Time`;
             time(aiChunkLabel);
