@@ -13,9 +13,18 @@ function init() {
     CREATE TABLE IF NOT EXISTS videos (
       videoId TEXT PRIMARY KEY,
       title TEXT NOT NULL,
+      duration INTEGER DEFAULT 0,
       createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
     )
   `);
+
+  // Add duration column if it doesn't exist (for backward compatibility)
+  try {
+    db.prepare('SELECT duration FROM videos LIMIT 1').get();
+  } catch (error) {
+    logger.info('Adding duration column to videos table with default value 0...');
+    db.exec('ALTER TABLE videos ADD COLUMN duration INTEGER DEFAULT 0');
+  }
 
   // scripts 테이블: 각 영상에 속한 화면 해설 스크립트 정보 저장
   db.exec(`
@@ -33,7 +42,7 @@ function init() {
 
 // 특정 영상 정보와 스크립트 전체를 가져오는 함수
 function getVideo(videoId) {
-  const videoRow = db.prepare('SELECT videoId, title FROM videos WHERE videoId = ?').get(videoId);
+  const videoRow = db.prepare('SELECT videoId, title, duration FROM videos WHERE videoId = ?').get(videoId);
   if (!videoRow) {
     return null;
   }
@@ -43,6 +52,7 @@ function getVideo(videoId) {
   return {
     videoId: videoRow.videoId,
     title: videoRow.title,
+    duration: videoRow.duration,
     script: scriptRows.map(row => ({
       ...row,
       // Ensure timestamp is a number
@@ -52,18 +62,22 @@ function getVideo(videoId) {
 }
 
 // 영상과 스크립트 정보를 DB에 저장하는 함수 (트랜잭션 사용)
-function saveVideo({ videoId, title, script }) {
+function saveVideo({ videoId, title, duration, script }) {
   const transaction = db.transaction(() => {
-    // Step 1: Ensure the parent video row exists.
-    db.prepare('INSERT OR IGNORE INTO videos (videoId, title) VALUES (?, ?)')
-      .run(videoId, title);
+    // Step 1: Use ON CONFLICT to insert or update the video record.
+    db.prepare(`
+      INSERT INTO videos (videoId, title, duration)
+      VALUES (?, ?, ?)
+      ON CONFLICT(videoId) DO UPDATE SET
+        title = excluded.title,
+        duration = excluded.duration
+    `).run(videoId, title, duration);
 
     // Step 2: Delete all old scripts for this video to ensure a clean slate.
-    db.prepare('DELETE FROM scripts WHERE videoId = ?')
-      .run(videoId);
+    db.prepare('DELETE FROM scripts WHERE videoId = ?').run(videoId);
 
     // Step 3: Insert all the new script lines.
-    const insertScript = db.prepare('INSERT OR IGNORE INTO scripts (id, videoId, timestamp, text, verbosity) VALUES (?, ?, ?, ?, ?)');
+    const insertScript = db.prepare('INSERT INTO scripts (id, videoId, timestamp, text, verbosity) VALUES (?, ?, ?, ?, ?)');
     for (const line of script) {
       insertScript.run(line.id, videoId, line.timestamp, line.text, line.verbosity);
     }
@@ -79,7 +93,7 @@ function saveVideo({ videoId, title, script }) {
 
 // 캐시된 모든 영상의 목록을 가져오는 함수
 function listVideos() {
-  const rows = db.prepare('SELECT videoId, title, createdAt FROM videos ORDER BY createdAt DESC').all();
+  const rows = db.prepare('SELECT videoId, title, duration, createdAt FROM videos ORDER BY createdAt DESC').all();
   return rows;
 }
 
@@ -90,15 +104,26 @@ function searchVideosByTitle(query) {
   return rows;
 }
 
-function saveVideoChunk({ videoId, title, scriptChunk }) {
-  const transaction = db.transaction(() => {
-    // Step 1: Ensure the parent video row exists.
-    if (title) {
-        db.prepare('INSERT OR IGNORE INTO videos (videoId, title) VALUES (?, ?)')
-          .run(videoId, title);
-    }
+// Ensures the parent video record exists, inserting or updating it.
+function ensureVideoRecord({ videoId, title, duration }) {
+  try {
+    db.prepare(`
+      INSERT INTO videos (videoId, title, duration)
+      VALUES (?, ?, ?)
+      ON CONFLICT(videoId) DO UPDATE SET
+        title = excluded.title,
+        duration = excluded.duration
+    `).run(videoId, title, duration);
+  } catch (error) {
+    logger.error(`[Database] Failed to ensure video record for ${videoId}:`, error);
+    throw error;
+  }
+}
 
-    // Step 2: Insert the new script lines from the chunk.
+// Saves only the script lines for a given chunk.
+function saveVideoChunk({ videoId, scriptChunk }) {
+  const transaction = db.transaction(() => {
+    // The caller is now responsible for ensuring the parent video row exists.
     const insertScript = db.prepare('INSERT OR IGNORE INTO scripts (id, videoId, timestamp, text, verbosity) VALUES (?, ?, ?, ?, ?)');
     for (const line of scriptChunk) {
       insertScript.run(line.id, videoId, line.timestamp, line.text, line.verbosity);
@@ -117,6 +142,7 @@ module.exports = {
   init,
   getVideo,
   saveVideo,
+  ensureVideoRecord, // export new function
   saveVideoChunk,
   listVideos,
   searchVideosByTitle,

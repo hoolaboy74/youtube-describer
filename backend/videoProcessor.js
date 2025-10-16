@@ -134,6 +134,10 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
 
         timeEnd(extractionLabel);
         logger.info(`[${requestHash}] Initial data extraction complete. Title: ${videoTitle}, VAD Intervals: ${nonSpeechIntervals.length}, Total Frames: ${allTimestamps.length}`);
+        
+        // Ensure the parent video record exists before processing chunks.
+        db.ensureVideoRecord({ videoId, title: videoTitle, duration: Math.round(totalDuration) });
+
         if (sseHandler) {
             sseHandler('start', { videoId, title: videoTitle });
         }
@@ -237,11 +241,7 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
             }).filter(Boolean);
 
             if (chunkScriptData.length > 0) {
-                db.saveVideoChunk({
-                    videoId,
-                    title: chunkNumber === 1 ? videoTitle : null, // Only send title for the first chunk
-                    scriptChunk: chunkScriptData
-                });
+                db.saveVideoChunk({ videoId, scriptChunk: chunkScriptData });
                 logger.info(`[${requestHash}] Saved ${chunkScriptData.length} script lines from chunk ${chunkNumber} to DB.`);
             }
 
@@ -294,14 +294,14 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
         const extractionLabel = `[${requestHash}] Initial Data Extraction Time`;
         time(extractionLabel);
 
-        const [videoTitle, nonSpeechIntervals, allTimestamps] = await Promise.all([
+        const [videoTitle, { nonSpeechIntervals, totalDuration }, allTimestamps] = await Promise.all([
             util.promisify(execFile)('yt-dlp', ['--get-title', '--encoding', 'utf-8', '--no-progress', '--cookies', 'cookies.txt', youtubeUrl]).then(result => result.stdout.trim()),
             (async () => {
                 const audioPath = path.join(baseTempDir, 'audio.wav');
                 const downloadedAudio = path.join(baseTempDir, 'audio_source.m4a');
                 await util.promisify(execFile)('yt-dlp', ['-f', 'bestaudio', '-o', downloadedAudio, '--no-progress', '--cookies', 'cookies.txt', youtubeUrl]);
                 const metadata = await util.promisify(ffmpeg.ffprobe)(downloadedAudio);
-                const totalDuration = metadata.format.duration;
+                const duration = metadata.format.duration;
                 await new Promise((resolve, reject) => {
                     ffmpeg(downloadedAudio).toFormat('wav').audioFrequency(16000).audioChannels(1).on('end', resolve).on('error', reject).save(audioPath);
                 });
@@ -327,7 +327,10 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
                     });
                     fileStream.on('error', reject);
                 });
-                return invertSpeechTimestamps(speechTimestamps, totalDuration * 1000);
+                return { 
+                    nonSpeechIntervals: invertSpeechTimestamps(speechTimestamps, duration * 1000),
+                    totalDuration: duration
+                };
             })(),
             (async () => {
                 const extractedTimestamps = [];
@@ -432,7 +435,7 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
 
         // 3. Finalize
         finalScriptData.sort((a, b) => a.timestamp - b.timestamp);
-        const responsePayload = { videoId, title: videoTitle, script: finalScriptData };
+        const responsePayload = { videoId, title: videoTitle, duration: Math.round(totalDuration), script: finalScriptData };
         db.saveVideo(responsePayload);
 
         logger.info(`[${requestHash}] Successfully generated and cached script text for batch processing.`);
