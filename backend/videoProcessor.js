@@ -55,7 +55,7 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
 
     try {
         const cachedData = db.getVideo(videoId);
-        if (cachedData && cachedData.script && cachedData.script.length > 0) {
+        if (cachedData && cachedData.script && cachedData.script.length > 0 && cachedData.status === 'completed') {
             logger.info(`[${requestHash}] Cache hit for videoId: ${videoId}.`);
             if (sseHandler) {
                 sseHandler('full_script', cachedData);
@@ -82,6 +82,9 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
         await new Promise((resolve, reject) => {
             ffmpeg(downloadedAudio).toFormat('wav').audioFrequency(16000).audioChannels(1).on('end', resolve).on('error', reject).save(audioPath);
         });
+
+        // Set video status to processing
+        db.ensureVideoRecord({ videoId, title: videoTitle, duration: Math.round(totalDuration) });
 
         if (sseHandler) sseHandler('status_update', { message: '음성 없는 구간(VAD) 분석 중...' });
         const speechTimestamps = await new Promise((resolve, reject) => {
@@ -135,9 +138,6 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
         timeEnd(extractionLabel);
         logger.info(`[${requestHash}] Initial data extraction complete. Title: ${videoTitle}, VAD Intervals: ${nonSpeechIntervals.length}, Total Frames: ${allTimestamps.length}`);
         
-        // Ensure the parent video record exists before processing chunks.
-        db.ensureVideoRecord({ videoId, title: videoTitle, duration: Math.round(totalDuration) });
-
         if (sseHandler) {
             sseHandler('start', { videoId, title: videoTitle });
         }
@@ -253,12 +253,14 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
             timeEnd(aiChunkLabel);
         }
 
+        db.updateVideoStatus(videoId, 'completed');
         logger.info(`[${requestHash}] Successfully generated script text.`);
         if (sseHandler) {
             sseHandler('end', { message: 'Processing complete.' });
         }
         
     } catch (error) {
+        db.updateVideoStatus(videoId, 'failed');
         logger.error(new Error(`[${requestHash}] Error processing request: ${error.message}`));
         if (sseHandler) {
             sseHandler('error', { message: 'Failed to process video', details: error.message });
@@ -282,7 +284,7 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
 
     try {
         const cachedData = db.getVideo(videoId);
-        if (cachedData && cachedData.script && cachedData.script.length > 0) {
+        if (cachedData && cachedData.status === 'completed') {
             logger.info(`[${requestHash}] Cache hit for videoId: ${videoId}. Batch processing not needed.`);
             return;
         }
@@ -362,6 +364,9 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
         timeEnd(extractionLabel);
         logger.info(`[${requestHash}] Initial data extraction complete. Title: ${videoTitle}, VAD Intervals: ${nonSpeechIntervals.length}, Total Frames: ${allTimestamps.length}`);
 
+        // Ensure record exists and is marked as processing
+        db.ensureVideoRecord({ videoId, title: videoTitle, duration: Math.round(totalDuration) });
+
         // 2. Process AI generation for the entire video
         const aiLabel = `[${requestHash}] Full AI Process Time`;
 
@@ -381,7 +386,10 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
         }
 
         if (imageParts.length === 0) {
-            throw new Error("No frames could be extracted or processed for the AI model.");
+            // If no frames, we still consider it 'completed' but with an empty script.
+            logger.warn(`[${requestHash}] No frames to process. Marking as complete with empty script.`);
+            db.saveVideo({ videoId, title: videoTitle, duration: Math.round(totalDuration), script: [] });
+            return; // Exit early
         }
 
         const silentIntervalsString = nonSpeechIntervals.map(interval => `${formatTime(interval.start)} ~ ${formatTime(interval.end)}`).join('\n');
@@ -441,6 +449,7 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
         logger.info(`[${requestHash}] Successfully generated and cached script text for batch processing.`);
         
     } catch (error) {
+        db.updateVideoStatus(videoId, 'failed');
         logger.error(new Error(`[${requestHash}] Error in batch processing: ${error.message}`));
     } finally {
         if (fs.existsSync(baseTempDir)) {

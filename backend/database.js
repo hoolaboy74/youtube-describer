@@ -14,16 +14,23 @@ function init() {
       videoId TEXT PRIMARY KEY,
       title TEXT NOT NULL,
       duration INTEGER DEFAULT 0,
+      status TEXT DEFAULT 'pending' NOT NULL,
       createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
     )
   `);
 
-  // Add duration column if it doesn't exist (for backward compatibility)
+  // Add columns if they don't exist (for backward compatibility)
   try {
     db.prepare('SELECT duration FROM videos LIMIT 1').get();
   } catch (error) {
     logger.info('Adding duration column to videos table with default value 0...');
     db.exec('ALTER TABLE videos ADD COLUMN duration INTEGER DEFAULT 0');
+  }
+  try {
+    db.prepare('SELECT status FROM videos LIMIT 1').get();
+  } catch (error) {
+    logger.info('Adding status column to videos table with default value \'completed\'...');
+    db.exec("ALTER TABLE videos ADD COLUMN status TEXT DEFAULT 'completed' NOT NULL");
   }
 
   // scripts 테이블: 각 영상에 속한 화면 해설 스크립트 정보 저장
@@ -42,7 +49,7 @@ function init() {
 
 // 특정 영상 정보와 스크립트 전체를 가져오는 함수
 function getVideo(videoId) {
-  const videoRow = db.prepare('SELECT videoId, title, duration FROM videos WHERE videoId = ?').get(videoId);
+  const videoRow = db.prepare('SELECT videoId, title, duration, status FROM videos WHERE videoId = ?').get(videoId);
   if (!videoRow) {
     return null;
   }
@@ -53,6 +60,7 @@ function getVideo(videoId) {
     videoId: videoRow.videoId,
     title: videoRow.title,
     duration: videoRow.duration,
+    status: videoRow.status,
     script: scriptRows.map(row => ({
       ...row,
       // Ensure timestamp is a number
@@ -61,25 +69,28 @@ function getVideo(videoId) {
   };
 }
 
-// 영상과 스크립트 정보를 DB에 저장하는 함수 (트랜잭션 사용)
+// 영상과 스크립트 정보를 DB에 저장하는 함수 (트랜잭션 사용, 배치 처리용)
 function saveVideo({ videoId, title, duration, script }) {
   const transaction = db.transaction(() => {
-    // Step 1: Use ON CONFLICT to insert or update the video record.
+    // Step 1: Insert or update the video record, setting status to completed.
     db.prepare(`
-      INSERT INTO videos (videoId, title, duration)
-      VALUES (?, ?, ?)
+      INSERT INTO videos (videoId, title, duration, status)
+      VALUES (?, ?, ?, 'completed')
       ON CONFLICT(videoId) DO UPDATE SET
         title = excluded.title,
-        duration = excluded.duration
+        duration = excluded.duration,
+        status = 'completed'
     `).run(videoId, title, duration);
 
     // Step 2: Delete all old scripts for this video to ensure a clean slate.
     db.prepare('DELETE FROM scripts WHERE videoId = ?').run(videoId);
 
     // Step 3: Insert all the new script lines.
-    const insertScript = db.prepare('INSERT INTO scripts (id, videoId, timestamp, text, verbosity) VALUES (?, ?, ?, ?, ?)');
-    for (const line of script) {
-      insertScript.run(line.id, videoId, line.timestamp, line.text, line.verbosity);
+    if (script && script.length > 0) {
+      const insertScript = db.prepare('INSERT INTO scripts (id, videoId, timestamp, text, verbosity) VALUES (?, ?, ?, ?, ?)');
+      for (const line of script) {
+        insertScript.run(line.id, videoId, line.timestamp, line.text, line.verbosity);
+      }
     }
   });
 
@@ -93,29 +104,41 @@ function saveVideo({ videoId, title, duration, script }) {
 
 // 캐시된 모든 영상의 목록을 가져오는 함수
 function listVideos() {
-  const rows = db.prepare('SELECT videoId, title, duration, createdAt FROM videos ORDER BY createdAt DESC').all();
+  const rows = db.prepare("SELECT videoId, title, duration, status, createdAt FROM videos WHERE status = 'completed' ORDER BY createdAt DESC").all();
   return rows;
 }
 
 function searchVideosByTitle(query) {
   const rows = db.prepare(
-    'SELECT videoId, title, createdAt FROM videos WHERE title LIKE ? ORDER BY createdAt DESC'
+    "SELECT videoId, title, duration, status, createdAt FROM videos WHERE title LIKE ? AND status = 'completed' ORDER BY createdAt DESC"
   ).all(`%${query}%`);
   return rows;
 }
 
-// Ensures the parent video record exists, inserting or updating it.
+// 처리 시작 시 호출. status를 'processing'으로 설정.
 function ensureVideoRecord({ videoId, title, duration }) {
   try {
     db.prepare(`
-      INSERT INTO videos (videoId, title, duration)
-      VALUES (?, ?, ?)
+      INSERT INTO videos (videoId, title, duration, status)
+      VALUES (?, ?, ?, 'processing')
       ON CONFLICT(videoId) DO UPDATE SET
         title = excluded.title,
-        duration = excluded.duration
-    `).run(videoId, title, duration);
+        duration = excluded.duration,
+        status = 'processing'
+    `).run(videoId, title, Math.round(duration));
   } catch (error) {
     logger.error(`[Database] Failed to ensure video record for ${videoId}:`, error);
+    throw error;
+  }
+}
+
+// 영상 처리 상태를 업데이트하는 함수
+function updateVideoStatus(videoId, status) {
+  try {
+    db.prepare('UPDATE videos SET status = ? WHERE videoId = ?').run(status, videoId);
+    logger.info(`[Database] Updated status for ${videoId} to ${status}`);
+  } catch (error) {
+    logger.error(`[Database] Failed to update status for ${videoId}:`, error);
     throw error;
   }
 }
@@ -142,7 +165,8 @@ module.exports = {
   init,
   getVideo,
   saveVideo,
-  ensureVideoRecord, // export new function
+  ensureVideoRecord,
+  updateVideoStatus,
   saveVideoChunk,
   listVideos,
   searchVideosByTitle,

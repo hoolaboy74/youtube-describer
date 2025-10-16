@@ -231,6 +231,80 @@ function PlayerScreen({ announcePolite, announceAssertive }) {
     const lastSpokenIndexRef = useRef(-1);
     const hasAnnouncedAiStart = useRef(false); // Ref to track AI start announcement
 
+    const startNewGeneration = useCallback(() => {
+        console.log('Starting new generation process...');
+        setIsNewGeneration(true);
+        setStatusMessage('새로운 화면 해설 대본 생성을 시작합니다...');
+        announcePolite('기존 대본이 없거나 불완전하여, 새로 생성을 시작합니다.');
+        
+        const sseApiHost = process.env.NODE_ENV === 'production' ? '' : 'http://localhost:4000';
+        const url = `${sseApiHost}/api/process?youtubeUrl=${encodeURIComponent(`https://www.youtube.com/watch?v=${videoId}`)}`;
+        const es = new EventSource(url);
+        eventSourceRef.current = es;
+        let isDuplicate = false;
+        let isFirstChunk = true;
+
+        es.onopen = () => console.log("SSE connection opened for streaming.");
+
+        es.addEventListener('start', (event) => {
+            const data = JSON.parse(event.data);
+            setVideoInfo({ videoId: data.videoId, title: data.title });
+        });
+
+        es.addEventListener('status_update', (event) => {
+            const data = JSON.parse(event.data);
+            setStatusMessage(data.message);
+            
+            const isAiMessage = data.message.includes('AI로 대본 생성 중');
+            if (isAiMessage) {
+                if (!hasAnnouncedAiStart.current) {
+                    announcePolite(data.message);
+                    hasAnnouncedAiStart.current = true;
+                }
+            } else {
+                announcePolite(data.message);
+            }
+        });
+
+        es.addEventListener('script_chunk', (event) => {
+            if (isFirstChunk) {
+                setIsPlayerReady(true);
+                announcePolite('재생 준비가 완료되었습니다. 이제 영상을 재생할 수 있습니다.');
+                isFirstChunk = false;
+            }
+            const chunk = JSON.parse(event.data);
+            setScript(prevScript => {
+                const scriptMap = new Map();
+                prevScript.forEach(line => scriptMap.set(line.id, line));
+                chunk.forEach(line => scriptMap.set(line.id, line));
+                const newScript = Array.from(scriptMap.values());
+                newScript.sort((a, b) => a.timestamp - b.timestamp);
+                return newScript;
+            });
+        });
+
+        es.addEventListener('end', () => {
+            console.log("SSE stream ended.");
+            announcePolite('대본 생성이 완료되었습니다.');
+            es.close();
+        });
+
+        es.addEventListener('duplicate_request', () => {
+            console.log('Duplicate request detected.');
+            isDuplicate = true;
+            es.close();
+        });
+
+        es.onerror = (err) => {
+            if (isDuplicate) return;
+            console.error('EventSource failed:', err);
+            const errorMsg = '대본 생성 중 오류가 발생했습니다.';
+            setError(errorMsg);
+            announceAssertive(`오류: ${errorMsg}`);
+            es.close();
+        };
+    }, [videoId, announcePolite, announceAssertive]);
+
     useEffect(() => {
         if (!videoId) {
             navigate('/');
@@ -249,90 +323,37 @@ function PlayerScreen({ announcePolite, announceAssertive }) {
 
         axios.get(`/api/script/${videoId}`)
             .then(response => {
-                if (response.data && response.data.script && response.data.script.length > 0) {
-                    setVideoInfo({ videoId: response.data.videoId, title: response.data.title });
-                    setScript(response.data.script);
-                    setIsPlayerReady(true); // Cached video, ready to play
-                    announcePolite('캐시된 영상 데이터를 불러왔습니다. 바로 재생할 수 있습니다.');
+                const video = response.data;
+                if (video) {
+                    setVideoInfo({ videoId: video.videoId, title: video.title });
+
+                    if (video.status === 'completed') {
+                        setScript(video.script || []);
+                        setIsPlayerReady(true);
+                        if (video.script && video.script.length > 0) {
+                            announcePolite('캐시된 영상 데이터를 불러왔습니다.');
+                        } else {
+                            announcePolite('영상 처리가 완료되었지만, 생성된 화면 해설이 없습니다.');
+                        }
+                    } else if (video.status === 'failed' || video.status === 'pending') {
+                        announcePolite('이전에 실패했거나 미완료된 영상입니다. 다시 생성을 시작합니다.');
+                        startNewGeneration();
+                    } else if (video.status === 'processing') {
+                        setError('해당 영상은 현재 다른 요청에 의해 처리 중입니다. 잠시 후 다시 시도해 주세요.');
+                        announceAssertive('해당 영상은 현재 처리 중입니다.');
+                    } else {
+                        // Fallback for unknown status or older records without status
+                        startNewGeneration();
+                    }
                 } else {
-                    // This case can happen if DB has video entry but no scripts yet
-                    setIsNewGeneration(true);
-                    // Fall through to catch block logic is implicitly handled by SSE
+                    // This case should not be hit if server returns 404, but as a fallback...
+                    startNewGeneration();
                 }
             })
             .catch(err => {
                 if (err.response && err.response.status === 404) {
-                    console.log('Script not in cache, starting new generation process...');
-                    setIsNewGeneration(true);
-                    setStatusMessage('새로운 화면 해설 대본 생성을 시작합니다...');
-                    announcePolite('캐시된 대본이 없어, 새로 생성을 시작합니다.');
-                    
-                    const sseApiHost = process.env.NODE_ENV === 'production' ? '' : 'http://localhost:4000';
-                    const url = `${sseApiHost}/api/process?youtubeUrl=${encodeURIComponent(`https://www.youtube.com/watch?v=${videoId}`)}`;
-                    const es = new EventSource(url);
-                    eventSourceRef.current = es;
-                    let isDuplicate = false;
-                    let isFirstChunk = true;
-
-                    es.onopen = () => console.log("SSE connection opened for streaming.");
-
-                    es.addEventListener('start', (event) => {
-                        const data = JSON.parse(event.data);
-                        setVideoInfo({ videoId: data.videoId, title: data.title });
-                    });
-
-                    es.addEventListener('status_update', (event) => {
-                        const data = JSON.parse(event.data);
-                        setStatusMessage(data.message);
-                        
-                        const isAiMessage = data.message.includes('AI로 대본 생성 중');
-                        if (isAiMessage) {
-                            if (!hasAnnouncedAiStart.current) {
-                                announcePolite(data.message);
-                                hasAnnouncedAiStart.current = true;
-                            }
-                        } else {
-                            announcePolite(data.message);
-                        }
-                    });
-
-                    es.addEventListener('script_chunk', (event) => {
-                        if (isFirstChunk) {
-                            setIsPlayerReady(true);
-                            announcePolite('재생 준비가 완료되었습니다. 이제 영상을 재생할 수 있습니다.');
-                            isFirstChunk = false;
-                        }
-                        const chunk = JSON.parse(event.data);
-                        setScript(prevScript => {
-                            const scriptMap = new Map();
-                            prevScript.forEach(line => scriptMap.set(line.id, line));
-                            chunk.forEach(line => scriptMap.set(line.id, line));
-                            const newScript = Array.from(scriptMap.values());
-                            newScript.sort((a, b) => a.timestamp - b.timestamp);
-                            return newScript;
-                        });
-                    });
-
-                    es.addEventListener('end', () => {
-                        console.log("SSE stream ended.");
-                        announcePolite('대본 생성이 완료되었습니다.');
-                        es.close();
-                    });
-
-                    es.addEventListener('duplicate_request', () => {
-                        console.log('Duplicate request detected.');
-                        isDuplicate = true;
-                        es.close();
-                    });
-
-                    es.onerror = (err) => {
-                        if (isDuplicate) return;
-                        console.error('EventSource failed:', err);
-                        const errorMsg = '대본 생성 중 오류가 발생했습니다.';
-                        setError(errorMsg);
-                        announceAssertive(`오류: ${errorMsg}`);
-                        es.close();
-                    };
+                    // Video does not exist in DB at all, start new generation.
+                    startNewGeneration();
                 } else {
                     console.error('Failed to fetch script:', err);
                     const errorMsg = '스크립트를 불러오는 중 오류가 발생했습니다.';
@@ -347,9 +368,10 @@ function PlayerScreen({ announcePolite, announceAssertive }) {
         return () => {
             if (eventSourceRef.current) {
                 eventSourceRef.current.close();
+                eventSourceRef.current = null;
             }
         };
-    }, [videoId, navigate, announcePolite, announceAssertive]);
+    }, [videoId, navigate, announcePolite, announceAssertive, startNewGeneration]);
 
     const filteredScript = useMemo(() => {
         const linesByTimestamp = new Map();
