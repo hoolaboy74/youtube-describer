@@ -186,30 +186,11 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
 
             const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
             
-            const basePrompt = '**영상 제목:** ' + videoTitle + '\n\n' +
-                '**역할:**\n' +
-                '"당신은 시각 장애인을 위한 유튜브 영상 화면 해설 전문가입니다. 제공된 영상의 키프레임, 타임스탬프, 음성 공백 구간 목록을 분석하여, 상세 수준(Verbosity)에 따라 영상의 시각적 정보를 설명하는 한국어 스크립트를 작성해 주세요."\n\n' +
-                '**핵심 지시사항:**\n' +
-                '1.  **모든 프레임 분석:** 제공된 모든 키프레임에 대해 해설을 생성하되, 각 해설의 중요도와 맥락에 따라 상세 수준(Verbosity Level)을 `[v1]`, `[v2]`, `[v3]`로 태그해 주세요.\n' +
-                '2.  **상세 수준(Verbosity Level) 정의:**\n' +
-                '    -   `[v1]`: **필수 해설.** 영상의 핵심적인 흐름을 이해하는 데 반드시 필요한 정보. **가급적** 음성 공백 구간에 맞춰 생성합니다.\n' +
-                '    -   `[v2]`: **추가 해설.** 스토리를 더 풍부하게 이해하는 데 도움이 되는 추가적인 정보. 음성 공백을 크게 신경 쓰지 않아도 됩니다.\n' +
-                '    -   `[v3]`: **상세 묘사.** 배경, 인물의 세세한 표정, 사물 등 모든 시각적 세부 정보.\n' +
-                '3.  **형식 준수:** 각 설명은 `[hh:mm:ss][vN] <설명>` 형식이어야 합니다. (N은 1, 2, 3 중 하나)\n\n' +
-                '**음성 공백 구간 (해설 삽입 권장 시간):**\n' +
-                '\`\`\`\n' +
-                silentIntervalsString + '\n' +
-                '\`\`\`\n\n' +
-                '**세부 지침:**\n' +
-                '-   **객관성 유지:** 보이는 것을 그대로 묘사하고, 주관적인 해석이나 감정 표현은 피하세요.\n' +
-                '-   **흐름 중시:** 이전 장면에 이어지는 맥락을 고려하여, 이야기가 연결되듯 자연스럽게 설명합니다.\n' +
-                '-   **간결성:** 핵심 정보를 중심으로, 짧고 명확한 문장으로 설명합니다.\n\n' +
-                '**출력 형식 예시:**\n' +
-                '\`\`\`\n' +
-                '[00:00:05][v3] 푸른 하늘 아래 넓은 초원이 펼쳐져 있다\n' +
-                '[00:01:15][v2] 한 남자가 언덕을 걸어 올라간다\n' +
-                '[00:02:12][v1] 남자가 정상에 도착해 갈색 가방을 내려놓는다\n' +
-                '\`\`\`';
+            const promptTemplatePath = path.join(__dirname, 'prompt_template.txt');
+            let basePrompt = fs.readFileSync(promptTemplatePath, 'utf-8');
+
+            basePrompt = basePrompt.replace('{{VIDEO_TITLE}}', videoTitle);
+            basePrompt = basePrompt.replace('{{SILENT_INTERVALS}}', silentIntervalsString);
 
             const contextPrompt = '**이전까지 생성된 대본 (전체 맥락 파악용):**\n' +
                 '\`\`\`\n' +
@@ -395,30 +376,11 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
         const silentIntervalsString = nonSpeechIntervals.map(interval => `${formatTime(interval.start)} ~ ${formatTime(interval.end)}`).join('\n');
         const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
 
-        const prompt = '**영상 제목:** ' + videoTitle + '\n\n' +
-            '**역할:**\n' +
-            '"당신은 시각 장애인을 위한 유튜브 영상 화면 해설 전문가입니다. 제공된 영상의 키프레임, 타임스탬프, 음성 공백 구간 목록을 분석하여, 상세 수준(Verbosity)에 따라 영상의 시각적 정보를 설명하는 한국어 스크립트를 작성해 주세요."\n\n' +
-            '**핵심 지시사항:**\n' +
-            '1.  **모든 프레임 분석:** 제공된 모든 키프레임에 대해 해설을 생성하되, 각 해설의 중요도와 맥락에 따라 상세 수준(Verbosity Level)을 `[v1]`, `[v2]`, `[v3]`로 태그해 주세요.\n' +
-            '2.  **상세 수준(Verbosity Level) 정의:**\n' +
-            '    -   `[v1]`: **필수 해설.** 영상의 핵심적인 흐름을 이해하는 데 반드시 필요한 정보. **가급적** 음성 공백 구간에 맞춰 생성합니다.\n' +
-            '    -   `[v2]`: **추가 해설.** 스토리를 더 풍부하게 이해하는 데 도움이 되는 추가적인 정보. 음성 공백을 크게 신경 쓰지 않아도 됩니다.\n' +
-            '    -   `[v3]`: **상세 묘사.** 배경, 인물의 세세한 표정, 사물 등 모든 시각적 세부 정보.\n' +
-            '3.  **형식 준수:** 각 설명은 `[hh:mm:ss][vN] <설명>` 형식이어야 합니다. (N은 1, 2, 3 중 하나)\n\n' +
-            '**음성 공백 구간 (해설 삽입 권장 시간):**\n' +
-            '\`\`\`\n' +
-            silentIntervalsString + '\n' +
-            '\`\`\`\n\n' +
-            '**세부 지침:**\n' +
-            '-   **객관성 유지:** 보이는 것을 그대로 묘사하고, 주관적인 해석이나 감정 표현은 피하세요.\n' +
-            '-   **흐름 중시:** 이전 장면에 이어지는 맥락을 고려하여, 이야기가 연결되듯 자연스럽게 설명합니다.\n' +
-            '-   **간결성:** 핵심 정보를 중심으로, 짧고 명확한 문장으로 설명합니다.\n\n' +
-            '**출력 형식 예시:**\n' +
-            '\`\`\`\n' +
-            '[00:00:05][v3] 푸른 하늘 아래 넓은 초원이 펼쳐져 있다\n' +
-            '[00:01:15][v2] 한 남자가 언덕을 걸어 올라간다\n' +
-            '[00:02:12][v1] 남자가 정상에 도착해 갈색 가방을 내려놓는다\n' +
-            '\`\`\`';
+        const promptTemplatePath = path.join(__dirname, 'prompt_template.txt');
+        let prompt = fs.readFileSync(promptTemplatePath, 'utf-8');
+
+        prompt = prompt.replace('{{VIDEO_TITLE}}', videoTitle);
+        prompt = prompt.replace('{{SILENT_INTERVALS}}', silentIntervalsString);
 
         const result = await model.generateContent([prompt, ...imageParts]);
         
