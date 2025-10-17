@@ -290,7 +290,7 @@ function PlayerScreen({ announcePolite, announceAssertive }) {
 
     useEffect(() => {
         const player = new Audio();
-        player.playbackRate = 1.3;
+
         audioPlayerRef.current = player;
 
         const onEnded = () => {
@@ -495,6 +495,7 @@ function PlayerScreen({ announcePolite, announceAssertive }) {
 
         const playAudioFromUrl = (url) => {
             audioPlayer.src = url;
+            audioPlayer.playbackRate = 1.3; // Re-apply playback rate every time src changes
             audioPlayer.volume = 1; // Make sure it's audible
             audioPlayer.play().catch(e => {
                 console.error("Audio play failed:", e);
