@@ -204,6 +204,65 @@ function formatTime(seconds) {
     return new Date(seconds * 1000).toISOString().substr(11, 8);
 }
 
+const SILENT_AUDIO = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA';
+
+// --- ShareButton Component ---
+function ShareButton({ announcePolite }) {
+    const [isCopied, setIsCopied] = useState(false);
+    const location = useLocation();
+
+    const handleShare = () => {
+        const shareUrl = window.location.origin + location.pathname;
+
+        // Modern, secure context-only API
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(shareUrl).then(() => {
+                setIsCopied(true);
+                announcePolite('링크가 클립보드에 복사되었습니다.');
+                setTimeout(() => setIsCopied(false), 2000);
+            }).catch(err => {
+                console.error('Failed to copy URL with navigator.clipboard: ', err);
+                alert('URL 복사에 실패했습니다. 사이트가 HTTPS로 제공되는지 확인하세요.');
+            });
+        } else {
+            // Fallback for HTTP or older browsers
+            const textArea = document.createElement("textarea");
+            textArea.value = shareUrl;
+            
+            // Make the textarea non-editable and hidden
+            textArea.style.position = "fixed";
+            textArea.style.top = "-9999px";
+            textArea.style.left = "-9999px";
+            
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    setIsCopied(true);
+                    announcePolite('링크가 클립보드에 복사되었습니다.');
+                    setTimeout(() => setIsCopied(false), 2000);
+                } else {
+                    throw new Error('document.execCommand failed');
+                }
+            } catch (err) {
+                console.error('Fallback: Failed to copy URL: ', err);
+                alert('URL 복사에 실패했습니다. 수동으로 복사해주세요.');
+            } finally {
+                document.body.removeChild(textArea);
+            }
+        }
+    };
+
+    return (
+        <button onClick={handleShare} className="share-button">
+            {isCopied ? '복사됨!' : '공유'}
+        </button>
+    );
+}
+
 function PlayerScreen({ announcePolite, announceAssertive }) {
     const { videoId } = useParams();
     const navigate = useNavigate();
@@ -217,6 +276,7 @@ function PlayerScreen({ announcePolite, announceAssertive }) {
     const [statusMessage, setStatusMessage] = useState('영상 정보를 확인 중입니다...');
     const [isPlayerReady, setIsPlayerReady] = useState(false);
     const [isNewGeneration, setIsNewGeneration] = useState(false);
+    const [isInteractionDone, setIsInteractionDone] = useState(false); // Audio unlock state
 
     const [player, setPlayer] = useState(null);
     const [isTtsEnabled, setIsTtsEnabled] = useState(true);
@@ -315,6 +375,7 @@ function PlayerScreen({ announcePolite, announceAssertive }) {
         setIsLoading(true);
         setIsNewGeneration(false);
         setIsPlayerReady(false);
+        setIsInteractionDone(false); // Reset audio unlock state
         setScript([]);
         setError('');
         setStatusMessage('영상 정보를 확인 중입니다...');
@@ -482,6 +543,23 @@ function PlayerScreen({ announcePolite, announceAssertive }) {
         announcePolite(`상세 수준이 ${verbosityLabels[level]}로 변경되었습니다.`);
     };
 
+    const handleInitialPlay = () => {
+        // Set interaction state first to hide overlay immediately
+        setIsInteractionDone(true);
+
+        // Directly try to play the video
+        if (player) {
+            player.playVideo();
+        }
+
+        // Play silent audio in the background to unlock audio context for mobile
+        const audio = new Audio(SILENT_AUDIO);
+        audio.volume = 0;
+        audio.play().catch(e => {
+            console.warn("Audio context could not be unlocked. TTS might not work on mobile.", e);
+        });
+    };
+
     const renderContent = () => {
         if (isLoading) {
             return <p>영상 데이터를 불러오는 중입니다...</p>;
@@ -501,6 +579,13 @@ function PlayerScreen({ announcePolite, announceAssertive }) {
         if (isPlayerReady) {
             return (
                 <div className="video-container">
+                    {!isInteractionDone && (
+                        <div className="play-overlay">
+                            <button className="big-play-button" onClick={handleInitialPlay} aria-label="재생 및 음성 해설 시작">
+                                ▶
+                            </button>
+                        </div>
+                    )}
                     <YouTube
                         videoId={videoId}
                         opts={{ width: '100%', height: '100%' }}
@@ -556,63 +641,6 @@ function PlayerScreen({ announcePolite, announceAssertive }) {
                 </ul>
             </div>
         </>
-    );
-}
-
-// --- ShareButton Component ---
-function ShareButton({ announcePolite }) {
-    const [isCopied, setIsCopied] = useState(false);
-    const location = useLocation();
-
-    const handleShare = () => {
-        const shareUrl = window.location.origin + location.pathname;
-
-        // Modern, secure context-only API
-        if (navigator.clipboard && window.isSecureContext) {
-            navigator.clipboard.writeText(shareUrl).then(() => {
-                setIsCopied(true);
-                announcePolite('링크가 클립보드에 복사되었습니다.');
-                setTimeout(() => setIsCopied(false), 2000);
-            }).catch(err => {
-                console.error('Failed to copy URL with navigator.clipboard: ', err);
-                alert('URL 복사에 실패했습니다. 사이트가 HTTPS로 제공되는지 확인하세요.');
-            });
-        } else {
-            // Fallback for HTTP or older browsers
-            const textArea = document.createElement("textarea");
-            textArea.value = shareUrl;
-            
-            // Make the textarea non-editable and hidden
-            textArea.style.position = "fixed";
-            textArea.style.top = "-9999px";
-            textArea.style.left = "-9999px";
-            
-            document.body.appendChild(textArea);
-            textArea.focus();
-            textArea.select();
-            
-            try {
-                const successful = document.execCommand('copy');
-                if (successful) {
-                    setIsCopied(true);
-                    announcePolite('링크가 클립보드에 복사되었습니다.');
-                    setTimeout(() => setIsCopied(false), 2000);
-                } else {
-                    throw new Error('document.execCommand failed');
-                }
-            } catch (err) {
-                console.error('Fallback: Failed to copy URL: ', err);
-                alert('URL 복사에 실패했습니다. 수동으로 복사해주세요.');
-            } finally {
-                document.body.removeChild(textArea);
-            }
-        }
-    };
-
-    return (
-        <button onClick={handleShare} className="share-button">
-            {isCopied ? '복사됨!' : '공유'}
-        </button>
     );
 }
 
