@@ -285,6 +285,28 @@ function PlayerScreen({ announcePolite, announceAssertive }) {
     const audioCache = useRef(new Map());
     const isTtsPlayingRef = useRef(false);
 
+    const audioPlayerRef = useRef(null);
+    const onAudioEndedRef = useRef(null);
+
+    useEffect(() => {
+        const player = new Audio();
+        player.playbackRate = 1.3;
+        audioPlayerRef.current = player;
+
+        const onEnded = () => {
+            if (onAudioEndedRef.current) {
+                onAudioEndedRef.current();
+            }
+        };
+        player.addEventListener('ended', onEnded);
+        player.addEventListener('error', onEnded); // Also handle errors
+
+        return () => {
+            player.removeEventListener('ended', onEnded);
+            player.removeEventListener('error', onEnded);
+        };
+    }, []);
+
     const ttsEnabledRef = useRef(isTtsEnabled);
     useEffect(() => { ttsEnabledRef.current = isTtsEnabled; }, [isTtsEnabled]);
 
@@ -452,35 +474,33 @@ function PlayerScreen({ announcePolite, announceAssertive }) {
     }, [script, verbosity]);
 
     const playDescription = useCallback(async (scriptLine) => {
-        if (!player || !scriptLine) return;
+        if (!player || !scriptLine || !audioPlayerRef.current) return;
 
         isTtsPlayingRef.current = true;
         player.setVolume(30);
         player.pauseVideo();
 
-        const playAudioFromUrl = (url) => {
-            const audioPlayer = new Audio(url);
-            audioPlayer.playbackRate = 1.3;
+        const audioPlayer = audioPlayerRef.current;
 
-            const onEnded = () => {
-                isTtsPlayingRef.current = false;
-                if (player) {
-                    player.setVolume(100);
-                    if (player.getPlayerState() !== 1) {
-                        player.playVideo();
-                    }
+        // Set the callback for when this specific audio ends
+        onAudioEndedRef.current = () => {
+            isTtsPlayingRef.current = false;
+            if (player) {
+                player.setVolume(100);
+                if (player.getPlayerState() !== 1) {
+                    player.playVideo();
                 }
-            };
+            }
+        };
 
-            audioPlayer.addEventListener('ended', onEnded);
-            audioPlayer.addEventListener('error', (e) => {
-                console.error("Audio playback error:", e);
-                onEnded();
-            });
-
+        const playAudioFromUrl = (url) => {
+            audioPlayer.src = url;
+            audioPlayer.volume = 1; // Make sure it's audible
             audioPlayer.play().catch(e => {
                 console.error("Audio play failed:", e);
-                onEnded();
+                if (onAudioEndedRef.current) {
+                    onAudioEndedRef.current(); // Manually trigger if play fails
+                }
             });
         };
 
@@ -500,8 +520,9 @@ function PlayerScreen({ announcePolite, announceAssertive }) {
             playAudioFromUrl(audioUrl);
         } catch (error) {
             console.error('Failed to fetch audio:', error);
-            isTtsPlayingRef.current = false;
-            if (player) player.playVideo();
+            if (onAudioEndedRef.current) {
+                onAudioEndedRef.current();
+            }
         }
     }, [player]);
 
@@ -544,20 +565,17 @@ function PlayerScreen({ announcePolite, announceAssertive }) {
     };
 
     const handleInitialPlay = () => {
-        // Set interaction state first to hide overlay immediately
         setIsInteractionDone(true);
-
-        // Directly try to play the video
         if (player) {
             player.playVideo();
         }
-
-        // Play silent audio in the background to unlock audio context for mobile
-        const audio = new Audio(SILENT_AUDIO);
-        audio.volume = 0;
-        audio.play().catch(e => {
-            console.warn("Audio context could not be unlocked. TTS might not work on mobile.", e);
-        });
+        if (audioPlayerRef.current) {
+            audioPlayerRef.current.src = SILENT_AUDIO;
+            audioPlayerRef.current.volume = 0;
+            audioPlayerRef.current.play().catch(e => {
+                console.warn("Audio context could not be unlocked.", e);
+            });
+        }
     };
 
     const renderContent = () => {
