@@ -76,7 +76,7 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
         if (sseHandler) sseHandler('status_update', { message: '영상 음성 다운로드 및 분석 중...' });
         const audioPath = path.join(baseTempDir, 'audio.wav');
         const downloadedAudio = path.join(baseTempDir, 'audio_source.m4a');
-        await util.promisify(execFile)('yt-dlp', ['-f', 'bestaudio', '-o', downloadedAudio, '--no-progress', '--cookies', 'cookies.txt', youtubeUrl]);
+        await util.promisify(execFile)('yt-dlp', ['-f', 'bestaudio*', '-o', downloadedAudio, '--no-progress', '--cookies', 'cookies.txt', youtubeUrl]);
         const metadata = await util.promisify(ffmpeg.ffprobe)(downloadedAudio);
         const totalDuration = metadata.format.duration;
         await new Promise((resolve, reject) => {
@@ -282,7 +282,7 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
             (async () => {
                 const audioPath = path.join(baseTempDir, 'audio.wav');
                 const downloadedAudio = path.join(baseTempDir, 'audio_source.m4a');
-                await util.promisify(execFile)('yt-dlp', ['-f', 'bestaudio', '-o', downloadedAudio, '--no-progress', '--cookies', 'cookies.txt', youtubeUrl]);
+                await util.promisify(execFile)('yt-dlp', ['-f', 'bestaudio*', '-o', downloadedAudio, '--no-progress', '--cookies', 'cookies.txt', youtubeUrl]);
                 const metadata = await util.promisify(ffmpeg.ffprobe)(downloadedAudio);
                 const duration = metadata.format.duration;
                 await new Promise((resolve, reject) => {
