@@ -12,7 +12,12 @@ const router = express.Router();
 const ttsClient = new TextToSpeechClient();
 const audioCacheDir = path.join(__dirname, 'public', 'audio');
 
-const Youtube = require('youtube-sr').default;
+const { google } = require('googleapis');
+
+const youtube = google.youtube({
+    version: 'v3',
+    auth: process.env.GOOGLE_API_KEY,
+});
 
 // Endpoint for unified search
 router.get('/search', async (req, res) => {
@@ -23,31 +28,72 @@ router.get('/search', async (req, res) => {
 
     try {
         // Perform both searches in parallel
-        const [dbResults, youtubeResults] = await Promise.all([
+        const [dbResults, youtubeSearchResults] = await Promise.all([
             // 1. Search local database
             db.searchVideosByTitle(query),
             // 2. Search YouTube
-            Youtube.search(query, { limit: 20, type: 'video' })
+            youtube.search.list({
+                part: 'snippet',
+                q: query,
+                maxResults: 50, // The API has a max limit of 50 per request
+                type: 'video',
+            }),
         ]);
+
+        const youtubeResults = youtubeSearchResults.data.items || [];
+
+        // Get video details for duration and views
+        const videoIds = youtubeResults.map(item => item.id.videoId).join(',');
+        let videoDetails = [];
+        if (videoIds) {
+            const details = await youtube.videos.list({
+                part: 'contentDetails,statistics',
+                id: videoIds,
+            });
+            videoDetails = details.data.items || [];
+        }
+
+        const videoDetailsMap = new Map(videoDetails.map(item => [item.id, item]));
 
         // Format results to have a consistent structure
         const formattedDbResults = dbResults.map(v => ({
             id: v.videoId,
             title: v.title,
-            // You might want to store thumbnails in the DB in the future
             thumbnail: `https://i.ytimg.com/vi/${v.videoId}/hqdefault.jpg`,
-            source: 'db' // Add source identifier
+            source: 'db'
         }));
 
-        const formattedYoutubeResults = youtubeResults.map(v => ({
-            id: v.id,
-            title: v.title,
-            thumbnail: v.thumbnail?.url, // Safely access thumbnail
-            channel: v.channel?.name,
-            views: v.views,
-            durationFormatted: v.durationFormatted,
-            source: 'youtube' // Add source identifier
-        }));
+        const formattedYoutubeResults = youtubeResults.map(item => {
+            const videoDetail = videoDetailsMap.get(item.id.videoId);
+            const duration = videoDetail?.contentDetails?.duration;
+            const views = videoDetail?.statistics?.viewCount;
+
+            // format duration from ISO 8601 to HH:MM:SS
+            let durationFormatted = '0:00';
+            if (duration) {
+                const match = duration.match(/PT(\d+H)?(\d+M)?(\d+S)?/);
+                if (match) {
+                    const hours = (parseInt(match[1]) || 0);
+                    const minutes = (parseInt(match[2]) || 0);
+                    const seconds = (parseInt(match[3]) || 0);
+                    if (hours > 0) {
+                        durationFormatted = `${hours}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                    } else {
+                        durationFormatted = `${minutes}:${String(seconds).padStart(2, '0')}`;
+                    }
+                }
+            }
+
+            return {
+                id: item.id.videoId,
+                title: item.snippet.title,
+                thumbnail: item.snippet.thumbnails.high.url,
+                channel: item.snippet.channelTitle,
+                views: views ? parseInt(views) : 0,
+                durationFormatted,
+                source: 'youtube'
+            };
+        });
 
         res.json({
             dbResults: formattedDbResults,

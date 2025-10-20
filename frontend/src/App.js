@@ -42,7 +42,7 @@ function App() {
                 <Link to="/" style={{ textDecoration: 'none', color: 'inherit' }}>
                     <h1>유튜브 화면 해설 생성기</h1>
                 </Link>
-                <p>유튜브 영상 링크를 입력하거나, 제목으로 검색하여 화면 해설을 생성하세요.</p>
+                <p>이 서비스는 유튜브 영상을 시각 장애인을 위한 화면 해설 영상으로 만드는 서비스 입니다.</p>
             </header>
             <main>
                 <Routes>
@@ -54,6 +54,7 @@ function App() {
     );
 }
 
+
 // --- HomeScreen Component ---
 function HomeScreen({ announcePolite, announceAssertive }) {
     const [inputValue, setInputValue] = useState('');
@@ -61,6 +62,8 @@ function HomeScreen({ announcePolite, announceAssertive }) {
     const [error, setError] = useState('');
     const [searchResults, setSearchResults] = useState({ db: [], youtube: [] });
     const [initialVideos, setInitialVideos] = useState([]);
+    const [initialVideosLimit, setInitialVideosLimit] = useState(10);
+    const [youtubeResultsLimit, setYoutubeResultsLimit] = useState(20);
     
     const navigate = useNavigate();
 
@@ -76,6 +79,7 @@ function HomeScreen({ announcePolite, announceAssertive }) {
     }, [announceAssertive]);
 
     const handleSearch = (query) => {
+        setYoutubeResultsLimit(20); // Reset limit on new search
         setIsSearching(true);
         announcePolite('검색 중입니다.');
         axios.get(`/api/search?query=${query}`)
@@ -126,7 +130,7 @@ function HomeScreen({ announcePolite, announceAssertive }) {
                     {searchResults.db.length > 0 && (
                         <div className="search-results-section">
                             <h3>DB 검색 결과</h3>
-                            <ul>
+                            <ol>
                                 {searchResults.db.map(video => (
                                     <li key={video.id}>
                                         <button onClick={() => handleVideoSelect(video)}>
@@ -134,14 +138,14 @@ function HomeScreen({ announcePolite, announceAssertive }) {
                                         </button>
                                     </li>
                                 ))}
-                            </ul>
+                            </ol>
                         </div>
                     )}
                     {searchResults.youtube.length > 0 && (
                         <div className="search-results-section">
                             <h3>YouTube 검색 결과</h3>
-                            <ul>
-                                {searchResults.youtube.map(video => (
+                            <ol>
+                                {searchResults.youtube.slice(0, youtubeResultsLimit).map(video => (
                                     <li key={video.id}>
                                         <button 
                                             onClick={() => handleVideoSelect(video)}
@@ -156,7 +160,12 @@ function HomeScreen({ announcePolite, announceAssertive }) {
                                         </button>
                                     </li>
                                 ))}
-                            </ul>
+                            </ol>
+                            {searchResults.youtube.length > youtubeResultsLimit && (
+                                <button onClick={() => setYoutubeResultsLimit(prev => prev + 20)} className="load-more-button">
+                                    더보기
+                                </button>
+                            )}
                         </div>
                     )}
                 </>
@@ -164,15 +173,22 @@ function HomeScreen({ announcePolite, announceAssertive }) {
         }
 
         return (
-            <ul>
-                {initialVideos.map(video => (
-                    <li key={video.videoId}>
-                        <button onClick={() => handleVideoSelect({ id: video.videoId, source: 'db' })}>
-                            {video.title}
-                        </button>
-                    </li>
-                ))}
-            </ul>
+            <>
+                <ol>
+                    {initialVideos.slice(0, initialVideosLimit).map(video => (
+                        <li key={video.videoId}>
+                            <button onClick={() => handleVideoSelect({ id: video.videoId, source: 'db' })}>
+                                {video.title}
+                            </button>
+                        </li>
+                    ))}
+                </ol>
+                {initialVideos.length > initialVideosLimit && (
+                    <button onClick={() => setInitialVideosLimit(prev => prev + 10)} className="load-more-button">
+                        더보기
+                    </button>
+                )}
+            </>
         );
     };
 
@@ -184,7 +200,7 @@ function HomeScreen({ announcePolite, announceAssertive }) {
                     type="text"
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
-                    placeholder="유튜브 URL을 입력하거나, 제목으로 검색하세요"
+                    placeholder="이곳에 유튜브 URL을 입력하거나, 제목으로 검색하세요"
                 />
                 <button type="submit" disabled={!inputValue}>{'검색 또는 생성'}</button>
             </form>
