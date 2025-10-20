@@ -272,15 +272,13 @@ function PlayerScreen({ announcePolite, announceAssertive }) {
     const [error, setError] = useState('');
     const eventSourceRef = useRef(null);
 
-    // New states for improved UX
     const [statusMessage, setStatusMessage] = useState('영상 정보를 확인 중입니다...');
     const [isPlayerReady, setIsPlayerReady] = useState(false);
     const [isNewGeneration, setIsNewGeneration] = useState(false);
-    const [isInteractionDone, setIsInteractionDone] = useState(false); // Audio unlock state
+    const [isInteractionDone, setIsInteractionDone] = useState(false);
 
     const [player, setPlayer] = useState(null);
-    const [isTtsEnabled, setIsTtsEnabled] = useState(true);
-    const [verbosity, setVerbosity] = useState(2);
+    const [verbosity, setVerbosity] = useState(2); // Default to '기본'
     const [isPlaying, setIsPlaying] = useState(false);
     const audioCache = useRef(new Map());
     const isTtsPlayingRef = useRef(false);
@@ -288,30 +286,30 @@ function PlayerScreen({ announcePolite, announceAssertive }) {
     const audioPlayerRef = useRef(null);
     const onAudioEndedRef = useRef(null);
 
+    // UI State
+    const [isScriptVisible, setIsScriptVisible] = useState(false);
+
+    // Combined description enabled/disabled logic
+    const isDescriptionEnabled = verbosity > 0;
+    const isDescriptionEnabledRef = useRef(isDescriptionEnabled);
+    useEffect(() => { isDescriptionEnabledRef.current = isDescriptionEnabled; }, [isDescriptionEnabled]);
+
     useEffect(() => {
         const player = new Audio();
-
         audioPlayerRef.current = player;
-
         const onEnded = () => {
-            if (onAudioEndedRef.current) {
-                onAudioEndedRef.current();
-            }
+            if (onAudioEndedRef.current) onAudioEndedRef.current();
         };
         player.addEventListener('ended', onEnded);
-        player.addEventListener('error', onEnded); // Also handle errors
-
+        player.addEventListener('error', onEnded);
         return () => {
             player.removeEventListener('ended', onEnded);
             player.removeEventListener('error', onEnded);
         };
     }, []);
 
-    const ttsEnabledRef = useRef(isTtsEnabled);
-    useEffect(() => { ttsEnabledRef.current = isTtsEnabled; }, [isTtsEnabled]);
-
     const lastSpokenIndexRef = useRef(-1);
-    const hasAnnouncedAiStart = useRef(false); // Ref to track AI start announcement
+    const hasAnnouncedAiStart = useRef(false);
 
     const startNewGeneration = useCallback(() => {
         console.log('Starting new generation process...');
@@ -356,12 +354,9 @@ function PlayerScreen({ announcePolite, announceAssertive }) {
             }
             const chunk = JSON.parse(event.data);
             setScript(prevScript => {
-                const scriptMap = new Map();
-                prevScript.forEach(line => scriptMap.set(line.id, line));
+                const scriptMap = new Map(prevScript.map(line => [line.id, line]));
                 chunk.forEach(line => scriptMap.set(line.id, line));
-                const newScript = Array.from(scriptMap.values());
-                newScript.sort((a, b) => a.timestamp - b.timestamp);
-                return newScript;
+                return Array.from(scriptMap.values()).sort((a, b) => a.timestamp - b.timestamp);
             });
         });
 
@@ -393,49 +388,40 @@ function PlayerScreen({ announcePolite, announceAssertive }) {
             return;
         }
 
-        // Reset states for new video
         setIsLoading(true);
         setIsNewGeneration(false);
         setIsPlayerReady(false);
-        setIsInteractionDone(false); // Reset audio unlock state
+        setIsInteractionDone(false);
         setScript([]);
         setError('');
         setStatusMessage('영상 정보를 확인 중입니다...');
         announcePolite('영상 데이터를 불러오는 중입니다.');
-        hasAnnouncedAiStart.current = false; // Reset the flag for each new video
+        hasAnnouncedAiStart.current = false;
 
         axios.get(`/api/script/${videoId}`)
             .then(response => {
                 const video = response.data;
                 if (video) {
                     setVideoInfo({ videoId: video.videoId, title: video.title });
-
                     if (video.status === 'completed') {
                         setScript(video.script || []);
                         setIsPlayerReady(true);
-                        if (video.script && video.script.length > 0) {
-                            announcePolite('캐시된 영상 데이터를 불러왔습니다.');
-                        } else {
-                            announcePolite('영상 처리가 완료되었지만, 생성된 화면 해설이 없습니다.');
-                        }
-                    } else if (video.status === 'failed' || video.status === 'pending') {
+                        announcePolite(video.script && video.script.length > 0 ? '캐시된 영상 데이터를 불러왔습니다.' : '영상 처리가 완료되었지만, 생성된 화면 해설이 없습니다.');
+                    } else if (['failed', 'pending'].includes(video.status)) {
                         announcePolite('이전에 실패했거나 미완료된 영상입니다. 다시 생성을 시작합니다.');
                         startNewGeneration();
                     } else if (video.status === 'processing') {
                         setError('해당 영상은 현재 다른 요청에 의해 처리 중입니다. 잠시 후 다시 시도해 주세요.');
                         announceAssertive('해당 영상은 현재 처리 중입니다.');
                     } else {
-                        // Fallback for unknown status or older records without status
                         startNewGeneration();
                     }
                 } else {
-                    // This case should not be hit if server returns 404, but as a fallback...
                     startNewGeneration();
                 }
             })
             .catch(err => {
                 if (err.response && err.response.status === 404) {
-                    // Video does not exist in DB at all, start new generation.
                     startNewGeneration();
                 } else {
                     console.error('Failed to fetch script:', err);
@@ -444,9 +430,7 @@ function PlayerScreen({ announcePolite, announceAssertive }) {
                     announceAssertive(`오류: ${errorMsg}`);
                 }
             })
-            .finally(() => {
-                setIsLoading(false);
-            });
+            .finally(() => setIsLoading(false));
 
         return () => {
             if (eventSourceRef.current) {
@@ -457,14 +441,13 @@ function PlayerScreen({ announcePolite, announceAssertive }) {
     }, [videoId, navigate, announcePolite, announceAssertive, startNewGeneration]);
 
     const filteredScript = useMemo(() => {
-        const linesByTimestamp = new Map();
+        if (verbosity === 0) return []; // No script if description is off
 
+        const linesByTimestamp = new Map();
         for (const line of script) {
             const lineVerbosity = parseInt(line.verbosity.replace('v', ''));
-
             if (lineVerbosity <= verbosity) {
                 const existingLine = linesByTimestamp.get(line.timestamp);
-
                 if (!existingLine || lineVerbosity > parseInt(existingLine.verbosity.replace('v', ''))) {
                     linesByTimestamp.set(line.timestamp, line);
                 }
@@ -482,26 +465,21 @@ function PlayerScreen({ announcePolite, announceAssertive }) {
 
         const audioPlayer = audioPlayerRef.current;
 
-        // Set the callback for when this specific audio ends
         onAudioEndedRef.current = () => {
             isTtsPlayingRef.current = false;
             if (player) {
                 player.setVolume(100);
-                if (player.getPlayerState() !== 1) {
-                    player.playVideo();
-                }
+                if (player.getPlayerState() !== 1) player.playVideo();
             }
         };
 
         const playAudioFromUrl = (url) => {
             audioPlayer.src = url;
-            audioPlayer.playbackRate = 1.3; // Re-apply playback rate every time src changes
-            audioPlayer.volume = 1; // Make sure it's audible
+            audioPlayer.playbackRate = 1.3;
+            audioPlayer.volume = 1;
             audioPlayer.play().catch(e => {
                 console.error("Audio play failed:", e);
-                if (onAudioEndedRef.current) {
-                    onAudioEndedRef.current(); // Manually trigger if play fails
-                }
+                if (onAudioEndedRef.current) onAudioEndedRef.current();
             });
         };
 
@@ -511,81 +489,72 @@ function PlayerScreen({ announcePolite, announceAssertive }) {
         }
 
         try {
-            const response = await axios.post(
-                `/api/tts`,
-                { text: scriptLine.text },
-                { responseType: 'blob' }
-            );
+            const response = await axios.post(`/api/tts`, { text: scriptLine.text }, { responseType: 'blob' });
             const audioUrl = URL.createObjectURL(response.data);
             audioCache.current.set(scriptLine.id, audioUrl);
             playAudioFromUrl(audioUrl);
         } catch (error) {
             console.error('Failed to fetch audio:', error);
-            if (onAudioEndedRef.current) {
-                onAudioEndedRef.current();
-            }
+            if (onAudioEndedRef.current) onAudioEndedRef.current();
         }
     }, [player]);
 
-    // Main playback loop - Refactored to prevent stale closures
     useEffect(() => {
         if (!isPlaying || !player) return;
 
         const intervalId = setInterval(() => {
-            if (isTtsPlayingRef.current || !ttsEnabledRef.current || !player || typeof player.getPlayerState !== 'function' || player.getPlayerState() !== 1) {
+            if (isTtsPlayingRef.current || !isDescriptionEnabledRef.current || !player || typeof player.getPlayerState !== 'function' || player.getPlayerState() !== 1) {
                 return;
             }
-
             const currentTime = Math.floor(player.getCurrentTime());
             const nextLineIndex = filteredScript.findIndex((line, index) => 
                 index > lastSpokenIndexRef.current && currentTime >= line.timestamp
             );
-
             if (nextLineIndex !== -1) {
                 lastSpokenIndexRef.current = nextLineIndex;
-                const scriptLine = filteredScript[nextLineIndex];
-                playDescription(scriptLine);
+                playDescription(filteredScript[nextLineIndex]);
             }
         }, 250);
 
         return () => clearInterval(intervalId);
     }, [isPlaying, player, filteredScript, playDescription]);
     
-    // Effect to sync index on verbosity change or seek
     useEffect(() => {
         if (player && typeof player.getCurrentTime === 'function') {
             const currentTime = player.getCurrentTime();
-            const lastIndex = filteredScript.findLastIndex(line => line.timestamp <= currentTime);
-            lastSpokenIndexRef.current = lastIndex;
+            lastSpokenIndexRef.current = filteredScript.findLastIndex(line => line.timestamp <= currentTime);
         }
     }, [verbosity, filteredScript, player]);
 
     const handleVerbosityChange = (level) => {
         setVerbosity(level);
-        announcePolite(`상세 수준이 ${verbosityLabels[level]}로 변경되었습니다.`);
+        const label = { 0: '해설 없음', ...verbosityLabels }[level];
+        announcePolite(`상세 수준이 ${label}으로 변경되었습니다.`);
     };
 
-    const handleInitialPlay = () => {
-        setIsInteractionDone(true);
-        if (player) {
-            player.playVideo();
+    const handleTogglePlay = () => {
+        if (!player) return;
+
+        if (!isInteractionDone) {
+            setIsInteractionDone(true);
+            if (audioPlayerRef.current) {
+                audioPlayerRef.current.src = SILENT_AUDIO;
+                audioPlayerRef.current.volume = 0;
+                audioPlayerRef.current.play().catch(e => console.warn("Audio context could not be unlocked.", e));
+            }
         }
-        if (audioPlayerRef.current) {
-            audioPlayerRef.current.src = SILENT_AUDIO;
-            audioPlayerRef.current.volume = 0;
-            audioPlayerRef.current.play().catch(e => {
-                console.warn("Audio context could not be unlocked.", e);
-            });
+
+        const playerState = player.getPlayerState();
+        if (playerState === 1) { // playing
+            player.pauseVideo();
+        } else { // paused, ended, etc.
+            player.playVideo();
         }
     };
 
     const renderContent = () => {
-        if (isLoading) {
-            return <p>영상 데이터를 불러오는 중입니다...</p>;
-        }
-        if (error) {
-            return <p className="error-message" role="alert">{error}</p>;
-        }
+        if (isLoading) return <p>영상 데이터를 불러오는 중입니다...</p>;
+        if (error) return <p className="error-message" role="alert">{error}</p>;
         if (isNewGeneration && !isPlayerReady) {
             return (
                 <div className="status-container">
@@ -598,16 +567,22 @@ function PlayerScreen({ announcePolite, announceAssertive }) {
         if (isPlayerReady) {
             return (
                 <div className="video-container">
-                    {!isInteractionDone && (
-                        <div className="play-overlay">
-                            <button className="big-play-button" onClick={handleInitialPlay} aria-label="재생 및 음성 해설 시작">
-                                ▶
-                            </button>
-                        </div>
-                    )}
+                    <div className={`play-overlay ${isPlaying ? 'is-playing' : ''}`}>
+                        <button className="big-play-button" onClick={handleTogglePlay} aria-label={isPlaying ? "일시정지" : "재생"}>
+                            {isPlaying ? '❚❚' : '▶'}
+                        </button>
+                    </div>
                     <YouTube
                         videoId={videoId}
-                        opts={{ width: '100%', height: '100%' }}
+                        opts={{
+                            width: '100%',
+                            height: '100%',
+                            playerVars: {
+                                controls: 0, // Hide YouTube's native controls
+                                rel: 0, // Do not show related videos
+                                iv_load_policy: 3 // Do not show annotations
+                            }
+                        }}
                         onReady={(e) => setPlayer(e.target)}
                         onStateChange={(e) => setIsPlaying(e.data === window.YT.PlayerState.PLAYING)}
                     />
@@ -616,6 +591,8 @@ function PlayerScreen({ announcePolite, announceAssertive }) {
         }
         return <p>알 수 없는 상태입니다. 페이지를 새로고침 해주세요.</p>;
     };
+
+    const newVerbosityLabels = { 0: '없음', ...verbosityLabels };
 
     return (
         <>
@@ -628,37 +605,33 @@ function PlayerScreen({ announcePolite, announceAssertive }) {
             {renderContent()}
 
             <div className="controls-container">
-                <label className="tts-toggle">
-                    <input 
-                        type="checkbox" 
-                        checked={isTtsEnabled} 
-                        onChange={(e) => setIsTtsEnabled(e.target.checked)} 
-                        aria-label="음성 해설 활성화"
-                    />
-                    <span aria-hidden="true">음성 해설 활성화</span>
-                </label>
                 <div className="verbosity-control">
                     <span>상세 수준:</span>
-                    {[1, 2, 3].map(level => (
+                    {[0, 1, 2, 3].map(level => (
                         <button key={level} onClick={() => handleVerbosityChange(level)} aria-pressed={verbosity === level}>
-                            {verbosityLabels[level]}
+                            {newVerbosityLabels[level]}
                         </button>
                     ))}
                 </div>
+                <button onClick={() => setIsScriptVisible(prev => !prev)} aria-expanded={isScriptVisible}>
+                    {isScriptVisible ? '대본 숨기기' : '대본 보기'}
+                </button>
             </div>
 
-            <div className="script-container">
-                <h3>{`화면 해설 대본 (${verbosityLabels[verbosity]}: ${filteredScript.length}개)`}</h3>
-                <ul>
-                    {filteredScript.map((line) => (
-                        <li key={line.id}>
-                            <strong>[{formatTime(line.timestamp)}]</strong>
-                            <span className={`verbosity-tag verbosity-${line.verbosity.replace('v', '')}`}>{line.verbosity}</span>
-                            {line.text}
-                        </li>
-                    ))}
-                </ul>
-            </div>
+            {isScriptVisible && (
+                <div className="script-container">
+                    <h3>{`화면 해설 대본 (${newVerbosityLabels[verbosity]}: ${filteredScript.length}개)`}</h3>
+                    <ul>
+                        {filteredScript.map((line) => (
+                            <li key={line.id}>
+                                <strong>[{formatTime(line.timestamp)}]</strong>
+                                <span className={`verbosity-tag verbosity-${line.verbosity.replace('v', '')}`}>{line.verbosity}</span>
+                                {line.text}
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+            )}
         </>
     );
 }

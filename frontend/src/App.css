@@ -257,10 +257,26 @@ main {
     justify-content: space-between;
     align-items: center;
     width: 100%;
-    padding: 10px;
+    padding: 15px;
     background-color: #fff;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    margin-top: 20px; /* Add space above the controls */
+}
+
+.controls-container > button {
+    padding: 8px 16px;
+    font-size: 0.9rem;
+    color: white;
+    background-color: #007bff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.controls-container > button:hover {
+    background-color: #0069d9;
 }
 
 /* TTS Toggle Switch */
@@ -356,7 +372,7 @@ main {
 
     .controls-container {
         flex-direction: column;
-        align-items: flex-start;
+        align-items: stretch;
         gap: 15px;
     }
 
@@ -384,10 +400,17 @@ main {
   cursor: pointer;
   z-index: 10;
   transition: opacity 0.3s ease;
+  opacity: 1; /* Default: visible (for paused state) */
 }
 
-.play-overlay:hover {
-  background-color: rgba(0, 0, 0, 0.7);
+/* When video is playing, make the overlay invisible... */
+.play-overlay.is-playing {
+  opacity: 0;
+}
+
+/* ...but show it again when the user hovers over the video area. */
+.video-container:hover .play-overlay.is-playing {
+  opacity: 1;
 }
 
 .big-play-button {
@@ -397,13 +420,16 @@ main {
   width: 80px;
   height: 80px;
   color: white;
-  font-size: 40px;
-  line-height: 74px; /* Vertically center the play icon */
+  font-size: 38px; /* Adjusted for better balance */
+  line-height: 1; /* Let flexbox handle alignment */
   text-align: center;
   padding: 0;
-  padding-left: 8px; /* Optically center the play icon */
   cursor: pointer;
   transition: all 0.2s ease;
+  display: flex; /* Use flexbox for centering */
+  justify-content: center;
+  align-items: center;
+  padding-left: 6px; /* Optical adjustment for play icon */
 }
 
 .big-play-button:hover {
