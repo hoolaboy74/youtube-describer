@@ -62,9 +62,13 @@ function HomeScreen({ announcePolite, announceAssertive }) {
     const [error, setError] = useState('');
     const [searchResults, setSearchResults] = useState({ db: [], youtube: [] });
     const [initialVideos, setInitialVideos] = useState([]);
-    const [initialVideosLimit, setInitialVideosLimit] = useState(10);
-    const [youtubeResultsLimit, setYoutubeResultsLimit] = useState(20);
     
+    const [initialVideosLimit, setInitialVideosLimit] = useState(10);
+    const [dbResultsLimit, setDbResultsLimit] = useState(10);
+    const [youtubeResultsLimit, setYoutubeResultsLimit] = useState(20);
+    const [focusedItemId, setFocusedItemId] = useState(null);
+    
+    const itemRefs = useRef(new Map());
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -78,7 +82,21 @@ function HomeScreen({ announcePolite, announceAssertive }) {
             });
     }, [announceAssertive]);
 
+    useEffect(() => {
+        if (focusedItemId) {
+            const element = itemRefs.current.get(focusedItemId);
+            if (element) {
+                // Defer focus call to avoid race conditions with browser's focus handling
+                setTimeout(() => {
+                    element.focus();
+                }, 0);
+            }
+            setFocusedItemId(null);
+        }
+    }, [focusedItemId]);
+
     const handleSearch = (query) => {
+        setDbResultsLimit(10); // Reset limit on new search
         setYoutubeResultsLimit(20); // Reset limit on new search
         setIsSearching(true);
         announcePolite('검색 중입니다.');
@@ -121,6 +139,36 @@ function HomeScreen({ announcePolite, announceAssertive }) {
         navigate(`/video/${video.id}`);
     };
 
+    const handleLoadMore = (type, e) => {
+        if (e) e.preventDefault();
+        let lastItem;
+
+        if (type === 'initial') {
+            const lastItemIndex = initialVideosLimit - 1;
+            if (lastItemIndex >= 0 && initialVideos.length > lastItemIndex) {
+                lastItem = initialVideos[lastItemIndex];
+                setFocusedItemId(lastItem.videoId);
+            }
+            setInitialVideosLimit(prev => prev + 10);
+
+        } else if (type === 'db') {
+            const lastItemIndex = dbResultsLimit - 1;
+            if (lastItemIndex >= 0 && searchResults.db.length > lastItemIndex) {
+                lastItem = searchResults.db[lastItemIndex];
+                setFocusedItemId(lastItem.id);
+            }
+            setDbResultsLimit(prev => prev + 10);
+
+        } else if (type === 'youtube') {
+            const lastItemIndex = youtubeResultsLimit - 1;
+            if (lastItemIndex >= 0 && searchResults.youtube.length > lastItemIndex) {
+                lastItem = searchResults.youtube[lastItemIndex];
+                setFocusedItemId(lastItem.id);
+            }
+            setYoutubeResultsLimit(prev => prev + 20);
+        }
+    };
+
     const showSearchResults = searchResults.db.length > 0 || searchResults.youtube.length > 0;
 
     const renderList = () => {
@@ -131,14 +179,21 @@ function HomeScreen({ announcePolite, announceAssertive }) {
                         <div className="search-results-section">
                             <h3>DB 검색 결과</h3>
                             <ol>
-                                {searchResults.db.map(video => (
+                                {searchResults.db.slice(0, dbResultsLimit).map(video => (
                                     <li key={video.id}>
-                                        <button onClick={() => handleVideoSelect(video)}>
+                                        <button 
+                                            ref={el => itemRefs.current.set(video.id, el)}
+                                            onClick={() => handleVideoSelect(video)}>
                                             <img src={video.thumbnail} alt="" className="thumbnail"/> {video.title}
                                         </button>
                                     </li>
                                 ))}
                             </ol>
+                            {searchResults.db.length > dbResultsLimit && (
+                                <button onClick={(e) => handleLoadMore('db', e)} className="load-more-button">
+                                    더보기
+                                </button>
+                            )}
                         </div>
                     )}
                     {searchResults.youtube.length > 0 && (
@@ -148,6 +203,7 @@ function HomeScreen({ announcePolite, announceAssertive }) {
                                 {searchResults.youtube.slice(0, youtubeResultsLimit).map(video => (
                                     <li key={video.id}>
                                         <button 
+                                            ref={el => itemRefs.current.set(video.id, el)}
                                             onClick={() => handleVideoSelect(video)}
                                             aria-label={`${video.title}, 채널 ${video.channel}, 조회수 ${video.views}회, 길이 ${video.durationFormatted}`}>
                                             <img src={video.thumbnail} alt={`${video.title} 썸네일`} className="thumbnail"/> 
@@ -162,7 +218,7 @@ function HomeScreen({ announcePolite, announceAssertive }) {
                                 ))}
                             </ol>
                             {searchResults.youtube.length > youtubeResultsLimit && (
-                                <button onClick={() => setYoutubeResultsLimit(prev => prev + 20)} className="load-more-button">
+                                <button onClick={(e) => handleLoadMore('youtube', e)} className="load-more-button">
                                     더보기
                                 </button>
                             )}
@@ -177,14 +233,16 @@ function HomeScreen({ announcePolite, announceAssertive }) {
                 <ol>
                     {initialVideos.slice(0, initialVideosLimit).map(video => (
                         <li key={video.videoId}>
-                            <button onClick={() => handleVideoSelect({ id: video.videoId, source: 'db' })}>
+                            <button 
+                                ref={el => itemRefs.current.set(video.videoId, el)}
+                                onClick={() => handleVideoSelect({ id: video.videoId, source: 'db' })}>
                                 {video.title}
                             </button>
                         </li>
                     ))}
                 </ol>
                 {initialVideos.length > initialVideosLimit && (
-                    <button onClick={() => setInitialVideosLimit(prev => prev + 10)} className="load-more-button">
+                    <button onClick={(e) => handleLoadMore('initial', e)} className="load-more-button">
                         더보기
                     </button>
                 )}
