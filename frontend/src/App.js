@@ -186,7 +186,7 @@ function HomeScreen({ announcePolite, announceAssertive }) {
                                         <button 
                                             ref={el => itemRefs.current.set(video.id, el)}
                                             onClick={() => handleVideoSelect(video)}>
-                                            <img src={video.thumbnail} alt="" className="thumbnail"/> {video.title}
+                                            <img src={video.thumbnail} alt="" className="thumbnail"/> {video.title} {video.commentCount > 0 && `(댓글: ${video.commentCount})`}
                                         </button>
                                     </li>
                                 ))}
@@ -238,7 +238,7 @@ function HomeScreen({ announcePolite, announceAssertive }) {
                             <button 
                                 ref={el => itemRefs.current.set(video.videoId, el)}
                                 onClick={() => handleVideoSelect({ id: video.videoId, source: 'db' })}>
-                                {video.title}
+                                {video.title} {video.commentCount > 0 && `(댓글: ${video.commentCount})`}
                             </button>
                         </li>
                     ))}

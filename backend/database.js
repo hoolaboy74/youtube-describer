@@ -119,14 +119,48 @@ function saveVideo({ videoId, title, duration, script }) {
 
 // 캐시된 모든 영상의 목록을 가져오는 함수
 function listVideos() {
-  const rows = db.prepare("SELECT videoId, title, duration, status, createdAt FROM videos WHERE status = 'completed' ORDER BY createdAt DESC").all();
+  const rows = db.prepare(`
+    SELECT 
+      v.videoId, 
+      v.title, 
+      v.duration, 
+      v.status, 
+      v.createdAt, 
+      COUNT(c.id) as commentCount 
+    FROM 
+      videos AS v
+    LEFT JOIN 
+      comments AS c ON v.videoId = c.videoId
+    WHERE 
+      v.status = 'completed'
+    GROUP BY 
+      v.videoId
+    ORDER BY 
+      v.createdAt DESC
+  `).all();
   return rows;
 }
 
 function searchVideosByTitle(query) {
-  const rows = db.prepare(
-    "SELECT videoId, title, duration, status, createdAt FROM videos WHERE title LIKE ? AND status = 'completed' ORDER BY createdAt DESC"
-  ).all(`%${query}%`);
+  const rows = db.prepare(`
+    SELECT 
+      v.videoId, 
+      v.title, 
+      v.duration, 
+      v.status, 
+      v.createdAt, 
+      COUNT(c.id) as commentCount 
+    FROM 
+      videos AS v
+    LEFT JOIN 
+      comments AS c ON v.videoId = c.videoId
+    WHERE 
+      v.title LIKE ? AND v.status = 'completed'
+    GROUP BY 
+      v.videoId
+    ORDER BY 
+      v.createdAt DESC
+  `).all(`%${query}%`);
   return rows;
 }
 
