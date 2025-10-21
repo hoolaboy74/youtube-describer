@@ -1,6 +1,7 @@
 const path = require('path');
 const Database = require('better-sqlite3');
 const logger = require('./logger');
+const crypto = require('crypto');
 
 const dbPath = path.join(__dirname, 'db', 'cache.db');
 const db = new Database(dbPath);
@@ -44,6 +45,20 @@ function init() {
       FOREIGN KEY (videoId) REFERENCES videos (videoId) ON DELETE CASCADE
     )
   `);
+
+  // comments 테이블: 영상에 대한 사용자 댓글 정보 저장
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS comments (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      videoId TEXT NOT NULL,
+      nickname TEXT NOT NULL,
+      password TEXT NOT NULL,
+      content TEXT NOT NULL,
+      createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (videoId) REFERENCES videos (videoId) ON DELETE CASCADE
+    )
+  `);
+
   logger.info('Database initialized successfully.');
 }
 
@@ -161,6 +176,59 @@ function saveVideoChunk({ videoId, scriptChunk }) {
   }
 }
 
+
+
+// 비밀번호 해싱을 위한 유틸리티
+function hashPassword(password) {
+  const salt = crypto.randomBytes(16).toString('hex');
+  const hash = crypto.pbkdf2Sync(password, salt, 1000, 64, 'sha512').toString('hex');
+  return `${salt}:${hash}`;
+}
+
+function verifyPassword(storedPassword, providedPassword) {
+  if (!storedPassword) return false;
+  const [salt, originalHash] = storedPassword.split(':');
+  if (!salt || !originalHash) return false;
+  const hash = crypto.pbkdf2Sync(providedPassword, salt, 1000, 64, 'sha512').toString('hex');
+  return hash === originalHash;
+}
+
+
+// 댓글 가져오기
+function getComments(videoId) {
+  return db.prepare("SELECT id, videoId, nickname, content, strftime('%Y-%m-%dT%H:%M:%fZ', createdAt) as createdAt FROM comments WHERE videoId = ? ORDER BY createdAt ASC").all(videoId);
+}
+
+// 댓글 추가
+function addComment({ videoId, nickname, password, content }) {
+  const hashedPassword = hashPassword(password);
+  const result = db.prepare(
+    'INSERT INTO comments (videoId, nickname, password, content) VALUES (?, ?, ?, ?)'
+  ).run(videoId, nickname, hashedPassword, content);
+  return result.lastInsertRowid;
+}
+
+// 댓글 ID로 댓글 가져오기 (비밀번호 포함)
+function getCommentById(commentId) {
+  return db.prepare("SELECT id, videoId, nickname, password, content, strftime('%Y-%m-%dT%H:%M:%fZ', createdAt) as createdAt FROM comments WHERE id = ?").get(commentId);
+}
+
+
+// 댓글 수정
+function updateComment({ commentId, content }) {
+  const result = db.prepare(
+    'UPDATE comments SET content = ?, createdAt = CURRENT_TIMESTAMP WHERE id = ?'
+  ).run(content, commentId);
+  return result.changes > 0;
+}
+
+// 댓글 삭제
+function deleteComment(commentId) {
+  const result = db.prepare('DELETE FROM comments WHERE id = ?').run(commentId);
+  return result.changes > 0;
+}
+
+
 module.exports = {
   init,
   getVideo,
@@ -170,4 +238,10 @@ module.exports = {
   saveVideoChunk,
   listVideos,
   searchVideosByTitle,
+  getComments,
+  addComment,
+  getCommentById,
+  updateComment,
+  deleteComment,
+  verifyPassword,
 };

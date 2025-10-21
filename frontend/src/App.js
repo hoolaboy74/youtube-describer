@@ -3,6 +3,7 @@ import { Routes, Route, useNavigate, useParams, useLocation, Link } from 'react-
 import axios from 'axios';
 import YouTube from 'react-youtube';
 import './App.css';
+import Comments from './Comments'; // Import the Comments component
 
 // Helper to check if a string is a valid YouTube URL
 function getYouTubeId(url) {
@@ -20,6 +21,7 @@ function App() {
     const [assertiveAnnouncement, setAssertiveAnnouncement] = useState('');
     const politeTimeoutRef = useRef(null);
     const assertiveTimeoutRef = useRef(null);
+    const mainRef = useRef(null);
 
     const announcePolite = useCallback((message) => {
         clearTimeout(politeTimeoutRef.current);
@@ -44,10 +46,10 @@ function App() {
                 </Link>
                 <p>이 서비스는 유튜브 영상을 시각 장애인을 위한 화면 해설 영상으로 만드는 서비스 입니다.</p>
             </header>
-            <main>
+            <main ref={mainRef} tabIndex="-1">
                 <Routes>
                     <Route path="/" element={<HomeScreen announcePolite={announcePolite} announceAssertive={announceAssertive} />} />
-                    <Route path="/video/:videoId" element={<PlayerScreen announcePolite={announcePolite} announceAssertive={announceAssertive} />} />
+                    <Route path="/video/:videoId" element={<PlayerScreen mainRef={mainRef} announcePolite={announcePolite} announceAssertive={announceAssertive} />} />
                 </Routes>
             </main>
         </div>
@@ -337,7 +339,7 @@ function ShareButton({ announcePolite }) {
     );
 }
 
-function PlayerScreen({ announcePolite, announceAssertive }) {
+function PlayerScreen({ mainRef, announcePolite, announceAssertive }) {
     const { videoId } = useParams();
     const navigate = useNavigate();
     const [videoInfo, setVideoInfo] = useState({ videoId, title: '불러오는 중...' });
@@ -706,6 +708,8 @@ function PlayerScreen({ announcePolite, announceAssertive }) {
                     </ul>
                 </div>
             )}
+
+            <Comments videoId={videoId} mainRef={mainRef} />
         </>
     );
 }

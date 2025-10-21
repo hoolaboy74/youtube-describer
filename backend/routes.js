@@ -235,4 +235,106 @@ router.post('/batch-process', (req, res) => {
     });
 });
 
+// --- COMMENTS API ENDPOINTS ---
+
+// GET all comments for a video
+router.get('/comments/:videoId', (req, res) => {
+    try {
+        const { videoId } = req.params;
+        const comments = db.getComments(videoId);
+        res.json(comments);
+    } catch (error) {
+        logger.error(`Failed to fetch comments for video ${req.params.videoId}:`, error);
+        res.status(500).json({ error: 'Failed to fetch comments' });
+    }
+});
+
+// POST a new comment
+router.post('/comments', (req, res) => {
+    try {
+        const { videoId, nickname, password, content } = req.body;
+        if (!videoId || !nickname || !password || !content) {
+            return res.status(400).json({ error: 'Missing required fields' });
+        }
+        const newCommentId = db.addComment({ videoId, nickname, password, content });
+        const newComment = db.getCommentById(newCommentId);
+        // Return the newly created comment (without password)
+        res.status(201).json({
+            id: newComment.id,
+            videoId: newComment.videoId,
+            nickname: newComment.nickname,
+            content: newComment.content,
+            createdAt: newComment.createdAt
+        });
+    } catch (error) {
+        logger.error('Failed to add comment:', error);
+        res.status(500).json({ error: 'Failed to add comment' });
+    }
+});
+
+// PUT (update) a comment
+router.put('/comments/:commentId', (req, res) => {
+    try {
+        const { commentId } = req.params;
+        const { password, content } = req.body;
+
+        if (!password || !content) {
+            return res.status(400).json({ error: 'Password and content are required' });
+        }
+
+        const comment = db.getCommentById(commentId);
+        if (!comment) {
+            return res.status(404).json({ error: 'Comment not found' });
+        }
+
+        const isPasswordValid = db.verifyPassword(comment.password, password);
+        if (!isPasswordValid) {
+            return res.status(403).json({ error: 'Invalid password' });
+        }
+
+        const success = db.updateComment({ commentId, content });
+        if (success) {
+            res.status(200).json({ message: 'Comment updated successfully' });
+        } else {
+            res.status(500).json({ error: 'Failed to update comment' });
+        }
+    } catch (error) {
+        logger.error(`Failed to update comment ${req.params.commentId}:`, error);
+        res.status(500).json({ error: 'Failed to update comment' });
+    }
+});
+
+// DELETE a comment
+router.delete('/comments/:commentId', (req, res) => {
+    try {
+        const { commentId } = req.params;
+        const { password } = req.body;
+
+        if (!password) {
+            return res.status(400).json({ error: 'Password is required' });
+        }
+
+        const comment = db.getCommentById(commentId);
+        if (!comment) {
+            return res.status(404).json({ error: 'Comment not found' });
+        }
+
+        const isPasswordValid = db.verifyPassword(comment.password, password);
+        if (!isPasswordValid) {
+            return res.status(403).json({ error: 'Invalid password' });
+        }
+
+        const success = db.deleteComment(commentId);
+        if (success) {
+            res.status(200).json({ message: 'Comment deleted successfully' });
+        } else {
+            res.status(500).json({ error: 'Failed to delete comment' });
+        }
+    } catch (error) {
+        logger.error(`Failed to delete comment ${req.params.commentId}:`, error);
+        res.status(500).json({ error: 'Failed to delete comment' });
+    }
+});
+
+
 module.exports = router;
