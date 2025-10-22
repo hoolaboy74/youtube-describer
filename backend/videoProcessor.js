@@ -5,11 +5,10 @@ const ffmpeg = require('fluent-ffmpeg');
 const fs = require('fs');
 const path = require('path');
 const util = require('util');
-const VAD = require('node-vad');
 const wav = require('wav');
 const crypto = require('crypto');
 const db = require('./database');
-const { formatTime, invertSpeechTimestamps } = require('./utils');
+const { formatTime } = require('./utils');
 const logger = require('./logger');
 
 const API_KEY = process.env.GOOGLE_API_KEY;
@@ -86,30 +85,27 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
         // Set video status to processing
         db.ensureVideoRecord({ videoId, title: videoTitle, duration: Math.round(totalDuration) });
 
-        if (sseHandler) sseHandler('status_update', { message: '음성 없는 구간(VAD) 분석 중...' });
-        const speechTimestamps = await new Promise((resolve, reject) => {
-            const vad = new VAD(VAD.Mode.NORMAL);
-            const fileStream = fs.createReadStream(audioPath).pipe(new wav.Reader());
-            const timestamps = [];
-            let isSpeaking = false, speechStart = 0, processedBytes = 0;
-            const bytesPerMs = (16000 * 16 / 8) / 1000;
-            fileStream.on('format', format => {
-                fileStream.on('data', chunk => {
-                    vad.processAudio(chunk, format.sampleRate).then(res => {
-                        const currentTime = processedBytes / bytesPerMs;
-                        if (res === VAD.Event.VOICE && !isSpeaking) { isSpeaking = true; speechStart = currentTime; }
-                        if (res === VAD.Event.SILENCE && isSpeaking) { isSpeaking = false; timestamps.push({ start: speechStart, end: currentTime }); }
-                        processedBytes += chunk.length;
-                    }).catch(reject);
-                });
-            });
-            fileStream.on('end', () => {
-                if (isSpeaking) { timestamps.push({ start: speechStart, end: processedBytes / bytesPerMs }); }
-                resolve(timestamps);
-            });
-            fileStream.on('error', reject);
-        });
-        const nonSpeechIntervals = invertSpeechTimestamps(speechTimestamps, totalDuration * 1000);
+
+
+        const subtitlePath = path.join(baseTempDir, 'subtitles.vtt');
+        await util.promisify(execFile)('yt-dlp', [
+            '--write-auto-sub',
+            '--sub-lang', 'ko',
+            '--sub-format', 'vtt',
+            '--output', `${baseTempDir}/subtitles`,
+            '--skip-download',
+            '--no-progress',
+            '--cookies', 'cookies.txt',
+            youtubeUrl
+        ]);
+        
+        const vttPath = path.join(baseTempDir, 'subtitles.ko.vtt');
+        let subtitleContent = '';
+        if (fs.existsSync(vttPath)) {
+            subtitleContent = fs.readFileSync(vttPath, 'utf-8');
+        } else {
+            logger.warn(`[${requestHash}] Subtitle file not found at ${vttPath}. Proceeding without subtitles.`);
+        }
 
         if (sseHandler) sseHandler('status_update', { message: '주요 장면 프레임 추출 중...' });
         const allTimestamps = await new Promise((resolve, reject) => {
@@ -136,7 +132,7 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
         });
 
         timeEnd(extractionLabel);
-        logger.info(`[${requestHash}] Initial data extraction complete. Title: ${videoTitle}, VAD Intervals: ${nonSpeechIntervals.length}, Total Frames: ${allTimestamps.length}`);
+        logger.info(`[${requestHash}] Initial data extraction complete. Title: ${videoTitle}, Total Frames: ${allTimestamps.length}`);
         
         if (sseHandler) {
             sseHandler('start', { videoId, title: videoTitle });
@@ -181,16 +177,13 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
                 continue;
             }
 
-            const chunkNonSpeechIntervals = nonSpeechIntervals.filter(i => i.start < chunkEndTime && i.end > chunkStartTime);
-            const silentIntervalsString = chunkNonSpeechIntervals.map(interval => `${formatTime(interval.start)} ~ ${formatTime(interval.end)}`).join('\n');
-
             const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
             
             const promptTemplatePath = path.join(__dirname, 'prompt_template.txt');
             let basePrompt = fs.readFileSync(promptTemplatePath, 'utf-8');
 
             basePrompt = basePrompt.replace('{{VIDEO_TITLE}}', videoTitle);
-            basePrompt = basePrompt.replace('{{SILENT_INTERVALS}}', silentIntervalsString);
+            basePrompt = basePrompt.replace('{{SUBTITLES}}', subtitleContent);
 
             const contextPrompt = '**이전까지 생성된 대본 (전체 맥락 파악용):**\n' +
                 '\`\`\`\n' +
@@ -277,43 +270,27 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
         const extractionLabel = `[${requestHash}] Initial Data Extraction Time`;
         time(extractionLabel);
 
-        const [videoTitle, { nonSpeechIntervals, totalDuration }, allTimestamps] = await Promise.all([
+        const [videoTitle, subtitleContent, allTimestamps, totalDuration] = await Promise.all([
             util.promisify(execFile)('yt-dlp', ['--get-title', '--encoding', 'utf-8', '--no-progress', '--cookies', 'cookies.txt', youtubeUrl]).then(result => result.stdout.trim()),
             (async () => {
-                const audioPath = path.join(baseTempDir, 'audio.wav');
-                const downloadedAudio = path.join(baseTempDir, 'audio_source.m4a');
-                await util.promisify(execFile)('yt-dlp', ['-f', 'bestaudio*', '-o', downloadedAudio, '--no-progress', '--cookies', 'cookies.txt', youtubeUrl]);
-                const metadata = await util.promisify(ffmpeg.ffprobe)(downloadedAudio);
-                const duration = metadata.format.duration;
-                await new Promise((resolve, reject) => {
-                    ffmpeg(downloadedAudio).toFormat('wav').audioFrequency(16000).audioChannels(1).on('end', resolve).on('error', reject).save(audioPath);
-                });
-                const speechTimestamps = await new Promise((resolve, reject) => {
-                    const vad = new VAD(VAD.Mode.NORMAL);
-                    const fileStream = fs.createReadStream(audioPath).pipe(new wav.Reader());
-                    const timestamps = [];
-                    let isSpeaking = false, speechStart = 0, processedBytes = 0;
-                    const bytesPerMs = (16000 * 16 / 8) / 1000;
-                    fileStream.on('format', format => {
-                        fileStream.on('data', chunk => {
-                            vad.processAudio(chunk, format.sampleRate).then(res => {
-                                const currentTime = processedBytes / bytesPerMs;
-                                if (res === VAD.Event.VOICE && !isSpeaking) { isSpeaking = true; speechStart = currentTime; }
-                                if (res === VAD.Event.SILENCE && isSpeaking) { isSpeaking = false; timestamps.push({ start: speechStart, end: currentTime }); }
-                                processedBytes += chunk.length;
-                            }).catch(reject);
-                        });
-                    });
-                    fileStream.on('end', () => {
-                        if (isSpeaking) { timestamps.push({ start: speechStart, end: processedBytes / bytesPerMs }); }
-                        resolve(timestamps);
-                    });
-                    fileStream.on('error', reject);
-                });
-                return { 
-                    nonSpeechIntervals: invertSpeechTimestamps(speechTimestamps, duration * 1000),
-                    totalDuration: duration
-                };
+                const subtitlePath = path.join(baseTempDir, 'subtitles.vtt');
+                await util.promisify(execFile)('yt-dlp', [
+                    '--write-auto-sub',
+                    '--sub-lang', 'ko',
+                    '--sub-format', 'vtt',
+                    '--output', `${baseTempDir}/subtitles`,
+                    '--skip-download',
+                    '--no-progress',
+                    '--cookies', 'cookies.txt',
+                    youtubeUrl
+                ]);
+                
+                const vttPath = path.join(baseTempDir, 'subtitles.ko.vtt');
+                if (fs.existsSync(vttPath)) {
+                    return fs.readFileSync(vttPath, 'utf-8');
+                }
+                logger.warn(`[${requestHash}] Subtitle file not found at ${vttPath}. Proceeding without subtitles.`);
+                return '';
             })(),
             (async () => {
                 const extractedTimestamps = [];
@@ -339,11 +316,23 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
                     });
                 });
                 return extractedTimestamps;
-            })()
+            })(),
+            util.promisify(execFile)('yt-dlp', ['--get-duration', '--no-progress', '--cookies', 'cookies.txt', youtubeUrl]).then(result => {
+                const durationParts = result.stdout.trim().split(':');
+                let duration = 0;
+                if (durationParts.length === 3) {
+                    duration = parseInt(durationParts[0]) * 3600 + parseInt(durationParts[1]) * 60 + parseInt(durationParts[2]);
+                } else if (durationParts.length === 2) {
+                    duration = parseInt(durationParts[0]) * 60 + parseInt(durationParts[1]);
+                } else {
+                    duration = parseInt(durationParts[0]);
+                }
+                return duration;
+            })
         ]);
 
         timeEnd(extractionLabel);
-        logger.info(`[${requestHash}] Initial data extraction complete. Title: ${videoTitle}, VAD Intervals: ${nonSpeechIntervals.length}, Total Frames: ${allTimestamps.length}`);
+        logger.info(`[${requestHash}] Initial data extraction complete. Title: ${videoTitle}, Total Frames: ${allTimestamps.length}`);
 
         // Ensure record exists and is marked as processing
         db.ensureVideoRecord({ videoId, title: videoTitle, duration: Math.round(totalDuration) });
@@ -373,14 +362,13 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
             return; // Exit early
         }
 
-        const silentIntervalsString = nonSpeechIntervals.map(interval => `${formatTime(interval.start)} ~ ${formatTime(interval.end)}`).join('\n');
         const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
 
         const promptTemplatePath = path.join(__dirname, 'prompt_template.txt');
         let prompt = fs.readFileSync(promptTemplatePath, 'utf-8');
 
         prompt = prompt.replace('{{VIDEO_TITLE}}', videoTitle);
-        prompt = prompt.replace('{{SILENT_INTERVALS}}', silentIntervalsString);
+        prompt = prompt.replace('{{SUBTITLES}}', subtitleContent);
 
         const result = await model.generateContent([prompt, ...imageParts]);
         
