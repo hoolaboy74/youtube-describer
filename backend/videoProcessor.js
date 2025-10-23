@@ -200,7 +200,7 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
             const model = genAI.getGenerativeModel({
                 model: "gemini-2.5-pro",
                 generationConfig: {
-                    temperature: 0.5
+                    temperature: 0.7
                 }
             });
             
@@ -394,7 +394,7 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
         const model = genAI.getGenerativeModel({
             model: "gemini-2.5-pro",
             generationConfig: {
-                temperature: 0.5
+                temperature: 0.7
             }
         });
 
