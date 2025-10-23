@@ -1,6 +1,7 @@
 require('dotenv').config();
 const { execFile, spawn } = require('child_process');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
+const { google } = require('googleapis');
 const ffmpeg = require('fluent-ffmpeg');
 const fs = require('fs');
 const path = require('path');
@@ -16,6 +17,7 @@ if (!API_KEY) {
   throw new Error("GOOGLE_API_KEY is not defined in the environment");
 }
 const genAI = new GoogleGenerativeAI(API_KEY);
+const youtube = google.youtube({ version: 'v3', auth: API_KEY });
 
 const processingLocks = new Set();
 const timers = new Map();
@@ -32,6 +34,17 @@ const timeEnd = (label) => {
         timers.delete(label);
     }
 };
+
+// Helper to parse ISO 8601 duration
+const parseISO8601Duration = (duration) => {
+    const match = duration.match(/PT(\d+H)?(\d+M)?(\d+S)?/);
+    if (!match) return 0;
+    const hours = (parseInt(match[1], 10) || 0);
+    const minutes = (parseInt(match[2], 10) || 0);
+    const seconds = (parseInt(match[3], 10) || 0);
+    return hours * 3600 + minutes * 60 + seconds;
+};
+
 
 const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
     const requestHash = sseHandler ? videoId.substring(0, 8) : `batch-${videoId.substring(0, 8)}`;
@@ -64,48 +77,55 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
 
         await fs.promises.mkdir(baseTempDir, { recursive: true });
 
-        // Step 1: Extract ALL data upfront (Title, VAD, Frames) - Sequentially for status updates
+        // Step 1: Extract ALL data upfront (Title, Subtitles, Frames)
         logger.info(`[${requestHash}] Step 1: Starting initial data extraction...`);
         const extractionLabel = `[${requestHash}] Initial Data Extraction Time`;
         time(extractionLabel);
 
         if (sseHandler) sseHandler('status_update', { message: '영상 정보 확인 중...' });
-        const videoTitle = await util.promisify(execFile)('yt-dlp', ['--get-title', '--encoding', 'utf-8', '--no-progress', '--cookies', 'cookies.txt', youtubeUrl]).then(result => result.stdout.trim());
-
-        if (sseHandler) sseHandler('status_update', { message: '영상 음성 다운로드 및 분석 중...' });
-        const audioPath = path.join(baseTempDir, 'audio.wav');
-        const downloadedAudio = path.join(baseTempDir, 'audio_source.m4a');
-        await util.promisify(execFile)('yt-dlp', ['-f', 'bestaudio*', '-o', downloadedAudio, '--no-progress', '--cookies', 'cookies.txt', youtubeUrl]);
-        const metadata = await util.promisify(ffmpeg.ffprobe)(downloadedAudio);
-        const totalDuration = metadata.format.duration;
-        await new Promise((resolve, reject) => {
-            ffmpeg(downloadedAudio).toFormat('wav').audioFrequency(16000).audioChannels(1).on('end', resolve).on('error', reject).save(audioPath);
+        
+        // Fetch video details from YouTube API
+        const videoApiResponse = await youtube.videos.list({
+            part: 'snippet,contentDetails',
+            id: videoId,
         });
 
-        // Set video status to processing
+        if (videoApiResponse.data.items.length === 0) {
+            throw new Error('Video not found via YouTube API.');
+        }
+        const videoDetails = videoApiResponse.data.items[0];
+        const videoTitle = videoDetails.snippet.title;
+        const totalDuration = parseISO8601Duration(videoDetails.contentDetails.duration);
+
         db.ensureVideoRecord({ videoId, title: videoTitle, duration: Math.round(totalDuration) });
 
+        if (sseHandler) sseHandler('status_update', { message: '자막 정보 확인 중...' });
 
-
-        const subtitlePath = path.join(baseTempDir, 'subtitles.vtt');
-        await util.promisify(execFile)('yt-dlp', [
-            '--write-auto-sub',
-            '--sub-lang', 'ko',
-            '--sub-format', 'vtt',
-            '--output', `${baseTempDir}/subtitles`,
-            '--skip-download',
-            '--no-progress',
-            '--cookies', 'cookies.txt',
-            youtubeUrl
-        ]);
-        
-        const vttPath = path.join(baseTempDir, 'subtitles.ko.vtt');
+        // Fetch subtitles using yt-dlp for reliability with auto-generated captions
         let subtitleContent = '';
-        if (fs.existsSync(vttPath)) {
-            subtitleContent = fs.readFileSync(vttPath, 'utf-8');
-        } else {
-            logger.warn(`[${requestHash}] Subtitle file not found at ${vttPath}. Proceeding without subtitles.`);
+        const subtitlePath = path.join(baseTempDir, 'subtitles.ko.vtt');
+        try {
+            await util.promisify(execFile)('yt-dlp', [
+                '--write-auto-sub',
+                '--sub-lang', 'ko',
+                '--sub-format', 'vtt',
+                '--output', `${baseTempDir}/subtitles`,
+                '--skip-download',
+                '--no-progress',
+                '--cookies', 'cookies.txt',
+                youtubeUrl
+            ]);
+            
+            if (fs.existsSync(subtitlePath)) {
+                subtitleContent = fs.readFileSync(subtitlePath, 'utf-8');
+                logger.info(`[${requestHash}] Successfully loaded subtitles using yt-dlp.`);
+            } else {
+                logger.warn(`[${requestHash}] yt-dlp did not create a subtitle file. Proceeding without subtitles.`);
+            }
+        } catch (error) {
+            logger.warn(`[${requestHash}] Error fetching subtitles with yt-dlp: ${error.message}. Proceeding without subtitles.`);
         }
+
 
         if (sseHandler) sseHandler('status_update', { message: '주요 장면 프레임 추출 중...' });
         const allTimestamps = await new Promise((resolve, reject) => {
@@ -177,7 +197,12 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
                 continue;
             }
 
-            const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
+            const model = genAI.getGenerativeModel({
+                model: "gemini-2.5-pro",
+                generationConfig: {
+                    temperature: 0.5
+                }
+            });
             
             const promptTemplatePath = path.join(__dirname, 'prompt_template.txt');
             let basePrompt = fs.readFileSync(promptTemplatePath, 'utf-8');
@@ -265,33 +290,46 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
 
         await fs.promises.mkdir(baseTempDir, { recursive: true });
 
-        // Step 1: Extract ALL data upfront (Title, VAD, Frames)
-        logger.info(`[${requestHash}] Step 1: Starting initial data extraction (Title, VAD, Frames)...`);
+        // Step 1: Extract ALL data upfront (Title, Subtitles, Frames)
+        logger.info(`[${requestHash}] Step 1: Starting initial data extraction (Title, Subtitles, Frames)...`);
         const extractionLabel = `[${requestHash}] Initial Data Extraction Time`;
         time(extractionLabel);
 
-        const [videoTitle, subtitleContent, allTimestamps, totalDuration] = await Promise.all([
-            util.promisify(execFile)('yt-dlp', ['--get-title', '--encoding', 'utf-8', '--no-progress', '--cookies', 'cookies.txt', youtubeUrl]).then(result => result.stdout.trim()),
+        const [videoDetails, subtitleContent, allTimestamps] = await Promise.all([
+            // Fetch video details from YouTube API
+            youtube.videos.list({
+                part: 'snippet,contentDetails',
+                id: videoId,
+            }).then(response => {
+                if (response.data.items.length === 0) throw new Error('Video not found via YouTube API.');
+                return response.data.items[0];
+            }),
+            // Fetch subtitles using yt-dlp for reliability with auto-generated captions
             (async () => {
-                const subtitlePath = path.join(baseTempDir, 'subtitles.vtt');
-                await util.promisify(execFile)('yt-dlp', [
-                    '--write-auto-sub',
-                    '--sub-lang', 'ko',
-                    '--sub-format', 'vtt',
-                    '--output', `${baseTempDir}/subtitles`,
-                    '--skip-download',
-                    '--no-progress',
-                    '--cookies', 'cookies.txt',
-                    youtubeUrl
-                ]);
-                
-                const vttPath = path.join(baseTempDir, 'subtitles.ko.vtt');
-                if (fs.existsSync(vttPath)) {
-                    return fs.readFileSync(vttPath, 'utf-8');
+                const subtitlePath = path.join(baseTempDir, 'subtitles.ko.vtt');
+                try {
+                    await util.promisify(execFile)('yt-dlp', [
+                        '--write-auto-sub',
+                        '--sub-lang', 'ko',
+                        '--sub-format', 'vtt',
+                        '--output', `${baseTempDir}/subtitles`,
+                        '--skip-download',
+                        '--no-progress',
+                        '--cookies', 'cookies.txt',
+                        youtubeUrl
+                    ]);
+                    
+                    if (fs.existsSync(subtitlePath)) {
+                        logger.info(`[${requestHash}] Successfully loaded subtitles using yt-dlp for batch.`);
+                        return fs.readFileSync(subtitlePath, 'utf-8');
+                    }
+                } catch (error) {
+                    logger.warn(`[${requestHash}] Error fetching subtitles with yt-dlp for batch: ${error.message}.`);
                 }
-                logger.warn(`[${requestHash}] Subtitle file not found at ${vttPath}. Proceeding without subtitles.`);
+                logger.warn(`[${requestHash}] yt-dlp did not create a subtitle file for batch. Proceeding without subtitles.`);
                 return '';
             })(),
+            // Extract frames using yt-dlp and ffmpeg
             (async () => {
                 const extractedTimestamps = [];
                 await new Promise((resolve, reject) => {
@@ -311,25 +349,16 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
                     ytdlpProcess.on('error', (err) => reject(new Error(`yt-dlp spawn error: ${err.message}`)));
                     ffmpegProcess.on('error', (err) => reject(new Error(`ffmpeg spawn error: ${err.message}`)));
                     ffmpegProcess.on('close', (code) => {
-                        if (code === 0) return resolve();
+                        if (code === 0) return resolve(extractedTimestamps);
                         reject(new Error(`ffmpeg frame extraction exited with code ${code}. Stderr: ${ffmpegStderr}`));
                     });
                 });
                 return extractedTimestamps;
-            })(),
-            util.promisify(execFile)('yt-dlp', ['--get-duration', '--no-progress', '--cookies', 'cookies.txt', youtubeUrl]).then(result => {
-                const durationParts = result.stdout.trim().split(':');
-                let duration = 0;
-                if (durationParts.length === 3) {
-                    duration = parseInt(durationParts[0]) * 3600 + parseInt(durationParts[1]) * 60 + parseInt(durationParts[2]);
-                } else if (durationParts.length === 2) {
-                    duration = parseInt(durationParts[0]) * 60 + parseInt(durationParts[1]);
-                } else {
-                    duration = parseInt(durationParts[0]);
-                }
-                return duration;
-            })
+            })()
         ]);
+        
+        const videoTitle = videoDetails.snippet.title;
+        const totalDuration = parseISO8601Duration(videoDetails.contentDetails.duration);
 
         timeEnd(extractionLabel);
         logger.info(`[${requestHash}] Initial data extraction complete. Title: ${videoTitle}, Total Frames: ${allTimestamps.length}`);
@@ -362,7 +391,12 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
             return; // Exit early
         }
 
-        const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
+        const model = genAI.getGenerativeModel({
+            model: "gemini-2.5-pro",
+            generationConfig: {
+                temperature: 0.5
+            }
+        });
 
         const promptTemplatePath = path.join(__dirname, 'prompt_template.txt');
         let prompt = fs.readFileSync(promptTemplatePath, 'utf-8');
