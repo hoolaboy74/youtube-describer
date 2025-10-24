@@ -158,102 +158,116 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
             sseHandler('start', { videoId, title: videoTitle });
         }
 
-        // 2. Process AI generation in chunks
-        const CHUNK_DURATION_SECONDS = 180;
+        // 2. Process AI generation with full context in a single stream
+        logger.info(`[${requestHash}] Step 2: Starting AI generation with full context...`);
+        const aiLabel = `[${requestHash}] Full AI Process Time`;
+        time(aiLabel);
+
+        if (sseHandler) sseHandler('status_update', { message: 'AI로 전체 대본 생성 중...' });
+
         const allFrameFiles = (await fs.promises.readdir(baseTempDir)).filter(f => f.endsWith('.png')).sort();
-        
-        let previousScriptText = '';
-        let frameIndex = 0;
+        const imageParts = [];
 
-        while (frameIndex < allTimestamps.length) {
-            const chunkNumber = Math.floor(allTimestamps[frameIndex] / CHUNK_DURATION_SECONDS) + 1;
-            const chunkStartTime = (chunkNumber - 1) * CHUNK_DURATION_SECONDS;
-            const chunkEndTime = chunkNumber * CHUNK_DURATION_SECONDS;
+        for (let i = 0; i < allTimestamps.length; i++) {
+            const timestamp = allTimestamps[i];
+            const frameFile = allFrameFiles[i];
+            if (frameFile) {
+                const framePath = path.join(baseTempDir, frameFile);
+                if (fs.existsSync(framePath)) {
+                    imageParts.push({ inlineData: { data: Buffer.from(await fs.promises.readFile(framePath)).toString("base64"), mimeType: 'image/png' } });
+                    imageParts.push({ text: `Timestamp: [${formatTime(timestamp)}]` });
+                }
+            }
+        }
 
-            logger.info(`[${requestHash}] Processing AI for chunk ${chunkNumber}...`);
-            if (sseHandler) sseHandler('status_update', { message: `AI로 대본 생성 중... (${chunkNumber}번째 조각)` });
-            const aiChunkLabel = `[${requestHash}] AI Chunk ${chunkNumber} Time`;
-            time(aiChunkLabel);
+        if (imageParts.length === 0) {
+            logger.warn(`[${requestHash}] No frames to process. Marking as complete with empty script.`);
+            db.updateVideoStatus(videoId, 'completed');
+            if (sseHandler) sseHandler('end', { message: 'Processing complete, no frames found.' });
+            return;
+        }
 
-            const chunkImageParts = [];
+        const model = genAI.getGenerativeModel({
+            model: "gemini-2.5-pro",
+            generationConfig: {
+                temperature: 1
+            }
+        });
 
-            while (frameIndex < allTimestamps.length && allTimestamps[frameIndex] < chunkEndTime) {
-                const timestamp = allTimestamps[frameIndex];
-                const frameFile = allFrameFiles[frameIndex];
+        const promptTemplatePath = path.join(__dirname, 'prompt_template.txt');
+        let prompt = fs.readFileSync(promptTemplatePath, 'utf-8');
+        prompt = prompt.replace('{{VIDEO_TITLE}}', videoTitle);
+        prompt = prompt.replace('{{SUBTITLES}}', subtitleContent);
+
+        const result = await model.generateContentStream([prompt, ...imageParts]);
+
+        let scriptBuffer = '';
+        let dbChunkBuffer = [];
+        const fullScript = [];
+
+        for await (const chunk of result.stream) {
+            if (chunk.text) {
+                scriptBuffer += chunk.text();
                 
-                if (frameFile) {
-                    const framePath = path.join(baseTempDir, frameFile);
-                    if (fs.existsSync(framePath)) {
-                        chunkImageParts.push({ inlineData: { data: Buffer.from(await fs.promises.readFile(framePath)).toString("base64"), mimeType: 'image/png' } });
-                        chunkImageParts.push({ text: `Timestamp: [${formatTime(timestamp)}]` });
+                let lastNewline = scriptBuffer.lastIndexOf('\n');
+                if (lastNewline !== -1) {
+                    const completeLines = scriptBuffer.substring(0, lastNewline).split('\n');
+                    scriptBuffer = scriptBuffer.substring(lastNewline + 1);
+
+                    const newScriptData = completeLines.map(line => {
+                        const match = line.match(/^\s*\[(\d{2}):(\d{2}):(\d{2})\]\s*\[v(\d)\]\s*(.*)\s*$/);
+                        if (!match) return null;
+                        const id = crypto.createHash('sha256').update(line).digest('hex');
+                        const [, hours, minutes, seconds, verbosity, text] = match;
+                        const timestamp = parseInt(hours, 10) * 3600 + parseInt(minutes, 10) * 60 + parseInt(seconds, 10);
+                        return { id, timestamp, text: text.trim(), verbosity: `v${verbosity}` };
+                    }).filter(Boolean);
+
+                    if (newScriptData.length > 0) {
+                        if (sseHandler) {
+                            sseHandler('script_chunk', newScriptData);
+                        }
+                        dbChunkBuffer.push(...newScriptData);
+                        fullScript.push(...newScriptData);
+
+                        if (dbChunkBuffer.length >= 10) {
+                            db.saveVideoChunk({ videoId, scriptChunk: dbChunkBuffer });
+                            dbChunkBuffer = [];
+                        }
                     }
                 }
-                frameIndex++;
             }
-
-            if (chunkImageParts.length === 0) {
-                logger.warn(`[${requestHash}] No frames for AI chunk ${chunkNumber}. Skipping.`);
-                timeEnd(aiChunkLabel);
-                continue;
-            }
-
-            const model = genAI.getGenerativeModel({
-                model: "gemini-2.5-pro",
-                generationConfig: {
-                    temperature: 0.7
-                }
-            });
-            
-            const promptTemplatePath = path.join(__dirname, 'prompt_template.txt');
-            let basePrompt = fs.readFileSync(promptTemplatePath, 'utf-8');
-
-            basePrompt = basePrompt.replace('{{VIDEO_TITLE}}', videoTitle);
-            basePrompt = basePrompt.replace('{{SUBTITLES}}', subtitleContent);
-
-            const contextPrompt = '**이전까지 생성된 대본 (전체 맥락 파악용):**\n' +
-                '\`\`\`\n' +
-                previousScriptText + '\n' +
-                '\`\`\`\n\n' +
-                '**이제부터 제공될 새로운 프레임에 대한 해설을 위 대본에 이어서 자연스럽게 작성해 주세요.**\n';
-            
-            const prompt = previousScriptText ? basePrompt + '\n\n' + contextPrompt : basePrompt;
-
-            const result = await model.generateContent([prompt, ...chunkImageParts]);
-
-            if (result.response.promptFeedback && result.response.promptFeedback.blockReason) {
-                const reason = result.response.promptFeedback.blockReason;
-                logger.error(`[${requestHash}] AI request for chunk ${chunkNumber} was blocked. Reason: ${reason}`);
-                throw new Error(`The AI prompt for chunk ${chunkNumber} was blocked due to prohibited content: ${reason}`);
-            }
-
-            const scriptText = result.response.text();
-            
-            const scriptLines = scriptText.split('\n').filter(line => line.trim().startsWith('['));
-            const chunkScriptData = scriptLines.map((line) => {
+        }
+        
+        // Process any remaining text in the buffer
+        if (scriptBuffer.trim()) {
+             const finalLines = scriptBuffer.split('\n').map(line => {
                 const match = line.match(/^\s*\[(\d{2}):(\d{2}):(\d{2})\]\s*\[v(\d)\]\s*(.*)\s*$/);
                 if (!match) return null;
-
                 const id = crypto.createHash('sha256').update(line).digest('hex');
                 const [, hours, minutes, seconds, verbosity, text] = match;
                 const timestamp = parseInt(hours, 10) * 3600 + parseInt(minutes, 10) * 60 + parseInt(seconds, 10);
                 return { id, timestamp, text: text.trim(), verbosity: `v${verbosity}` };
             }).filter(Boolean);
 
-            if (chunkScriptData.length > 0) {
-                db.saveVideoChunk({ videoId, scriptChunk: chunkScriptData });
-                logger.info(`[${requestHash}] Saved ${chunkScriptData.length} script lines from chunk ${chunkNumber} to DB.`);
+            if (finalLines.length > 0) {
+                if (sseHandler) sseHandler('script_chunk', finalLines);
+                dbChunkBuffer.push(...finalLines);
+                fullScript.push(...finalLines);
             }
-
-            if (sseHandler) {
-                sseHandler('script_chunk', chunkScriptData);
-            }
-            previousScriptText += (previousScriptText ? '\n' : '') + scriptText;
-
-            timeEnd(aiChunkLabel);
         }
 
-        db.updateVideoStatus(videoId, 'completed');
-        logger.info(`[${requestHash}] Successfully generated script text.`);
+        // Save any remaining lines in the DB buffer
+        if (dbChunkBuffer.length > 0) {
+            db.saveVideoChunk({ videoId, scriptChunk: dbChunkBuffer });
+        }
+
+        // Final step: Clean up old scripts and insert the new, complete script atomically.
+        // This ensures consistency, especially if the process was re-run.
+        db.saveVideo({ videoId, title: videoTitle, duration: Math.round(totalDuration), script: fullScript });
+        
+        timeEnd(aiLabel);
+        logger.info(`[${requestHash}] Successfully generated and streamed script text.`);
         if (sseHandler) {
             sseHandler('end', { message: 'Processing complete.' });
         }
@@ -367,7 +381,9 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
         db.ensureVideoRecord({ videoId, title: videoTitle, duration: Math.round(totalDuration) });
 
         // 2. Process AI generation for the entire video
+        logger.info(`[${requestHash}] Step 2: Starting AI generation with full context for batch...`);
         const aiLabel = `[${requestHash}] Full AI Process Time`;
+        time(aiLabel);
 
         const allFrameFiles = (await fs.promises.readdir(baseTempDir)).filter(f => f.endsWith('.png')).sort();
         const imageParts = [];
@@ -394,7 +410,7 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
         const model = genAI.getGenerativeModel({
             model: "gemini-2.5-pro",
             generationConfig: {
-                temperature: 0.7
+                temperature: 1
             }
         });
 
@@ -430,6 +446,7 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
         const responsePayload = { videoId, title: videoTitle, duration: Math.round(totalDuration), script: finalScriptData };
         db.saveVideo(responsePayload);
 
+        timeEnd(aiLabel);
         logger.info(`[${requestHash}] Successfully generated and cached script text for batch processing.`);
         
     } catch (error) {
