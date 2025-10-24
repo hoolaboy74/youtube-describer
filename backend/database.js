@@ -262,6 +262,12 @@ function deleteComment(commentId) {
   return result.changes > 0;
 }
 
+// 영상 삭제 (관련 스크립트와 댓글은 ON DELETE CASCADE로 자동 삭제됨)
+function deleteVideo(videoId) {
+  const result = db.prepare('DELETE FROM videos WHERE videoId = ?').run(videoId);
+  return result.changes > 0;
+}
+
 
 module.exports = {
   init,
@@ -277,5 +283,6 @@ module.exports = {
   getCommentById,
   updateComment,
   deleteComment,
+  deleteVideo,
   verifyPassword,
 };

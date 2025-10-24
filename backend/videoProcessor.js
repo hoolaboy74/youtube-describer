@@ -1,15 +1,12 @@
-require('dotenv').config();
-const { execFile, spawn } = require('child_process');
-const { GoogleGenerativeAI } = require('@google/generative-ai');
-const { google } = require('googleapis');
-const ffmpeg = require('fluent-ffmpeg');
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+const { google } = require("googleapis");
 const fs = require('fs');
 const path = require('path');
 const util = require('util');
-const wav = require('wav');
+const { execFile, spawn } = require('child_process');
 const crypto = require('crypto');
 const db = require('./database');
-const { formatTime } = require('./utils');
+const { formatTime, preprocessVtt } = require('./utils');
 const logger = require('./logger');
 
 const API_KEY = process.env.GOOGLE_API_KEY;
@@ -117,8 +114,9 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
             ]);
             
             if (fs.existsSync(subtitlePath)) {
-                subtitleContent = fs.readFileSync(subtitlePath, 'utf-8');
-                logger.info(`[${requestHash}] Successfully loaded subtitles using yt-dlp.`);
+                const rawVtt = fs.readFileSync(subtitlePath, 'utf-8');
+                subtitleContent = preprocessVtt(rawVtt); // Convert timestamps to seconds
+                logger.info(`[${requestHash}] Successfully loaded and preprocessed subtitles.`);
             } else {
                 logger.warn(`[${requestHash}] yt-dlp did not create a subtitle file. Proceeding without subtitles.`);
             }
@@ -175,7 +173,7 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
                 const framePath = path.join(baseTempDir, frameFile);
                 if (fs.existsSync(framePath)) {
                     imageParts.push({ inlineData: { data: Buffer.from(await fs.promises.readFile(framePath)).toString("base64"), mimeType: 'image/png' } });
-                    imageParts.push({ text: `Timestamp: [${formatTime(timestamp)}]` });
+                    imageParts.push({ text: `Timestamp: [${Math.round(timestamp)}]` });
                 }
             }
         }
@@ -190,7 +188,7 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
         const model = genAI.getGenerativeModel({
             model: "gemini-2.5-pro",
             generationConfig: {
-                temperature: 1
+                temperature: 0.7
             }
         });
 
@@ -215,11 +213,11 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
                     scriptBuffer = scriptBuffer.substring(lastNewline + 1);
 
                     const newScriptData = completeLines.map(line => {
-                        const match = line.match(/^\s*\[(\d{2}):(\d{2}):(\d{2})\]\s*\[v(\d)\]\s*(.*)\s*$/);
+                        const match = line.match(/^\s*\[(\d+)\]\s*\[v(\d)\]\s*(.*)\s*$/);
                         if (!match) return null;
                         const id = crypto.createHash('sha256').update(line).digest('hex');
-                        const [, hours, minutes, seconds, verbosity, text] = match;
-                        const timestamp = parseInt(hours, 10) * 3600 + parseInt(minutes, 10) * 60 + parseInt(seconds, 10);
+                        const [, timestampStr, verbosity, text] = match;
+                        const timestamp = parseInt(timestampStr, 10);
                         return { id, timestamp, text: text.trim(), verbosity: `v${verbosity}` };
                     }).filter(Boolean);
 
@@ -335,7 +333,8 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
                     
                     if (fs.existsSync(subtitlePath)) {
                         logger.info(`[${requestHash}] Successfully loaded subtitles using yt-dlp for batch.`);
-                        return fs.readFileSync(subtitlePath, 'utf-8');
+                        const rawVtt = fs.readFileSync(subtitlePath, 'utf-8');
+                        return preprocessVtt(rawVtt); // Convert timestamps to seconds
                     }
                 } catch (error) {
                     logger.warn(`[${requestHash}] Error fetching subtitles with yt-dlp for batch: ${error.message}.`);
@@ -395,7 +394,7 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
                 const framePath = path.join(baseTempDir, frameFile);
                 if (fs.existsSync(framePath)) {
                     imageParts.push({ inlineData: { data: Buffer.from(await fs.promises.readFile(framePath)).toString("base64"), mimeType: 'image/png' } });
-                    imageParts.push({ text: `Timestamp: [${formatTime(timestamp)}]` });
+                    imageParts.push({ text: `Timestamp: [${Math.round(timestamp)}]` });
                 }
             }
         }
@@ -410,7 +409,7 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
         const model = genAI.getGenerativeModel({
             model: "gemini-2.5-pro",
             generationConfig: {
-                temperature: 1
+                temperature: 0.7
             }
         });
 
@@ -432,12 +431,12 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
         
         const scriptLines = scriptText.split('\n').filter(line => line.trim().startsWith('['));
         const finalScriptData = scriptLines.map((line) => {
-            const match = line.match(/^\s*\[(\d{2}):(\d{2}):(\d{2})\]\s*\[v(\d)\]\s*(.*)\s*$/);
+            const match = line.match(/^\s*\[(\d+)\]\s*\[v(\d)\]\s*(.*)\s*$/);
             if (!match) return null;
 
             const id = crypto.createHash('sha256').update(line).digest('hex');
-            const [, hours, minutes, seconds, verbosity, text] = match;
-            const timestamp = parseInt(hours, 10) * 3600 + parseInt(minutes, 10) * 60 + parseInt(seconds, 10);
+            const [, timestampStr, verbosity, text] = match;
+            const timestamp = parseInt(timestampStr, 10);
             return { id, timestamp, text: text.trim(), verbosity: `v${verbosity}` };
         }).filter(Boolean);
 

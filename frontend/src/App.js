@@ -351,6 +351,7 @@ function PlayerScreen({ mainRef, announcePolite, announceAssertive }) {
     const [statusMessage, setStatusMessage] = useState('영상 정보를 확인 중입니다...');
     const [isPlayerReady, setIsPlayerReady] = useState(false);
     const [isNewGeneration, setIsNewGeneration] = useState(false);
+    const [isGenerationComplete, setIsGenerationComplete] = useState(false);
     const [isInteractionDone, setIsInteractionDone] = useState(false);
 
     const [player, setPlayer] = useState(null);
@@ -439,6 +440,7 @@ function PlayerScreen({ mainRef, announcePolite, announceAssertive }) {
         es.addEventListener('end', () => {
             console.log("SSE stream ended.");
             announcePolite('대본 생성이 완료되었습니다.');
+            setIsGenerationComplete(true);
             es.close();
         });
 
@@ -467,6 +469,7 @@ function PlayerScreen({ mainRef, announcePolite, announceAssertive }) {
         setIsLoading(true);
         setIsNewGeneration(false);
         setIsPlayerReady(false);
+        setIsGenerationComplete(false);
         setIsInteractionDone(false);
         setScript([]);
         setError('');
@@ -482,6 +485,7 @@ function PlayerScreen({ mainRef, announcePolite, announceAssertive }) {
                     if (video.status === 'completed') {
                         setScript(video.script || []);
                         setIsPlayerReady(true);
+                        setIsGenerationComplete(true);
                         announcePolite(video.script && video.script.length > 0 ? '캐시된 영상 데이터를 불러왔습니다.' : '영상 처리가 완료되었지만, 생성된 화면 해설이 없습니다.');
                     } else if (['failed', 'pending'].includes(video.status)) {
                         announcePolite('이전에 실패했거나 미완료된 영상입니다. 다시 생성을 시작합니다.');
@@ -515,6 +519,29 @@ function PlayerScreen({ mainRef, announcePolite, announceAssertive }) {
             }
         };
     }, [videoId, navigate, announcePolite, announceAssertive, startNewGeneration]);
+
+    // Effect for periodic announcements during generation for screen reader users
+    useEffect(() => {
+        if (isNewGeneration && !isGenerationComplete) {
+            const waitingMessages = [
+                'AI가 열심히 대본을 작성하고 있습니다. 잠시만 기다려주세요.',
+                '최고의 해설을 위해 영상의 모든 장면을 분석 중입니다.',
+                '이야기의 흐름을 파악하고 있습니다. 거의 다 되어갑니다.',
+            ];
+            let messageIndex = 0;
+
+            // Announce immediately once, then set interval
+            announcePolite(waitingMessages[messageIndex]);
+            messageIndex = (messageIndex + 1) % waitingMessages.length;
+
+            const intervalId = setInterval(() => {
+                announcePolite(waitingMessages[messageIndex]);
+                messageIndex = (messageIndex + 1) % waitingMessages.length;
+            }, 15000); // Announce every 15 seconds
+
+            return () => clearInterval(intervalId); // Cleanup on completion or error
+        }
+    }, [isNewGeneration, isGenerationComplete, announcePolite]);
 
     const filteredScript = useMemo(() => {
         if (verbosity === 0) return []; // No script if description is off
