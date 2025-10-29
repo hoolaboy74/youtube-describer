@@ -522,7 +522,9 @@ function PlayerScreen({ mainRef, announcePolite, announceAssertive }) {
 
     // Effect for periodic announcements during generation for screen reader users
     useEffect(() => {
-        if (isNewGeneration && !isGenerationComplete) {
+        // The interval should only run when we are actively generating a *new* script,
+        // it's not yet complete, there are no errors, and the player isn't ready to start.
+        if (isNewGeneration && !isGenerationComplete && !error && !isPlayerReady) {
             const waitingMessages = [
                 'AI가 열심히 대본을 작성하고 있습니다. 잠시만 기다려주세요.',
                 '최고의 해설을 위해 영상의 모든 장면을 분석 중입니다.',
@@ -541,7 +543,7 @@ function PlayerScreen({ mainRef, announcePolite, announceAssertive }) {
 
             return () => clearInterval(intervalId); // Cleanup on completion or error
         }
-    }, [isNewGeneration, isGenerationComplete, announcePolite]);
+    }, [isNewGeneration, isGenerationComplete, announcePolite, error, isPlayerReady]);
 
     const filteredScript = useMemo(() => {
         if (verbosity === 0) return []; // No script if description is off
