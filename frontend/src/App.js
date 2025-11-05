@@ -47,10 +47,7 @@ function App() {
         }
     }, [isGuideVisible]);
 
-    const openGuide = (e) => {
-        e.preventDefault();
-        setIsGuideVisible(true);
-    };
+    const openGuide = () => setIsGuideVisible(true);
     const closeGuide = () => setIsGuideVisible(false);
 
     const handleCopyAccount = () => {
@@ -75,9 +72,9 @@ function App() {
                     <Link to="/" style={{ textDecoration: 'none', color: 'inherit' }}>
                         <h1>유튜브 화면 해설 생성기</h1>
                     </Link>
-                    <a href="#" onClick={openGuide} className="guide-button" ref={guideButtonRef}>
+                    <button onClick={openGuide} className="guide-button" ref={guideButtonRef} role="link">
                         서비스 이용 안내
-                    </a>
+                    </button>
                 </div>
                 <p>이 서비스는 유튜브 영상을 시각 장애인을 위한 화면 해설 영상으로 만드는 서비스 입니다.</p>
             </header>
