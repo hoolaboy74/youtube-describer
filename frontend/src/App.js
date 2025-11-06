@@ -456,6 +456,8 @@ function PlayerScreen({ mainRef, announcePolite, announceAssertive }) {
 
     const lastSpokenIndexRef = useRef(-1);
     const hasAnnouncedAiStart = useRef(false);
+    const hasAnnouncedFrameExtraction = useRef(false);
+    const messageIndexRef = useRef(0);
 
     const startNewGeneration = useCallback(() => {
         console.log('Starting new generation process...');
@@ -479,16 +481,31 @@ function PlayerScreen({ mainRef, announcePolite, announceAssertive }) {
 
         es.addEventListener('status_update', (event) => {
             const data = JSON.parse(event.data);
-            setStatusMessage(data.message);
-            
-            const isAiMessage = data.message.includes('AI로 대본 생성 중');
+            setStatusMessage(data.message); // Always update visual message
+
+            const isAiMessage = data.message.includes('AI로 전체 대본 생성 중');
+            const isFrameExtractionMessage = data.message.includes('주요 장면 프레임 추출 중');
+
             if (isAiMessage) {
                 setHasAiProcessingStarted(true); // AI processing has now started
                 if (!hasAnnouncedAiStart.current) {
                     announcePolite(data.message);
                     hasAnnouncedAiStart.current = true;
                 }
+            } else if (isFrameExtractionMessage) {
+                if (!hasAnnouncedFrameExtraction.current) {
+                    // Announce the full message only once
+                    announcePolite('주요 장면 프레임 추출 중입니다.');
+                    hasAnnouncedFrameExtraction.current = true;
+                } else {
+                    // For subsequent updates, just announce the percentage
+                    const progressMatch = data.message.match(/\((\d+)%\)/);
+                    if (progressMatch && progressMatch[1]) {
+                        announcePolite(progressMatch[1] + '%');
+                    }
+                }
             } else {
+                // For other messages like "자막 정보 확인 중..."
                 announcePolite(data.message);
             }
         });
@@ -547,6 +564,8 @@ function PlayerScreen({ mainRef, announcePolite, announceAssertive }) {
         setStatusMessage('영상 정보를 확인 중입니다...');
         announcePolite('영상 데이터를 불러오는 중입니다.');
         hasAnnouncedAiStart.current = false;
+        hasAnnouncedFrameExtraction.current = false;
+        messageIndexRef.current = 0;
 
         axios.get(`/api/script/${videoId}`)
             .then(response => {
@@ -601,15 +620,14 @@ function PlayerScreen({ mainRef, announcePolite, announceAssertive }) {
                 '최고의 해설을 위해 영상의 모든 장면을 분석 중입니다.',
                 '이야기의 흐름을 파악하고 있습니다. 거의 다 되어갑니다.',
             ];
-            let messageIndex = 0;
 
-            // Announce immediately once, then set interval
-            announcePolite(waitingMessages[messageIndex]);
-            messageIndex = (messageIndex + 1) % waitingMessages.length;
+            // Announce immediately once
+            announcePolite(waitingMessages[messageIndexRef.current]);
+            messageIndexRef.current = (messageIndexRef.current + 1) % waitingMessages.length;
 
             const intervalId = setInterval(() => {
-                announcePolite(waitingMessages[messageIndex]);
-                messageIndex = (messageIndex + 1) % waitingMessages.length;
+                announcePolite(waitingMessages[messageIndexRef.current]);
+                messageIndexRef.current = (messageIndexRef.current + 1) % waitingMessages.length;
             }, 15000); // Announce every 15 seconds
 
             return () => clearInterval(intervalId); // Cleanup on completion or error
