@@ -421,6 +421,7 @@ function PlayerScreen({ mainRef, announcePolite, announceAssertive }) {
     const [isNewGeneration, setIsNewGeneration] = useState(false);
     const [isGenerationComplete, setIsGenerationComplete] = useState(false);
     const [isInteractionDone, setIsInteractionDone] = useState(false);
+    const [hasAiProcessingStarted, setHasAiProcessingStarted] = useState(false);
 
     const [player, setPlayer] = useState(null);
     const [verbosity, setVerbosity] = useState(2); // Default to '기본'
@@ -482,6 +483,7 @@ function PlayerScreen({ mainRef, announcePolite, announceAssertive }) {
             
             const isAiMessage = data.message.includes('AI로 대본 생성 중');
             if (isAiMessage) {
+                setHasAiProcessingStarted(true); // AI processing has now started
                 if (!hasAnnouncedAiStart.current) {
                     announcePolite(data.message);
                     hasAnnouncedAiStart.current = true;
@@ -538,6 +540,7 @@ function PlayerScreen({ mainRef, announcePolite, announceAssertive }) {
         setIsNewGeneration(false);
         setIsPlayerReady(false);
         setIsGenerationComplete(false);
+        setHasAiProcessingStarted(false);
         setIsInteractionDone(false);
         setScript([]);
         setError('');
@@ -590,9 +593,9 @@ function PlayerScreen({ mainRef, announcePolite, announceAssertive }) {
 
     // Effect for periodic announcements during generation for screen reader users
     useEffect(() => {
-        // The interval should only run when we are actively generating a *new* script,
-        // it's not yet complete, there are no errors, and the player isn't ready to start.
-        if (isNewGeneration && !isGenerationComplete && !error && !isPlayerReady) {
+        // This interval should only run when we are specifically waiting for the AI,
+        // after frame extraction is complete and before the player is ready.
+        if (hasAiProcessingStarted && !isGenerationComplete && !error && !isPlayerReady) {
             const waitingMessages = [
                 'AI가 열심히 대본을 작성하고 있습니다. 잠시만 기다려주세요.',
                 '최고의 해설을 위해 영상의 모든 장면을 분석 중입니다.',

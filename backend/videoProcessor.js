@@ -128,6 +128,8 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
         if (sseHandler) sseHandler('status_update', { message: '주요 장면 프레임 추출 중...' });
         const allTimestamps = await new Promise((resolve, reject) => {
             const extractedTimestamps = [];
+            let lastReportedProgress = -1; // For progress reporting
+
             const ytdlpArgs = ['-f', 'bestvideo[height<=720][ext=mp4]/best[height<=720][ext=mp4]', '-o', '-', '--no-progress', '--cookies', 'cookies.txt', youtubeUrl];
             const ffmpegArgs = ['-i', '-', '-vf', "select='gt(scene,0.4)',showinfo", '-vsync', 'vfr', path.join(baseTempDir, 'frame-%04d.png')];
             const ytdlpProcess = spawn('yt-dlp', ytdlpArgs);
@@ -135,10 +137,35 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
             ytdlpProcess.stdout.pipe(ffmpegProcess.stdin);
             let ffmpegStderr = '';
             ffmpegProcess.stderr.on('data', (data) => {
-                ffmpegStderr += data.toString();
-                const timeMatches = data.toString().matchAll(/pts_time:(\d+\.?\d*)/g);
+                const stderrChunk = data.toString();
+                ffmpegStderr += stderrChunk;
+
+                // For timestamp extraction from 'showinfo' filter
+                const timeMatches = stderrChunk.matchAll(/pts_time:(\d+\.?\d*)/g);
                 for (const match of timeMatches) {
                     extractedTimestamps.push(parseFloat(match[1]));
+                }
+
+                // For progress reporting from ffmpeg's default output
+                const progressMatches = stderrChunk.matchAll(/time=(\d{2}):(\d{2}):(\d{2})\.(\d{2})/g);
+                let lastMatch = null;
+                for (const match of progressMatches) { lastMatch = match; }
+
+                if (lastMatch) {
+                    const hours = parseInt(lastMatch[1], 10);
+                    const minutes = parseInt(lastMatch[2], 10);
+                    const seconds = parseInt(lastMatch[3], 10);
+                    const currentTime = hours * 3600 + minutes * 60 + seconds;
+
+                    if (totalDuration > 0) {
+                        const progress = Math.min(100, Math.round((currentTime / totalDuration) * 100));
+                        if (progress > lastReportedProgress) {
+                            lastReportedProgress = progress;
+                            if (sseHandler) {
+                                sseHandler('status_update', { message: `주요 장면 프레임 추출 중... (${progress}%)` });
+                            }
+                        }
+                    }
                 }
             });
             ytdlpProcess.on('error', (err) => reject(new Error(`yt-dlp spawn error: ${err.message}`)));
