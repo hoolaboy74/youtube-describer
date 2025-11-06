@@ -106,6 +106,7 @@ function App() {
                                 <button onClick={handleCopyAccount} className="copy-button">
                                     {isCopied ? '복사됨!' : '계좌번호 복사'}
                                 </button>
+                                <p style={{marginTop: '15px'}}><strong>문의 사항:</strong> c7861967@gmail.com</p>
                             </div>
                         </div>
                         <button onClick={closeGuide} ref={closeGuideButtonRef}>닫기</button>
@@ -752,7 +753,8 @@ function PlayerScreen({ mainRef, announcePolite, announceAssertive }) {
                             playerVars: {
                                 controls: 0, // Hide YouTube's native controls
                                 rel: 0, // Do not show related videos
-                                iv_load_policy: 3 // Do not show annotations
+                                iv_load_policy: 3, // Do not show annotations
+                                playsinline: 1 // Important for mobile inline playback
                             }
                         }}
                         onReady={(e) => setPlayer(e.target)}
