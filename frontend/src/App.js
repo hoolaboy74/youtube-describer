@@ -614,7 +614,7 @@ function PlayerScreen({ mainRef, announcePolite, announceAssertive }) {
 
             return () => clearInterval(intervalId); // Cleanup on completion or error
         }
-    }, [isNewGeneration, isGenerationComplete, announcePolite, error, isPlayerReady]);
+    }, [hasAiProcessingStarted, isGenerationComplete, announcePolite, error, isPlayerReady]);
 
     const filteredScript = useMemo(() => {
         if (verbosity === 0) return []; // No script if description is off
