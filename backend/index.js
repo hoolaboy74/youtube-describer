@@ -6,6 +6,7 @@ const path = require('path');
 const db = require('./database');
 const apiRoutes = require('./routes');
 const logger = require('./logger');
+const checkDiskSpace = require('check-disk-space').default;
 
 // Initialize the database
 db.init();
@@ -27,8 +28,20 @@ const ttsCacheDir = path.join(audioCacheDir, 'tts_cache');
 const CACHE_MAX_AGE_DAYS = 30;
 
 async function cleanupOldFiles() {
-    logger.info('Running cleanup of old audio files...');
+    logger.info('Checking disk usage before cleaning old audio files...');
     try {
+        const diskSpace = await checkDiskSpace(__dirname); // Check disk space of the current partition
+        const usagePercent = ((diskSpace.size - diskSpace.free) / diskSpace.size) * 100;
+
+        logger.info(`Current disk usage: ${usagePercent.toFixed(2)}%`);
+
+        if (usagePercent < 70) {
+            logger.info(`Disk usage is below the 70% threshold. Skipping cleanup.`);
+            return;
+        }
+
+        logger.info('Disk usage is above 70%. Proceeding with cleanup of old audio files...');
+        
         // This targets the nested directories inside tts_cache
         const firstLevelDirs = await fs.promises.readdir(ttsCacheDir);
         for (const dir1 of firstLevelDirs) {
