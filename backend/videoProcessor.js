@@ -6,7 +6,7 @@ const util = require('util');
 const { execFile, spawn } = require('child_process');
 const crypto = require('crypto');
 const db = require('./database');
-const { formatTime, preprocessVtt } = require('./utils');
+const { formatTime, preprocessVtt, isValidYoutubeUrl } = require('./utils');
 const logger = require('./logger');
 
 const API_KEY = process.env.GOOGLE_API_KEY;
@@ -51,6 +51,15 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
         if (sseHandler) {
             sseHandler('duplicate_request', { message: 'This video is already being processed.' });
         }
+        return;
+    }
+
+    if (!isValidYoutubeUrl(youtubeUrl)) {
+        logger.error(`[${requestHash}] Invalid YouTube URL provided: ${youtubeUrl}`);
+        if (sseHandler) {
+            sseHandler('error', { message: 'Invalid YouTube URL' });
+        }
+        processingLocks.delete(videoId);
         return;
     }
 
@@ -314,6 +323,10 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
 
 const processVideoBatch = async (videoId, youtubeUrl) => {
     const requestHash = `batch-${videoId.substring(0, 8)}`;
+    if (!isValidYoutubeUrl(youtubeUrl)) {
+        logger.error(`[${requestHash}] Invalid YouTube URL provided: ${youtubeUrl}`);
+        return;
+    }
     const totalTimeLabel = `[${requestHash}] Total Batch Process Time`;
     logger.info(`[${requestHash}] Starting batch processing for ${youtubeUrl}`);
     time(totalTimeLabel);

@@ -27,4 +27,8 @@ function preprocessVtt(vttContent) {
 }
 
 
-module.exports = { formatTime, getYoutubeVideoId, preprocessVtt };
+const YOUTUBE_URL_REGEX = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/(watch\?v=|embed\/|v\/|)([\w-]+)$/;function isValidYoutubeUrl(url) {
+    return YOUTUBE_URL_REGEX.test(url);
+}
+
+module.exports = { formatTime, getYoutubeVideoId, preprocessVtt, isValidYoutubeUrl };
