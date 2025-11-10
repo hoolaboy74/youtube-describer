@@ -258,7 +258,7 @@ function HomeScreen({ announcePolite, announceAssertive }) {
     };
 
     const showSearchResults = searchResults.db.length > 0 || searchResults.youtube.length > 0;
-    const formatCurrency = (num) => num ? num.toLocaleString('ko-KR') : '0';
+    const formatCurrency = (num) => num ? Math.floor(num).toLocaleString('ko-KR') : '0';
 
     const renderList = () => {
         if (showSearchResults) {
@@ -526,6 +526,10 @@ function PlayerScreen({ mainRef, announcePolite, announceAssertive }) {
                         const fundsDepletedError = '서비스 운영을 위한 후원금이 모두 소진되어 현재 새로운 영상을 생성할 수 없습니다. 여러분의 따뜻한 후원이 필요합니다.';
                         setError(fundsDepletedError);
                         announcePolite(fundsDepletedError);
+                    } else if (data.message === 'duration_exceeded') {
+                        const durationError = '30분이 넘는 영상은 비용 문제로 인해 처리할 수 없습니다. 양해 부탁드립니다.';
+                        setError(durationError);
+                        announcePolite(durationError);
                     } else {
                         const errorMessage = data.message || '알 수 없는 오류가 발생했습니다.';
                         setError(errorMessage);
