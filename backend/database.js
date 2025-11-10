@@ -59,6 +59,32 @@ function init() {
     )
   `);
 
+  // donations 테이블: 후원금 입금 내역 저장
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS donations (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      donator_name TEXT NOT NULL,
+      amount INTEGER NOT NULL,
+      donation_date DATETIME NOT NULL,
+      message TEXT,
+      createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  // api_costs 테이블: API 호출 비용 정보 저장
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS api_costs (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      videoId TEXT,
+      model_used TEXT NOT NULL,
+      image_tokens INTEGER DEFAULT 0,
+      text_tokens INTEGER DEFAULT 0,
+      cost REAL NOT NULL,
+      createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (videoId) REFERENCES videos (videoId) ON DELETE SET NULL
+    )
+  `);
+
   logger.info('Database initialized successfully.');
 }
 
@@ -268,6 +294,64 @@ function deleteVideo(videoId) {
   return result.changes > 0;
 }
 
+// --- Admin Page Functions ---
+
+// 후원금 추가
+function addDonation({ donator_name, amount, donation_date, message }) {
+  const result = db.prepare(
+    'INSERT INTO donations (donator_name, amount, donation_date, message) VALUES (?, ?, ?, ?)'
+  ).run(donator_name, amount, donation_date, message);
+  return result.lastInsertRowid;
+}
+
+// 후원금 목록 조회
+function listDonations() {
+  return db.prepare("SELECT id, donator_name, amount, strftime('%Y-%m-%dT%H:%M:%SZ', donation_date) as donation_date, message, strftime('%Y-%m-%dT%H:%M:%SZ', createdAt) as createdAt FROM donations ORDER BY donation_date DESC").all();
+}
+
+// 후원금 삭제
+function deleteDonation(id) {
+  const result = db.prepare('DELETE FROM donations WHERE id = ?').run(id);
+  return result.changes > 0;
+}
+
+// API 비용 추가
+function addApiCost({ videoId, model_used, image_tokens, text_tokens, cost }) {
+    const result = db.prepare(
+        'INSERT INTO api_costs (videoId, model_used, image_tokens, text_tokens, cost) VALUES (?, ?, ?, ?, ?)'
+    ).run(videoId, model_used, image_tokens, text_tokens, cost);
+    return result.lastInsertRowid;
+}
+
+// API 비용 목록 조회
+function listApiCosts() {
+    return db.prepare(`
+        SELECT 
+            ac.id, 
+            ac.videoId, 
+            v.title as videoTitle,
+            ac.model_used, 
+            ac.image_tokens, 
+            ac.text_tokens, 
+            ac.cost, 
+            strftime('%Y-%m-%dT%H:%M:%SZ', ac.createdAt) as createdAt 
+        FROM api_costs ac
+        LEFT JOIN videos v ON ac.videoId = v.videoId
+        ORDER BY ac.createdAt DESC
+    `).all();
+}
+
+// 총 후원금 및 총 비용 집계
+function getAggregatedCosts() {
+    const totalDonations = db.prepare('SELECT SUM(amount) as total FROM donations').get()?.total || 0;
+    const totalApiCosts = db.prepare('SELECT SUM(cost) as total FROM api_costs').get()?.total || 0;
+    return {
+        totalDonations,
+        totalApiCosts,
+        balance: totalDonations - totalApiCosts,
+    };
+}
+
 
 module.exports = {
   init,
@@ -285,4 +369,11 @@ module.exports = {
   deleteComment,
   deleteVideo,
   verifyPassword,
+  // Admin functions
+  addDonation,
+  listDonations,
+  deleteDonation,
+  addApiCost,
+  listApiCosts,
+  getAggregatedCosts,
 };

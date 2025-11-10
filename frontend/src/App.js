@@ -4,9 +4,13 @@ import axios from 'axios';
 import YouTube from 'react-youtube';
 import './App.css';
 import Comments from './Comments'; // Import the Comments component
+import Admin from './Admin'; // Import the Admin component
 
 // Helper to check if a string is a valid YouTube URL
 function getYouTubeId(url) {
+    if (!isValidYoutubeUrl(url)) {
+        return null;
+    }
     try {
         const urlObj = new URL(url);
         if (urlObj.hostname === 'youtu.be') return urlObj.pathname.substring(1);
@@ -42,8 +46,6 @@ function App() {
     useEffect(() => {
         if (isGuideVisible) {
             closeGuideButtonRef.current?.focus();
-        } else {
-            guideButtonRef.current?.focus();
         }
     }, [isGuideVisible]);
 
@@ -70,13 +72,13 @@ function App() {
             <header className="App-header">
                 <div className="header-top">
                     <Link to="/" style={{ textDecoration: 'none', color: 'inherit' }}>
-                        <h1>유튜브 화면 해설 생성기</h1>
+                        <h1>뷰레이터</h1>
                     </Link>
                     <button onClick={openGuide} className="guide-button" ref={guideButtonRef} role="link">
                         서비스 이용 안내
                     </button>
                 </div>
-                <p>이 서비스는 유튜브 영상을 시각 장애인을 위한 화면 해설 영상으로 만드는 서비스 입니다.</p>
+                <p>뷰레이터는 시각 장애인을 위한 유튜브 화면 해설 생성 서비스 입니다</p>
             </header>
 
             {isGuideVisible && (
@@ -118,6 +120,7 @@ function App() {
                 <Routes>
                     <Route path="/" element={<HomeScreen announcePolite={announcePolite} announceAssertive={announceAssertive} />} />
                     <Route path="/video/:videoId" element={<PlayerScreen mainRef={mainRef} announcePolite={announcePolite} announceAssertive={announceAssertive} />} />
+                    <Route path="/admin" element={<Admin />} />
                 </Routes>
             </main>
         </div>
@@ -132,6 +135,7 @@ function HomeScreen({ announcePolite, announceAssertive }) {
     const [error, setError] = useState('');
     const [searchResults, setSearchResults] = useState({ db: [], youtube: [] });
     const [initialVideos, setInitialVideos] = useState([]);
+    const [financialSummary, setFinancialSummary] = useState(null);
     
     const [initialVideosLimit, setInitialVideosLimit] = useState(10);
     const [dbResultsLimit, setDbResultsLimit] = useState(10);
@@ -142,6 +146,7 @@ function HomeScreen({ announcePolite, announceAssertive }) {
     const navigate = useNavigate();
 
     useEffect(() => {
+        // Fetch initial video list
         axios.get(`/api/cached-videos`)
             .then(response => setInitialVideos(response.data || []))
             .catch(err => {
@@ -150,6 +155,11 @@ function HomeScreen({ announcePolite, announceAssertive }) {
                 setError(errorMsg);
                 announceAssertive(`오류: ${errorMsg}`);
             });
+
+        // Fetch financial summary
+        axios.get('/api/financial-summary')
+            .then(response => setFinancialSummary(response.data))
+            .catch(err => console.error('Failed to fetch financial summary:', err));
     }, [announceAssertive]);
 
     useEffect(() => {
@@ -194,12 +204,20 @@ function HomeScreen({ announcePolite, announceAssertive }) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
+        setError(''); // Clear previous errors
         if (!inputValue) return;
 
+        const isUrlLike = inputValue.startsWith('http://') || inputValue.startsWith('https://');
         const videoId = getYouTubeId(inputValue);
-        if (videoId) {
-            announcePolite('새 영상 처리를 시작합니다.');
-            navigate(`/video/${videoId}`);
+
+        if (isUrlLike) {
+            if (videoId) {
+                announcePolite('새 영상 처리를 시작합니다.');
+                navigate(`/video/${videoId}`);
+            } else {
+                setError('유효하지 않은 YouTube URL입니다. 올바른 주소를 입력해주세요.');
+                announceAssertive('오류: 유효하지 않은 YouTube URL');
+            }
         } else {
             handleSearch(inputValue);
         }
@@ -240,6 +258,7 @@ function HomeScreen({ announcePolite, announceAssertive }) {
     };
 
     const showSearchResults = searchResults.db.length > 0 || searchResults.youtube.length > 0;
+    const formatCurrency = (num) => num ? num.toLocaleString('ko-KR') : '0';
 
     const renderList = () => {
         if (showSearchResults) {
@@ -247,7 +266,7 @@ function HomeScreen({ announcePolite, announceAssertive }) {
                 <>
                     {searchResults.db.length > 0 && (
                         <div className="search-results-section">
-                            <h3>DB 검색 결과</h3>
+                            <h3>화면 해설 영상 검색 결과</h3>
                             <ol>
                                 {searchResults.db.slice(0, dbResultsLimit).map(video => (
                                     <li key={video.id}>
@@ -323,6 +342,21 @@ function HomeScreen({ announcePolite, announceAssertive }) {
     return (
         <>
             {error && <p className="error-message" role="alert">{error}</p>}
+
+            {financialSummary && (
+                <section className="financial-summary-container" aria-labelledby="financial-summary-heading">
+                    <h2 id="financial-summary-heading" className="visually-hidden">실시간 운영 현황</h2>
+                    <div className="financial-text">
+                        남은 운영비: <strong>{formatCurrency(financialSummary.balance)}원</strong>
+                    </div>
+                    <progress
+                        max={financialSummary.totalDonations}
+                        value={financialSummary.totalApiCosts}
+                        aria-label={`총 후원금 ${formatCurrency(financialSummary.totalDonations)}원 중 ${formatCurrency(financialSummary.totalApiCosts)}원 사용됨`}
+                    />
+                </section>
+            )}
+
             <form onSubmit={handleSubmit} className="url-form">
                 <input
                     type="text"
@@ -334,7 +368,7 @@ function HomeScreen({ announcePolite, announceAssertive }) {
             </form>
 
             <div className="cached-list-container">
-                <h2>{showSearchResults ? '검색 결과' : '이전 작업 목록'}</h2>
+                <h2>{showSearchResults ? '검색 결과' : '사용자들의 최근 생성 영상'}</h2>
                 {isSearching ? <p>검색 중...</p> : renderList()}
             </div>
         </>
@@ -348,7 +382,13 @@ function formatTime(seconds) {
     return new Date(seconds * 1000).toISOString().substr(11, 8);
 }
 
-const SILENT_AUDIO = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA';
+const SILENT_AUDIO = 'data:audio/wav;base64,U1JpZ0AAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA';
+
+const YOUTUBE_URL_REGEX = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/(watch\?v=|embed\/|v\/|)([\w-]+)$/;
+
+function isValidYoutubeUrl(url) {
+    return YOUTUBE_URL_REGEX.test(url);
+}
 
 // --- ShareButton Component ---
 function ShareButton({ announcePolite }) {
@@ -537,12 +577,39 @@ function PlayerScreen({ mainRef, announcePolite, announceAssertive }) {
             es.close();
         });
 
+        es.addEventListener('backend_error', (event) => {
+            // This listener catches custom 'backend_error' events sent from the backend
+            // The native es.onerror will still catch network-level errors
+            try {
+                const data = JSON.parse(event.data);
+                console.error('Backend Error Event:', data);
+                
+                if (data.message === 'funds_depleted') {
+                    const fundsDepletedError = '서비스 운영을 위한 후원금이 모두 소진되어 현재 새로운 영상을 생성할 수 없습니다. 여러분의 따뜻한 후원이 필요합니다.';
+                    setError(fundsDepletedError);
+                    announcePolite(fundsDepletedError);
+                } else {
+                    const errorMessage = data.message || '알 수 없는 오류가 발생했습니다.';
+                    setError(errorMessage);
+                    announcePolite(`오류: ${errorMessage}`);
+                }
+
+            } catch (parseError) {
+                console.error('Failed to parse backend error event:', parseError, event.data);
+                setError('서버에서 알 수 없는 오류가 발생했습니다.');
+                announcePolite('오류: 서버에서 알 수 없는 오류');
+            }
+            es.close();
+        });
+
         es.onerror = (err) => {
             if (isDuplicate) return;
             console.error('EventSource failed:', err);
-            const errorMsg = '대본 생성 중 오류가 발생했습니다.';
-            setError(errorMsg);
-            announceAssertive(`오류: ${errorMsg}`);
+            if (!error) { 
+                const errorMsg = '대본 생성 중 네트워크 오류가 발생했습니다. 인터넷 연결을 확인해주세요.';
+                setError(errorMsg);
+                announcePolite(`오류: ${errorMsg}`);
+            }
             es.close();
         };
     }, [videoId, announcePolite, announceAssertive]);

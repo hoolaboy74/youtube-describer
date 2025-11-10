@@ -296,6 +296,27 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
             db.saveVideoChunk({ videoId, scriptChunk: dbChunkBuffer });
         }
 
+        // Log API cost after stream is complete
+        try {
+            const finalResponse = await result.response;
+            const usageMetadata = finalResponse.usageMetadata;
+            if (usageMetadata) {
+                const { promptTokenCount, candidatesTokenCount, totalTokenCount } = usageMetadata;
+                // Gemini 2.5 Pro: $3.50 per 1M input tokens = $0.0000035 per token
+                const cost = totalTokenCount * 0.0000035; 
+                db.addApiCost({
+                    videoId,
+                    model_used: 'gemini-2.5-pro',
+                    image_tokens: promptTokenCount, // This is an approximation, includes text prompt
+                    text_tokens: candidatesTokenCount,
+                    cost
+                });
+                logger.info(`[${requestHash}] Logged API cost: ${cost.toFixed(6)} USD for ${totalTokenCount} tokens.`);
+            }
+        } catch (costError) {
+            logger.error(`[${requestHash}] Failed to log API cost:`, costError);
+        }
+
         // Final step: Clean up old scripts and insert the new, complete script atomically.
         // This ensures consistency, especially if the process was re-run.
         db.saveVideo({ videoId, title: videoTitle, duration: Math.round(totalDuration), script: fullScript });
@@ -460,6 +481,25 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
         prompt = prompt.replace('{{SUBTITLES}}', subtitleContent);
 
         const result = await model.generateContent([prompt, ...imageParts]);
+
+        // Log API cost
+        try {
+            const usageMetadata = result.response.usageMetadata;
+            if (usageMetadata) {
+                const { promptTokenCount, candidatesTokenCount, totalTokenCount } = usageMetadata;
+                const cost = totalTokenCount * 0.0000035; // Gemini 2.5 Pro: $3.50 per 1M tokens
+                db.addApiCost({
+                    videoId,
+                    model_used: 'gemini-2.5-pro',
+                    image_tokens: promptTokenCount,
+                    text_tokens: candidatesTokenCount,
+                    cost
+                });
+                logger.info(`[${requestHash}] Logged API cost for batch: ${cost.toFixed(6)} USD for ${totalTokenCount} tokens.`);
+            }
+        } catch (costError) {
+            logger.error(`[${requestHash}] Failed to log API cost for batch:`, costError);
+        }
         
         if (result.response.promptFeedback && result.response.promptFeedback.blockReason) {
             const reason = result.response.promptFeedback.blockReason;

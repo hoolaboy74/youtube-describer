@@ -122,6 +122,17 @@ router.get('/script/:videoId', (req, res) => {
     }
 });
 
+// Public endpoint for financial summary
+router.get('/financial-summary', (req, res) => {
+    try {
+        const summary = db.getAggregatedCosts();
+        res.json(summary);
+    } catch (error) {
+        logger.error('[Public] Failed to fetch financial summary:', error);
+        res.status(500).json({ error: 'Failed to fetch financial summary' });
+    }
+});
+
 router.get('/cached-videos', (req, res) => {
     try {
         const videos = db.listVideos();
@@ -199,13 +210,27 @@ router.get('/process', async (req, res) => {
 
     const { youtubeUrl } = req.query;
     if (!youtubeUrl || typeof youtubeUrl !== 'string') {
-        sendSse('error', { message: 'Invalid or missing YouTube URL' });
+        sendSse('backend_error', { message: 'Invalid or missing YouTube URL' });
         return res.end();
     }
 
     const videoId = getYoutubeVideoId(youtubeUrl);
     if (!videoId) {
-        sendSse('error', { message: 'Could not extract YouTube video ID from URL' });
+        sendSse('backend_error', { message: 'Could not extract YouTube video ID from URL' });
+        return res.end();
+    }
+
+    // Check financial balance before processing
+    try {
+        const financialSummary = db.getAggregatedCosts();
+        if (financialSummary.balance <= 0) {
+            logger.warn(`[Processing] Video processing blocked for ${videoId} due to insufficient funds. Balance: ${financialSummary.balance}`);
+            sendSse('backend_error', { message: 'funds_depleted' });
+            return res.end();
+        }
+    } catch (error) {
+        logger.error(`[Processing] Failed to check financial balance for ${videoId}:`, error);
+        sendSse('backend_error', { message: 'Failed to check server balance. Please try again later.' });
         return res.end();
     }
 
@@ -335,6 +360,94 @@ router.delete('/comments/:commentId', (req, res) => {
         res.status(500).json({ error: 'Failed to delete comment' });
     }
 });
+
+// --- ADMIN API ENDPOINTS ---
+
+// Simple password authentication middleware for admin routes
+const adminAuth = (req, res, next) => {
+    const authHeader = req.headers.authorization;
+    const expectedPassword = 'momcenter!@#';
+
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+        const token = authHeader.substring(7); // "Bearer ".length
+        if (token === expectedPassword) {
+            return next();
+        }
+    }
+    logger.warn(`[Admin] Unauthorized access attempt to ${req.originalUrl}`);
+    res.status(401).json({ error: 'Unauthorized' });
+};
+
+// Apply the middleware to all /admin routes
+const adminRouter = express.Router();
+adminRouter.use(adminAuth);
+
+// GET cost summary
+adminRouter.get('/summary', (req, res) => {
+    try {
+        const summary = db.getAggregatedCosts();
+        res.json(summary);
+    } catch (error) {
+        logger.error('[Admin] Failed to fetch cost summary:', error);
+        res.status(500).json({ error: 'Failed to fetch cost summary' });
+    }
+});
+
+// GET all donations
+adminRouter.get('/donations', (req, res) => {
+    try {
+        const donations = db.listDonations();
+        res.json(donations);
+    } catch (error) {
+        logger.error('[Admin] Failed to fetch donations:', error);
+        res.status(500).json({ error: 'Failed to fetch donations' });
+    }
+});
+
+// POST a new donation
+adminRouter.post('/donations', (req, res) => {
+    try {
+        const { donator_name, amount, donation_date, message } = req.body;
+        if (!donator_name || amount === null || amount === undefined || !donation_date) {
+            return res.status(400).json({ error: 'Missing required fields for donation' });
+        }
+        const newDonationId = db.addDonation({ donator_name, amount: parseInt(amount), donation_date, message });
+        res.status(201).json({ id: newDonationId });
+    } catch (error) {
+        logger.error('[Admin] Failed to add donation:', error);
+        res.status(500).json({ error: 'Failed to add donation' });
+    }
+});
+
+// DELETE a donation
+adminRouter.delete('/donations/:id', (req, res) => {
+    try {
+        const { id } = req.params;
+        const success = db.deleteDonation(id);
+        if (success) {
+            res.status(200).json({ message: 'Donation deleted successfully' });
+        } else {
+            res.status(404).json({ error: 'Donation not found' });
+        }
+    } catch (error) {
+        logger.error(`[Admin] Failed to delete donation ${req.params.id}:`, error);
+        res.status(500).json({ error: 'Failed to delete donation' });
+    }
+});
+
+// GET all API costs
+adminRouter.get('/costs', (req, res) => {
+    try {
+        const costs = db.listApiCosts();
+        res.json(costs);
+    } catch (error) {
+        logger.error('[Admin] Failed to fetch API costs:', error);
+        res.status(500).json({ error: 'Failed to fetch API costs' });
+    }
+});
+
+// Mount the admin router
+router.use('/admin', adminRouter);
 
 
 module.exports = router;
