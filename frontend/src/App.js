@@ -537,12 +537,12 @@ function PlayerScreen({ mainRef, announcePolite, announceAssertive }) {
                     // Announce the full message only once
                     announcePolite('주요 장면 프레임 추출 중입니다.');
                     hasAnnouncedFrameExtraction.current = true;
-                } else {
-                    // For subsequent updates, just announce the percentage
-                    const progressMatch = data.message.match(/\((\d+)%\)/);
-                    if (progressMatch && progressMatch[1]) {
-                        announcePolite(progressMatch[1] + '%');
-                    }
+                }
+            } else {
+                // For subsequent updates, just announce the percentage
+                const progressMatch = data.message.match(/\((\d+)%\)/);
+                if (progressMatch && progressMatch[1]) {
+                    announcePolite(progressMatch[1] + '%');
                 }
             } else {
                 // For other messages like "자막 정보 확인 중..."
@@ -612,7 +612,7 @@ function PlayerScreen({ mainRef, announcePolite, announceAssertive }) {
             }
             es.close();
         };
-    }, [videoId, announcePolite, announceAssertive]);
+    }, [videoId, announcePolite, error]);
 
     useEffect(() => {
         if (!videoId) {
