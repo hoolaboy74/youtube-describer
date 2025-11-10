@@ -510,6 +510,43 @@ function PlayerScreen({ mainRef, announcePolite, announceAssertive }) {
         eventSourceRef.current = es;
         let isDuplicate = false;
         let isFirstChunk = true;
+        let hasErrorFired = false;
+
+        const handleError = (errorType, errorPayload) => {
+            if (hasErrorFired) return;
+            hasErrorFired = true;
+            es.close();
+
+            if (errorType === 'backend') {
+                try {
+                    const data = JSON.parse(errorPayload);
+                    console.error('Backend Error Event:', data);
+                    
+                    if (data.message === 'funds_depleted') {
+                        const fundsDepletedError = '서비스 운영을 위한 후원금이 모두 소진되어 현재 새로운 영상을 생성할 수 없습니다. 여러분의 따뜻한 후원이 필요합니다.';
+                        setError(fundsDepletedError);
+                        announcePolite(fundsDepletedError);
+                    } else {
+                        const errorMessage = data.message || '알 수 없는 오류가 발생했습니다.';
+                        setError(errorMessage);
+                        announcePolite(`오류: ${errorMessage}`);
+                    }
+                } catch (parseError) {
+                    console.error('Failed to parse backend error event:', parseError, errorPayload);
+                    setError('서버에서 알 수 없는 오류가 발생했습니다.');
+                    announcePolite('오류: 서버에서 알 수 없는 오류');
+                }
+            } else if (errorType === 'network') {
+                if (isDuplicate) return;
+                console.error('EventSource failed:', errorPayload);
+                setError(currentError => {
+                    if (currentError) return currentError; // Don't overwrite a more specific error
+                    const errorMsg = '대본 생성 중 네트워크 오류가 발생했습니다. 인터넷 연결을 확인해주세요.';
+                    announcePolite(`오류: ${errorMsg}`);
+                    return errorMsg;
+                });
+            }
+        };
 
         es.onopen = () => console.log("SSE connection opened for streaming.");
 
@@ -574,38 +611,14 @@ function PlayerScreen({ mainRef, announcePolite, announceAssertive }) {
         });
 
         es.addEventListener('backend_error', (event) => {
-            try {
-                const data = JSON.parse(event.data);
-                console.error('Backend Error Event:', data);
-                
-                if (data.message === 'funds_depleted') {
-                    const fundsDepletedError = '서비스 운영을 위한 후원금이 모두 소진되어 현재 새로운 영상을 생성할 수 없습니다. 여러분의 따뜻한 후원이 필요합니다.';
-                    setError(fundsDepletedError);
-                    announcePolite(fundsDepletedError);
-                } else {
-                    const errorMessage = data.message || '알 수 없는 오류가 발생했습니다.';
-                    setError(errorMessage);
-                    announcePolite(`오류: ${errorMessage}`);
-                }
-            } catch (parseError) {
-                console.error('Failed to parse backend error event:', parseError, event.data);
-                setError('서버에서 알 수 없는 오류가 발생했습니다.');
-                announcePolite('오류: 서버에서 알 수 없는 오류');
-            }
-            es.close();
+            handleError('backend', event.data);
         });
 
         es.onerror = (err) => {
             if (isDuplicate) return;
-            console.error('EventSource failed:', err);
-            if (!error) { 
-                const errorMsg = '대본 생성 중 네트워크 오류가 발생했습니다. 인터넷 연결을 확인해주세요.';
-                setError(errorMsg);
-                announcePolite(`오류: ${errorMsg}`);
-            }
-            es.close();
+            handleError('network', err);
         };
-    }, [videoId, announcePolite, error]);
+    }, [videoId, announcePolite]);
 
     useEffect(() => {
         if (!videoId) {
