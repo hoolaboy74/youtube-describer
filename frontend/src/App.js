@@ -475,7 +475,6 @@ function PlayerScreen({ mainRef, announcePolite, announceAssertive }) {
     // UI State
     const [isScriptVisible, setIsScriptVisible] = useState(false);
 
-    // Combined description enabled/disabled logic
     const isDescriptionEnabled = verbosity > 0;
     const isDescriptionEnabledRef = useRef(isDescriptionEnabled);
     useEffect(() => { isDescriptionEnabledRef.current = isDescriptionEnabled; }, [isDescriptionEnabled]);
@@ -519,53 +518,30 @@ function PlayerScreen({ mainRef, announcePolite, announceAssertive }) {
             setVideoInfo({ videoId: data.videoId, title: data.title });
         });
 
-    const startNewGeneration = useCallback(() => {
-        console.log('Starting new generation process...');
-        setIsNewGeneration(true);
-        setStatusMessage('새로운 화면 해설 대본 생성을 시작합니다...');
-        announcePolite('기존 대본이 없거나 불완전하여, 새로 생성을 시작합니다.');
-        
-        const sseApiHost = process.env.NODE_ENV === 'production' ? '' : 'http://localhost:4000';
-        const url = `${sseApiHost}/api/process?youtubeUrl=${encodeURIComponent(`https://www.youtube.com/watch?v=${videoId}`)}`;
-        const es = new EventSource(url);
-        eventSourceRef.current = es;
-        let isDuplicate = false;
-        let isFirstChunk = true;
-
-        es.onopen = () => console.log("SSE connection opened for streaming.");
-
-        es.addEventListener('start', (event) => {
-            const data = JSON.parse(event.data);
-            setVideoInfo({ videoId: data.videoId, title: data.title });
-        });
-
         es.addEventListener('status_update', (event) => {
             const data = JSON.parse(event.data);
-            setStatusMessage(data.message); // Always update visual message
+            setStatusMessage(data.message);
 
             const isAiMessage = data.message.includes('AI로 전체 대본 생성 중');
             const isFrameExtractionMessage = data.message.includes('주요 장면 프레임 추출 중');
 
             if (isAiMessage) {
-                setHasAiProcessingStarted(true); // AI processing has now started
+                setHasAiProcessingStarted(true);
                 if (!hasAnnouncedAiStart.current) {
                     announcePolite(data.message);
                     hasAnnouncedAiStart.current = true;
                 }
             } else if (isFrameExtractionMessage) {
                 if (!hasAnnouncedFrameExtraction.current) {
-                    // Announce the full message only once
                     announcePolite('주요 장면 프레임 추출 중입니다.');
                     hasAnnouncedFrameExtraction.current = true;
                 } else {
-                    // For subsequent updates, just announce the percentage
                     const progressMatch = data.message.match(/\((\d+)%\)/);
                     if (progressMatch && progressMatch[1]) {
                         announcePolite(progressMatch[1] + '%');
                     }
                 }
             } else {
-                // For other messages like "자막 정보 확인 중..."
                 announcePolite(data.message);
             }
         });
@@ -598,8 +574,6 @@ function PlayerScreen({ mainRef, announcePolite, announceAssertive }) {
         });
 
         es.addEventListener('backend_error', (event) => {
-            // This listener catches custom 'backend_error' events sent from the backend
-            // The native es.onerror will still catch network-level errors
             try {
                 const data = JSON.parse(event.data);
                 console.error('Backend Error Event:', data);
@@ -613,71 +587,6 @@ function PlayerScreen({ mainRef, announcePolite, announceAssertive }) {
                     setError(errorMessage);
                     announcePolite(`오류: ${errorMessage}`);
                 }
-
-            } catch (parseError) {
-                console.error('Failed to parse backend error event:', parseError, event.data);
-                setError('서버에서 알 수 없는 오류가 발생했습니다.');
-                announcePolite('오류: 서버에서 알 수 없는 오류');
-            }
-            es.close();
-        });
-
-        es.onerror = (err) => {
-            if (isDuplicate) return;
-            console.error('EventSource failed:', err);
-            if (!error) { 
-                const errorMsg = '대본 생성 중 네트워크 오류가 발생했습니다. 인터넷 연결을 확인해주세요.';
-                setError(errorMsg);
-                announcePolite(`오류: ${errorMsg}`);
-            }
-            es.close();
-        };
-    }, [videoId, announcePolite, error]);
-
-        es.addEventListener('script_chunk', (event) => {
-            if (isFirstChunk) {
-                setIsPlayerReady(true);
-                announcePolite('재생 준비가 완료되었습니다. 이제 영상을 재생할 수 있습니다.');
-                isFirstChunk = false;
-            }
-            const chunk = JSON.parse(event.data);
-            setScript(prevScript => {
-                const scriptMap = new Map(prevScript.map(line => [line.id, line]));
-                chunk.forEach(line => scriptMap.set(line.id, line));
-                return Array.from(scriptMap.values()).sort((a, b) => a.timestamp - b.timestamp);
-            });
-        });
-
-        es.addEventListener('end', () => {
-            console.log("SSE stream ended.");
-            announcePolite('대본 생성이 완료되었습니다.');
-            setIsGenerationComplete(true);
-            es.close();
-        });
-
-        es.addEventListener('duplicate_request', () => {
-            console.log('Duplicate request detected.');
-            isDuplicate = true;
-            es.close();
-        });
-
-        es.addEventListener('backend_error', (event) => {
-            // This listener catches custom 'backend_error' events sent from the backend
-            // The native es.onerror will still catch network-level errors
-            try {
-                const data = JSON.parse(event.data);
-                console.error('Backend Error Event:', data);
-                
-                if (data.message === 'funds_depleted') {
-                    const fundsDepletedError = '서비스 운영을 위한 후원금이 모두 소진되어 현재 새로운 영상을 생성할 수 없습니다. 여러분의 따뜻한 후원이 필요합니다.';
-                    setError(fundsDepletedError);
-                    announcePolite(fundsDepletedError);
-                } else {
-                    const errorMessage = data.message || '알 수 없는 오류가 발생했습니다.';
-                    setError(errorMessage);
-                    announcePolite(`오류: ${errorMessage}`);
-                }
-
             } catch (parseError) {
                 console.error('Failed to parse backend error event:', parseError, event.data);
                 setError('서버에서 알 수 없는 오류가 발생했습니다.');
@@ -763,8 +672,6 @@ function PlayerScreen({ mainRef, announcePolite, announceAssertive }) {
 
     // Effect for periodic announcements during generation for screen reader users
     useEffect(() => {
-        // This interval should only run when we are specifically waiting for the AI,
-        // after frame extraction is complete and before the player is ready.
         if (hasAiProcessingStarted && !isGenerationComplete && !error && !isPlayerReady) {
             const waitingMessages = [
                 'AI가 열심히 대본을 작성하고 있습니다. 잠시만 기다려주세요.',
@@ -772,21 +679,20 @@ function PlayerScreen({ mainRef, announcePolite, announceAssertive }) {
                 '이야기의 흐름을 파악하고 있습니다. 거의 다 되어갑니다.',
             ];
 
-            // Announce immediately once
             announcePolite(waitingMessages[messageIndexRef.current]);
             messageIndexRef.current = (messageIndexRef.current + 1) % waitingMessages.length;
 
             const intervalId = setInterval(() => {
                 announcePolite(waitingMessages[messageIndexRef.current]);
                 messageIndexRef.current = (messageIndexRef.current + 1) % waitingMessages.length;
-            }, 15000); // Announce every 15 seconds
+            }, 15000);
 
-            return () => clearInterval(intervalId); // Cleanup on completion or error
+            return () => clearInterval(intervalId);
         }
     }, [hasAiProcessingStarted, isGenerationComplete, announcePolite, error, isPlayerReady]);
 
     const filteredScript = useMemo(() => {
-        if (verbosity === 0) return []; // No script if description is off
+        if (verbosity === 0) return [];
 
         const linesByTimestamp = new Map();
         for (const line of script) {
@@ -873,7 +779,7 @@ function PlayerScreen({ mainRef, announcePolite, announceAssertive }) {
 
     const handleVerbosityChange = (level) => {
         setVerbosity(level);
-        const label = { 0: '해설 없음', ...verbosityLabels }[level];
+        const label = { 0: '없음', ...verbosityLabels }[level];
         announcePolite(`상세 수준이 ${label}으로 변경되었습니다.`);
     };
 
@@ -890,9 +796,9 @@ function PlayerScreen({ mainRef, announcePolite, announceAssertive }) {
         }
 
         const playerState = player.getPlayerState();
-        if (playerState === 1) { // playing
+        if (playerState === 1) {
             player.pauseVideo();
-        } else { // paused, ended, etc.
+        } else {
             player.playVideo();
         }
     };
@@ -923,10 +829,10 @@ function PlayerScreen({ mainRef, announcePolite, announceAssertive }) {
                             width: '100%',
                             height: '100%',
                             playerVars: {
-                                controls: 0, // Hide YouTube's native controls
-                                rel: 0, // Do not show related videos
-                                iv_load_policy: 3, // Do not show annotations
-                                playsinline: 1 // Important for mobile inline playback
+                                controls: 0,
+                                rel: 0,
+                                iv_load_policy: 3,
+                                playsinline: 1
                             }
                         }}
                         onReady={(e) => setPlayer(e.target)}
