@@ -85,7 +85,46 @@ function init() {
     )
   `);
 
+  // settings 테이블: 서비스 전체 설정 저장
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS settings (
+      key TEXT PRIMARY KEY,
+      value TEXT
+    )
+  `);
+
+  // 기본 설정값 추가 (존재하지 않을 경우)
+  const insertSetting = db.prepare('INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)');
+  const transaction = db.transaction(() => {
+    insertSetting.run('videoDurationLimit', '30'); // minutes
+    insertSetting.run('processingPaused', 'false');
+    insertSetting.run('exchangeRate', '1400');
+  });
+  transaction();
+
+
   logger.info('Database initialized successfully.');
+}
+
+// --- Settings Functions ---
+function getSetting(key) {
+  const row = db.prepare('SELECT value FROM settings WHERE key = ?').get(key);
+  return row ? row.value : null;
+}
+
+function getAllSettings() {
+    const rows = db.prepare('SELECT key, value FROM settings').all();
+    const settings = {};
+    for (const row of rows) {
+        settings[row.key] = row.value;
+    }
+    return settings;
+}
+
+function updateSetting({ key, value }) {
+    const result = db.prepare('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)')
+                     .run(key, value);
+    return result.changes > 0;
 }
 
 // 특정 영상 정보와 스크립트 전체를 가져오는 함수
@@ -305,8 +344,33 @@ function addDonation({ donator_name, amount, donation_date, message }) {
 }
 
 // 후원금 목록 조회
-function listDonations() {
-  return db.prepare("SELECT id, donator_name, amount, strftime('%Y-%m-%dT%H:%M:%SZ', donation_date) as donation_date, message, strftime('%Y-%m-%dT%H:%M:%SZ', createdAt) as createdAt FROM donations ORDER BY donation_date DESC").all();
+function listDonations({ page = 1, limit = 20, search = null }) {
+  const params = [];
+  const countParams = [];
+  let whereClause = 'WHERE 1=1';
+
+  if (search) {
+    whereClause += ' AND (donator_name LIKE ? OR message LIKE ?)';
+    const searchTerm = `%${search}%`;
+    params.push(searchTerm, searchTerm);
+    countParams.push(searchTerm, searchTerm);
+  }
+
+  const countQuery = `SELECT COUNT(*) as count FROM donations ${whereClause}`;
+  const totalDonations = db.prepare(countQuery).get(countParams).count;
+
+  const offset = (page - 1) * limit;
+  params.push(limit, offset);
+
+  const dataQuery = `
+    SELECT id, donator_name, amount, strftime('%Y-%m-%dT%H:%M:%SZ', donation_date) as donation_date, message, strftime('%Y-%m-%dT%H:%M:%SZ', createdAt) as createdAt 
+    FROM donations 
+    ${whereClause} 
+    ORDER BY donation_date DESC 
+    LIMIT ? OFFSET ?`;
+  
+  const donations = db.prepare(dataQuery).all(params);
+  return { donations, totalDonations };
 }
 
 // 후원금 삭제
@@ -324,21 +388,48 @@ function addApiCost({ videoId, model_used, image_tokens, text_tokens, cost }) {
 }
 
 // API 비용 목록 조회
-function listApiCosts() {
-    return db.prepare(`
-        SELECT 
-            ac.id, 
-            ac.videoId, 
-            v.title as videoTitle,
-            ac.model_used, 
-            ac.image_tokens, 
-            ac.text_tokens, 
-            ac.cost, 
-            strftime('%Y-%m-%dT%H:%M:%SZ', ac.createdAt) as createdAt 
-        FROM api_costs ac
-        LEFT JOIN videos v ON ac.videoId = v.videoId
-        ORDER BY ac.createdAt DESC
-    `).all();
+function listApiCosts({ page = 1, limit = 20, search = null, sortBy = 'createdAt', sortOrder = 'DESC' }) {
+  const params = [];
+  const countParams = [];
+  let whereClause = 'WHERE 1=1';
+
+  // Basic validation for sortBy to prevent SQL injection
+  const allowedSortBy = ['createdAt', 'cost', 'videoTitle', 'model_used'];
+  const safeSortBy = allowedSortBy.includes(sortBy) ? sortBy : 'createdAt';
+  const safeSortOrder = sortOrder.toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
+
+  if (search) {
+    whereClause += ' AND v.title LIKE ?';
+    const searchTerm = `%${search}%`;
+    params.push(searchTerm);
+    countParams.push(searchTerm);
+  }
+
+  const countQuery = `SELECT COUNT(*) as count FROM api_costs ac LEFT JOIN videos v ON ac.videoId = v.videoId ${whereClause}`;
+  const totalCosts = db.prepare(countQuery).get(countParams).count;
+  
+  const offset = (page - 1) * limit;
+  params.push(limit, offset);
+
+  const dataQuery = `
+    SELECT 
+        ac.id, 
+        ac.videoId, 
+        v.title as videoTitle,
+        ac.model_used, 
+        ac.image_tokens, 
+        ac.text_tokens, 
+        ac.cost, 
+        strftime('%Y-%m-%dT%H:%M:%SZ', ac.createdAt) as createdAt 
+    FROM api_costs ac
+    LEFT JOIN videos v ON ac.videoId = v.videoId
+    ${whereClause}
+    ORDER BY ${safeSortBy} ${safeSortOrder}
+    LIMIT ? OFFSET ?
+  `;
+  
+  const costs = db.prepare(dataQuery).all(params);
+  return { costs, totalCosts };
 }
 
 // 총 후원금 및 총 비용 집계
@@ -413,11 +504,64 @@ function getDashboardStats() {
     stats.videosThisWeek = db.prepare("SELECT COUNT(*) as count FROM videos WHERE createdAt >= date('now', '-7 days')").get().count;
     stats.videosThisMonth = db.prepare("SELECT COUNT(*) as count FROM videos WHERE createdAt >= date('now', '-30 days')").get().count;
 
+    // API costs by period
+    stats.costToday = db.prepare("SELECT SUM(cost) as total FROM api_costs WHERE createdAt >= date('now')").get()?.total || 0;
+    stats.costThisWeek = db.prepare("SELECT SUM(cost) as total FROM api_costs WHERE createdAt >= date('now', '-7 days')").get()?.total || 0;
+    stats.costThisMonth = db.prepare("SELECT SUM(cost) as total FROM api_costs WHERE createdAt >= date('now', '-30 days')").get()?.total || 0;
+
     // System status
     stats.processingVideos = db.prepare("SELECT videoId, title, createdAt FROM videos WHERE status = 'processing' ORDER BY createdAt DESC LIMIT 5").all();
     stats.failedVideos = db.prepare("SELECT videoId, title, createdAt FROM videos WHERE status = 'failed' AND createdAt >= date('now', '-1 day') ORDER BY createdAt DESC LIMIT 5").all();
 
     return stats;
+}
+
+// 관리자용: 모든 댓글 목록 가져오기 (페이지네이션 및 필터링 지원)
+function listAllCommentsForAdmin({ page = 1, limit = 20, search = null }) {
+  const params = [];
+  const countParams = [];
+  let whereClause = 'WHERE 1=1';
+
+  if (search) {
+    whereClause += ' AND (c.nickname LIKE ? OR c.content LIKE ?)';
+    const searchTerm = `%${search}%`;
+    params.push(searchTerm, searchTerm);
+    countParams.push(searchTerm, searchTerm);
+  }
+
+  const countQuery = `SELECT COUNT(*) as count FROM comments AS c ${whereClause}`;
+  const totalComments = db.prepare(countQuery).get(countParams).count;
+
+  const offset = (page - 1) * limit;
+  params.push(limit, offset);
+
+  const dataQuery = `
+    SELECT
+      c.id,
+      c.videoId,
+      v.title as videoTitle,
+      c.nickname,
+      c.content,
+      c.createdAt
+    FROM
+      comments AS c
+    LEFT JOIN
+      videos AS v ON c.videoId = v.videoId
+    ${whereClause}
+    ORDER BY
+      c.createdAt DESC
+    LIMIT ? OFFSET ?
+  `;
+
+  const comments = db.prepare(dataQuery).all(params);
+
+  return { comments, totalComments };
+}
+
+// 관리자용: ID로 댓글 삭제
+function deleteCommentByIdAdmin(commentId) {
+  const result = db.prepare('DELETE FROM comments WHERE id = ?').run(commentId);
+  return result.changes > 0;
 }
 
 
@@ -437,6 +581,10 @@ module.exports = {
   deleteComment,
   deleteVideo,
   verifyPassword,
+  // Settings Functions
+  getSetting,
+  getAllSettings,
+  updateSetting,
   // Admin functions
   addDonation,
   listDonations,
@@ -446,4 +594,6 @@ module.exports = {
   getAggregatedCosts,
   listAllVideosForAdmin,
   getDashboardStats,
+  listAllCommentsForAdmin,
+  deleteCommentByIdAdmin,
 };

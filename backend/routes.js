@@ -126,7 +126,9 @@ router.get('/script/:videoId', (req, res) => {
 router.get('/financial-summary', (req, res) => {
     try {
         const summary = db.getAggregatedCosts();
-        res.json(summary);
+        const exchangeRate = db.getSetting('exchangeRate') || '1400';
+        const processingPaused = db.getSetting('processingPaused') || 'false';
+        res.json({ ...summary, exchangeRate, processingPaused });
     } catch (error) {
         logger.error('[Public] Failed to fetch financial summary:', error);
         res.status(500).json({ error: 'Failed to fetch financial summary' });
@@ -208,35 +210,45 @@ router.get('/process', async (req, res) => {
         res.write(`event: ${eventName}\ndata: ${JSON.stringify(data)}\n\n`);
     };
 
-    const { youtubeUrl } = req.query;
-    if (!youtubeUrl || typeof youtubeUrl !== 'string') {
-        sendSse('backend_error', { message: 'Invalid or missing YouTube URL' });
-        return res.end();
-    }
-
-    const videoId = getYoutubeVideoId(youtubeUrl);
-    if (!videoId) {
-        sendSse('backend_error', { message: 'Could not extract YouTube video ID from URL' });
-        return res.end();
-    }
-
-    // Check financial balance before processing
     try {
+        // --- Check Service Settings First ---
+        const processingPaused = db.getSetting('processingPaused');
+        if (processingPaused === 'true') {
+            logger.warn('[Processing] Blocked: Service is paused by admin.');
+            sendSse('backend_error', { message: 'service_paused' });
+            return res.end();
+        }
+
+        const { youtubeUrl } = req.query;
+        if (!youtubeUrl || typeof youtubeUrl !== 'string') {
+            sendSse('backend_error', { message: 'Invalid or missing YouTube URL' });
+            return res.end();
+        }
+
+        const videoId = getYoutubeVideoId(youtubeUrl);
+        if (!videoId) {
+            sendSse('backend_error', { message: 'Could not extract YouTube video ID from URL' });
+            return res.end();
+        }
+
+        // Check financial balance
         const financialSummary = db.getAggregatedCosts();
         if (financialSummary.balance <= 0) {
             logger.warn(`[Processing] Video processing blocked for ${videoId} due to insufficient funds. Balance: ${financialSummary.balance}`);
             sendSse('backend_error', { message: 'funds_depleted' });
             return res.end();
         }
+
+        // Use the refactored processor, which now includes the duration check
+        await processVideo(videoId, youtubeUrl, sendSse);
+        res.end();
+
     } catch (error) {
-        logger.error(`[Processing] Failed to check financial balance for ${videoId}:`, error);
-        sendSse('backend_error', { message: 'Failed to check server balance. Please try again later.' });
+        // Catch errors from initial checks (e.g., DB error)
+        logger.error('[Process Endpoint] Initial check failed:', error);
+        sendSse('backend_error', { message: 'An unexpected error occurred on the server.' });
         return res.end();
     }
-
-    // Use the refactored processor
-    await processVideo(videoId, youtubeUrl, sendSse);
-    res.end();
 });
 
 // --- BATCH PROCESSING API ENDPOINT ---
@@ -382,6 +394,35 @@ const adminAuth = (req, res, next) => {
 const adminRouter = express.Router();
 adminRouter.use(adminAuth);
 
+// GET all settings
+adminRouter.get('/settings', (req, res) => {
+    try {
+        const settings = db.getAllSettings();
+        res.json(settings);
+    } catch (error) {
+        logger.error('[Admin] Failed to fetch settings:', error);
+        res.status(500).json({ error: 'Failed to fetch settings' });
+    }
+});
+
+// PUT (update) settings
+adminRouter.put('/settings', (req, res) => {
+    try {
+        const settingsToUpdate = req.body;
+        for (const key in settingsToUpdate) {
+            if (Object.hasOwnProperty.call(settingsToUpdate, key)) {
+                const value = settingsToUpdate[key];
+                db.updateSetting({ key, value: String(value) });
+            }
+        }
+        logger.info('[Admin] Settings updated successfully.');
+        res.status(200).json({ message: 'Settings updated successfully' });
+    } catch (error) {
+        logger.error('[Admin] Failed to update settings:', error);
+        res.status(500).json({ error: 'Failed to update settings' });
+    }
+});
+
 // GET cost summary
 adminRouter.get('/summary', (req, res) => {
     try {
@@ -396,8 +437,11 @@ adminRouter.get('/summary', (req, res) => {
 // GET all donations
 adminRouter.get('/donations', (req, res) => {
     try {
-        const donations = db.listDonations();
-        res.json(donations);
+        const page = parseInt(req.query.page || '1', 10);
+        const limit = parseInt(req.query.limit || '20', 10);
+        const search = req.query.search || null;
+        const result = db.listDonations({ page, limit, search });
+        res.json(result);
     } catch (error) {
         logger.error('[Admin] Failed to fetch donations:', error);
         res.status(500).json({ error: 'Failed to fetch donations' });
@@ -438,8 +482,13 @@ adminRouter.delete('/donations/:id', (req, res) => {
 // GET all API costs
 adminRouter.get('/costs', (req, res) => {
     try {
-        const costs = db.listApiCosts();
-        res.json(costs);
+        const page = parseInt(req.query.page || '1', 10);
+        const limit = parseInt(req.query.limit || '20', 10);
+        const search = req.query.search || null;
+        const sortBy = req.query.sortBy || 'createdAt';
+        const sortOrder = req.query.sortOrder || 'DESC';
+        const result = db.listApiCosts({ page, limit, search, sortBy, sortOrder });
+        res.json(result);
     } catch (error) {
         logger.error('[Admin] Failed to fetch API costs:', error);
         res.status(500).json({ error: 'Failed to fetch API costs' });
@@ -476,6 +525,38 @@ adminRouter.delete('/videos/:videoId', (req, res) => {
     } catch (error) {
         logger.error(`[Admin] Failed to delete video ${req.params.videoId}:`, error);
         res.status(500).json({ error: 'Failed to delete video' });
+    }
+});
+
+// GET all comments for admin (with pagination and filtering)
+adminRouter.get('/comments', (req, res) => {
+    try {
+        const page = parseInt(req.query.page || '1', 10);
+        const limit = parseInt(req.query.limit || '20', 10);
+        const search = req.query.search || null;
+
+        const result = db.listAllCommentsForAdmin({ page, limit, search });
+        res.json(result);
+    } catch (error) {
+        logger.error('[Admin] Failed to fetch all comments:', error);
+        res.status(500).json({ error: 'Failed to fetch all comments' });
+    }
+});
+
+// DELETE a comment by ID (admin)
+adminRouter.delete('/comments/:id', (req, res) => {
+    try {
+        const { id } = req.params;
+        const success = db.deleteCommentByIdAdmin(id);
+        if (success) {
+            logger.info(`[Admin] Deleted comment ${id} successfully.`);
+            res.status(200).json({ message: 'Comment deleted successfully' });
+        } else {
+            res.status(404).json({ error: 'Comment not found' });
+        }
+    } catch (error) {
+        logger.error(`[Admin] Failed to delete comment ${req.params.id}:`, error);
+        res.status(500).json({ error: 'Failed to delete comment' });
     }
 });
 

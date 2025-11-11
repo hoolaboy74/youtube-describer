@@ -103,13 +103,16 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
         const videoTitle = videoDetails.snippet.title;
         const totalDuration = parseISO8601Duration(videoDetails.contentDetails.duration);
 
-        const DURATION_LIMIT_SECONDS = 30 * 60; // 30 minutes
-        if (totalDuration >= DURATION_LIMIT_SECONDS) {
-            logger.warn(`[${requestHash}] Video processing blocked for ${videoId} because it is too long (${totalDuration}s).`);
-            if (sseHandler) {
-                sseHandler('backend_error', { message: 'duration_exceeded' });
+        const durationLimitMinutes = parseInt(db.getSetting('videoDurationLimit') || '30', 10);
+        if (durationLimitMinutes > 0) { // A limit of 0 means 'unlimited'
+            const durationLimitSeconds = durationLimitMinutes * 60;
+            if (totalDuration >= durationLimitSeconds) {
+                logger.warn(`[${requestHash}] Video processing blocked for ${videoId} because its duration (${totalDuration}s) exceeds the limit of ${durationLimitSeconds}s.`);
+                if (sseHandler) {
+                    sseHandler('backend_error', { message: 'duration_exceeded', limit: durationLimitMinutes });
+                }
+                return; // Stop processing
             }
-            return; // Stop processing
         }
 
         db.ensureVideoRecord({ videoId, title: videoTitle, duration: Math.round(totalDuration) });

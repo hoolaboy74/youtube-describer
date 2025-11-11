@@ -211,6 +211,12 @@ function HomeScreen({ announcePolite, announceAssertive }) {
         const videoId = getYouTubeId(inputValue);
 
         if (isUrlLike) {
+            if (financialSummary?.processingPaused === 'true') {
+                const pauseError = "현재 관리자에 의해 신규 영상 생성이 일시 중지되었습니다. 기존 영상 검색은 가능합니다.";
+                setError(pauseError);
+                announceAssertive(pauseError);
+                return;
+            }
             if (videoId) {
                 announcePolite('새 영상 처리를 시작합니다.');
                 navigate(`/video/${videoId}`);
@@ -258,7 +264,14 @@ function HomeScreen({ announcePolite, announceAssertive }) {
     };
 
     const showSearchResults = searchResults.db.length > 0 || searchResults.youtube.length > 0;
-    const formatCurrency = (num) => num ? Math.floor(num).toLocaleString('ko-KR') : '0';
+    
+    const isUrl = inputValue.startsWith('http');
+    const isCreationDisabled = isUrl && financialSummary?.processingPaused === 'true';
+    const isSubmitDisabled = !inputValue || isCreationDisabled;
+
+    const placeholderText = financialSummary?.processingPaused === 'true' 
+        ? "신규 영상 생성 중지됨. 기존 영상 검색만 가능합니다." 
+        : "이곳에 유튜브 URL을 입력하거나, 제목으로 검색하세요";
 
     const renderList = () => {
         if (showSearchResults) {
@@ -293,7 +306,15 @@ function HomeScreen({ announcePolite, announceAssertive }) {
                                     <li key={video.id}>
                                         <button 
                                             ref={el => itemRefs.current.set(video.id, el)}
-                                            onClick={() => handleVideoSelect(video)}
+                                            onClick={() => {
+                                                if (financialSummary?.processingPaused === 'true') {
+                                                    const pauseError = "현재 관리자에 의해 신규 영상 생성이 일시 중지되었습니다.";
+                                                    setError(pauseError);
+                                                    announceAssertive(pauseError);
+                                                } else {
+                                                    handleVideoSelect(video);
+                                                }
+                                            }}
                                             aria-label={`${video.title}, 채널 ${video.channel}, 조회수 ${video.views}회, 길이 ${video.durationFormatted}`}>
                                             <img src={video.thumbnail} alt={`${video.title} 썸네일`} className="thumbnail"/> 
                                             <div className="video-info" aria-hidden="true">
@@ -339,32 +360,45 @@ function HomeScreen({ announcePolite, announceAssertive }) {
         );
     };
 
+    const renderFinancialSummary = () => {
+        if (!financialSummary) return null;
+
+        const { totalDonations, totalApiCosts, exchangeRate } = financialSummary;
+        const rate = parseFloat(exchangeRate) || 1400;
+        const totalApiCostsKRW = totalApiCosts * rate;
+        const balanceKRW = totalDonations - totalApiCostsKRW;
+
+        const formatCurrency = (num) => Math.floor(num).toLocaleString('ko-KR');
+
+        return (
+            <section className="financial-summary-container" aria-labelledby="financial-summary-heading">
+                <h2 id="financial-summary-heading" className="visually-hidden">실시간 운영 현황</h2>
+                <div className="financial-text">
+                    남은 운영비: <strong>{formatCurrency(balanceKRW)}원</strong>
+                </div>
+                <progress
+                    max={totalDonations}
+                    value={totalApiCostsKRW}
+                    aria-label={`총 후원금 ${formatCurrency(totalDonations)}원 중 ${formatCurrency(totalApiCostsKRW)}원 사용됨`}
+                />
+            </section>
+        );
+    };
+
     return (
         <>
             {error && <p className="error-message" role="alert">{error}</p>}
 
-            {financialSummary && (
-                <section className="financial-summary-container" aria-labelledby="financial-summary-heading">
-                    <h2 id="financial-summary-heading" className="visually-hidden">실시간 운영 현황</h2>
-                    <div className="financial-text">
-                        남은 운영비: <strong>{formatCurrency(financialSummary.balance)}원</strong>
-                    </div>
-                    <progress
-                        max={financialSummary.totalDonations}
-                        value={financialSummary.totalApiCosts}
-                        aria-label={`총 후원금 ${formatCurrency(financialSummary.totalDonations)}원 중 ${formatCurrency(financialSummary.totalApiCosts)}원 사용됨`}
-                    />
-                </section>
-            )}
+            {renderFinancialSummary()}
 
             <form onSubmit={handleSubmit} className="url-form">
                 <input
                     type="text"
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
-                    placeholder="이곳에 유튜브 URL을 입력하거나, 제목으로 검색하세요"
+                    placeholder={placeholderText}
                 />
-                <button type="submit" disabled={!inputValue}>{'검색 또는 생성'}</button>
+                <button type="submit" disabled={isSubmitDisabled}>{'검색 또는 생성'}</button>
             </form>
 
             <div className="cached-list-container">
@@ -527,7 +561,8 @@ function PlayerScreen({ mainRef, announcePolite, announceAssertive }) {
                         setError(fundsDepletedError);
                         announcePolite(fundsDepletedError);
                     } else if (data.message === 'duration_exceeded') {
-                        const durationError = '30분이 넘는 영상은 비용 문제로 인해 처리할 수 없습니다. 양해 부탁드립니다.';
+                        const limit = data.limit || 30;
+                        const durationError = `${limit}분이 넘는 영상은 비용 문제로 인해 처리할 수 없습니다. 양해 부탁드립니다.`;
                         setError(durationError);
                         announcePolite(durationError);
                     } else {

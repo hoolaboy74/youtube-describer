@@ -260,3 +260,12 @@ tr:nth-child(even) {
     padding: 0 0.5rem;
     font-weight: bold;
 }
+
+/* Styles for Comment Management Table */
+.comment-content-cell {
+    max-width: 350px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
