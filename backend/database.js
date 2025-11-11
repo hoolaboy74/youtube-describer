@@ -291,7 +291,7 @@ function deleteComment(commentId) {
 // 영상 삭제 (관련 스크립트와 댓글은 ON DELETE CASCADE로 자동 삭제됨)
 function deleteVideo(videoId) {
   const result = db.prepare('DELETE FROM videos WHERE videoId = ?').run(videoId);
-  return result.changes > 0;
+  return result;
 }
 
 // --- Admin Page Functions ---
@@ -352,6 +352,74 @@ function getAggregatedCosts() {
     };
 }
 
+// 관리자용: 모든 상태의 영상 목록 가져오기 (페이지네이션 및 필터링 지원)
+function listAllVideosForAdmin({ page = 1, limit = 20, search = null, status = null }) {
+  const params = [];
+  const countParams = [];
+  let whereClause = 'WHERE 1=1';
+
+  if (search) {
+    whereClause += ' AND v.title LIKE ?';
+    params.push(`%${search}%`);
+    countParams.push(`%${search}%`);
+  }
+  if (status) {
+    whereClause += ' AND v.status = ?';
+    params.push(status);
+    countParams.push(status);
+  }
+
+  const countQuery = `SELECT COUNT(*) as count FROM videos AS v ${whereClause}`;
+  const totalVideos = db.prepare(countQuery).get(countParams).count;
+
+  const offset = (page - 1) * limit;
+  params.push(limit, offset);
+
+  const dataQuery = `
+    SELECT 
+      v.videoId, 
+      v.title, 
+      v.duration, 
+      v.status, 
+      v.createdAt, 
+      COUNT(c.id) as commentCount 
+    FROM 
+      videos AS v
+    LEFT JOIN 
+      comments AS c ON v.videoId = c.videoId
+    ${whereClause}
+    GROUP BY 
+      v.videoId
+    ORDER BY 
+      v.createdAt DESC
+    LIMIT ? OFFSET ?
+  `;
+  
+  const videos = db.prepare(dataQuery).all(params);
+  
+  return { videos, totalVideos };
+}
+
+// 관리자용: 대시보드 통계 데이터 가져오기
+function getDashboardStats() {
+    const stats = {};
+
+    // Core stats
+    stats.totalVideos = db.prepare('SELECT COUNT(*) as count FROM videos').get().count;
+    stats.totalComments = db.prepare('SELECT COUNT(*) as count FROM comments').get().count;
+    
+    // Videos processed by period
+    stats.videosToday = db.prepare("SELECT COUNT(*) as count FROM videos WHERE createdAt >= date('now')").get().count;
+    stats.videosThisWeek = db.prepare("SELECT COUNT(*) as count FROM videos WHERE createdAt >= date('now', '-7 days')").get().count;
+    stats.videosThisMonth = db.prepare("SELECT COUNT(*) as count FROM videos WHERE createdAt >= date('now', '-30 days')").get().count;
+
+    // System status
+    stats.processingVideos = db.prepare("SELECT videoId, title, createdAt FROM videos WHERE status = 'processing' ORDER BY createdAt DESC LIMIT 5").all();
+    stats.failedVideos = db.prepare("SELECT videoId, title, createdAt FROM videos WHERE status = 'failed' AND createdAt >= date('now', '-1 day') ORDER BY createdAt DESC LIMIT 5").all();
+
+    return stats;
+}
+
 
 module.exports = {
   init,
@@ -376,4 +444,6 @@ module.exports = {
   addApiCost,
   listApiCosts,
   getAggregatedCosts,
+  listAllVideosForAdmin,
+  getDashboardStats,
 };

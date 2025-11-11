@@ -446,6 +446,50 @@ adminRouter.get('/costs', (req, res) => {
     }
 });
 
+// GET all videos for admin (with pagination and filtering)
+adminRouter.get('/videos', (req, res) => {
+    try {
+        const page = parseInt(req.query.page || '1', 10);
+        const limit = parseInt(req.query.limit || '20', 10);
+        const search = req.query.search || null;
+        const status = req.query.status || null;
+
+        const result = db.listAllVideosForAdmin({ page, limit, search, status });
+        res.json(result);
+    } catch (error) {
+        logger.error('[Admin] Failed to fetch all videos:', error);
+        res.status(500).json({ error: 'Failed to fetch all videos' });
+    }
+});
+
+// DELETE a video
+adminRouter.delete('/videos/:videoId', (req, res) => {
+    try {
+        const { videoId } = req.params;
+        const result = db.deleteVideo(videoId);
+        if (result.changes > 0) {
+            logger.info(`[Admin] Deleted video ${videoId} successfully.`);
+            res.status(200).json({ message: 'Video deleted successfully' });
+        } else {
+            res.status(404).json({ error: 'Video not found' });
+        }
+    } catch (error) {
+        logger.error(`[Admin] Failed to delete video ${req.params.videoId}:`, error);
+        res.status(500).json({ error: 'Failed to delete video' });
+    }
+});
+
+// GET dashboard stats
+adminRouter.get('/dashboard-stats', (req, res) => {
+    try {
+        const stats = db.getDashboardStats();
+        res.json(stats);
+    } catch (error) {
+        logger.error('[Admin] Failed to fetch dashboard stats:', error);
+        res.status(500).json({ error: 'Failed to fetch dashboard stats' });
+    }
+});
+
 // Mount the admin router
 router.use('/admin', adminRouter);
 

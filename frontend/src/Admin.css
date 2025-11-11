@@ -180,3 +180,83 @@ tr:nth-child(even) {
 .delete-btn:hover {
     background-color: #c82333;
 }
+
+.system-status-container {
+    display: flex;
+    gap: 2rem;
+    justify-content: space-between;
+}
+
+.status-list {
+    flex: 1;
+    background-color: #fdfdfd;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    padding: 1rem 1.5rem;
+}
+
+.status-list h3 {
+    margin-top: 0;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 0.5rem;
+}
+
+.status-list ul {
+    padding-left: 1.2rem;
+    margin: 0;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.status-list li {
+    margin-bottom: 0.5rem;
+}
+
+.filters-container {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    align-items: center;
+}
+
+.filters-container input,
+.filters-container select {
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+.filters-container input[type="search"] {
+    width: 250px;
+}
+
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1.5rem;
+}
+
+.pagination-container button {
+    padding: 0.5rem 1rem;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.pagination-container button:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+.pagination-container button:hover:not(:disabled) {
+    background-color: #f0f0f0;
+}
+
+.pagination-container span {
+    padding: 0 0.5rem;
+    font-weight: bold;
+}
