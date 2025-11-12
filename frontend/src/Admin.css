@@ -248,9 +248,22 @@ tr:nth-child(even) {
 }
 
 .pagination-container button:disabled {
+    background-color: #6c757d;
     cursor: not-allowed;
-    opacity: 0.5;
 }
+
+.dashboard-table {
+    margin-top: 20px;
+}
+
+.dashboard-table h4 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: #495057;
+    border-bottom: 1px solid #dee2e6;
+    padding-bottom: 5px;
+}
+
 
 .pagination-container button:hover:not(:disabled) {
     background-color: #f0f0f0;
@@ -263,9 +276,19 @@ tr:nth-child(even) {
 
 /* Styles for Comment Management Table */
 .comment-content-cell {
-    max-width: 350px;
-    white-space: nowrap;
+    max-width: 300px;
     overflow: hidden;
     text-overflow: ellipsis;
+    white-space: nowrap;
 }
+
+.fail-reason-cell {
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: #dc3545;
+}
+
+
 

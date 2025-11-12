@@ -643,8 +643,13 @@ function PlayerScreen({ mainRef, announcePolite, announceAssertive }) {
                         const durationError = `${limit}분이 넘는 영상은 비용 문제로 인해 처리할 수 없습니다. 양해 부탁드립니다.`;
                         setError(durationError);
                         announcePolite(durationError);
+                    } else if (data.message === 'service_paused') {
+                        const servicePausedError = '현재 관리자에 의해 신규 영상 생성이 일시 중지되었습니다. 잠시 후 다시 시도해주세요.';
+                        setError(servicePausedError);
+                        announcePolite(servicePausedError);
                     } else {
-                        const errorMessage = data.message || '알 수 없는 오류가 발생했습니다.';
+                        // Prioritize the more specific 'details' field if it exists
+                        const errorMessage = data.details || data.message || '알 수 없는 오류가 발생했습니다.';
                         setError(errorMessage);
                         announcePolite(`오류: ${errorMessage}`);
                     }

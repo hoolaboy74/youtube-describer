@@ -33,6 +33,12 @@ function init() {
     logger.info('Adding status column to videos table with default value \'completed\'...');
     db.exec("ALTER TABLE videos ADD COLUMN status TEXT DEFAULT 'completed' NOT NULL");
   }
+  try {
+    db.prepare('SELECT fail_reason FROM videos LIMIT 1').get();
+  } catch (error) {
+    logger.info('Adding fail_reason column to videos table...');
+    db.exec('ALTER TABLE videos ADD COLUMN fail_reason TEXT');
+  }
 
   // scripts 테이블: 각 영상에 속한 화면 해설 스크립트 정보 저장
   db.exec(`
@@ -192,13 +198,13 @@ function listVideos() {
       v.title, 
       v.duration, 
       v.status, 
-      v.createdAt, 
+      strftime('%Y-%m-%dT%H:%M:%SZ', v.createdAt) as createdAt, 
       COUNT(c.id) as commentCount 
     FROM 
       videos AS v
     LEFT JOIN 
       comments AS c ON v.videoId = c.videoId
-    WHERE 
+    WHERE
       v.status = 'completed'
     GROUP BY 
       v.videoId
@@ -215,7 +221,7 @@ function searchVideosByTitle(query) {
       v.title, 
       v.duration, 
       v.status, 
-      v.createdAt, 
+      strftime('%Y-%m-%dT%H:%M:%SZ', v.createdAt) as createdAt, 
       COUNT(c.id) as commentCount 
     FROM 
       videos AS v
@@ -249,14 +255,27 @@ function ensureVideoRecord({ videoId, title, duration }) {
 }
 
 // 영상 처리 상태를 업데이트하는 함수
-function updateVideoStatus(videoId, status) {
+function updateVideoStatus(videoId, status, reason = null) {
   try {
-    db.prepare('UPDATE videos SET status = ? WHERE videoId = ?').run(status, videoId);
-    logger.info(`[Database] Updated status for ${videoId} to ${status}`);
+    // If status is 'failed', we store the reason. Otherwise, we clear it.
+    const failReason = status === 'failed' ? reason : null;
+    db.prepare('UPDATE videos SET status = ?, fail_reason = ? WHERE videoId = ?').run(status, failReason, videoId);
+    logger.info(`[Database] Updated status for ${videoId} to ${status}` + (failReason ? ` with reason: ${failReason}` : ''));
   } catch (error) {
     logger.error(`[Database] Failed to update status for ${videoId}:`, error);
     throw error;
   }
+}
+
+// 임시 레코드를 먼저 생성하는 함수
+function ensurePreliminaryRecord(videoId) {
+    try {
+        db.prepare('INSERT OR IGNORE INTO videos (videoId, title, status) VALUES (?, ?, ?)')
+          .run(videoId, `(Pending) ${videoId}`, 'pending');
+    } catch (error) {
+        logger.error(`[Database] Failed to ensure preliminary record for ${videoId}:`, error);
+        throw error; // Re-throw to be caught by the caller
+    }
 }
 
 // Saves only the script lines for a given chunk.
@@ -297,7 +316,7 @@ function verifyPassword(storedPassword, providedPassword) {
 
 // 댓글 가져오기
 function getComments(videoId) {
-  return db.prepare("SELECT id, videoId, nickname, content, strftime('%Y-%m-%dT%H:%M:%fZ', createdAt) as createdAt FROM comments WHERE videoId = ? ORDER BY createdAt ASC").all(videoId);
+  return db.prepare("SELECT id, videoId, nickname, content, strftime('%Y-%m-%dT%H:%M:%SZ', createdAt) as createdAt FROM comments WHERE videoId = ? ORDER BY createdAt ASC").all(videoId);
 }
 
 // 댓글 추가
@@ -474,7 +493,8 @@ function listAllVideosForAdmin({ page = 1, limit = 20, search = null, status = n
       v.title, 
       v.duration, 
       v.status, 
-      v.createdAt, 
+      strftime('%Y-%m-%dT%H:%M:%SZ', v.createdAt) as createdAt, 
+      v.fail_reason,
       COUNT(c.id) as commentCount 
     FROM 
       videos AS v
@@ -512,8 +532,8 @@ function getDashboardStats() {
     stats.costThisMonth = db.prepare("SELECT SUM(cost) as total FROM api_costs WHERE createdAt >= date('now', '-30 days')").get()?.total || 0;
 
     // System status
-    stats.processingVideos = db.prepare("SELECT videoId, title, createdAt FROM videos WHERE status = 'processing' ORDER BY createdAt DESC LIMIT 5").all();
-    stats.failedVideos = db.prepare("SELECT videoId, title, createdAt FROM videos WHERE status = 'failed' AND createdAt >= date('now', '-1 day') ORDER BY createdAt DESC LIMIT 5").all();
+    stats.processingVideos = db.prepare("SELECT videoId, title, strftime('%Y-%m-%dT%H:%M:%SZ', createdAt) as createdAt FROM videos WHERE status = 'processing' ORDER BY createdAt DESC LIMIT 5").all();
+    stats.failedVideos = db.prepare("SELECT videoId, title, strftime('%Y-%m-%dT%H:%M:%SZ', createdAt) as createdAt, fail_reason FROM videos WHERE status = 'failed' AND createdAt >= date('now', '-1 day') ORDER BY createdAt DESC LIMIT 5").all();
 
     return stats;
 }
@@ -544,7 +564,7 @@ function listAllCommentsForAdmin({ page = 1, limit = 20, search = null }) {
       v.title as videoTitle,
       c.nickname,
       c.content,
-      c.createdAt
+      strftime('%Y-%m-%dT%H:%M:%SZ', c.createdAt) as createdAt
     FROM
       comments AS c
     LEFT JOIN
@@ -573,6 +593,7 @@ module.exports = {
   saveVideo,
   ensureVideoRecord,
   updateVideoStatus,
+  ensurePreliminaryRecord,
   saveVideoChunk,
   listVideos,
   searchVideosByTitle,

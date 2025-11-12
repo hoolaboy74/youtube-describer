@@ -57,13 +57,26 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
     if (!isValidYoutubeUrl(youtubeUrl)) {
         logger.error(`[${requestHash}] Invalid YouTube URL provided: ${youtubeUrl}`);
         if (sseHandler) {
-            sseHandler('error', { message: 'Invalid YouTube URL' });
+            sseHandler('backend_error', { message: 'Invalid YouTube URL' });
         }
         processingLocks.delete(videoId);
         return;
     }
 
     processingLocks.add(videoId);
+
+    // Ensure a preliminary record exists in the DB to log failures against.
+    try {
+        db.ensurePreliminaryRecord(videoId);
+    } catch (dbError) {
+        logger.error(`[${requestHash}] Failed to create initial pending record for ${videoId}:`, dbError);
+        // This is a critical DB error, so we shouldn't proceed.
+        processingLocks.delete(videoId);
+        if (sseHandler) {
+            sseHandler('backend_error', { message: 'A critical database error occurred.' });
+        }
+        return;
+    }
 
     const totalTimeLabel = `[${requestHash}] Total Process Time`;
     logger.info(`[${requestHash}] Starting processing for ${youtubeUrl}`);
@@ -355,10 +368,10 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
         }
         
     } catch (error) {
-        db.updateVideoStatus(videoId, 'failed');
+        db.updateVideoStatus(videoId, 'failed', error.message);
         logger.error(new Error(`[${requestHash}] Error processing request: ${error.message}`));
         if (sseHandler) {
-            sseHandler('error', { message: 'Failed to process video', details: error.message });
+            sseHandler('backend_error', { message: 'Failed to process video', details: error.message });
         }
     } finally {
         if (fs.existsSync(baseTempDir)) {
@@ -375,6 +388,15 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
         logger.error(`[${requestHash}] Invalid YouTube URL provided: ${youtubeUrl}`);
         return;
     }
+
+    // Ensure a preliminary record exists in the DB to log failures against.
+    try {
+        db.ensurePreliminaryRecord(videoId);
+    } catch (dbError) {
+        logger.error(`[${requestHash}] Failed to create initial pending record for ${videoId}:`, dbError);
+        return; // Don't proceed if DB fails
+    }
+
     const totalTimeLabel = `[${requestHash}] Total Batch Process Time`;
     logger.info(`[${requestHash}] Starting batch processing for ${youtubeUrl}`);
     time(totalTimeLabel);
@@ -572,7 +594,7 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
         logger.info(`[${requestHash}] Successfully generated and cached script text for batch processing.`);
         
     } catch (error) {
-        db.updateVideoStatus(videoId, 'failed');
+        db.updateVideoStatus(videoId, 'failed', error.message);
         logger.error(new Error(`[${requestHash}] Error in batch processing: ${error.message}`));
     } finally {
         if (fs.existsSync(baseTempDir)) {
