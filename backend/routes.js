@@ -126,9 +126,14 @@ router.get('/script/:videoId', (req, res) => {
 router.get('/financial-summary', (req, res) => {
     try {
         const summary = db.getAggregatedCosts();
-        const exchangeRate = db.getSetting('exchangeRate') || '1400';
-        const processingPaused = db.getSetting('processingPaused') || 'false';
-        res.json({ ...summary, exchangeRate, processingPaused });
+        const settings = db.getAllSettings(); // 모든 설정을 한번에 가져옴
+        res.json({ 
+            ...summary, 
+            exchangeRate: settings.exchangeRate || '1400', 
+            processingPaused: settings.processingPaused || 'false',
+            noticeTitle: settings.notice_title || '',
+            noticeContent: settings.notice_content || '',
+        });
     } catch (error) {
         logger.error('[Public] Failed to fetch financial summary:', error);
         res.status(500).json({ error: 'Failed to fetch financial summary' });

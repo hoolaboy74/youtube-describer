@@ -65,14 +65,22 @@ const Admin = () => {
     const [settings, setSettings] = useState({
         videoDurationLimit: '30',
         processingPaused: 'false',
-        exchangeRate: '1400'
+        exchangeRate: '1400',
+        notice_title: '',
+        notice_content: '',
     });
 
     const fetchSettings = useCallback(async () => {
         if (!isAuthenticated) return;
         try {
             const res = await api.get('/admin/settings');
-            setSettings(res.data);
+            // Ensure all setting fields exist to prevent uncontrolled component warnings
+            setSettings(prev => ({
+                ...prev,
+                ...res.data,
+                notice_title: res.data.notice_title || '',
+                notice_content: res.data.notice_content || '',
+            }));
         } catch (error) {
             console.error('Failed to fetch settings', error);
         }
@@ -542,6 +550,21 @@ const Admin = () => {
                         <input id="exchangeRate" name="exchangeRate" type="number" value={settings.exchangeRate} onChange={handleSettingChange} />
                         <p>대시보드의 원화(KRW) 비용 표시에 사용될 환율입니다.</p>
                     </div>
+
+                    <hr />
+
+                    <h2>공지사항 관리</h2>
+                    <div className="setting-item">
+                        <label htmlFor="notice_title">공지사항 제목</label>
+                        <input id="notice_title" name="notice_title" type="text" value={settings.notice_title || ''} onChange={handleSettingChange} placeholder="공지사항 제목을 입력하세요." />
+                        <p>메인 페이지에 표시될 공지사항의 제목입니다. 비워두면 공지가 표시되지 않습니다.</p>
+                    </div>
+                    <div className="setting-item">
+                        <label htmlFor="notice_content">공지사항 내용</label>
+                        <textarea id="notice_content" name="notice_content" value={settings.notice_content || ''} onChange={handleSettingChange} rows="5" placeholder="공지사항 내용을 입력하세요."></textarea>
+                        <p>공지사항의 전체 내용입니다.</p>
+                    </div>
+
                     <button className="save-btn" onClick={handleSaveSettings}>설정 저장</button>
                 </section>
             </div>

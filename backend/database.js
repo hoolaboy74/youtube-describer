@@ -99,6 +99,8 @@ function init() {
     insertSetting.run('videoDurationLimit', '30'); // minutes
     insertSetting.run('processingPaused', 'false');
     insertSetting.run('exchangeRate', '1400');
+    insertSetting.run('notice_title', '');
+    insertSetting.run('notice_content', '');
   });
   transaction();
 

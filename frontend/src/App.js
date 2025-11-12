@@ -136,6 +136,9 @@ function HomeScreen({ announcePolite, announceAssertive }) {
     const [searchResults, setSearchResults] = useState({ db: [], youtube: [] });
     const [initialVideos, setInitialVideos] = useState([]);
     const [financialSummary, setFinancialSummary] = useState(null);
+    const [notice, setNotice] = useState({ id: '', title: '', content: '' });
+    const [isNoticeVisible, setIsNoticeVisible] = useState(false);
+    const [dontShowNoticeToday, setDontShowNoticeToday] = useState(false);
     
     const [initialVideosLimit, setInitialVideosLimit] = useState(10);
     const [dbResultsLimit, setDbResultsLimit] = useState(10);
@@ -144,6 +147,17 @@ function HomeScreen({ announcePolite, announceAssertive }) {
     
     const itemRefs = useRef(new Map());
     const navigate = useNavigate();
+
+    // Simple hash function for notice content
+    const simpleHash = (str) => {
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) {
+            const char = str.charCodeAt(i);
+            hash = (hash << 5) - hash + char;
+            hash |= 0; // Convert to 32bit integer
+        }
+        return String(hash);
+    };
 
     useEffect(() => {
         // Fetch initial video list
@@ -156,9 +170,36 @@ function HomeScreen({ announcePolite, announceAssertive }) {
                 announceAssertive(`오류: ${errorMsg}`);
             });
 
-        // Fetch financial summary
+        // Fetch financial summary and notice
         axios.get('/api/financial-summary')
-            .then(response => setFinancialSummary(response.data))
+            .then(response => {
+                setFinancialSummary(response.data);
+                const { noticeTitle, noticeContent } = response.data;
+
+                if (!noticeTitle || !noticeContent) {
+                    return; // No notice, do nothing
+                }
+
+                const currentNoticeId = simpleHash(noticeContent);
+                const dismissedNoticeRaw = localStorage.getItem('dismissed_notice');
+                const dismissedNotice = dismissedNoticeRaw ? JSON.parse(dismissedNoticeRaw) : null;
+                
+                const now = new Date().getTime();
+                const oneDay = 24 * 60 * 60 * 1000;
+
+                let shouldShow = true;
+                if (dismissedNotice) {
+                    // If the notice is the same one that was dismissed, check the timestamp
+                    if (dismissedNotice.id === currentNoticeId && (now - dismissedNotice.timestamp < oneDay)) {
+                        shouldShow = false;
+                    }
+                }
+
+                if (shouldShow) {
+                    setNotice({ id: currentNoticeId, title: noticeTitle, content: noticeContent });
+                    setIsNoticeVisible(true);
+                }
+            })
             .catch(err => console.error('Failed to fetch financial summary:', err));
     }, [announceAssertive]);
 
@@ -385,8 +426,45 @@ function HomeScreen({ announcePolite, announceAssertive }) {
         );
     };
 
+    const handleCloseNotice = () => {
+        if (dontShowNoticeToday) {
+            const now = new Date().getTime();
+            localStorage.setItem('dismissed_notice', JSON.stringify({ id: notice.id, timestamp: now }));
+        }
+        setIsNoticeVisible(false);
+    };
+
     return (
         <>
+            {isNoticeVisible && (
+                <div className="modal-overlay" onClick={handleCloseNotice}>
+                    <div className="modal-content" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-labelledby="notice-title">
+                        <h3 id="notice-title">{notice.title}</h3>
+                        <div style={{ textAlign: 'left', whiteSpace: 'pre-wrap', marginBottom: '20px' }}>
+                            <p>{notice.content}</p>
+                        </div>
+                        <div className="modal-footer">
+                            <div className="checkbox-wrapper">
+                                <input 
+                                    type="checkbox" 
+                                    aria-label="하루 동안 보지 않기"
+                                    checked={dontShowNoticeToday} 
+                                    onChange={(e) => setDontShowNoticeToday(e.target.checked)}
+                                />
+                                <span 
+                                    className="checkbox-text"
+                                    onClick={() => setDontShowNoticeToday(prev => !prev)}
+                                    aria-hidden="true"
+                                >
+                                    하루 동안 보지 않기
+                                </span>
+                            </div>
+                            <button onClick={handleCloseNotice}>닫기</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {error && <p className="error-message" role="alert">{error}</p>}
 
             {renderFinancialSummary()}

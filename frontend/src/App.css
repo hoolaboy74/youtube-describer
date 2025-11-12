@@ -681,3 +681,30 @@ main {
 .financial-summary-container progress::-moz-progress-bar {
     background-color: #61dafb;
 }
+
+.modal-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+    border-top: 1px solid #eee;
+    padding-top: 15px;
+}
+
+.modal-footer .checkbox-wrapper {
+    display: flex;
+    align-items: center;
+}
+
+.modal-footer .checkbox-text {
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: #555;
+    margin-left: 8px;
+}
+
+.modal-footer input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
