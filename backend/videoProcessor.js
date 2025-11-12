@@ -314,8 +314,23 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
             const usageMetadata = finalResponse.usageMetadata;
             if (usageMetadata) {
                 const { promptTokenCount, candidatesTokenCount, totalTokenCount } = usageMetadata;
-                // Gemini 2.5 Pro: $3.50 per 1M input tokens = $0.0000035 per token
-                const cost = totalTokenCount * 0.0000035; 
+
+                // Official Gemini 2.5 Pro pricing (per 1M tokens)
+                let inputCostPerMillionTokens;
+                let outputCostPerMillionTokens;
+
+                if (totalTokenCount <= 200000) {
+                    inputCostPerMillionTokens = 1.25; // <= 200k tokens tier
+                    outputCostPerMillionTokens = 10.00; // <= 200k tokens tier
+                } else {
+                    inputCostPerMillionTokens = 2.50; // > 200k tokens tier
+                    outputCostPerMillionTokens = 15.00; // > 200k tokens tier
+                }
+
+                const inputCost = (promptTokenCount / 1000000) * inputCostPerMillionTokens;
+                const outputCost = (candidatesTokenCount / 1000000) * outputCostPerMillionTokens;
+                const cost = inputCost + outputCost;
+
                 db.addApiCost({
                     videoId,
                     model_used: 'gemini-2.5-pro',
@@ -323,7 +338,7 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
                     text_tokens: candidatesTokenCount,
                     cost
                 });
-                logger.info(`[${requestHash}] Logged API cost: ${cost.toFixed(6)} USD for ${totalTokenCount} tokens.`);
+                logger.info(`[${requestHash}] Logged API cost: ${cost.toFixed(6)} USD for ${totalTokenCount} tokens (Input: ${promptTokenCount}, Output: ${candidatesTokenCount}).`);
             }
         } catch (costError) {
             logger.error(`[${requestHash}] Failed to log API cost:`, costError);
@@ -499,7 +514,23 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
             const usageMetadata = result.response.usageMetadata;
             if (usageMetadata) {
                 const { promptTokenCount, candidatesTokenCount, totalTokenCount } = usageMetadata;
-                const cost = totalTokenCount * 0.0000035; // Gemini 2.5 Pro: $3.50 per 1M tokens
+                
+                // Official Gemini 2.5 Pro pricing (per 1M tokens)
+                let inputCostPerMillionTokens;
+                let outputCostPerMillionTokens;
+
+                if (totalTokenCount <= 200000) {
+                    inputCostPerMillionTokens = 1.25; // <= 200k tokens tier
+                    outputCostPerMillionTokens = 10.00; // <= 200k tokens tier
+                } else {
+                    inputCostPerMillionTokens = 2.50; // > 200k tokens tier
+                    outputCostPerMillionTokens = 15.00; // > 200k tokens tier
+                }
+
+                const inputCost = (promptTokenCount / 1000000) * inputCostPerMillionTokens;
+                const outputCost = (candidatesTokenCount / 1000000) * outputCostPerMillionTokens;
+                const cost = inputCost + outputCost;
+
                 db.addApiCost({
                     videoId,
                     model_used: 'gemini-2.5-pro',
@@ -507,7 +538,7 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
                     text_tokens: candidatesTokenCount,
                     cost
                 });
-                logger.info(`[${requestHash}] Logged API cost for batch: ${cost.toFixed(6)} USD for ${totalTokenCount} tokens.`);
+                logger.info(`[${requestHash}] Logged API cost for batch: ${cost.toFixed(6)} USD for ${totalTokenCount} tokens (Input: ${promptTokenCount}, Output: ${candidatesTokenCount}).`);
             }
         } catch (costError) {
             logger.error(`[${requestHash}] Failed to log API cost for batch:`, costError);
