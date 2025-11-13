@@ -1,8 +1,7 @@
-import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import { Routes, Route, useNavigate, useParams, useLocation, Link } from 'react-router-dom';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { Routes, Route, useNavigate, useLocation, Link } from 'react-router-dom';
 import axios from 'axios';
 import './App.css';
-import Comments from './Comments'; // Import the Comments component
 import Admin from './Admin'; // Import the Admin component
 import PlayerScreen from './PlayerScreen'; // Import the PlayerScreen component
 
