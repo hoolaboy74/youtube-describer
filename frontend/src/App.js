@@ -127,7 +127,7 @@ function App() {
                                 <button onClick={handleCopyAccount} className="copy-button">
                                     {isCopied ? '복사됨!' : '계좌번호 복사'}
                                 </button>
-                                <p style={{marginTop: '15px'}}><strong>문의 사항:</strong> c7861967@gmail.com</p>
+                                <p style={{marginTop: '15px'}}><strong>문의 사항:</strong> momcenter1@gmail.com</p>
                             </div>
                         </div>
                         <button onClick={closeGuide} ref={closeGuideButtonRef}>닫기</button>
