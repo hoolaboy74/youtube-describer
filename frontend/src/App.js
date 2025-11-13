@@ -5,18 +5,7 @@ import YouTube from 'react-youtube';
 import './App.css';
 import Comments from './Comments'; // Import the Comments component
 import Admin from './Admin'; // Import the Admin component
-
-// Custom hook for managing focus on page/view change
-function usePageFocus(ref) {
-    const location = useLocation();
-
-    useEffect(() => {
-        if (ref.current) {
-            ref.current.setAttribute('tabindex', '-1');
-            ref.current.focus();
-        }
-    }, [location.pathname, ref]);
-}
+import { usePageFocus } from './hooks'; // Import the custom hook
 
 // Helper to check if a string is a valid YouTube URL
 function getYouTubeId(url) {

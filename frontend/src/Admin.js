@@ -2,20 +2,9 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import axios from 'axios';
 import './Admin.css';
+import { usePageFocus } from './hooks';
 
 const API_BASE_URL = process.env.NODE_ENV === 'development' ? 'http://localhost:4000/api' : '/api';
-
-// Custom hook for managing focus on page/view change
-function usePageFocus(ref) {
-    const location = useLocation();
-
-    useEffect(() => {
-        if (ref.current) {
-            ref.current.setAttribute('tabindex', '-1');
-            ref.current.focus();
-        }
-    }, [location.pathname, ref]);
-}
 
 const api = axios.create({
     baseURL: API_BASE_URL,
