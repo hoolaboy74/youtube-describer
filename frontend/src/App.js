@@ -44,6 +44,14 @@ function App() {
     const closeGuideButtonRef = useRef(null);
     const guideTitleRef = useRef(null);
     const lastFocusedElementRef = useRef(null);
+    const appTitleRef = useRef(null);
+    const location = useLocation();
+
+    useEffect(() => {
+        if (location.pathname === '/') {
+            appTitleRef.current?.focus();
+        }
+    }, [location.pathname]);
 
     const announcePolite = useCallback((message) => {
         clearTimeout(politeTimeoutRef.current);
@@ -90,7 +98,7 @@ function App() {
             <header className="App-header">
                 <div className="header-top">
                     <Link to="/" style={{ textDecoration: 'none', color: 'inherit' }}>
-                        <h1>뷰레이터</h1>
+                        <h1 ref={appTitleRef} tabIndex="-1">뷰레이터</h1>
                     </Link>
                     <button onClick={openGuide} className="guide-button" ref={guideButtonRef} role="link">
                         서비스 이용 안내
@@ -165,11 +173,9 @@ function HomeScreen({ announcePolite, announceAssertive }) {
     
     const itemRefs = useRef(new Map());
     const navigate = useNavigate();
-    const headingRef = useRef(null);
     const noticeCloseButtonRef = useRef(null);
     const noticeTitleRef = useRef(null);
     const lastFocusedNoticeElementRef = useRef(null);
-    usePageFocus(headingRef);
 
     // Simple hash function for notice content
     const simpleHash = (str) => {
@@ -511,7 +517,7 @@ function HomeScreen({ announcePolite, announceAssertive }) {
             </form>
 
             <div className="cached-list-container">
-                <h2 ref={headingRef}>{showSearchResults ? '검색 결과' : '사용자들의 최근 생성 영상'}</h2>
+                <h2>{showSearchResults ? '검색 결과' : '사용자들의 최근 생성 영상'}</h2>
                 {isSearching ? <p>검색 중...</p> : renderList()}
             </div>
         </>
