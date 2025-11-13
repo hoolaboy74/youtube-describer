@@ -1,8 +1,21 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 import axios from 'axios';
 import './Admin.css';
 
 const API_BASE_URL = process.env.NODE_ENV === 'development' ? 'http://localhost:4000/api' : '/api';
+
+// Custom hook for managing focus on page/view change
+function usePageFocus(ref) {
+    const location = useLocation();
+
+    useEffect(() => {
+        if (ref.current) {
+            ref.current.setAttribute('tabindex', '-1');
+            ref.current.focus();
+        }
+    }, [location.pathname, ref]);
+}
 
 const api = axios.create({
     baseURL: API_BASE_URL,
@@ -69,6 +82,9 @@ const Admin = () => {
         notice_title: '',
         notice_content: '',
     });
+
+    const headingRef = useRef(null);
+    usePageFocus(headingRef);
 
     const fetchSettings = useCallback(async () => {
         if (!isAuthenticated) return;
@@ -368,7 +384,7 @@ const Admin = () => {
 
     return (
         <div className="admin-container">
-            <h1>관리자 페이지</h1>
+            <h1 ref={headingRef}>관리자 페이지</h1>
 
             <div className="admin-tabs" role="tablist" aria-label="관리자 페이지 탭">
                 <button role="tab" aria-selected={activeTab === 'dashboard'} className={`tab-btn ${activeTab === 'dashboard' ? 'active' : ''}`} onClick={() => setActiveTab('dashboard')}>대시보드</button>
@@ -415,9 +431,9 @@ const Admin = () => {
                             <table>
                                 <thead>
                                     <tr>
-                                        <th>시작 시간</th>
-                                        <th>제목</th>
-                                        <th>Video ID</th>
+                                        <th scope="col">시작 시간</th>
+                                        <th scope="col">제목</th>
+                                        <th scope="col">Video ID</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -438,10 +454,10 @@ const Admin = () => {
                             <table>
                                 <thead>
                                     <tr>
-                                        <th>실패 시간</th>
-                                        <th>제목</th>
-                                        <th>Video ID</th>
-                                        <th>실패 원인</th>
+                                        <th scope="col">실패 시간</th>
+                                        <th scope="col">제목</th>
+                                        <th scope="col">Video ID</th>
+                                        <th scope="col">실패 원인</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -475,7 +491,7 @@ const Admin = () => {
                     </div>
                     <div className="table-container">
                         <table>
-                            <thead><tr><th>생성일</th><th>제목</th><th>Video ID</th><th>상태</th><th>실패 원인</th><th>댓글 수</th><th>작업</th></tr></thead>
+                            <thead><tr><th scope="col">생성일</th><th scope="col">제목</th><th scope="col">Video ID</th><th scope="col">상태</th><th scope="col">실패 원인</th><th scope="col">댓글 수</th><th scope="col">작업</th></tr></thead>
                             <tbody>
                                 {(videos || []).map(v => (
                                     <tr key={v.videoId}>
@@ -506,7 +522,7 @@ const Admin = () => {
                     </div>
                     <div className="table-container">
                         <table>
-                            <thead><tr><th>작성일</th><th>영상 제목</th><th>닉네임</th><th>내용</th><th>작업</th></tr></thead>
+                            <thead><tr><th scope="col">작성일</th><th scope="col">영상 제목</th><th scope="col">닉네임</th><th scope="col">내용</th><th scope="col">작업</th></tr></thead>
                             <tbody>
                                 {(comments || []).map(c => (
                                     <tr key={c.id}><td>{new Date(c.createdAt).toLocaleString()}</td><td>{c.videoTitle || 'N/A'}</td><td>{c.nickname}</td><td className="comment-content-cell" title={c.content}>{c.content}</td><td><button className="delete-btn" onClick={() => handleDeleteComment(c.id, c.content)}>삭제</button></td></tr>
@@ -541,7 +557,7 @@ const Admin = () => {
                     </div>
                     <div className="table-container">
                         <table>
-                            <thead><tr><th>날짜</th><th>후원자명</th><th>금액</th><th>메시지</th><th>작업</th></tr></thead>
+                            <thead><tr><th scope="col">날짜</th><th scope="col">후원자명</th><th scope="col">금액</th><th scope="col">메시지</th><th scope="col">작업</th></tr></thead>
                             <tbody>
                                 {donations.map(d => (
                                     <tr key={d.id}><td>{new Date(d.donation_date).toLocaleDateString()}</td><td>{d.donator_name}</td><td>{d.amount.toLocaleString()} 원</td><td className="comment-content-cell" title={d.message}>{d.message}</td><td><button className="delete-btn" onClick={() => handleDeleteDonation(d.id)}>삭제</button></td></tr>
@@ -566,7 +582,7 @@ const Admin = () => {
                     </div>
                     <div className="table-container">
                         <table>
-                            <thead><tr><th>날짜</th><th>영상 제목</th><th>모델</th><th>총 토큰</th><th>비용 (USD)</th></tr></thead>
+                            <thead><tr><th scope="col">날짜</th><th scope="col">영상 제목</th><th scope="col">모델</th><th scope="col">총 토큰</th><th scope="col">비용 (USD)</th></tr></thead>
                             <tbody>
                                 {costs.map(c => (
                                     <tr key={c.id}><td>{new Date(c.createdAt).toLocaleString()}</td><td>{c.videoTitle || c.videoId}</td><td>{c.model_used}</td><td>{(c.image_tokens + c.text_tokens).toLocaleString()}</td><td>{c.cost.toFixed(6)}</td></tr>

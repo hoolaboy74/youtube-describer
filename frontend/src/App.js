@@ -6,6 +6,18 @@ import './App.css';
 import Comments from './Comments'; // Import the Comments component
 import Admin from './Admin'; // Import the Admin component
 
+// Custom hook for managing focus on page/view change
+function usePageFocus(ref) {
+    const location = useLocation();
+
+    useEffect(() => {
+        if (ref.current) {
+            ref.current.setAttribute('tabindex', '-1');
+            ref.current.focus();
+        }
+    }, [location.pathname, ref]);
+}
+
 // Helper to check if a string is a valid YouTube URL
 function getYouTubeId(url) {
     if (!isValidYoutubeUrl(url)) {
@@ -30,6 +42,8 @@ function App() {
     const mainRef = useRef(null);
     const guideButtonRef = useRef(null);
     const closeGuideButtonRef = useRef(null);
+    const guideTitleRef = useRef(null);
+    const lastFocusedElementRef = useRef(null);
 
     const announcePolite = useCallback((message) => {
         clearTimeout(politeTimeoutRef.current);
@@ -45,12 +59,16 @@ function App() {
 
     useEffect(() => {
         if (isGuideVisible) {
-            closeGuideButtonRef.current?.focus();
+            lastFocusedElementRef.current = document.activeElement;
+            guideTitleRef.current?.focus();
         }
     }, [isGuideVisible]);
 
     const openGuide = () => setIsGuideVisible(true);
-    const closeGuide = () => setIsGuideVisible(false);
+    const closeGuide = () => {
+        setIsGuideVisible(false);
+        lastFocusedElementRef.current?.focus();
+    };
 
     const handleCopyAccount = () => {
         const textToCopy = '우리은행 1005-980-321301';
@@ -84,7 +102,7 @@ function App() {
             {isGuideVisible && (
                 <div className="modal-overlay" onClick={closeGuide}>
                     <div className="modal-content" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-labelledby="guide-title">
-                        <h3 id="guide-title">서비스 이용 방법</h3>
+                        <h3 id="guide-title" ref={guideTitleRef} tabIndex="-1">서비스 이용 방법</h3>
                         <div style={{textAlign: 'left', marginBottom: '20px'}}>
                             <h4>1. 영상 찾기 및 생성</h4>
                             <p>홈 화면 입력창에 유튜브 주소(URL)나 검색어를 입력 후 '검색 또는 생성' 버튼을 누르세요. 검색 결과에서 원하는 영상을 선택하면 재생 화면으로 이동합니다.</p>
@@ -147,6 +165,11 @@ function HomeScreen({ announcePolite, announceAssertive }) {
     
     const itemRefs = useRef(new Map());
     const navigate = useNavigate();
+    const headingRef = useRef(null);
+    const noticeCloseButtonRef = useRef(null);
+    const noticeTitleRef = useRef(null);
+    const lastFocusedNoticeElementRef = useRef(null);
+    usePageFocus(headingRef);
 
     // Simple hash function for notice content
     const simpleHash = (str) => {
@@ -202,6 +225,13 @@ function HomeScreen({ announcePolite, announceAssertive }) {
             })
             .catch(err => console.error('Failed to fetch financial summary:', err));
     }, [announceAssertive]);
+
+    useEffect(() => {
+        if (isNoticeVisible) {
+            lastFocusedNoticeElementRef.current = document.activeElement;
+            noticeTitleRef.current?.focus();
+        }
+    }, [isNoticeVisible]);
 
     useEffect(() => {
         if (focusedItemId) {
@@ -432,6 +462,7 @@ function HomeScreen({ announcePolite, announceAssertive }) {
             localStorage.setItem('dismissed_notice', JSON.stringify({ id: notice.id, timestamp: now }));
         }
         setIsNoticeVisible(false);
+        lastFocusedNoticeElementRef.current?.focus();
     };
 
     return (
@@ -439,7 +470,7 @@ function HomeScreen({ announcePolite, announceAssertive }) {
             {isNoticeVisible && (
                 <div className="modal-overlay" onClick={handleCloseNotice}>
                     <div className="modal-content" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-labelledby="notice-title">
-                        <h3 id="notice-title">{notice.title}</h3>
+                        <h3 id="notice-title" ref={noticeTitleRef} tabIndex="-1">{notice.title}</h3>
                         <div style={{ textAlign: 'left', whiteSpace: 'pre-wrap', marginBottom: '20px' }}>
                             <p>{notice.content}</p>
                         </div>
@@ -459,7 +490,7 @@ function HomeScreen({ announcePolite, announceAssertive }) {
                                     하루 동안 보지 않기
                                 </span>
                             </div>
-                            <button onClick={handleCloseNotice}>닫기</button>
+                            <button onClick={handleCloseNotice} ref={noticeCloseButtonRef}>닫기</button>
                         </div>
                     </div>
                 </div>
@@ -480,7 +511,7 @@ function HomeScreen({ announcePolite, announceAssertive }) {
             </form>
 
             <div className="cached-list-container">
-                <h2>{showSearchResults ? '검색 결과' : '사용자들의 최근 생성 영상'}</h2>
+                <h2 ref={headingRef}>{showSearchResults ? '검색 결과' : '사용자들의 최근 생성 영상'}</h2>
                 {isSearching ? <p>검색 중...</p> : renderList()}
             </div>
         </>
