@@ -35,17 +35,18 @@ const log = (level, message) => {
 };
 
 const logger = {
-  info: (message) => log('info', message),
-  warn: (message) => log('warn', message),
-  error: (message) => {
-    // For errors, it's often helpful to log the stack trace
-    if (message instanceof Error) {
-      log('error', message.stack || message.message);
-    } else {
-      log('error', message);
-    }
+  info: (...args) => log('info', args.join(' ')),
+  warn: (...args) => log('warn', args.join(' ')),
+  error: (...args) => {
+    const message = args.map(arg => {
+      if (arg instanceof Error) {
+        return arg.stack || JSON.stringify(arg);
+      }
+      return arg;
+    }).join(' ');
+    log('error', message);
   },
-  log: (message) => log('info', message), // Treat .log as .info
+  log: (...args) => log('info', args.join(' ')), // Treat .log as .info
 };
 
 module.exports = logger;
