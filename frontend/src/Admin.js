@@ -386,7 +386,7 @@ const Admin = () => {
                     <h2>재정 요약</h2>
                     <div className="summary-cards">
                         <div className="card"><h3>총 후원금</h3><p>{summary.totalDonations.toLocaleString()} 원</p></div>
-                        <div className="card"><h3>총 API 비용</h3><p>{summary.totalApiCosts.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</p></div>
+                        <div className="card"><h3>총 API 비용</h3><p>{Math.floor(summary.totalApiCosts * USD_TO_KRW_RATE).toLocaleString()} 원</p></div>
                         <div className="card"><h3>현재 잔액 (참고)</h3><p><strong>{Math.floor(summary.totalDonations - (summary.totalApiCosts * USD_TO_KRW_RATE)).toLocaleString()} 원</strong></p></div>
                     </div>
                 </section>

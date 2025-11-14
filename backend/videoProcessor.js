@@ -120,7 +120,9 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
         if (durationLimitMinutes > 0) { // A limit of 0 means 'unlimited'
             const durationLimitSeconds = durationLimitMinutes * 60;
             if (totalDuration >= durationLimitSeconds) {
+                const reason = `duration_exceeded: ${totalDuration}s > ${durationLimitSeconds}s`;
                 logger.warn(`[${requestHash}] Video processing blocked for ${videoId} because its duration (${totalDuration}s) exceeds the limit of ${durationLimitSeconds}s.`);
+                db.updateVideoStatus(videoId, 'failed', reason); // Explicitly mark as failed
                 if (sseHandler) {
                     sseHandler('backend_error', { message: 'duration_exceeded', limit: durationLimitMinutes });
                 }
