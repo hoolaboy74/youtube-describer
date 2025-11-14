@@ -12,12 +12,7 @@ const router = express.Router();
 const ttsClient = new TextToSpeechClient();
 const audioCacheDir = path.join(__dirname, 'public', 'audio');
 
-const { google } = require('googleapis');
-
-const youtube = google.youtube({
-    version: 'v3',
-    auth: process.env.GOOGLE_API_KEY,
-});
+const YouTube = require('youtube-sr').default;
 
 // Endpoint for unified search
 router.get('/search', async (req, res) => {
@@ -31,29 +26,9 @@ router.get('/search', async (req, res) => {
         const [dbResults, youtubeSearchResults] = await Promise.all([
             // 1. Search local database
             db.searchVideosByTitle(query),
-            // 2. Search YouTube
-            youtube.search.list({
-                part: 'snippet',
-                q: query,
-                maxResults: 50, // The API has a max limit of 50 per request
-                type: 'video',
-            }),
+            // 2. Search YouTube using youtube-sr
+            YouTube.search(query, { limit: 50, type: 'video' }),
         ]);
-
-        const youtubeResults = youtubeSearchResults.data.items || [];
-
-        // Get video details for duration and views
-        const videoIds = youtubeResults.map(item => item.id.videoId).join(',');
-        let videoDetails = [];
-        if (videoIds) {
-            const details = await youtube.videos.list({
-                part: 'contentDetails,statistics',
-                id: videoIds,
-            });
-            videoDetails = details.data.items || [];
-        }
-
-        const videoDetailsMap = new Map(videoDetails.map(item => [item.id, item]));
 
         // Format results to have a consistent structure
         const formattedDbResults = dbResults.map(v => ({
@@ -63,33 +38,28 @@ router.get('/search', async (req, res) => {
             source: 'db'
         }));
 
-        const formattedYoutubeResults = youtubeResults.map(item => {
-            const videoDetail = videoDetailsMap.get(item.id.videoId);
-            const duration = videoDetail?.contentDetails?.duration;
-            const views = videoDetail?.statistics?.viewCount;
-
-            // format duration from ISO 8601 to HH:MM:SS
+        const formattedYoutubeResults = youtubeSearchResults.map(item => {
+            // format duration from milliseconds to HH:MM:SS
             let durationFormatted = '0:00';
-            if (duration) {
-                const match = duration.match(/PT(\d+H)?(\d+M)?(\d+S)?/);
-                if (match) {
-                    const hours = (parseInt(match[1]) || 0);
-                    const minutes = (parseInt(match[2]) || 0);
-                    const seconds = (parseInt(match[3]) || 0);
-                    if (hours > 0) {
-                        durationFormatted = `${hours}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-                    } else {
-                        durationFormatted = `${minutes}:${String(seconds).padStart(2, '0')}`;
-                    }
+            if (item.duration) {
+                const totalSeconds = Math.floor(item.duration / 1000);
+                const hours = Math.floor(totalSeconds / 3600);
+                const minutes = Math.floor((totalSeconds % 3600) / 60);
+                const seconds = totalSeconds % 60;
+
+                if (hours > 0) {
+                    durationFormatted = `${hours}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                } else {
+                    durationFormatted = `${minutes}:${String(seconds).padStart(2, '0')}`;
                 }
             }
 
             return {
-                id: item.id.videoId,
-                title: item.snippet.title,
-                thumbnail: item.snippet.thumbnails.high.url,
-                channel: item.snippet.channelTitle,
-                views: views ? parseInt(views) : 0,
+                id: item.id,
+                title: item.title,
+                thumbnail: item.thumbnail?.url,
+                channel: item.channel?.name,
+                views: item.views,
                 durationFormatted,
                 source: 'youtube'
             };
