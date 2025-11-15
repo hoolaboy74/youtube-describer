@@ -18,7 +18,38 @@ const youtube = google.youtube({ version: 'v3', auth: API_KEY });
 
 const processingLocks = new Set();
 const timers = new Map();
-const cookiesPath = '/tmp/cookies.txt';
+
+const getRandomCookiePath = () => {
+    const cookiesDir = path.join(__dirname, 'cookies');
+    if (!fs.existsSync(cookiesDir)) {
+        logger.warn('Cookies directory not found, falling back to default cookies.txt');
+        const defaultCookiePath = path.join(__dirname, 'cookies.txt');
+        if (fs.existsSync(defaultCookiePath)) {
+            logger.info('Using default cookie file: cookies.txt');
+            return defaultCookiePath;
+        }
+        logger.warn('Default cookies.txt not found either. Proceeding without cookies.');
+        return null;
+    }
+
+    const cookieFiles = fs.readdirSync(cookiesDir).filter(file => file.endsWith('_cookies.txt') && fs.statSync(path.join(cookiesDir, file)).size > 0);
+
+    if (cookieFiles.length === 0) {
+        logger.warn('No valid cookie files found in cookies directory, falling back to default cookies.txt');
+        const defaultCookiePath = path.join(__dirname, 'cookies.txt');
+        if (fs.existsSync(defaultCookiePath)) {
+            logger.info('Using default cookie file: cookies.txt');
+            return defaultCookiePath;
+        }
+        logger.warn('Default cookies.txt not found either. Proceeding without cookies.');
+        return null;
+    }
+
+    const randomCookieFile = cookieFiles[Math.floor(Math.random() * cookieFiles.length)];
+    const cookiePath = path.join(cookiesDir, randomCookieFile);
+    logger.info(`Using cookie file: ${randomCookieFile}`);
+    return cookiePath;
+};
 
 const time = (label) => {
     timers.set(label, Date.now());
@@ -135,6 +166,9 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
 
         if (sseHandler) sseHandler('status_update', { message: '자막 정보 확인 중...' });
 
+        const cookiePath = getRandomCookiePath();
+        const cookieArgs = cookiePath ? ['--cookies', cookiePath] : [];
+
         // Fetch subtitles using yt-dlp for reliability with auto-generated captions
         let subtitleContent = '';
         const subtitlePath = path.join(baseTempDir, 'subtitles.ko.vtt');
@@ -146,7 +180,7 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
                 '--output', `${baseTempDir}/subtitles`,
                 '--skip-download',
                 '--no-progress',
-                '--cookies', cookiesPath,
+                ...cookieArgs,
                 youtubeUrl
             ]);
             
@@ -167,7 +201,7 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
             const extractedTimestamps = [];
             let lastReportedProgress = -1; // For progress reporting
 
-            const ytdlpArgs = ['-f', 'bestvideo[height<=720][ext=mp4]/best[height<=720][ext=mp4]', '-o', '-', '--no-progress', '--cookies', cookiesPath, youtubeUrl];
+            const ytdlpArgs = ['-f', 'bestvideo[height<=720][ext=mp4]/best[height<=720][ext=mp4]', '-o', '-', '--no-progress', ...cookieArgs, youtubeUrl];
             const ffmpegArgs = ['-i', '-', '-vf', "select='gt(scene,0.4)',showinfo", '-vsync', 'vfr', path.join(baseTempDir, 'frame-%04d.png')];
             const ytdlpProcess = spawn('yt-dlp', ytdlpArgs);
             const ffmpegProcess = spawn('ffmpeg', ffmpegArgs);
@@ -420,6 +454,9 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
         const extractionLabel = `[${requestHash}] Initial Data Extraction Time`;
         time(extractionLabel);
 
+        const cookiePath = getRandomCookiePath();
+        const cookieArgs = cookiePath ? ['--cookies', cookiePath] : [];
+
         const [videoDetails, subtitleContent, allTimestamps] = await Promise.all([
             // Fetch video details from YouTube API
             youtube.videos.list({
@@ -440,7 +477,7 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
                         '--output', `${baseTempDir}/subtitles`,
                         '--skip-download',
                         '--no-progress',
-                        '--cookies', cookiesPath,
+                        ...cookieArgs,
                         youtubeUrl
                     ]);
                     
@@ -459,7 +496,7 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
             (async () => {
                 const extractedTimestamps = [];
                 await new Promise((resolve, reject) => {
-                    const ytdlpArgs = ['-f', 'bestvideo[height<=720][ext=mp4]/best[height<=720][ext=mp4]', '-o', '-', '--no-progress', '--cookies', cookiesPath, youtubeUrl];
+                    const ytdlpArgs = ['-f', 'bestvideo[height<=720][ext=mp4]/best[height<=720][ext=mp4]', '-o', '-', '--no-progress', ...cookieArgs, youtubeUrl];
                     const ffmpegArgs = ['-i', '-', '-vf', "select='gt(scene,0.4)',showinfo", '-vsync', 'vfr', path.join(baseTempDir, 'frame-%04d.png')];
                     const ytdlpProcess = spawn('yt-dlp', ytdlpArgs);
                     const ffmpegProcess = spawn('ffmpeg', ffmpegArgs);
