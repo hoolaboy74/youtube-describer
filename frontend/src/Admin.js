@@ -25,7 +25,7 @@ const Admin = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [password, setPassword] = useState('');
 
-    const [summary, setSummary] = useState({ totalDonations: 0, totalApiCosts: 0, balance: 0 });
+    const [summary, setSummary] = useState({ totalDonations: 0, totalApiCosts: 0, totalProxyCost: 0, balance: 0 });
     const [donations, setDonations] = useState([]);
     const [costs, setCosts] = useState([]);
     const [videos, setVideos] = useState([]);
@@ -38,9 +38,11 @@ const Admin = () => {
         videosThisMonth: 0,
         processingVideos: [],
         failedVideos: [],
-        costToday: 0,
-        costThisWeek: 0,
-        costThisMonth: 0,
+        costs: {
+            today: { api: 0, proxy: 0, total: 0 },
+            week: { api: 0, proxy: 0, total: 0 },
+            month: { api: 0, proxy: 0, total: 0 },
+        },
     });
     
     const [newDonation, setNewDonation] = useState(getInitialDonationState());
@@ -61,12 +63,13 @@ const Admin = () => {
     const [costPagination, setCostPagination] = useState({ page: 1, limit: 10, totalCosts: 0 });
     const [costSearchTerm, setCostSearchTerm] = useState('');
     const [debouncedCostSearch, setDebouncedCostSearch] = useState('');
-    const [costSortOptions, setCostSortOptions] = useState({ sortBy: 'cost', sortOrder: 'DESC' });
+    const [costSortOptions, setCostSortOptions] = useState({ sortBy: 'totalCost', sortOrder: 'DESC' });
 
     const [settings, setSettings] = useState({
         videoDurationLimit: '30',
         processingPaused: 'false',
         exchangeRate: '1400',
+        proxyCostPerGB: '1',
         notice_title: '',
         notice_content: '',
     });
@@ -78,7 +81,6 @@ const Admin = () => {
         if (!isAuthenticated) return;
         try {
             const res = await api.get('/admin/settings');
-            // Ensure all setting fields exist to prevent uncontrolled component warnings
             setSettings(prev => ({
                 ...prev,
                 ...res.data,
@@ -96,7 +98,6 @@ const Admin = () => {
             try {
                 await api.put('/admin/settings', settings);
                 alert('설정이 성공적으로 저장되었습니다.');
-                // Re-fetch summary data in case exchange rate changed
                 fetchAllData();
             } catch (error) {
                 console.error('Failed to save settings', error);
@@ -207,7 +208,7 @@ const Admin = () => {
                 api.get('/admin/dashboard-stats'),
             ]);
             setSummary(summaryRes.data);
-            setStats(statsRes.data);
+            setStats(prevStats => ({ ...prevStats, ...statsRes.data }));
         } catch (error) {
             console.error('Failed to fetch admin data', error);
             if (error.response && error.response.status === 401) {
@@ -369,6 +370,7 @@ const Admin = () => {
     }
 
     const USD_TO_KRW_RATE = parseFloat(settings.exchangeRate) || 1400;
+    const totalUsedCost = summary.totalApiCosts + summary.totalProxyCost;
 
     return (
         <div className="admin-container">
@@ -386,16 +388,31 @@ const Admin = () => {
                     <h2>재정 요약</h2>
                     <div className="summary-cards">
                         <div className="card"><h3>총 후원금</h3><p>{summary.totalDonations.toLocaleString()} 원</p></div>
-                        <div className="card"><h3>총 API 비용</h3><p>{Math.floor(summary.totalApiCosts * USD_TO_KRW_RATE).toLocaleString()} 원</p></div>
-                        <div className="card"><h3>현재 잔액 (참고)</h3><p><strong>{Math.floor(summary.totalDonations - (summary.totalApiCosts * USD_TO_KRW_RATE)).toLocaleString()} 원</strong></p></div>
+                        <div className="card"><h3>총 사용 비용</h3><p>{Math.floor(totalUsedCost * USD_TO_KRW_RATE).toLocaleString()} 원</p></div>
+                        <div className="card"><h3>현재 잔액 (참고)</h3><p><strong>{Math.floor(summary.balance * USD_TO_KRW_RATE).toLocaleString()} 원</strong></p></div>
                     </div>
                 </section>
                 <section className="admin-summary">
-                    <h2>API 비용 요약</h2>
+                    <h2>비용 요약</h2>
                     <div className="summary-cards">
-                        <div className="card"><h3>오늘 API 비용</h3><p>{Math.floor(stats.costToday * USD_TO_KRW_RATE).toLocaleString()} 원</p></div>
-                        <div className="card"><h3>최근 7일 API 비용</h3><p>{Math.floor(stats.costThisWeek * USD_TO_KRW_RATE).toLocaleString()} 원</p></div>
-                        <div className="card"><h3>최근 30일 API 비용</h3><p>{Math.floor(stats.costThisMonth * USD_TO_KRW_RATE).toLocaleString()} 원</p></div>
+                        <div className="card">
+                            <h3>오늘 사용 비용</h3>
+                            <p>API: {Math.floor(stats.costs.today.api * USD_TO_KRW_RATE).toLocaleString()} 원</p>
+                            <p>Proxy: {Math.floor(stats.costs.today.proxy * USD_TO_KRW_RATE).toLocaleString()} 원</p>
+                            <p><strong>Total: {Math.floor(stats.costs.today.total * USD_TO_KRW_RATE).toLocaleString()} 원</strong></p>
+                        </div>
+                        <div className="card">
+                            <h3>최근 7일 비용</h3>
+                            <p>API: {Math.floor(stats.costs.week.api * USD_TO_KRW_RATE).toLocaleString()} 원</p>
+                            <p>Proxy: {Math.floor(stats.costs.week.proxy * USD_TO_KRW_RATE).toLocaleString()} 원</p>
+                            <p><strong>Total: {Math.floor(stats.costs.week.total * USD_TO_KRW_RATE).toLocaleString()} 원</strong></p>
+                        </div>
+                        <div className="card">
+                            <h3>최근 30일 비용</h3>
+                            <p>API: {Math.floor(stats.costs.month.api * USD_TO_KRW_RATE).toLocaleString()} 원</p>
+                            <p>Proxy: {Math.floor(stats.costs.month.proxy * USD_TO_KRW_RATE).toLocaleString()} 원</p>
+                            <p><strong>Total: {Math.floor(stats.costs.month.total * USD_TO_KRW_RATE).toLocaleString()} 원</strong></p>
+                        </div>
                     </div>
                 </section>
                 <section className="admin-summary">
@@ -560,20 +577,36 @@ const Admin = () => {
                     </div>
                 </section>
                 <section>
-                    <h2>API 비용 내역</h2>
+                    <h2>영상 처리 비용</h2>
                     <div className="filters-container">
                         <input type="search" name="cost-search" placeholder="영상 제목으로 검색..." value={costSearchTerm} onChange={(e) => setCostSearchTerm(e.target.value)} />
                         <select value={`${costSortOptions.sortBy},${costSortOptions.sortOrder}`} onChange={(e) => { const [sortBy, sortOrder] = e.target.value.split(','); setCostSortOptions({ sortBy, sortOrder }); }}>
-                            <option value="cost,DESC">비용 높은 순</option>
+                            <option value="totalCost,DESC">총비용 높은 순</option>
                             <option value="createdAt,DESC">최신 순</option>
+                            <option value="apiCost,DESC">API 비용 높은 순</option>
+                            <option value="proxyCost,DESC">Proxy 비용 높은 순</option>
                         </select>
                     </div>
                     <div className="table-container">
                         <table>
-                            <thead><tr><th scope="col">날짜</th><th scope="col">영상 제목</th><th scope="col">모델</th><th scope="col">총 토큰</th><th scope="col">비용 (USD)</th></tr></thead>
+                            <thead>
+                                <tr>
+                                    <th scope="col">날짜</th>
+                                    <th scope="col">영상 제목</th>
+                                    <th scope="col">API 비용 (USD)</th>
+                                    <th scope="col">Proxy 비용 (USD)</th>
+                                    <th scope="col">총비용 (USD)</th>
+                                </tr>
+                            </thead>
                             <tbody>
                                 {costs.map(c => (
-                                    <tr key={c.id}><td>{new Date(c.createdAt).toLocaleString()}</td><td>{c.videoTitle || c.videoId}</td><td>{c.model_used}</td><td>{(c.image_tokens + c.text_tokens).toLocaleString()}</td><td>{c.cost.toFixed(6)}</td></tr>
+                                    <tr key={c.id}>
+                                        <td>{new Date(c.createdAt).toLocaleString()}</td>
+                                        <td>{c.videoTitle || c.videoId}</td>
+                                        <td>{c.apiCost.toFixed(6)}</td>
+                                        <td>{c.proxyCost.toFixed(6)}</td>
+                                        <td><strong>{c.totalCost.toFixed(6)}</strong></td>
+                                    </tr>
                                 ))}
                             </tbody>
                         </table>
@@ -611,6 +644,11 @@ const Admin = () => {
                         <label htmlFor="exchangeRate">환율 설정 (USD to KRW)</label>
                         <input id="exchangeRate" name="exchangeRate" type="number" value={settings.exchangeRate} onChange={handleSettingChange} />
                         <p>대시보드의 원화(KRW) 비용 표시에 사용될 환율입니다.</p>
+                    </div>
+                    <div className="setting-item">
+                        <label htmlFor="proxyCostPerGB">Proxy 비용 (GB당 USD)</label>
+                        <input id="proxyCostPerGB" name="proxyCostPerGB" type="number" value={settings.proxyCostPerGB} onChange={handleSettingChange} />
+                        <p>Proxy 트래픽 비용 계산에 사용될 GB당 비용(USD)입니다.</p>
                     </div>
 
                     <hr />

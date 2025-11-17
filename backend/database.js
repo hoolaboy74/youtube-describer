@@ -15,6 +15,7 @@ function init() {
       videoId TEXT PRIMARY KEY,
       title TEXT NOT NULL,
       duration INTEGER DEFAULT 0,
+      filesize INTEGER DEFAULT 0,
       status TEXT DEFAULT 'pending' NOT NULL,
       createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
     )
@@ -38,6 +39,12 @@ function init() {
   } catch (error) {
     logger.info('Adding fail_reason column to videos table...');
     db.exec('ALTER TABLE videos ADD COLUMN fail_reason TEXT');
+  }
+  try {
+    db.prepare('SELECT filesize FROM videos LIMIT 1').get();
+  } catch (error) {
+    logger.info('Adding filesize column to videos table...');
+    db.exec('ALTER TABLE videos ADD COLUMN filesize INTEGER DEFAULT 0');
   }
 
   // scripts 테이블: 각 영상에 속한 화면 해설 스크립트 정보 저장
@@ -107,6 +114,7 @@ function init() {
     insertSetting.run('exchangeRate', '1400');
     insertSetting.run('notice_title', '');
     insertSetting.run('notice_content', '');
+    insertSetting.run('proxyCostPerGB', '1'); // USD per GB
   });
   transaction();
 
@@ -137,7 +145,7 @@ function updateSetting({ key, value }) {
 
 // 특정 영상 정보와 스크립트 전체를 가져오는 함수
 function getVideo(videoId) {
-  const videoRow = db.prepare('SELECT videoId, title, duration, status FROM videos WHERE videoId = ?').get(videoId);
+  const videoRow = db.prepare('SELECT videoId, title, duration, filesize, status FROM videos WHERE videoId = ?').get(videoId);
   if (!videoRow) {
     return null;
   }
@@ -148,6 +156,7 @@ function getVideo(videoId) {
     videoId: videoRow.videoId,
     title: videoRow.title,
     duration: videoRow.duration,
+    filesize: videoRow.filesize,
     status: videoRow.status,
     script: scriptRows.map(row => ({
       ...row,
@@ -158,17 +167,18 @@ function getVideo(videoId) {
 }
 
 // 영상과 스크립트 정보를 DB에 저장하는 함수 (트랜잭션 사용, 배치 처리용)
-function saveVideo({ videoId, title, duration, script }) {
+function saveVideo({ videoId, title, duration, filesize, script }) {
   const transaction = db.transaction(() => {
     // Step 1: Insert or update the video record, setting status to completed.
     db.prepare(`
-      INSERT INTO videos (videoId, title, duration, status)
-      VALUES (?, ?, ?, 'completed')
+      INSERT INTO videos (videoId, title, duration, filesize, status)
+      VALUES (?, ?, ?, ?, 'completed')
       ON CONFLICT(videoId) DO UPDATE SET
         title = excluded.title,
         duration = excluded.duration,
+        filesize = excluded.filesize,
         status = 'completed'
-    `).run(videoId, title, duration);
+    `).run(videoId, title, duration, filesize);
 
     // Step 2: Delete all old scripts for this video to ensure a clean slate.
     db.prepare('DELETE FROM scripts WHERE videoId = ?').run(videoId);
@@ -197,6 +207,7 @@ function listVideos() {
       v.videoId, 
       v.title, 
       v.duration, 
+      v.filesize,
       v.status, 
       strftime('%Y-%m-%dT%H:%M:%SZ', v.createdAt) as createdAt, 
       COUNT(c.id) as commentCount 
@@ -220,6 +231,7 @@ function searchVideosByTitle(query) {
       v.videoId, 
       v.title, 
       v.duration, 
+      v.filesize,
       v.status, 
       strftime('%Y-%m-%dT%H:%M:%SZ', v.createdAt) as createdAt, 
       COUNT(c.id) as commentCount 
@@ -238,16 +250,17 @@ function searchVideosByTitle(query) {
 }
 
 // 처리 시작 시 호출. status를 'processing'으로 설정.
-function ensureVideoRecord({ videoId, title, duration }) {
+function ensureVideoRecord({ videoId, title, duration, filesize }) {
   try {
     db.prepare(`
-      INSERT INTO videos (videoId, title, duration, status)
-      VALUES (?, ?, ?, 'processing')
+      INSERT INTO videos (videoId, title, duration, filesize, status)
+      VALUES (?, ?, ?, ?, 'processing')
       ON CONFLICT(videoId) DO UPDATE SET
         title = excluded.title,
         duration = excluded.duration,
+        filesize = excluded.filesize,
         status = 'processing'
-    `).run(videoId, title, Math.round(duration));
+    `).run(videoId, title, Math.round(duration), filesize);
   } catch (error) {
     logger.error(`[Database] Failed to ensure video record for ${videoId}:`, error);
     throw error;
@@ -437,10 +450,11 @@ function listApiCosts({ page = 1, limit = 20, search = null, sortBy = 'createdAt
         ac.id, 
         ac.videoId, 
         v.title as videoTitle,
+        v.filesize,
         ac.model_used, 
         ac.image_tokens, 
         ac.text_tokens, 
-        ac.cost, 
+        ac.cost as apiCost,
         strftime('%Y-%m-%dT%H:%M:%SZ', ac.createdAt) as createdAt 
     FROM api_costs ac
     LEFT JOIN videos v ON ac.videoId = v.videoId
@@ -450,17 +464,34 @@ function listApiCosts({ page = 1, limit = 20, search = null, sortBy = 'createdAt
   `;
   
   const costs = db.prepare(dataQuery).all(params);
-  return { costs, totalCosts };
+  const proxyCostPerGB = parseFloat(getSetting('proxyCostPerGB') || '1');
+
+  const results = costs.map(row => {
+    const proxyCost = row.filesize ? (row.filesize / 1_000_000_000) * proxyCostPerGB : 0;
+    return {
+      ...row,
+      proxyCost,
+      totalCost: row.apiCost + proxyCost
+    };
+  });
+
+  return { costs: results, totalCosts };
 }
 
 // 총 후원금 및 총 비용 집계
 function getAggregatedCosts() {
     const totalDonations = db.prepare('SELECT SUM(amount) as total FROM donations').get()?.total || 0;
     const totalApiCosts = db.prepare('SELECT SUM(cost) as total FROM api_costs').get()?.total || 0;
+    
+    const totalFilesize = db.prepare('SELECT SUM(filesize) as total FROM videos').get()?.total || 0;
+    const proxyCostPerGB = parseFloat(getSetting('proxyCostPerGB') || '1');
+    const totalProxyCost = (totalFilesize / 1_000_000_000) * proxyCostPerGB;
+
     return {
         totalDonations,
         totalApiCosts,
-        balance: totalDonations - totalApiCosts,
+        totalProxyCost,
+        balance: totalDonations - (totalApiCosts + totalProxyCost),
     };
 }
 
@@ -492,6 +523,7 @@ function listAllVideosForAdmin({ page = 1, limit = 20, search = null, status = n
       v.videoId, 
       v.title, 
       v.duration, 
+      v.filesize,
       v.status, 
       strftime('%Y-%m-%dT%H:%M:%SZ', v.createdAt) as createdAt, 
       v.fail_reason,
@@ -516,6 +548,7 @@ function listAllVideosForAdmin({ page = 1, limit = 20, search = null, status = n
 // 관리자용: 대시보드 통계 데이터 가져오기
 function getDashboardStats() {
     const stats = {};
+    const proxyCostPerGB = parseFloat(getSetting('proxyCostPerGB') || '1');
 
     // Core stats
     stats.totalVideos = db.prepare('SELECT COUNT(*) as count FROM videos').get().count;
@@ -527,9 +560,24 @@ function getDashboardStats() {
     stats.videosThisMonth = db.prepare("SELECT COUNT(*) as count FROM videos WHERE createdAt >= date('now', '-30 days')").get().count;
 
     // API costs by period
-    stats.costToday = db.prepare("SELECT SUM(cost) as total FROM api_costs WHERE date(createdAt, 'localtime') = date('now', 'localtime')").get()?.total || 0;
-    stats.costThisWeek = db.prepare("SELECT SUM(cost) as total FROM api_costs WHERE createdAt >= date('now', '-7 days')").get()?.total || 0;
-    stats.costThisMonth = db.prepare("SELECT SUM(cost) as total FROM api_costs WHERE createdAt >= date('now', '-30 days')").get()?.total || 0;
+    const apiCostToday = db.prepare("SELECT SUM(cost) as total FROM api_costs WHERE date(createdAt, 'localtime') = date('now', 'localtime')").get()?.total || 0;
+    const apiCostThisWeek = db.prepare("SELECT SUM(cost) as total FROM api_costs WHERE createdAt >= date('now', '-7 days')").get()?.total || 0;
+    const apiCostThisMonth = db.prepare("SELECT SUM(cost) as total FROM api_costs WHERE createdAt >= date('now', '-30 days')").get()?.total || 0;
+
+    // Proxy costs by period
+    const filesizeToday = db.prepare("SELECT SUM(filesize) as total FROM videos WHERE date(createdAt, 'localtime') = date('now', 'localtime')").get()?.total || 0;
+    const filesizeThisWeek = db.prepare("SELECT SUM(filesize) as total FROM videos WHERE createdAt >= date('now', '-7 days')").get()?.total || 0;
+    const filesizeThisMonth = db.prepare("SELECT SUM(filesize) as total FROM videos WHERE createdAt >= date('now', '-30 days')").get()?.total || 0;
+
+    const proxyCostToday = (filesizeToday / 1_000_000_000) * proxyCostPerGB;
+    const proxyCostThisWeek = (filesizeThisWeek / 1_000_000_000) * proxyCostPerGB;
+    const proxyCostThisMonth = (filesizeThisMonth / 1_000_000_000) * proxyCostPerGB;
+
+    stats.costs = {
+        today: { api: apiCostToday, proxy: proxyCostToday, total: apiCostToday + proxyCostToday },
+        week: { api: apiCostThisWeek, proxy: proxyCostThisWeek, total: apiCostThisWeek + proxyCostThisWeek },
+        month: { api: apiCostThisMonth, proxy: proxyCostThisMonth, total: apiCostThisMonth + proxyCostThisMonth },
+    };
 
     // System status
     stats.processingVideos = db.prepare("SELECT videoId, title, strftime('%Y-%m-%dT%H:%M:%SZ', createdAt) as createdAt FROM videos WHERE status = 'processing' ORDER BY createdAt DESC LIMIT 5").all();

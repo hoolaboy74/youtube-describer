@@ -135,21 +135,27 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
 
         if (sseHandler) sseHandler('status_update', { message: '영상 정보 확인 중...' });
         
-        // Fetch video details from YouTube API
-        const videoApiResponse = await youtube.videos.list({
-            part: 'snippet,contentDetails',
-            id: videoId,
-        });
+        const cookiePath = getRandomCookiePath();
+        const cookieArgs = cookiePath ? ['--cookies', cookiePath] : [];
+        const proxyArgs = process.env.YTDLP_PROXY ? ['--proxy', process.env.YTDLP_PROXY] : [];
 
-        if (videoApiResponse.data.items.length === 0) {
-            throw new Error('Video not found via YouTube API.');
-        }
-        const videoDetails = videoApiResponse.data.items[0];
-        const videoTitle = videoDetails.snippet.title;
-        const totalDuration = parseISO8601Duration(videoDetails.contentDetails.duration);
+        // Fetch video metadata using yt-dlp --print-json
+        const { stdout } = await util.promisify(execFile)('yt-dlp', [
+            '-j', // --print-json
+            '-f', 'bestvideo[height<=720][ext=mp4]/best[height<=720][ext=mp4]',
+            '--no-progress',
+            ...cookieArgs,
+            ...proxyArgs,
+            youtubeUrl
+        ]);
+        const videoInfo = JSON.parse(stdout);
 
-        if (videoDetails.snippet.liveBroadcastContent !== 'none') {
-            const reason = `live_stream_not_supported: liveBroadcastContent is ${videoDetails.snippet.liveBroadcastContent}`;
+        const videoTitle = videoInfo.title;
+        const totalDuration = videoInfo.duration;
+        const filesize = videoInfo.filesize || videoInfo.filesize_approx || 0;
+
+        if (videoInfo.is_live) {
+            const reason = `live_stream_not_supported: is_live is true`;
             logger.warn(`[${requestHash}] Video processing blocked for ${videoId} because it is a live stream.`);
             db.updateVideoStatus(videoId, 'failed', reason);
             if (sseHandler) {
@@ -172,13 +178,9 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
             }
         }
 
-        db.ensureVideoRecord({ videoId, title: videoTitle, duration: Math.round(totalDuration) });
+        db.ensureVideoRecord({ videoId, title: videoTitle, duration: Math.round(totalDuration), filesize });
 
         if (sseHandler) sseHandler('status_update', { message: '자막 정보 확인 중...' });
-
-        const cookiePath = getRandomCookiePath();
-        const cookieArgs = cookiePath ? ['--cookies', cookiePath] : [];
-        const proxyArgs = process.env.YTDLP_PROXY ? ['--proxy', process.env.YTDLP_PROXY] : [];
 
         // Fetch subtitles using yt-dlp for reliability with auto-generated captions
         let subtitleContent = '';
@@ -470,15 +472,22 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
         const cookieArgs = cookiePath ? ['--cookies', cookiePath] : [];
         const proxyArgs = process.env.YTDLP_PROXY ? ['--proxy', process.env.YTDLP_PROXY] : [];
 
-        const [videoDetails, subtitleContent, allTimestamps] = await Promise.all([
-            // Fetch video details from YouTube API
-            youtube.videos.list({
-                part: 'snippet,contentDetails',
-                id: videoId,
-            }).then(response => {
-                if (response.data.items.length === 0) throw new Error('Video not found via YouTube API.');
-                return response.data.items[0];
-            }),
+        // Fetch video metadata using yt-dlp --print-json
+        const { stdout: stdoutJson } = await util.promisify(execFile)('yt-dlp', [
+            '-j', // --print-json
+            '-f', 'bestvideo[height<=720][ext=mp4]/best[height<=720][ext=mp4]',
+            '--no-progress',
+            ...cookieArgs,
+            ...proxyArgs,
+            youtubeUrl
+        ]);
+        const videoInfo = JSON.parse(stdoutJson);
+
+        const videoTitle = videoInfo.title;
+        const totalDuration = videoInfo.duration;
+        const filesize = videoInfo.filesize || videoInfo.filesize_approx || 0;
+
+        const [subtitleContent, allTimestamps] = await Promise.all([
             // Fetch subtitles using yt-dlp for reliability with auto-generated captions
             (async () => {
                 const subtitlePath = path.join(baseTempDir, 'subtitles.ko.vtt');
@@ -533,12 +542,9 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
                 return extractedTimestamps;
             })()
         ]);
-        
-        const videoTitle = videoDetails.snippet.title;
-        const totalDuration = parseISO8601Duration(videoDetails.contentDetails.duration);
 
-        if (videoDetails.snippet.liveBroadcastContent !== 'none') {
-            const reason = `live_stream_not_supported: liveBroadcastContent is ${videoDetails.snippet.liveBroadcastContent}`;
+        if (videoInfo.is_live) {
+            const reason = `live_stream_not_supported: is_live is true`;
             logger.warn(`[${requestHash}] Batch processing blocked for ${videoId} because it is a live stream.`);
             db.updateVideoStatus(videoId, 'failed', reason);
             return; // Stop batch processing
@@ -559,7 +565,7 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
         logger.info(`[${requestHash}] Initial data extraction complete. Title: ${videoTitle}, Total Frames: ${allTimestamps.length}`);
 
         // Ensure record exists and is marked as processing
-        db.ensureVideoRecord({ videoId, title: videoTitle, duration: Math.round(totalDuration) });
+        db.ensureVideoRecord({ videoId, title: videoTitle, duration: Math.round(totalDuration), filesize });
 
         // 2. Process AI generation for the entire video
         logger.info(`[${requestHash}] Step 2: Starting AI generation with full context for batch...`);
