@@ -410,7 +410,7 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
 
         // Final step: Clean up old scripts and insert the new, complete script atomically.
         // This ensures consistency, especially if the process was re-run.
-        db.saveVideo({ videoId, title: videoTitle, duration: Math.round(totalDuration), script: fullScript });
+        db.saveVideo({ videoId, title: videoTitle, duration: Math.round(totalDuration), filesize, script: fullScript });
         
         timeEnd(aiLabel);
         logger.info(`[${requestHash}] Successfully generated and streamed script text.`);
@@ -665,8 +665,7 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
 
         // 3. Finalize
         finalScriptData.sort((a, b) => a.timestamp - b.timestamp);
-        const responsePayload = { videoId, title: videoTitle, duration: Math.round(totalDuration), script: finalScriptData };
-        db.saveVideo(responsePayload);
+        db.saveVideo({ videoId, title: videoTitle, duration: Math.round(totalDuration), filesize, script: finalScriptData });
 
         timeEnd(aiLabel);
         logger.info(`[${requestHash}] Successfully generated and cached script text for batch processing.`);
