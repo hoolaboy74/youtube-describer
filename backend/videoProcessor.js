@@ -148,6 +148,16 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
         const videoTitle = videoDetails.snippet.title;
         const totalDuration = parseISO8601Duration(videoDetails.contentDetails.duration);
 
+        if (videoDetails.snippet.liveBroadcastContent !== 'none') {
+            const reason = `live_stream_not_supported: liveBroadcastContent is ${videoDetails.snippet.liveBroadcastContent}`;
+            logger.warn(`[${requestHash}] Video processing blocked for ${videoId} because it is a live stream.`);
+            db.updateVideoStatus(videoId, 'failed', reason);
+            if (sseHandler) {
+                sseHandler('backend_error', { message: 'live_stream_not_supported', details: 'Live streams cannot be processed.' });
+            }
+            return; // Stop processing
+        }
+
         const durationLimitMinutes = parseInt(db.getSetting('videoDurationLimit') || '30', 10);
         if (durationLimitMinutes > 0) { // A limit of 0 means 'unlimited'
             const durationLimitSeconds = durationLimitMinutes * 60;
@@ -522,6 +532,24 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
         
         const videoTitle = videoDetails.snippet.title;
         const totalDuration = parseISO8601Duration(videoDetails.contentDetails.duration);
+
+        if (videoDetails.snippet.liveBroadcastContent !== 'none') {
+            const reason = `live_stream_not_supported: liveBroadcastContent is ${videoDetails.snippet.liveBroadcastContent}`;
+            logger.warn(`[${requestHash}] Batch processing blocked for ${videoId} because it is a live stream.`);
+            db.updateVideoStatus(videoId, 'failed', reason);
+            return; // Stop batch processing
+        }
+
+        const durationLimitMinutes = parseInt(db.getSetting('videoDurationLimit') || '30', 10);
+        if (durationLimitMinutes > 0) { // A limit of 0 means 'unlimited'
+            const durationLimitSeconds = durationLimitMinutes * 60;
+            if (totalDuration >= durationLimitSeconds) {
+                const reason = `duration_exceeded: ${totalDuration}s > ${durationLimitSeconds}s`;
+                logger.warn(`[${requestHash}] Batch processing blocked for ${videoId} because its duration (${totalDuration}s) exceeds the limit of ${durationLimitSeconds}s.`);
+                db.updateVideoStatus(videoId, 'failed', reason);
+                return; // Stop batch processing
+            }
+        }
 
         timeEnd(extractionLabel);
         logger.info(`[${requestHash}] Initial data extraction complete. Title: ${videoTitle}, Total Frames: ${allTimestamps.length}`);

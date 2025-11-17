@@ -153,6 +153,10 @@ function PlayerScreen({ mainRef, announcePolite, announceAssertive }) {
                         const servicePausedError = '현재 관리자에 의해 신규 영상 생성이 일시 중지되었습니다. 잠시 후 다시 시도해주세요.';
                         setError(servicePausedError);
                         announcePolite(servicePausedError);
+                    } else if (data.message === 'live_stream_not_supported') {
+                        const liveStreamError = '라이브 스트리밍 영상은 현재 지원되지 않습니다. 영상이 종료된 후 다시 시도해주세요.';
+                        setError(liveStreamError);
+                        announcePolite(liveStreamError);
                     } else {
                         const errorMessage = data.details || data.message || '알 수 없는 오류가 발생했습니다.';
                         setError(errorMessage);
