@@ -522,12 +522,12 @@ function getDashboardStats() {
     stats.totalComments = db.prepare('SELECT COUNT(*) as count FROM comments').get().count;
     
     // Videos processed by period
-    stats.videosToday = db.prepare("SELECT COUNT(*) as count FROM videos WHERE createdAt >= date('now')").get().count;
+    stats.videosToday = db.prepare("SELECT COUNT(*) as count FROM videos WHERE date(createdAt, 'localtime') = date('now', 'localtime')").get().count;
     stats.videosThisWeek = db.prepare("SELECT COUNT(*) as count FROM videos WHERE createdAt >= date('now', '-7 days')").get().count;
     stats.videosThisMonth = db.prepare("SELECT COUNT(*) as count FROM videos WHERE createdAt >= date('now', '-30 days')").get().count;
 
     // API costs by period
-    stats.costToday = db.prepare("SELECT SUM(cost) as total FROM api_costs WHERE createdAt >= date('now')").get()?.total || 0;
+    stats.costToday = db.prepare("SELECT SUM(cost) as total FROM api_costs WHERE date(createdAt, 'localtime') = date('now', 'localtime')").get()?.total || 0;
     stats.costThisWeek = db.prepare("SELECT SUM(cost) as total FROM api_costs WHERE createdAt >= date('now', '-7 days')").get()?.total || 0;
     stats.costThisMonth = db.prepare("SELECT SUM(cost) as total FROM api_costs WHERE createdAt >= date('now', '-30 days')").get()?.total || 0;
 
