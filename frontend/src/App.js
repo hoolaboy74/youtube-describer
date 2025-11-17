@@ -433,10 +433,11 @@ function HomeScreen({ announcePolite, announceAssertive }) {
     const renderFinancialSummary = () => {
         if (!financialSummary) return null;
 
-        const { totalDonations, totalApiCosts, exchangeRate } = financialSummary;
+        const { totalDonations, totalApiCosts, totalProxyCost, exchangeRate } = financialSummary;
         const rate = parseFloat(exchangeRate) || 1400;
-        const totalApiCostsKRW = totalApiCosts * rate;
-        const balanceKRW = totalDonations - totalApiCostsKRW;
+        const totalUsedCost = (totalApiCosts || 0) + (totalProxyCost || 0);
+        const totalUsedCostKRW = totalUsedCost * rate;
+        const balanceKRW = totalDonations - totalUsedCostKRW;
 
         const formatCurrency = (num) => Math.floor(num).toLocaleString('ko-KR');
 
@@ -448,8 +449,8 @@ function HomeScreen({ announcePolite, announceAssertive }) {
                 </div>
                 <progress
                     max={totalDonations}
-                    value={totalApiCostsKRW}
-                    aria-label={`총 후원금 ${formatCurrency(totalDonations)}원 중 ${formatCurrency(totalApiCostsKRW)}원 사용됨`}
+                    value={totalUsedCostKRW}
+                    aria-label={`총 후원금 ${formatCurrency(totalDonations)}원 중 ${formatCurrency(totalUsedCostKRW)}원 사용됨`}
                 />
             </section>
         );
