@@ -491,7 +491,6 @@ function getAggregatedCosts() {
         totalDonations,
         totalApiCosts,
         totalProxyCost,
-        balance: totalDonations - (totalApiCosts + totalProxyCost),
     };
 }
 

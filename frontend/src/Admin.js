@@ -370,7 +370,9 @@ const Admin = () => {
     }
 
     const USD_TO_KRW_RATE = parseFloat(settings.exchangeRate) || 1400;
-    const totalUsedCost = summary.totalApiCosts + summary.totalProxyCost;
+    const totalUsedCost = (summary.totalApiCosts || 0) + (summary.totalProxyCost || 0);
+    const totalUsedCostKRW = totalUsedCost * USD_TO_KRW_RATE;
+    const balanceKRW = (summary.totalDonations || 0) - totalUsedCostKRW;
 
     return (
         <div className="admin-container">
@@ -387,9 +389,9 @@ const Admin = () => {
                 <section className="admin-summary">
                     <h2>재정 요약</h2>
                     <div className="summary-cards">
-                        <div className="card"><h3>총 후원금</h3><p>{summary.totalDonations.toLocaleString()} 원</p></div>
-                        <div className="card"><h3>총 사용 비용</h3><p>{Math.floor(totalUsedCost * USD_TO_KRW_RATE).toLocaleString()} 원</p></div>
-                        <div className="card"><h3>현재 잔액 (참고)</h3><p><strong>{Math.floor(summary.balance * USD_TO_KRW_RATE).toLocaleString()} 원</strong></p></div>
+                        <div className="card"><h3>총 후원금</h3><p>{(summary.totalDonations || 0).toLocaleString()} 원</p></div>
+                        <div className="card"><h3>총 사용 비용</h3><p>{Math.floor(totalUsedCostKRW).toLocaleString()} 원</p></div>
+                        <div className="card"><h3>현재 잔액</h3><p><strong>{Math.floor(balanceKRW).toLocaleString()} 원</strong></p></div>
                     </div>
                 </section>
                 <section className="admin-summary">
