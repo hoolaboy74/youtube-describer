@@ -9,18 +9,6 @@ const api = axios.create({
     baseURL: API_BASE_URL,
 });
 
-const getInitialDonationState = () => {
-    const today = new Date();
-    return {
-        donator_name: '',
-        amount: '',
-        year: today.getFullYear(),
-        month: String(today.getMonth() + 1).padStart(2, '0'),
-        day: String(today.getDate()).padStart(2, '0'),
-        message: ''
-    };
-};
-
 const Admin = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const passwordRef = useRef(null);
