@@ -419,10 +419,19 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
         }
         
     } catch (error) {
+        if (error.message.includes('Sign in to confirm')) {
+            logger.error(`[${requestHash}] Authentication failed with cookie: ${cookiePath}. Please refresh this cookie file.`);
+        }
         db.updateVideoStatus(videoId, 'failed', error.message);
         logger.error(new Error(`[${requestHash}] Error processing request: ${error.message}`));
         if (sseHandler) {
-            sseHandler('backend_error', { message: 'Failed to process video', details: error.message });
+            let clientMessage = 'An unexpected error occurred.';
+            if (error.message.includes('proxy')) {
+                clientMessage = 'Failed to download video through proxy. Please try again later.';
+            } else if (error.message.includes('Sign in to confirm')) {
+                clientMessage = 'Authentication failed. Please contact the administrator.';
+            }
+            sseHandler('backend_error', { message: 'Failed to process video', details: clientMessage });
         }
     } finally {
         if (fs.existsSync(baseTempDir)) {
