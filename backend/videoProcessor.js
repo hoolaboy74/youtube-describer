@@ -419,20 +419,27 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
         }
         
     } catch (error) {
-        if (error.message.includes('Sign in to confirm')) {
-            logger.error(`[${requestHash}] Authentication failed with cookie: ${cookiePath}. Please refresh this cookie file.`);
+    // Log the full stderr from yt-dlp if available, for detailed debugging
+    if (error.stderr) {
+      logger.error(`[${requestHash}] yt-dlp STDERR for ${videoId} with cookie ${cookiePath}:\n${error.stderr}`);
+    }
+
+    // Specific check for authentication error
+    if (error.stderr && error.stderr.includes('Sign in to confirm')) {
+      logger.error(`[${requestHash}] Authentication failed with cookie: ${cookiePath}. Please refresh this cookie file.`);
+    }
+
+    db.updateVideoStatus(videoId, 'failed', error.message);
+    logger.error(new Error(`[${requestHash}] Error processing request: ${error.message}`));
+    if (sseHandler) {
+        let clientMessage = 'An unexpected error occurred.';
+        if (error.message.includes('proxy')) {
+            clientMessage = 'Failed to download video through proxy. Please try again later.';
+        } else if (error.stderr && error.stderr.includes('Sign in to confirm')) {
+            clientMessage = 'Authentication failed. Please contact the administrator.';
         }
-        db.updateVideoStatus(videoId, 'failed', error.message);
-        logger.error(new Error(`[${requestHash}] Error processing request: ${error.message}`));
-        if (sseHandler) {
-            let clientMessage = 'An unexpected error occurred.';
-            if (error.message.includes('proxy')) {
-                clientMessage = 'Failed to download video through proxy. Please try again later.';
-            } else if (error.message.includes('Sign in to confirm')) {
-                clientMessage = 'Authentication failed. Please contact the administrator.';
-            }
-            sseHandler('backend_error', { message: 'Failed to process video', details: clientMessage });
-        }
+        sseHandler('backend_error', { message: 'Failed to process video', details: clientMessage });
+    }
     } finally {
         if (fs.existsSync(baseTempDir)) {
             await fs.promises.rm(baseTempDir, { recursive: true, force: true });
