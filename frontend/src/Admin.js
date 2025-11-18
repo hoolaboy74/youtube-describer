@@ -23,7 +23,7 @@ const getInitialDonationState = () => {
 
 const Admin = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const [password, setPassword] = useState('');
+    const passwordRef = useRef(null);
 
     const [summary, setSummary] = useState({ totalDonations: 0, totalApiCosts: 0, totalProxyCost: 0, balance: 0 });
     const [donations, setDonations] = useState([]);
@@ -45,7 +45,14 @@ const Admin = () => {
         },
     });
     
-    const [newDonation, setNewDonation] = useState(getInitialDonationState());
+    // Refs for the donation form
+    const donatorNameRef = useRef(null);
+    const amountRef = useRef(null);
+    const yearRef = useRef(null);
+    const monthRef = useRef(null);
+    const dayRef = useRef(null);
+    const messageRef = useRef(null);
+
 
     const [videoFilters, setVideoFilters] = useState({ search: '', status: '' });
     const [videoPagination, setVideoPagination] = useState({ page: 1, limit: 20, totalVideos: 0 });
@@ -120,6 +127,7 @@ const Admin = () => {
     }, [searchTerm]);
 
     const handleAuth = () => {
+        const password = passwordRef.current.value;
         if (password === 'momcenter!@#') {
             localStorage.setItem('admin_token', password);
             api.defaults.headers.common['Authorization'] = `Bearer ${password}`;
@@ -221,7 +229,7 @@ const Admin = () => {
     useEffect(() => {
         const token = localStorage.getItem('admin_token');
         if (token) {
-            setPassword(token);
+            // For security, don't set password state from token. Just set auth header.
             api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
             setIsAuthenticated(true);
         }
@@ -291,14 +299,15 @@ const Admin = () => {
     const totalCostPages = Math.ceil(costPagination.totalCosts / costPagination.limit);
     const handleCostPageChange = (newPage) => newPage > 0 && newPage <= totalCostPages && setCostPagination(prev => ({ ...prev, page: newPage }));
 
-    const handleNewDonationChange = (e) => {
-        const { name, value } = e.target;
-        setNewDonation(prev => ({ ...prev, [name]: value }));
-    };
-
     const handleAddDonation = async (e) => {
         e.preventDefault();
-        const { donator_name, amount, year, month, day, message } = newDonation;
+        const donator_name = donatorNameRef.current.value;
+        const amount = amountRef.current.value;
+        const year = yearRef.current.value;
+        const month = monthRef.current.value;
+        const day = dayRef.current.value;
+        const message = messageRef.current.value;
+
         if (!donator_name.trim() || !amount.trim() || !year || !month || !day) {
             alert('후원자명, 금액, 날짜를 모두 입력해주세요.');
             return;
@@ -310,7 +319,16 @@ const Admin = () => {
         }
         try {
             await api.post('/admin/donations', { donator_name, amount, donation_date, message });
-            setNewDonation(getInitialDonationState());
+            // Clear inputs
+            donatorNameRef.current.value = '';
+            amountRef.current.value = '';
+            messageRef.current.value = '';
+            // Reset date to today
+            const today = new Date();
+            yearRef.current.value = today.getFullYear();
+            monthRef.current.value = String(today.getMonth() + 1).padStart(2, '0');
+            dayRef.current.value = String(today.getDate()).padStart(2, '0');
+            
             fetchDonations();
             fetchAllData();
         } catch (error) {
@@ -363,7 +381,7 @@ const Admin = () => {
         return (
             <div className="admin-auth-container">
                 <h1>Admin Access</h1>
-                <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Enter password" onKeyPress={(e) => e.key === 'Enter' && handleAuth()} />
+                <input type="password" ref={passwordRef} placeholder="Enter password" onKeyPress={(e) => e.key === 'Enter' && handleAuth()} />
                 <button onClick={handleAuth}>Login</button>
             </div>
         );
@@ -487,7 +505,7 @@ const Admin = () => {
                 <section>
                     <h2>영상 관리</h2>
                     <div className="filters-container">
-                        <input type="search" name="search" placeholder="제목으로 검색..." value={searchTerm} onChange={handleFilterChange} />
+                        <input type="search" name="search" placeholder="제목으로 검색..." onChange={handleFilterChange} />
                         <select name="status" value={videoFilters.status} onChange={handleFilterChange}>
                             <option value="">모든 상태</option>
                             <option value="completed">Completed</option>
@@ -525,7 +543,7 @@ const Admin = () => {
                 <section>
                     <h2>댓글 관리</h2>
                     <div className="filters-container">
-                        <input type="search" name="comment-search" placeholder="닉네임 또는 내용으로 검색..." value={commentSearchTerm} onChange={(e) => setCommentSearchTerm(e.target.value)} />
+                        <input type="search" name="comment-search" placeholder="닉네임 또는 내용으로 검색..." onChange={(e) => setCommentSearchTerm(e.target.value)} />
                     </div>
                     <div className="table-container">
                         <table>
@@ -549,18 +567,18 @@ const Admin = () => {
                 <section>
                     <h2>후원금 관리</h2>
                     <form onSubmit={handleAddDonation} className="donation-form">
-                        <input type="text" name="donator_name" value={newDonation.donator_name} onChange={handleNewDonationChange} placeholder="후원자명" />
-                        <input type="number" name="amount" value={newDonation.amount} onChange={handleNewDonationChange} placeholder="금액(원)" />
+                        <input type="text" name="donator_name" ref={donatorNameRef} placeholder="후원자명" />
+                        <input type="number" name="amount" ref={amountRef} placeholder="금액(원)" />
                         <div className="date-inputs">
-                            <label>년</label><input type="number" name="year" value={newDonation.year} onChange={handleNewDonationChange} placeholder="YYYY" />
-                            <label>월</label><input type="number" name="month" value={newDonation.month} onChange={handleNewDonationChange} placeholder="MM" />
-                            <label>일</label><input type="number" name="day" value={newDonation.day} onChange={handleNewDonationChange} placeholder="DD" />
+                            <label>년</label><input type="number" name="year" ref={yearRef} defaultValue={new Date().getFullYear()} placeholder="YYYY" />
+                            <label>월</label><input type="number" name="month" ref={monthRef} defaultValue={String(new Date().getMonth() + 1).padStart(2, '0')} placeholder="MM" />
+                            <label>일</label><input type="number" name="day" ref={dayRef} defaultValue={String(new Date().getDate()).padStart(2, '0')} placeholder="DD" />
                         </div>
-                        <input type="text" name="message" value={newDonation.message} onChange={handleNewDonationChange} placeholder="메시지 (선택)" />
+                        <input type="text" name="message" ref={messageRef} placeholder="메시지 (선택)" />
                         <button type="submit">후원 내역 추가</button>
                     </form>
                     <div className="filters-container">
-                        <input type="search" name="donation-search" placeholder="후원자명 또는 메시지로 검색..." value={donationSearchTerm} onChange={(e) => setDonationSearchTerm(e.target.value)} />
+                        <input type="search" name="donation-search" placeholder="후원자명 또는 메시지로 검색..." onChange={(e) => setDonationSearchTerm(e.target.value)} />
                     </div>
                     <div className="table-container">
                         <table>
@@ -581,7 +599,7 @@ const Admin = () => {
                 <section>
                     <h2>영상 처리 비용</h2>
                     <div className="filters-container">
-                        <input type="search" name="cost-search" placeholder="영상 제목으로 검색..." value={costSearchTerm} onChange={(e) => setCostSearchTerm(e.target.value)} />
+                        <input type="search" name="cost-search" placeholder="영상 제목으로 검색..." onChange={(e) => setCostSearchTerm(e.target.value)} />
                         <select value={`${costSortOptions.sortBy},${costSortOptions.sortOrder}`} onChange={(e) => { const [sortBy, sortOrder] = e.target.value.split(','); setCostSortOptions({ sortBy, sortOrder }); }}>
                             <option value="totalCost,DESC">총비용 높은 순</option>
                             <option value="createdAt,DESC">최신 순</option>
@@ -644,12 +662,12 @@ const Admin = () => {
                     </div>
                     <div className="setting-item">
                         <label htmlFor="exchangeRate">환율 설정 (USD to KRW)</label>
-                        <input id="exchangeRate" name="exchangeRate" type="number" value={settings.exchangeRate} onChange={handleSettingChange} />
+                        <input id="exchangeRate" name="exchangeRate" type="number" defaultValue={settings.exchangeRate} onChange={handleSettingChange} />
                         <p>대시보드의 원화(KRW) 비용 표시에 사용될 환율입니다.</p>
                     </div>
                     <div className="setting-item">
                         <label htmlFor="proxyCostPerGB">Proxy 비용 (GB당 USD)</label>
-                        <input id="proxyCostPerGB" name="proxyCostPerGB" type="number" value={settings.proxyCostPerGB} onChange={handleSettingChange} />
+                        <input id="proxyCostPerGB" name="proxyCostPerGB" type="number" defaultValue={settings.proxyCostPerGB} onChange={handleSettingChange} />
                         <p>Proxy 트래픽 비용 계산에 사용될 GB당 비용(USD)입니다.</p>
                     </div>
 
@@ -658,12 +676,12 @@ const Admin = () => {
                     <h2>공지사항 관리</h2>
                     <div className="setting-item">
                         <label htmlFor="notice_title">공지사항 제목</label>
-                        <input id="notice_title" name="notice_title" type="text" value={settings.notice_title || ''} onChange={handleSettingChange} placeholder="공지사항 제목을 입력하세요." />
+                        <input id="notice_title" name="notice_title" type="text" defaultValue={settings.notice_title || ''} onChange={handleSettingChange} placeholder="공지사항 제목을 입력하세요." />
                         <p>메인 페이지에 표시될 공지사항의 제목입니다. 비워두면 공지가 표시되지 않습니다.</p>
                     </div>
                     <div className="setting-item">
                         <label htmlFor="notice_content">공지사항 내용</label>
-                        <textarea id="notice_content" name="notice_content" value={settings.notice_content || ''} onChange={handleSettingChange} rows="5" placeholder="공지사항 내용을 입력하세요."></textarea>
+                        <textarea id="notice_content" name="notice_content" defaultValue={settings.notice_content || ''} onChange={handleSettingChange} rows="5" placeholder="공지사항 내용을 입력하세요."></textarea>
                         <p>공지사항의 전체 내용입니다.</p>
                     </div>
 

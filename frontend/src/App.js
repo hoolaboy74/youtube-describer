@@ -4,6 +4,9 @@ import axios from 'axios';
 import './App.css';
 import Admin from './Admin'; // Import the Admin component
 import PlayerScreen from './PlayerScreen'; // Import the PlayerScreen component
+import BoardScreen from './BoardScreen';
+import PostScreen from './PostScreen';
+import CreatePost from './CreatePost';
 
 // Helper to check if a string is a valid YouTube URL
 function getYouTubeId(url) {
@@ -93,9 +96,14 @@ function App() {
                     <Link to="/" style={{ textDecoration: 'none', color: 'inherit' }}>
                         <h1 ref={appTitleRef} tabIndex="-1">뷰레이터</h1>
                     </Link>
-                    <button onClick={openGuide} className="guide-button" ref={guideButtonRef} role="link">
-                        서비스 이용 안내
-                    </button>
+                    <nav className="header-nav">
+                        <Link to="/board" className="guide-button" role="link">
+                            와글와글 게시판
+                        </Link>
+                        <button onClick={openGuide} className="guide-button" ref={guideButtonRef} role="link">
+                            서비스 이용 안내
+                        </button>
+                    </nav>
                 </div>
                 <p>뷰레이터는 시각 장애인을 위한 유튜브 화면 해설 생성 서비스 입니다</p>
             </header>
@@ -140,6 +148,9 @@ function App() {
                     <Route path="/" element={<HomeScreen announcePolite={announcePolite} announceAssertive={announceAssertive} />} />
                     <Route path="/video/:videoId" element={<PlayerScreen mainRef={mainRef} announcePolite={announcePolite} announceAssertive={announceAssertive} />} />
                     <Route path="/admin" element={<Admin />} />
+                    <Route path="/board" element={<BoardScreen announcePolite={announcePolite} announceAssertive={announceAssertive} />} />
+                    <Route path="/board/create" element={<CreatePost announcePolite={announcePolite} announceAssertive={announceAssertive} />} />
+                    <Route path="/board/:postId" element={<PostScreen announcePolite={announcePolite} announceAssertive={announceAssertive} />} />
                 </Routes>
             </main>
         </div>

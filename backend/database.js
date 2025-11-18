@@ -118,6 +118,31 @@ function init() {
   });
   transaction();
 
+  // posts 테이블: '와글와글 게시판'의 글(주제) 정보 저장
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS posts (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      title TEXT NOT NULL,
+      content TEXT NOT NULL,
+      nickname TEXT NOT NULL,
+      password TEXT NOT NULL,
+      createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  // post_comments 테이블: 각 글에 대한 댓글 정보 저장
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS post_comments (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      postId INTEGER NOT NULL,
+      nickname TEXT NOT NULL,
+      password TEXT NOT NULL,
+      content TEXT NOT NULL,
+      createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (postId) REFERENCES posts (id) ON DELETE CASCADE
+    )
+  `);
+
 
   logger.info('Database initialized successfully.');
 }
@@ -633,6 +658,116 @@ function deleteCommentByIdAdmin(commentId) {
   return result.changes > 0;
 }
 
+// --- Board (게시판) Functions ---
+
+// 새 글 작성
+function createPost({ title, content, nickname, password }) {
+  const hashedPassword = hashPassword(password);
+  const result = db.prepare(
+    'INSERT INTO posts (title, content, nickname, password) VALUES (?, ?, ?, ?)'
+  ).run(title, content, nickname, hashedPassword);
+  return result.lastInsertRowid;
+}
+
+// ID로 특정 글 조회 (댓글 수 포함)
+function getPost(id) {
+  const post = db.prepare(`
+    SELECT 
+      p.id, p.title, p.content, p.nickname, strftime('%Y-%m-%dT%H:%M:%SZ', p.createdAt) as createdAt,
+      (SELECT COUNT(*) FROM post_comments WHERE postId = p.id) as commentCount
+    FROM posts p 
+    WHERE p.id = ?
+  `).get(id);
+  
+  if (post) {
+    const comments = db.prepare(`
+      SELECT id, postId, nickname, content, strftime('%Y-%m-%dT%H:%M:%SZ', createdAt) as createdAt 
+      FROM post_comments 
+      WHERE postId = ? 
+      ORDER BY createdAt ASC
+    `).all(id);
+    post.comments = comments;
+  }
+  return post;
+}
+
+// ID로 특정 글의 비밀번호 정보까지 포함하여 조회 (수정/삭제 시 인증용)
+function getPostWithPassword(id) {
+    return db.prepare('SELECT * FROM posts WHERE id = ?').get(id);
+}
+
+
+// 글 목록 조회 (정렬 기능 포함)
+function getPosts({ sortBy = 'newest', page = 1, limit = 15 }) {
+  const offset = (page - 1) * limit;
+  let orderBy;
+
+  switch (sortBy) {
+    case 'comments':
+      orderBy = 'commentCount DESC, p.createdAt DESC';
+      break;
+    case 'newest':
+    default:
+      orderBy = 'p.createdAt DESC';
+  }
+
+  const query = `
+    SELECT 
+      p.id, p.title, p.nickname, strftime('%Y-%m-%dT%H:%M:%SZ', p.createdAt) as createdAt,
+      (SELECT COUNT(*) FROM post_comments WHERE postId = p.id) as commentCount
+    FROM posts p
+    ORDER BY ${orderBy}
+    LIMIT ? OFFSET ?
+  `;
+
+  const posts = db.prepare(query).all(limit, offset);
+  const totalPosts = db.prepare('SELECT COUNT(*) as count FROM posts').get().count;
+
+  return { posts, totalPosts };
+}
+
+// 글 수정
+function updatePost({ id, title, content }) {
+  const result = db.prepare(
+    'UPDATE posts SET title = ?, content = ?, createdAt = CURRENT_TIMESTAMP WHERE id = ?'
+  ).run(title, content, id);
+  return result.changes > 0;
+}
+
+// 글 삭제 (연관된 댓글은 ON DELETE CASCADE로 자동 삭제됨)
+function deletePost(id) {
+  const result = db.prepare('DELETE FROM posts WHERE id = ?').run(id);
+  return result.changes > 0;
+}
+
+// 새 댓글 작성 (게시판용)
+function createPostComment({ postId, nickname, password, content }) {
+  const hashedPassword = hashPassword(password);
+  const result = db.prepare(
+    'INSERT INTO post_comments (postId, nickname, password, content) VALUES (?, ?, ?, ?)'
+  ).run(postId, nickname, hashedPassword, content);
+  return result.lastInsertRowid;
+}
+
+// ID로 특정 댓글 조회 (비밀번호 포함, 게시판용)
+function getPostCommentById(commentId) {
+  return db.prepare('SELECT * FROM post_comments WHERE id = ?').get(commentId);
+}
+
+// 댓글 수정 (게시판용)
+function updatePostComment({ commentId, content }) {
+  const result = db.prepare(
+    'UPDATE post_comments SET content = ?, createdAt = CURRENT_TIMESTAMP WHERE id = ?'
+  ).run(content, commentId);
+  return result.changes > 0;
+}
+
+// 댓글 삭제 (게시판용)
+function deletePostComment(commentId) {
+  const result = db.prepare('DELETE FROM post_comments WHERE id = ?').run(commentId);
+  return result.changes > 0;
+}
+
 
 module.exports = {
   init,
@@ -666,4 +801,15 @@ module.exports = {
   getDashboardStats,
   listAllCommentsForAdmin,
   deleteCommentByIdAdmin,
+  // Board functions
+  createPost,
+  getPost,
+  getPostWithPassword,
+  getPosts,
+  updatePost,
+  deletePost,
+  createPostComment,
+  getPostCommentById,
+  updatePostComment,
+  deletePostComment,
 };

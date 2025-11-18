@@ -1,14 +1,18 @@
-
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import axios from 'axios';
 
 function Comments({ videoId, mainRef }) {
     const [comments, setComments] = useState([]);
-    const [nickname, setNickname] = useState('');
-    const [password, setPassword] = useState('');
-    const [content, setContent] = useState('');
     const [editingComment, setEditingComment] = useState(null); // { id, content }
     const [error, setError] = useState('');
+
+    // Refs for the new comment form
+    const nicknameRef = useRef(null);
+    const passwordRef = useRef(null);
+    const contentRef = useRef(null);
+
+    // Ref for the comment edit form
+    const editContentRef = useRef(null);
 
     const fetchComments = useCallback(async () => {
         try {
@@ -28,15 +32,19 @@ function Comments({ videoId, mainRef }) {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        const nickname = nicknameRef.current.value;
+        const password = passwordRef.current.value;
+        const content = contentRef.current.value;
+
         if (!nickname || !password || !content) {
             setError("닉네임, 비밀번호, 내용을 모두 입력해주세요.");
             return;
         }
         try {
             await axios.post('/api/comments', { videoId, nickname, password, content });
-            setNickname('');
-            setPassword('');
-            setContent('');
+            nicknameRef.current.value = '';
+            passwordRef.current.value = '';
+            contentRef.current.value = '';
             setError('');
             fetchComments();
         } catch (err) {
@@ -60,18 +68,24 @@ function Comments({ videoId, mainRef }) {
     };
 
     const handleEdit = (comment) => {
-        setEditingComment({ id: comment.id, content: comment.content });
+        setEditingComment(comment);
     };
 
     const handleUpdate = async (e) => {
         e.preventDefault();
+        const newContent = editContentRef.current.value;
+        if (!newContent) {
+            alert("내용을 입력해주세요.");
+            return;
+        }
+
         const pw = prompt("댓글을 수정하려면 비밀번호를 입력하세요.");
         if (!pw) return;
 
         try {
             await axios.put(`/api/comments/${editingComment.id}`, {
                 password: pw,
-                content: editingComment.content
+                content: newContent
             });
             setEditingComment(null);
             fetchComments();
@@ -91,22 +105,22 @@ function Comments({ videoId, mainRef }) {
                     <input
                         type="text"
                         placeholder="닉네임"
-                        value={nickname}
-                        onChange={(e) => setNickname(e.target.value)}
+                        ref={nicknameRef}
+                        defaultValue=""
                         required
                     />
                     <input
                         type="password"
                         placeholder="비밀번호"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
+                        ref={passwordRef}
+                        defaultValue=""
                         required
                     />
                 </div>
                 <textarea
                     placeholder="댓글을 입력하세요..."
-                    value={content}
-                    onChange={(e) => setContent(e.target.value)}
+                    ref={contentRef}
+                    defaultValue=""
                     required
                 ></textarea>
                 <button type="submit">등록</button>
@@ -118,8 +132,8 @@ function Comments({ videoId, mainRef }) {
                         {editingComment && editingComment.id === comment.id ? (
                             <form onSubmit={handleUpdate} className="comment-edit-form">
                                 <textarea
-                                    value={editingComment.content}
-                                    onChange={(e) => setEditingComment({ ...editingComment, content: e.target.value })}
+                                    ref={editContentRef}
+                                    defaultValue={comment.content}
                                     required
                                 ></textarea>
                                 <div className="comment-actions">

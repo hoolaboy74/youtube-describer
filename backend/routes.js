@@ -348,6 +348,212 @@ router.delete('/comments/:commentId', (req, res) => {
     }
 });
 
+// --- BOARD (게시판) API ENDPOINTS ---
+const boardRouter = express.Router();
+
+// GET all posts
+boardRouter.get('/posts', (req, res) => {
+    try {
+        const { sortBy, page, limit } = req.query;
+        const posts = db.getPosts({ 
+            sortBy: sortBy || 'newest',
+            page: parseInt(page || '1', 10),
+            limit: parseInt(limit || '15', 10)
+        });
+        res.json(posts);
+    } catch (error) {
+        logger.error('[Board] Failed to fetch posts:', error);
+        res.status(500).json({ error: 'Failed to fetch posts' });
+    }
+});
+
+// GET a single post by ID
+boardRouter.get('/posts/:id', (req, res) => {
+    try {
+        const { id } = req.params;
+        const post = db.getPost(id);
+        if (post) {
+            res.json(post);
+        } else {
+            res.status(404).json({ error: 'Post not found' });
+        }
+    } catch (error) {
+        logger.error(`[Board] Failed to fetch post ${req.params.id}:`, error);
+        res.status(500).json({ error: 'Failed to fetch post' });
+    }
+});
+
+// POST a new post
+boardRouter.post('/posts', (req, res) => {
+    try {
+        const { title, content, nickname, password } = req.body;
+        if (!title || !content || !nickname || !password) {
+            return res.status(400).json({ error: 'Missing required fields' });
+        }
+        const newPostId = db.createPost({ title, content, nickname, password });
+        const newPost = db.getPost(newPostId);
+        res.status(201).json(newPost);
+    } catch (error) {
+        logger.error('[Board] Failed to create post:', error);
+        res.status(500).json({ error: 'Failed to create post' });
+    }
+});
+
+// PUT (update) a post
+boardRouter.put('/posts/:id', (req, res) => {
+    try {
+        const { id } = req.params;
+        const { title, content, password } = req.body;
+
+        if (!password || !title || !content) {
+            return res.status(400).json({ error: 'Password, title, and content are required' });
+        }
+
+        const post = db.getPostWithPassword(id);
+        if (!post) {
+            return res.status(404).json({ error: 'Post not found' });
+        }
+
+        const isPasswordValid = db.verifyPassword(post.password, password);
+        if (!isPasswordValid) {
+            return res.status(403).json({ error: 'Invalid password' });
+        }
+
+        const success = db.updatePost({ id, title, content });
+        if (success) {
+            res.status(200).json({ message: 'Post updated successfully' });
+        } else {
+            res.status(500).json({ error: 'Failed to update post' });
+        }
+    } catch (error) {
+        logger.error(`[Board] Failed to update post ${req.params.id}:`, error);
+        res.status(500).json({ error: 'Failed to update post' });
+    }
+});
+
+// DELETE a post
+boardRouter.delete('/posts/:id', (req, res) => {
+    try {
+        const { id } = req.params;
+        const { password } = req.body;
+
+        if (!password) {
+            return res.status(400).json({ error: 'Password is required' });
+        }
+
+        const post = db.getPostWithPassword(id);
+        if (!post) {
+            return res.status(404).json({ error: 'Post not found' });
+        }
+
+        const isPasswordValid = db.verifyPassword(post.password, password);
+        if (!isPasswordValid) {
+            return res.status(403).json({ error: 'Invalid password' });
+        }
+
+        const success = db.deletePost(id);
+        if (success) {
+            res.status(200).json({ message: 'Post deleted successfully' });
+        } else {
+            res.status(500).json({ error: 'Failed to delete post' });
+        }
+    } catch (error) {
+        logger.error(`[Board] Failed to delete post ${req.params.id}:`, error);
+        res.status(500).json({ error: 'Failed to delete post' });
+    }
+});
+
+// POST a new comment on a post
+boardRouter.post('/posts/:id/comments', (req, res) => {
+    try {
+        const { id: postId } = req.params;
+        const { nickname, password, content } = req.body;
+        if (!nickname || !password || !content) {
+            return res.status(400).json({ error: 'Missing required fields' });
+        }
+        const newCommentId = db.createPostComment({ postId, nickname, password, content });
+        const newComment = db.getPostCommentById(newCommentId);
+        res.status(201).json({
+            id: newComment.id,
+            postId: newComment.postId,
+            nickname: newComment.nickname,
+            content: newComment.content,
+            createdAt: newComment.createdAt
+        });
+    } catch (error) {
+        logger.error(`[Board] Failed to add comment to post ${req.params.id}:`, error);
+        res.status(500).json({ error: 'Failed to add comment' });
+    }
+});
+
+// PUT (update) a comment on a post
+boardRouter.put('/comments/:commentId', (req, res) => {
+    try {
+        const { commentId } = req.params;
+        const { password, content } = req.body;
+
+        if (!password || !content) {
+            return res.status(400).json({ error: 'Password and content are required' });
+        }
+
+        const comment = db.getPostCommentById(commentId);
+        if (!comment) {
+            return res.status(404).json({ error: 'Comment not found' });
+        }
+
+        const isPasswordValid = db.verifyPassword(comment.password, password);
+        if (!isPasswordValid) {
+            return res.status(403).json({ error: 'Invalid password' });
+        }
+
+        const success = db.updatePostComment({ commentId, content });
+        if (success) {
+            res.status(200).json({ message: 'Comment updated successfully' });
+        } else {
+            res.status(500).json({ error: 'Failed to update comment' });
+        }
+    } catch (error) {
+        logger.error(`[Board] Failed to update comment ${req.params.commentId}:`, error);
+        res.status(500).json({ error: 'Failed to update comment' });
+    }
+});
+
+// DELETE a comment on a post
+boardRouter.delete('/comments/:commentId', (req, res) => {
+    try {
+        const { commentId } = req.params;
+        const { password } = req.body;
+
+        if (!password) {
+            return res.status(400).json({ error: 'Password is required' });
+        }
+
+        const comment = db.getPostCommentById(commentId);
+        if (!comment) {
+            return res.status(404).json({ error: 'Comment not found' });
+        }
+
+        const isPasswordValid = db.verifyPassword(comment.password, password);
+        if (!isPasswordValid) {
+            return res.status(403).json({ error: 'Invalid password' });
+        }
+
+        const success = db.deletePostComment(commentId);
+        if (success) {
+            res.status(200).json({ message: 'Comment deleted successfully' });
+        } else {
+            res.status(500).json({ error: 'Failed to delete comment' });
+        }
+    } catch (error) {
+        logger.error(`[Board] Failed to delete comment ${req.params.commentId}:`, error);
+        res.status(500).json({ error: 'Failed to delete comment' });
+    }
+});
+
+// Mount the board router
+router.use('/board', boardRouter);
+
+
 // --- ADMIN API ENDPOINTS ---
 
 // Simple password authentication middleware for admin routes
