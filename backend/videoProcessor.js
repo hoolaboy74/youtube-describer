@@ -142,7 +142,7 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
         // Fetch video metadata using yt-dlp --print-json
         const { stdout } = await util.promisify(execFile)('yt-dlp', [
             '-j', // --print-json
-            '-f', 'bestvideo[height<=720][ext=mp4]/best[height<=720][ext=mp4]',
+            '-f', 'bestvideo[height<=480][ext=mp4]/best[height<=480][ext=mp4]',
             '--no-progress',
             ...cookieArgs,
             ...proxyArgs,
@@ -215,7 +215,7 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
             const extractedTimestamps = [];
             let lastReportedProgress = -1; // For progress reporting
 
-            const ytdlpArgs = ['-f', 'bestvideo[height<=720][ext=mp4]/best[height<=720][ext=mp4]', '-o', '-', '--no-progress', ...cookieArgs, ...proxyArgs, youtubeUrl];
+            const ytdlpArgs = ['-f', 'bestvideo[height<=480][ext=mp4]/best[height<=480][ext=mp4]', '-o', '-', '--no-progress', ...cookieArgs, ...proxyArgs, youtubeUrl];
             const ffmpegArgs = ['-i', '-', '-vf', "select='gt(scene,0.4)',showinfo", '-vsync', 'vfr', path.join(baseTempDir, 'frame-%04d.png')];
             const ytdlpProcess = spawn('yt-dlp', ytdlpArgs);
             const ffmpegProcess = spawn('ffmpeg', ffmpegArgs);
@@ -475,7 +475,7 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
         // Fetch video metadata using yt-dlp --print-json
         const { stdout: stdoutJson } = await util.promisify(execFile)('yt-dlp', [
             '-j', // --print-json
-            '-f', 'bestvideo[height<=720][ext=mp4]/best[height<=720][ext=mp4]',
+            '-f', 'bestvideo[height<=480][ext=mp4]/best[height<=480][ext=mp4]',
             '--no-progress',
             ...cookieArgs,
             ...proxyArgs,
@@ -519,7 +519,7 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
             (async () => {
                 const extractedTimestamps = [];
                 await new Promise((resolve, reject) => {
-                    const ytdlpArgs = ['-f', 'bestvideo[height<=720][ext=mp4]/best[height<=720][ext=mp4]', '-o', '-', '--no-progress', ...cookieArgs, ...proxyArgs, youtubeUrl];
+                    const ytdlpArgs = ['-f', 'bestvideo[height<=480][ext=mp4]/best[height<=480][ext=mp4]', '-o', '-', '--no-progress', ...cookieArgs, ...proxyArgs, youtubeUrl];
                     const ffmpegArgs = ['-i', '-', '-vf', "select='gt(scene,0.4)',showinfo", '-vsync', 'vfr', path.join(baseTempDir, 'frame-%04d.png')];
                     const ytdlpProcess = spawn('yt-dlp', ytdlpArgs);
                     const ffmpegProcess = spawn('ffmpeg', ffmpegArgs);
