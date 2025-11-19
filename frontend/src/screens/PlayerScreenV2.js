@@ -397,22 +397,11 @@ function PlayerScreenV2() {
     }, [player]);
 
     const handleTtsEnd = useCallback(() => {
-        if (!player || typeof player.getCurrentTime !== 'function' || typeof player.seekTo !== 'function') return;
-        
+        if (!player) return;
         isTtsPlayingRef.current = false;
-
-        setTimeout(() => {
-            if (isTtsPlayingRef.current) return;
-
-            const currentTime = player.getCurrentTime();
-            const rewindTime = Math.max(0, currentTime - 0.5);
-            
-            player.seekTo(rewindTime, true);
-
-            if (player.getPlayerState() !== 1) {
-                player.playVideo();
-            }
-        }, 400);
+        if (player.getPlayerState() !== 1) {
+            player.playVideo();
+        }
     }, [player]);
 
     const playDescription = useCallback(async (scriptLine) => {
