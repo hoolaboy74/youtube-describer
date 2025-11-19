@@ -92,9 +92,6 @@ function PlayerScreenV2() {
     const audioPlayerRef = useRef(null);
     const onAudioEndedRef = useRef(null);
 
-    const isMobile = useMemo(() => /Mobi|Android|iPhone/i.test(navigator.userAgent), []);
-
-
     // UI State
     const [isScriptVisible, setIsScriptVisible] = useState(false);
 
@@ -393,57 +390,30 @@ function PlayerScreenV2() {
         return finalScript;
     }, [filteredScript]);
 
-    const fadeVolume = useCallback((targetVolume, duration) => {
-        if (!player || typeof player.getVolume !== 'function') return;
-
-        const startVolume = player.getVolume();
-        const volumeChange = targetVolume - startVolume;
-        if (volumeChange === 0) return;
-
-        let startTime = null;
-
-        const animateVolume = (timestamp) => {
-            if (!startTime) startTime = timestamp;
-            const progress = timestamp - startTime;
-            const newVolume = startVolume + volumeChange * Math.min(progress / duration, 1);
-            
-            if (typeof player.setVolume === 'function') {
-                player.setVolume(newVolume);
-            }
-
-            if (progress < duration) {
-                requestAnimationFrame(animateVolume);
-            }
-        };
-
-        requestAnimationFrame(animateVolume);
+    const handleTtsStart = useCallback(() => {
+        if (!player || typeof player.pauseVideo !== 'function') return;
+        isTtsPlayingRef.current = true;
+        player.pauseVideo();
     }, [player]);
 
-    const handleTtsStart = useCallback(() => {
-        if (!player) return;
-        isTtsPlayingRef.current = true;
-        if (isMobile) {
-            player.setPlaybackRate(0.75);
-        } else {
-            fadeVolume(15, 300); // Fade down to 15% volume over 300ms
-        }
-    }, [player, fadeVolume, isMobile]);
-
     const handleTtsEnd = useCallback(() => {
-        if (!player) return;
+        if (!player || typeof player.getCurrentTime !== 'function' || typeof player.seekTo !== 'function') return;
+        
         isTtsPlayingRef.current = false;
-        if (isMobile) {
-            player.setPlaybackRate(1);
-        } else {
-            // Wait 500ms before starting to fade back in
-            setTimeout(() => {
-                // Check if another TTS hasn't started in the meantime
-                if (!isTtsPlayingRef.current) {
-                    fadeVolume(100, 300); // Fade back to 100% volume over 300ms
-                }
-            }, 500);
-        }
-    }, [player, fadeVolume, isMobile]);
+
+        setTimeout(() => {
+            if (isTtsPlayingRef.current) return;
+
+            const currentTime = player.getCurrentTime();
+            const rewindTime = Math.max(0, currentTime - 0.5);
+            
+            player.seekTo(rewindTime, true);
+
+            if (player.getPlayerState() !== 1) {
+                player.playVideo();
+            }
+        }, 400);
+    }, [player]);
 
     const playDescription = useCallback(async (scriptLine) => {
         if (!player || !scriptLine || !audioPlayerRef.current) return;
