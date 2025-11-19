@@ -12,7 +12,7 @@ const Layout = () => {
   usePageFocus(titleRef);
 
   const getTitle = (pathname) => {
-    if (pathname === '/') return '홈';
+    if (pathname === '/') return '뷰레이터';
     if (pathname.startsWith('/board')) return '와글와글 게시판';
     if (pathname === '/more') return '더보기';
     return '유튜브 화면 해설';
