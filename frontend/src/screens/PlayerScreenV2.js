@@ -92,6 +92,9 @@ function PlayerScreenV2() {
     const audioPlayerRef = useRef(null);
     const onAudioEndedRef = useRef(null);
 
+    const isMobile = useMemo(() => /Mobi|Android|iPhone/i.test(navigator.userAgent), []);
+
+
     // UI State
     const [isScriptVisible, setIsScriptVisible] = useState(false);
 
@@ -419,20 +422,28 @@ function PlayerScreenV2() {
     const handleTtsStart = useCallback(() => {
         if (!player) return;
         isTtsPlayingRef.current = true;
-        fadeVolume(15, 300); // Fade down to 15% volume over 300ms
-    }, [player, fadeVolume]);
+        if (isMobile) {
+            player.setPlaybackRate(0.75);
+        } else {
+            fadeVolume(15, 300); // Fade down to 15% volume over 300ms
+        }
+    }, [player, fadeVolume, isMobile]);
 
     const handleTtsEnd = useCallback(() => {
         if (!player) return;
         isTtsPlayingRef.current = false;
-        // Wait 500ms before starting to fade back in
-        setTimeout(() => {
-            // Check if another TTS hasn't started in the meantime
-            if (!isTtsPlayingRef.current) {
-                fadeVolume(100, 300); // Fade back to 100% volume over 300ms
-            }
-        }, 500);
-    }, [player, fadeVolume]);
+        if (isMobile) {
+            player.setPlaybackRate(1);
+        } else {
+            // Wait 500ms before starting to fade back in
+            setTimeout(() => {
+                // Check if another TTS hasn't started in the meantime
+                if (!isTtsPlayingRef.current) {
+                    fadeVolume(100, 300); // Fade back to 100% volume over 300ms
+                }
+            }, 500);
+        }
+    }, [player, fadeVolume, isMobile]);
 
     const playDescription = useCallback(async (scriptLine) => {
         if (!player || !scriptLine || !audioPlayerRef.current) return;
