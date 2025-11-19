@@ -319,7 +319,7 @@ function HomeScreen() {
         const formatCurrency = (num) => Math.floor(num).toLocaleString('ko-KR');
 
         return (
-            <section className="financial-summary-container" aria-labelledby="financial-summary-heading">
+            <div className="financial-summary-container" aria-labelledby="financial-summary-heading">
                 <h2 id="financial-summary-heading" className="visually-hidden">실시간 운영 현황</h2>
                 <div className="financial-text">
                     남은 운영비: <strong>{formatCurrency(balanceKRW)}원</strong>
@@ -329,7 +329,7 @@ function HomeScreen() {
                     value={totalUsedCostKRW}
                     aria-label={`총 후원금 ${formatCurrency(totalDonations)}원 중 ${formatCurrency(totalUsedCostKRW)}원 사용됨`}
                 />
-            </section>
+            </div>
         );
     };
 

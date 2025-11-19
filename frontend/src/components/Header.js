@@ -12,7 +12,7 @@ const Header = forwardRef(({ title }, ref) => {
     <header className="header">
       <div className="header-left">
         {showBackButton && (
-          <button onClick={() => navigate(-1)} className="back-button-header">
+          <button onClick={() => navigate(-1)} className="back-button-header" aria-label="뒤로 가기">
             &larr;
           </button>
         )}
