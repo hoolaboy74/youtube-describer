@@ -1,0 +1,26 @@
+.guide-content {
+  padding: 1rem;
+}
+
+.guide-content h3,
+.guide-content h4 {
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.guide-content p,
+.guide-content ul {
+  margin-bottom: 1rem;
+  line-height: 1.6;
+}
+
+.guide-content .sponsorship-info {
+  margin-top: 1rem;
+  padding: 1rem;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+}
+
+.guide-content .copy-button {
+  margin-top: 0.5rem;
+}

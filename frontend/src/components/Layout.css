@@ -1,0 +1,12 @@
+.layout {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.main-content {
+  padding-top: 50px; /* Header height */
+  padding-bottom: 60px; /* BottomNav height */
+  overflow-y: auto;
+  flex-grow: 1;
+}

@@ -1,0 +1,49 @@
+.more-screen {
+  padding: 1rem;
+}
+
+.more-menu {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  border-top: 1px solid #dee2e6;
+}
+
+.more-menu-item {
+  border-bottom: 1px solid #dee2e6;
+}
+
+.more-menu-item a {
+  display: block;
+  padding: 1rem;
+  text-decoration: none;
+  color: #212529;
+}
+
+.more-menu-item a:hover,
+.more-menu-button:hover {
+  background-color: #f8f9fa;
+}
+
+.back-button {
+  background: none;
+  border: none;
+  color: #007bff;
+  font-size: 1rem;
+  padding: 0.5rem 0;
+  cursor: pointer;
+  margin-bottom: 1rem;
+}
+
+.more-menu-button {
+  display: block;
+  width: 100%;
+  padding: 1rem;
+  border: none;
+  background: none;
+  text-align: left;
+  font-size: inherit;
+  font-family: inherit;
+  color: #212529;
+  cursor: pointer;
+}

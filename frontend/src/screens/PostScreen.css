@@ -1,0 +1,72 @@
+.post-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.post-header {
+  border-bottom: 1px solid #eee;
+  padding-bottom: 15px;
+  margin-bottom: 20px;
+}
+
+.post-header h1 {
+  margin: 0 0 10px 0;
+}
+
+.post-content {
+  line-height: 1.6;
+  margin-bottom: 30px;
+  white-space: pre-wrap; /* This will respect newlines and wrap text */
+}
+
+.post-actions {
+    text-align: right;
+    margin-bottom: 20px;
+}
+
+.comments-section {
+  margin-top: 30px;
+}
+
+.comment-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 30px 0;
+}
+
+.comment-item {
+  border-bottom: 1px solid #f0f0f0;
+  padding: 15px 0;
+}
+
+.comment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  font-size: 0.9em;
+}
+
+.comment-header strong {
+  font-weight: bold;
+}
+
+.comment-header span {
+  color: #888;
+}
+
+.comment-item p {
+  margin: 0;
+}
+
+.comment-form {
+  margin-top: 20px;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 5px;
+}
+
+.comment-form h3 {
+  margin-top: 0;
+}

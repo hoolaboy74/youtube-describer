@@ -8,7 +8,7 @@ export function usePageFocus(ref) {
     useEffect(() => {
         if (ref.current) {
             ref.current.setAttribute('tabindex', '-1');
-            ref.current.focus();
+            setTimeout(() => ref.current.focus(), 0);
         }
     }, [location.pathname, ref]);
 }
