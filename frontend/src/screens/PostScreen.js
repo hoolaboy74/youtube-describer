@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import { usePageFocus } from '../hooks';
 import { useAccessibility } from '../contexts/AccessibilityContext';
