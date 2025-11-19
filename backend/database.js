@@ -143,6 +143,14 @@ function init() {
     )
   `);
 
+  // 'posts' 테이블에 is_notice 컬럼 추가 (없을 경우)
+  try {
+    db.prepare('SELECT is_notice FROM posts LIMIT 1').get();
+  } catch (error) {
+    logger.info('Adding is_notice column to posts table...');
+    db.exec('ALTER TABLE posts ADD COLUMN is_notice INTEGER DEFAULT 0');
+  }
+
 
   logger.info('Database initialized successfully.');
 }
@@ -713,10 +721,10 @@ function getPosts({ sortBy = 'newest', page = 1, limit = 15 }) {
 
   const query = `
     SELECT 
-      p.id, p.title, p.nickname, strftime('%Y-%m-%dT%H:%M:%SZ', p.createdAt) as createdAt,
+      p.id, p.title, p.nickname, p.is_notice, strftime('%Y-%m-%dT%H:%M:%SZ', p.createdAt) as createdAt,
       (SELECT COUNT(*) FROM post_comments WHERE postId = p.id) as commentCount
     FROM posts p
-    ORDER BY ${orderBy}
+    ORDER BY p.is_notice DESC, ${orderBy}
     LIMIT ? OFFSET ?
   `;
 

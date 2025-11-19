@@ -58,9 +58,12 @@ function BoardScreen() {
         <ul className="post-list">
           {posts.length > 0 ? (
             posts.map(post => (
-              <li key={post.id}>
+              <li key={post.id} className={post.is_notice ? 'notice-post' : ''}>
                 <Link to={`/board/${post.id}`} className="post-link">
-                  <div className="post-title">{post.title}</div>
+                  <div className="post-title">
+                    {post.is_notice && <strong>[공지] </strong>}
+                    {post.title}
+                  </div>
                   <div className="post-meta">
                     <span>{post.nickname}</span>
                     <span>{formatDate(post.createdAt)}</span>

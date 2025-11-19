@@ -1,7 +1,10 @@
 .board-container {
   max-width: 800px;
-  margin: 0 auto;
+  margin: 20px auto;
   padding: 20px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .board-header {
@@ -9,28 +12,55 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 15px;
 }
 
 .board-header h1 {
+  font-size: 2em;
+  color: #333;
   margin: 0;
+}
+
+.btn-primary {
+  background-color: #007bff;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  text-decoration: none;
+  font-size: 1em;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-primary:hover {
+  background-color: #0056b3;
 }
 
 .sort-options {
   margin-bottom: 20px;
+  text-align: right;
 }
 
 .sort-options button {
-  margin-right: 10px;
-  padding: 5px 10px;
-  border: 1px solid #ccc;
-  background-color: #f0f0f0;
+  background-color: #e9ecef;
+  border: 1px solid #ced4da;
+  padding: 8px 12px;
+  margin-left: 5px;
+  border-radius: 5px;
   cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s;
 }
 
 .sort-options button.active {
   background-color: #007bff;
   color: white;
   border-color: #007bff;
+}
+
+.sort-options button:hover:not(.active) {
+  background-color: #dee2e6;
 }
 
 .post-list {
@@ -40,46 +70,96 @@
 }
 
 .post-list li {
-  border-bottom: 1px solid #eee;
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  transition: box-shadow 0.2s;
+}
+
+.post-list li:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .post-link {
   display: block;
-  padding: 15px 10px;
+  padding: 15px;
   text-decoration: none;
-  color: inherit;
-  transition: background-color 0.2s;
-}
-
-.post-link:hover {
-  background-color: #f9f9f9;
+  color: #333;
 }
 
 .post-title {
   font-size: 1.2em;
   font-weight: bold;
-  margin-bottom: 8px;
+  margin-bottom: 5px;
+  color: #007bff;
 }
 
 .post-meta {
   font-size: 0.9em;
-  color: #666;
+  color: #6c757d;
+  display: flex;
+  justify-content: space-between;
 }
 
-.post-meta span {
+.post-meta span:not(:last-child) {
   margin-right: 15px;
 }
 
-.btn {
-  padding: 8px 15px;
-  border-radius: 4px;
-  text-decoration: none;
-  cursor: pointer;
-  border: 1px solid transparent;
+.error-message {
+  color: #dc3545;
+  text-align: center;
+  margin-top: 20px;
 }
 
-.btn-primary {
-  background-color: #007bff;
-  color: white;
-  border-color: #007bff;
+/* Responsive adjustments */
+@media (max-width: 600px) {
+  .board-container {
+    margin: 10px;
+    padding: 15px;
+  }
+
+  .board-header h1 {
+    font-size: 1.5em;
+  }
+
+  .btn-primary {
+    padding: 8px 12px;
+    font-size: 0.9em;
+  }
+
+  .sort-options {
+    text-align: center;
+    margin-bottom: 15px;
+  }
+
+  .sort-options button {
+    margin: 5px;
+    display: inline-block;
+  }
+
+  .post-title {
+    font-size: 1.1em;
+  }
+
+  .post-meta {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .post-meta span {
+    margin-bottom: 3px;
+  }
+}
+
+/* Notice Post Styling */
+.post-list li.notice-post {
+  background-color: #f0f8ff; /* Alice Blue */
+  border-left: 5px solid #007bff; /* A blue border to highlight */
+  padding-left: 15px; /* Adjust padding due to border */
+}
+
+.post-list li.notice-post .post-title strong {
+  color: #007bff; /* Make the [공지] text blue */
+  margin-right: 5px;
 }
