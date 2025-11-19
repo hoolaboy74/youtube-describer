@@ -4,7 +4,7 @@ import axios from 'axios';
 import YouTube from 'react-youtube';
 import Comments from '../Comments';
 import { usePageFocus } from '../hooks';
-
+import Header from '../components/Header';
 import { useAccessibility } from '../contexts/AccessibilityContext';
 
 const verbosityLabels = { 1: '최소', 2: '기본', 3: '최대' };
@@ -496,11 +496,7 @@ function PlayerScreen() {
 
     return (
         <div ref={mainContainerRef}>
-            <div className="video-header">
-                <button onClick={() => navigate('/')} className="back-button">← 목록으로</button>
-                <h2 ref={headingRef}>{videoInfo.title}</h2>
-                <ShareButton announcePolite={announcePolite} />
-            </div>
+            <Header title={videoInfo.title} ref={headingRef} />
 
             {renderContent()}
 
@@ -516,6 +512,7 @@ function PlayerScreen() {
                 <button onClick={() => setIsScriptVisible(prev => !prev)} aria-expanded={isScriptVisible}>
                     {isScriptVisible ? '대본 숨기기' : '대본 보기'}
                 </button>
+                <ShareButton />
             </div>
 
             {isScriptVisible && (

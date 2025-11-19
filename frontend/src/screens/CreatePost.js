@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { usePageFocus } from '../hooks';
 import { useAccessibility } from '../contexts/AccessibilityContext';
+import Header from '../components/Header';
 import './CreatePost.css';
 
 function CreatePost() {
@@ -59,7 +60,7 @@ function CreatePost() {
 
   return (
     <div className="create-post-container">
-      <h1 ref={pageTitleRef}>새 글 작성</h1>
+      <Header title="새 글 작성" ref={pageTitleRef} />
       <form onSubmit={handleSubmit} className="create-post-form">
         {error && <p className="error-message">{error}</p>}
         <div className="form-group">
@@ -103,9 +104,6 @@ function CreatePost() {
           />
         </div>
         <div className="form-actions">
-            <button type="button" onClick={() => navigate('/board')} disabled={loading}>
-                취소
-            </button>
             <button type="submit" disabled={loading}>
                 {loading ? '작성 중...' : '작성'}
             </button>

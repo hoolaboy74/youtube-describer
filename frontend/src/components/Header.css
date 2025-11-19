@@ -7,19 +7,45 @@
   background-color: #ffffff;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between; /* Change to space-between */
   border-bottom: 1px solid #dee2e6;
   z-index: 1000;
   padding: 0 1rem;
+}
+
+.header-left, .header-right {
+  width: 50px; /* Allocate space for buttons */
+  display: flex;
+  align-items: center;
+}
+
+.header-left {
+  justify-content: flex-start;
+}
+
+.header-right {
+  justify-content: flex-end;
 }
 
 .header-title {
   margin: 0;
   font-size: 1.2rem;
   font-weight: bold;
+  text-align: center;
+  flex-grow: 1; /* Allow title to take up remaining space */
 }
 
 .header-link {
     text-decoration: none;
     color: inherit;
+}
+
+.back-button-header {
+  background: none;
+  border: none;
+  font-size: 1.5rem; /* Make arrow larger */
+  cursor: pointer;
+  color: #333;
+  padding: 0;
+  line-height: 1;
 }

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import axios from 'axios';
 import './Admin.css';
 import { usePageFocus } from '../hooks';
+import Header from '../components/Header';
 
 const API_BASE_URL = process.env.NODE_ENV === 'development' ? 'http://localhost:4000/api' : '/api';
 
@@ -382,7 +383,7 @@ const Admin = () => {
 
     return (
         <div className="admin-container">
-            <h1 ref={headingRef}>관리자 페이지</h1>
+            <Header title="관리자 페이지" ref={headingRef} />
 
             <div className="admin-tabs" role="tablist" aria-label="관리자 페이지 탭">
                 <button role="tab" aria-selected={activeTab === 'dashboard'} className={`tab-btn ${activeTab === 'dashboard' ? 'active' : ''}`} onClick={() => setActiveTab('dashboard')}>대시보드</button>

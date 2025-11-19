@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import { usePageFocus } from '../hooks';
 import { useAccessibility } from '../contexts/AccessibilityContext';
+import Header from '../components/Header';
 import './PostScreen.css';
 
 function PostScreen() {
@@ -84,32 +85,42 @@ function PostScreen() {
   };
 
   if (loading) {
-    return <p>게시글을 불러오는 중...</p>;
+    return (
+        <>
+            <Header title="게시글 불러오는 중..." />
+            <p>게시글을 불러오는 중...</p>
+        </>
+    );
   }
 
   if (error) {
-    return <p className="error-message">{error}</p>;
+    return (
+        <>
+            <Header title="오류" />
+            <p className="error-message">{error}</p>
+        </>
+    );
   }
 
   if (!post) {
-    return <p>게시글을 찾을 수 없습니다.</p>;
+    return (
+        <>
+            <Header title="게시글 없음" />
+            <p>게시글을 찾을 수 없습니다.</p>
+        </>
+    );
   }
 
   return (
     <div className="post-container">
-      <div className="post-header">
-        <h1 ref={pageTitleRef}>{post.title}</h1>
-        <div className="post-meta">
+      <Header title={post.title} ref={pageTitleRef} />
+      
+      <div className="post-meta">
           <span>작성자: {post.nickname}</span>
           <span>작성일: {formatDate(post.createdAt)}</span>
-        </div>
       </div>
 
       <div className="post-content" dangerouslySetInnerHTML={{ __html: post.content.replace(/\n/g, '<br />') }}></div>
-      
-      <div className="post-actions">
-          <Link to="/board" className="btn">목록으로</Link>
-      </div>
 
       <hr />
 
