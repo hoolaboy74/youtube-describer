@@ -386,16 +386,27 @@ boardRouter.get('/posts/:id', (req, res) => {
 // POST a new post
 boardRouter.post('/posts', (req, res) => {
     try {
-        const { title, content, nickname, password } = req.body;
+        const { title, content, nickname, password, is_notice = false, adminPassword } = req.body;
+        
         if (!title || !content || !nickname || !password) {
-            return res.status(400).json({ error: 'Missing required fields' });
+            return res.status(400).json({ error: '제목, 내용, 닉네임, 비밀번호는 필수입니다.' });
         }
-        const newPostId = db.createPost({ title, content, nickname, password });
+
+        let isNoticeBool = Boolean(is_notice);
+
+        if (isNoticeBool) {
+            const actualAdminPassword = db.getSetting('admin_password') || 'momcenter!@#';
+            if (adminPassword !== actualAdminPassword) {
+                return res.status(403).json({ error: '관리자 암호가 올바르지 않아 공지글로 등록할 수 없습니다.' });
+            }
+        }
+
+        const newPostId = db.createPost({ title, content, nickname, password, is_notice: isNoticeBool });
         const newPost = db.getPost(newPostId);
         res.status(201).json(newPost);
     } catch (error) {
         logger.error('[Board] Failed to create post:', error);
-        res.status(500).json({ error: 'Failed to create post' });
+        res.status(500).json({ error: '글 작성 중 서버 오류가 발생했습니다.' });
     }
 });
 
@@ -554,12 +565,34 @@ boardRouter.delete('/comments/:commentId', (req, res) => {
 router.use('/board', boardRouter);
 
 
-// --- ADMIN API ENDPOINTS ---
+// --- AUTH & ADMIN API ENDPOINTS ---
+
+// Standalone login endpoint, not protected by adminAuth
+router.post('/login', (req, res) => {
+    const { password } = req.body;
+    if (!password) {
+        return res.status(400).json({ error: 'Password is required' });
+    }
+    
+    const expectedPassword = db.getSetting('admin_password') || 'momcenter!@#';
+    
+    if (password === expectedPassword) {
+        // In a real app, you'd return a JWT here.
+        // For this app, we just confirm the password is correct.
+        logger.info('[Auth] Admin login successful.');
+        res.status(200).json({ message: 'Login successful' });
+    } else {
+        logger.warn('[Auth] Admin login failed: incorrect password.');
+        res.status(401).json({ error: 'Incorrect password' });
+    }
+});
+
 
 // Simple password authentication middleware for admin routes
 const adminAuth = (req, res, next) => {
     const authHeader = req.headers.authorization;
-    const expectedPassword = 'momcenter!@#';
+    // Get password from DB. Fallback to a default if not set.
+    const expectedPassword = db.getSetting('admin_password') || 'momcenter!@#';
 
     if (authHeader && authHeader.startsWith('Bearer ')) {
         const token = authHeader.substring(7); // "Bearer ".length
@@ -586,10 +619,38 @@ adminRouter.get('/settings', (req, res) => {
     }
 });
 
+// PUT (update) password
+adminRouter.put('/change-password', (req, res) => {
+    try {
+        const { currentPassword, newPassword } = req.body;
+        if (!currentPassword || !newPassword) {
+            return res.status(400).json({ error: '현재 비밀번호와 새 비밀번호를 모두 입력해야 합니다.' });
+        }
+
+        const actualCurrentPassword = db.getSetting('admin_password');
+        if (currentPassword !== actualCurrentPassword) {
+            return res.status(403).json({ error: '현재 비밀번호가 일치하지 않습니다.' });
+        }
+
+        db.updateSetting({ key: 'admin_password', value: newPassword });
+        logger.info('[Admin] Admin password updated successfully.');
+        res.status(200).json({ message: '비밀번호가 성공적으로 변경되었습니다.' });
+
+    } catch (error) {
+        logger.error('[Admin] Failed to change password:', error);
+        res.status(500).json({ error: '비밀번호 변경 중 서버 오류가 발생했습니다.' });
+    }
+});
+
 // PUT (update) settings
 adminRouter.put('/settings', (req, res) => {
     try {
         const settingsToUpdate = req.body;
+        // Do not allow password change through this endpoint
+        if (settingsToUpdate.admin_password) {
+            delete settingsToUpdate.admin_password;
+        }
+
         for (const key in settingsToUpdate) {
             if (Object.hasOwnProperty.call(settingsToUpdate, key)) {
                 const value = settingsToUpdate[key];
@@ -749,6 +810,72 @@ adminRouter.get('/dashboard-stats', (req, res) => {
     } catch (error) {
         logger.error('[Admin] Failed to fetch dashboard stats:', error);
         res.status(500).json({ error: 'Failed to fetch dashboard stats' });
+    }
+});
+
+// --- ADMIN BOARD API ENDPOINTS ---
+
+// GET all posts for admin (with pagination and filtering)
+adminRouter.get('/board/posts', (req, res) => {
+    try {
+        const page = parseInt(req.query.page || '1', 10);
+        const limit = parseInt(req.query.limit || '20', 10);
+        const search = req.query.search || null;
+
+        const result = db.listAllPostsForAdmin({ page, limit, search });
+        res.json(result);
+    } catch (error) {
+        logger.error('[Admin] Failed to fetch all board posts:', error);
+        res.status(500).json({ error: 'Failed to fetch all board posts' });
+    }
+});
+
+// DELETE a board post by ID (admin)
+adminRouter.delete('/board/posts/:id', (req, res) => {
+    try {
+        const { id } = req.params;
+        const success = db.deletePostByIdAdmin(id);
+        if (success) {
+            logger.info(`[Admin] Deleted board post ${id} successfully.`);
+            res.status(200).json({ message: 'Board post deleted successfully' });
+        } else {
+            res.status(404).json({ error: 'Board post not found' });
+        }
+    } catch (error) {
+        logger.error(`[Admin] Failed to delete board post ${req.params.id}:`, error);
+        res.status(500).json({ error: 'Failed to delete board post' });
+    }
+});
+
+// GET all board comments for admin (with pagination and filtering)
+adminRouter.get('/board/comments', (req, res) => {
+    try {
+        const page = parseInt(req.query.page || '1', 10);
+        const limit = parseInt(req.query.limit || '20', 10);
+        const search = req.query.search || null;
+
+        const result = db.listAllPostCommentsForAdmin({ page, limit, search });
+        res.json(result);
+    } catch (error) {
+        logger.error('[Admin] Failed to fetch all board comments:', error);
+        res.status(500).json({ error: 'Failed to fetch all board comments' });
+    }
+});
+
+// DELETE a board comment by ID (admin)
+adminRouter.delete('/board/comments/:id', (req, res) => {
+    try {
+        const { id } = req.params;
+        const success = db.deletePostCommentByIdAdmin(id);
+        if (success) {
+            logger.info(`[Admin] Deleted board comment ${id} successfully.`);
+            res.status(200).json({ message: 'Board comment deleted successfully' });
+        } else {
+            res.status(404).json({ error: 'Board comment not found' });
+        }
+    } catch (error) {
+        logger.error(`[Admin] Failed to delete board comment ${req.params.id}:`, error);
+        res.status(500).json({ error: 'Failed to delete board comment' });
     }
 });
 

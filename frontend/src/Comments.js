@@ -6,10 +6,11 @@ function Comments({ videoId, mainRef }) {
     const [editingComment, setEditingComment] = useState(null); // { id, content }
     const [error, setError] = useState('');
 
-    // Refs for the new comment form
-    const nicknameRef = useRef(null);
-    const passwordRef = useRef(null);
-    const contentRef = useRef(null);
+    const [newComment, setNewComment] = useState({
+        nickname: '',
+        password: '',
+        content: '',
+    });
 
     // Ref for the comment edit form
     const editContentRef = useRef(null);
@@ -30,26 +31,45 @@ function Comments({ videoId, mainRef }) {
         }
     }, [videoId, fetchComments]);
 
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setNewComment(prev => ({ ...prev, [name]: value }));
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const nickname = nicknameRef.current.value;
-        const password = passwordRef.current.value;
-        const content = contentRef.current.value;
+        const { nickname, password, content } = newComment;
 
-        if (!nickname || !password || !content) {
+        if (!nickname.trim() || !password.trim() || !content.trim()) {
             setError("닉네임, 비밀번호, 내용을 모두 입력해주세요.");
             return;
         }
+        if (nickname.trim().length < 2) {
+            setError("닉네임은 2자 이상이어야 합니다.");
+            return;
+        }
+        if (password.trim().length < 4) {
+            setError("비밀번호는 4자 이상이어야 합니다.");
+            return;
+        }
+        if (content.trim().length < 2) {
+            setError("내용은 2자 이상이어야 합니다.");
+            return;
+        }
+
         try {
-            await axios.post('/api/comments', { videoId, nickname, password, content });
-            nicknameRef.current.value = '';
-            passwordRef.current.value = '';
-            contentRef.current.value = '';
+            await axios.post('/api/comments', { 
+                videoId, 
+                nickname: nickname.trim(), 
+                password: password.trim(), 
+                content: content.trim() 
+            });
+            setNewComment({ nickname: '', password: '', content: '' }); // Clear form
             setError('');
             fetchComments();
         } catch (err) {
             console.error("Failed to add comment:", err);
-            setError("댓글 작성에 실패했습니다.");
+            setError(err.response?.data?.error || "댓글 작성에 실패했습니다.");
         }
     };
 
@@ -74,8 +94,12 @@ function Comments({ videoId, mainRef }) {
     const handleUpdate = async (e) => {
         e.preventDefault();
         const newContent = editContentRef.current.value;
-        if (!newContent) {
+        if (!newContent.trim()) {
             alert("내용을 입력해주세요.");
+            return;
+        }
+        if (newContent.trim().length < 2) {
+            alert("내용은 2자 이상이어야 합니다.");
             return;
         }
 
@@ -85,7 +109,7 @@ function Comments({ videoId, mainRef }) {
         try {
             await axios.put(`/api/comments/${editingComment.id}`, {
                 password: pw,
-                content: newContent
+                content: newContent.trim()
             });
             setEditingComment(null);
             fetchComments();
@@ -99,28 +123,31 @@ function Comments({ videoId, mainRef }) {
     return (
         <div className="comments-container">
             <h3>댓글</h3>
-            {error && <p className="error-message">{error}</p>}
+            {error && <p className="error-message" role="alert">{error}</p>}
             <form onSubmit={handleSubmit} className="comment-form">
                 <div className="comment-meta">
                     <input
                         type="text"
+                        name="nickname"
                         placeholder="닉네임"
-                        ref={nicknameRef}
-                        defaultValue=""
+                        value={newComment.nickname}
+                        onChange={handleInputChange}
                         required
                     />
                     <input
                         type="password"
+                        name="password"
                         placeholder="비밀번호"
-                        ref={passwordRef}
-                        defaultValue=""
+                        value={newComment.password}
+                        onChange={handleInputChange}
                         required
                     />
                 </div>
                 <textarea
+                    name="content"
                     placeholder="댓글을 입력하세요..."
-                    ref={contentRef}
-                    defaultValue=""
+                    value={newComment.content}
+                    onChange={handleInputChange}
                     required
                 ></textarea>
                 <button type="submit">등록</button>

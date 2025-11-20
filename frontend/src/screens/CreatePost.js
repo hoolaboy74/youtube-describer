@@ -8,28 +8,54 @@ import './CreatePost.css';
 
 function CreatePost() {
   const { announcePolite, announceAssertive } = useAccessibility();
-  const titleRef = useRef(null);
-  const contentRef = useRef(null);
-  const nicknameRef = useRef(null);
-  const passwordRef = useRef(null);
   const pageTitleRef = useRef(null);
-
   usePageFocus(pageTitleRef);
-
+  
+  const [formData, setFormData] = useState({
+    title: '',
+    content: '',
+    nickname: '',
+    password: '',
+    adminPassword: ''
+  });
+  const [isNotice, setIsNotice] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    const title = titleRef.current.value;
-    const content = contentRef.current.value;
-    const nickname = nicknameRef.current.value;
-    const password = passwordRef.current.value;
+    const { title, content, nickname, password, adminPassword } = formData;
 
-    if (!title || !content || !nickname || !password) {
-      setError('모든 필드를 입력해주세요.');
+    if (!title.trim() || !content.trim() || !nickname.trim() || !password.trim()) {
+      setError('제목, 내용, 닉네임, 비밀번호는 필수입니다.');
+      return;
+    }
+    if (nickname.trim().length < 2) {
+      setError('닉네임은 2자 이상이어야 합니다.');
+      return;
+    }
+    if (password.trim().length < 4) {
+      setError('비밀번호는 4자 이상이어야 합니다.');
+      return;
+    }
+    if (title.trim().length < 2) {
+        setError('제목은 2자 이상이어야 합니다.');
+        return;
+    }
+    if (content.trim().length < 5) {
+        setError('내용은 5자 이상이어야 합니다.');
+        return;
+    }
+
+    if (isNotice && !adminPassword.trim()) {
+      setError('공지로 등록하려면 관리자 비밀번호를 입력해야 합니다.');
       return;
     }
 
@@ -37,19 +63,23 @@ function CreatePost() {
     setError('');
 
     try {
-      const response = await axios.post('/api/board/posts', {
-        title,
-        content,
-        nickname,
-        password,
-      });
+      const payload = {
+        title: title.trim(),
+        content: content.trim(),
+        nickname: nickname.trim(),
+        password: password.trim(),
+        is_notice: isNotice,
+        adminPassword: isNotice ? adminPassword.trim() : undefined,
+      };
+      
+      const response = await axios.post('/api/board/posts', payload);
       
       announcePolite('새 글이 성공적으로 작성되었습니다.');
       const newPostId = response.data.id;
-      navigate(`/board/${newPostId}`);
+      navigate(`/board/${newPostId}`, { replace: true });
 
     } catch (err) {
-      const errorMsg = '글 작성에 실패했습니다. 다시 시도해주세요.';
+      const errorMsg = err.response?.data?.error || '글 작성에 실패했습니다. 다시 시도해주세요.';
       setError(errorMsg);
       announceAssertive(errorMsg);
       console.error(err);
@@ -62,14 +92,15 @@ function CreatePost() {
     <div className="create-post-container">
       <Header title="새 글 작성" ref={pageTitleRef} />
       <form onSubmit={handleSubmit} className="create-post-form">
-        {error && <p className="error-message">{error}</p>}
+        {error && <p className="error-message" role="alert">{error}</p>}
         <div className="form-group">
           <label htmlFor="title">제목</label>
           <input
             type="text"
             id="title"
-            ref={titleRef}
-            defaultValue=""
+            name="title"
+            value={formData.title}
+            onChange={handleInputChange}
             required
           />
         </div>
@@ -77,8 +108,9 @@ function CreatePost() {
           <label htmlFor="content">내용</label>
           <textarea
             id="content"
-            ref={contentRef}
-            defaultValue=""
+            name="content"
+            value={formData.content}
+            onChange={handleInputChange}
             required
             rows="10"
           ></textarea>
@@ -88,8 +120,9 @@ function CreatePost() {
           <input
             type="text"
             id="nickname"
-            ref={nicknameRef}
-            defaultValue=""
+            name="nickname"
+            value={formData.nickname}
+            onChange={handleInputChange}
             required
           />
         </div>
@@ -98,11 +131,37 @@ function CreatePost() {
           <input
             type="password"
             id="password"
-            ref={passwordRef}
-            defaultValue=""
+            name="password"
+            value={formData.password}
+            onChange={handleInputChange}
             required
           />
         </div>
+
+        <div className="form-group notice-checkbox">
+            <input 
+                type="checkbox"
+                id="isNotice"
+                checked={isNotice}
+                onChange={(e) => setIsNotice(e.target.checked)}
+            />
+            <label htmlFor="isNotice">공지로 등록</label>
+        </div>
+
+        {isNotice && (
+            <div className="form-group">
+                <label htmlFor="adminPassword">관리자 비밀번호</label>
+                <input
+                    type="password"
+                    id="adminPassword"
+                    name="adminPassword"
+                    value={formData.adminPassword}
+                    onChange={handleInputChange}
+                    required={isNotice}
+                />
+            </div>
+        )}
+
         <div className="form-actions">
             <button type="submit" disabled={loading}>
                 {loading ? '작성 중...' : '작성'}

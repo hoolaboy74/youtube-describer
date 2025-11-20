@@ -115,6 +115,7 @@ function init() {
     insertSetting.run('notice_title', '');
     insertSetting.run('notice_content', '');
     insertSetting.run('proxyCostPerGB', '1'); // USD per GB
+    insertSetting.run('admin_password', 'momcenter!@#');
   });
   transaction();
 
@@ -669,11 +670,11 @@ function deleteCommentByIdAdmin(commentId) {
 // --- Board (게시판) Functions ---
 
 // 새 글 작성
-function createPost({ title, content, nickname, password }) {
+function createPost({ title, content, nickname, password, is_notice = false }) {
   const hashedPassword = hashPassword(password);
   const result = db.prepare(
-    'INSERT INTO posts (title, content, nickname, password) VALUES (?, ?, ?, ?)'
-  ).run(title, content, nickname, hashedPassword);
+    'INSERT INTO posts (title, content, nickname, password, is_notice) VALUES (?, ?, ?, ?, ?)'
+  ).run(title, content, nickname, hashedPassword, is_notice ? 1 : 0);
   return result.lastInsertRowid;
 }
 
@@ -776,6 +777,101 @@ function deletePostComment(commentId) {
   return result.changes > 0;
 }
 
+// --- Admin Board Functions ---
+
+// 관리자용: 모든 게시글 목록 가져오기 (페이지네이션 및 필터링 지원)
+function listAllPostsForAdmin({ page = 1, limit = 20, search = null }) {
+  const params = [];
+  const countParams = [];
+  let whereClause = 'WHERE 1=1';
+
+  if (search) {
+    whereClause += ' AND (p.title LIKE ? OR p.nickname LIKE ? OR p.content LIKE ?)';
+    const searchTerm = `%${search}%`;
+    params.push(searchTerm, searchTerm, searchTerm);
+    countParams.push(searchTerm, searchTerm, searchTerm);
+  }
+
+  const countQuery = `SELECT COUNT(*) as count FROM posts AS p ${whereClause}`;
+  const totalPosts = db.prepare(countQuery).get(countParams).count;
+
+  const offset = (page - 1) * limit;
+  params.push(limit, offset);
+
+  const dataQuery = `
+    SELECT
+      p.id,
+      p.title,
+      p.nickname,
+      p.is_notice,
+      strftime('%Y-%m-%dT%H:%M:%SZ', p.createdAt) as createdAt,
+      (SELECT COUNT(*) FROM post_comments WHERE postId = p.id) as commentCount
+    FROM
+      posts AS p
+    ${whereClause}
+    ORDER BY
+      p.is_notice DESC, p.createdAt DESC
+    LIMIT ? OFFSET ?
+  `;
+
+  const posts = db.prepare(dataQuery).all(params);
+
+  return { posts, totalPosts };
+}
+
+// 관리자용: 모든 게시판 댓글 목록 가져오기 (페이지네이션 및 필터링 지원)
+function listAllPostCommentsForAdmin({ page = 1, limit = 20, search = null }) {
+  const params = [];
+  const countParams = [];
+  let whereClause = 'WHERE 1=1';
+
+  if (search) {
+    whereClause += ' AND (pc.content LIKE ? OR pc.nickname LIKE ? OR p.title LIKE ?)';
+    const searchTerm = `%${search}%`;
+    params.push(searchTerm, searchTerm, searchTerm);
+    countParams.push(searchTerm, searchTerm, searchTerm);
+  }
+
+  const countQuery = `SELECT COUNT(*) as count FROM post_comments AS pc LEFT JOIN posts AS p ON pc.postId = p.id ${whereClause}`;
+  const totalComments = db.prepare(countQuery).get(countParams).count;
+
+  const offset = (page - 1) * limit;
+  params.push(limit, offset);
+
+  const dataQuery = `
+    SELECT
+      pc.id,
+      pc.postId,
+      p.title as postTitle,
+      pc.nickname,
+      pc.content,
+      strftime('%Y-%m-%dT%H:%M:%SZ', pc.createdAt) as createdAt
+    FROM
+      post_comments AS pc
+    LEFT JOIN
+      posts AS p ON pc.postId = p.id
+    ${whereClause}
+    ORDER BY
+      pc.createdAt DESC
+    LIMIT ? OFFSET ?
+  `;
+
+  const comments = db.prepare(dataQuery).all(params);
+
+  return { comments, totalComments };
+}
+
+// 관리자용: ID로 게시글 삭제
+function deletePostByIdAdmin(id) {
+  const result = db.prepare('DELETE FROM posts WHERE id = ?').run(id);
+  return result.changes > 0;
+}
+
+// 관리자용: ID로 게시판 댓글 삭제
+function deletePostCommentByIdAdmin(id) {
+  const result = db.prepare('DELETE FROM post_comments WHERE id = ?').run(id);
+  return result.changes > 0;
+}
 
 module.exports = {
   init,
@@ -820,4 +916,9 @@ module.exports = {
   getPostCommentById,
   updatePostComment,
   deletePostComment,
+  // Admin Board functions
+  listAllPostsForAdmin,
+  listAllPostCommentsForAdmin,
+  deletePostByIdAdmin,
+  deletePostCommentByIdAdmin,
 };

@@ -12,14 +12,15 @@ function PostScreen() {
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-
-  const contentRef = useRef(null);
-  const nicknameRef = useRef(null);
-  const passwordRef = useRef(null);
+  
   const pageTitleRef = useRef(null);
-
   usePageFocus(pageTitleRef);
 
+  const [commentData, setCommentData] = useState({
+    nickname: '',
+    password: '',
+    content: ''
+  });
   const [commentError, setCommentError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -42,15 +43,30 @@ function PostScreen() {
     fetchPost();
   }, [fetchPost]);
 
+  const handleCommentInputChange = (e) => {
+    const { name, value } = e.target;
+    setCommentData(prev => ({ ...prev, [name]: value }));
+  };
+
   const handleCommentSubmit = async (e) => {
     e.preventDefault();
     
-    const content = contentRef.current.value;
-    const nickname = nicknameRef.current.value;
-    const password = passwordRef.current.value;
+    const { content, nickname, password } = commentData;
 
-    if (!content || !nickname || !password) {
-      setCommentError('모든 필드를 입력해주세요.');
+    if (!content.trim() || !nickname.trim() || !password.trim()) {
+      setCommentError('닉네임, 비밀번호, 내용을 모두 입력해주세요.');
+      return;
+    }
+    if (nickname.trim().length < 2) {
+      setCommentError('닉네임은 2자 이상이어야 합니다.');
+      return;
+    }
+    if (password.trim().length < 4) {
+      setCommentError('비밀번호는 4자 이상이어야 합니다.');
+      return;
+    }
+    if (content.trim().length < 2) {
+      setCommentError('내용은 2자 이상이어야 합니다.');
       return;
     }
 
@@ -59,18 +75,16 @@ function PostScreen() {
 
     try {
       await axios.post(`/api/board/posts/${postId}/comments`, {
-        content,
-        nickname,
-        password,
+        content: content.trim(),
+        nickname: nickname.trim(),
+        password: password.trim(),
       });
       
       announcePolite('댓글이 성공적으로 작성되었습니다.');
-      contentRef.current.value = '';
-      nicknameRef.current.value = '';
-      passwordRef.current.value = '';
+      setCommentData({ nickname: '', password: '', content: '' }); // Clear form
       fetchPost(); // Re-fetch the post to show the new comment
     } catch (err) {
-      const errorMsg = '댓글 작성에 실패했습니다.';
+      const errorMsg = err.response?.data?.error || '댓글 작성에 실패했습니다.';
       setCommentError(errorMsg);
       announceAssertive(errorMsg);
       console.error(err);
@@ -140,14 +154,15 @@ function PostScreen() {
 
         <form onSubmit={handleCommentSubmit} className="comment-form">
           <h3>댓글 작성</h3>
-          {commentError && <p className="error-message">{commentError}</p>}
+          {commentError && <p className="error-message" role="alert">{commentError}</p>}
           <div className="form-group">
             <label htmlFor="comment-nickname">닉네임</label>
             <input
               type="text"
               id="comment-nickname"
-              ref={nicknameRef}
-              defaultValue=""
+              name="nickname"
+              value={commentData.nickname}
+              onChange={handleCommentInputChange}
               required
             />
           </div>
@@ -156,8 +171,9 @@ function PostScreen() {
             <input
               type="password"
               id="comment-password"
-              ref={passwordRef}
-              defaultValue=""
+              name="password"
+              value={commentData.password}
+              onChange={handleCommentInputChange}
               required
             />
           </div>
@@ -165,8 +181,9 @@ function PostScreen() {
             <label htmlFor="comment-content">내용</label>
             <textarea
               id="comment-content"
-              ref={contentRef}
-              defaultValue=""
+              name="content"
+              value={commentData.content}
+              onChange={handleCommentInputChange}
               required
               rows="3"
             ></textarea>
