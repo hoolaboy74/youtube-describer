@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { usePageFocus } from '../hooks';
 import { useAccessibility } from '../contexts/AccessibilityContext';
@@ -7,6 +7,7 @@ import './BoardScreen.css';
 
 function BoardScreen() {
   const { announceAssertive } = useAccessibility();
+  const navigate = useNavigate();
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -59,8 +60,15 @@ function BoardScreen() {
           {posts.length > 0 ? (
             posts.map(post => (
               <li key={post.id} className={post.is_notice ? 'notice-post' : ''}>
-                <Link 
-                  to={`/board/${post.id}`} 
+                <div 
+                  role="link"
+                  tabIndex="0"
+                  onClick={() => navigate(`/board/${post.id}`)}
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter') {
+                      navigate(`/board/${post.id}`);
+                    }
+                  }}
                   className="post-link"
                   aria-label={`${post.is_notice ? '공지, ' : ''} 제목: ${post.title}, 작성자: ${post.nickname}, 댓글: ${post.commentCount}개`}
                 >
@@ -73,7 +81,7 @@ function BoardScreen() {
                     <span>{formatDate(post.createdAt)}</span>
                     <span>댓글: {post.commentCount}</span>
                   </div>
-                </Link>
+                </div>
               </li>
             ))
           ) : (
