@@ -148,11 +148,11 @@ function PostScreen() {
               tabIndex="0"
               aria-label={`댓글. 작성자: ${comment.nickname}, 작성일: ${formatDate(comment.createdAt)}, 내용: ${comment.content}`}
             >
-              <div className="comment-header">
+              <div className="comment-header" aria-hidden="true">
                 <strong>{comment.nickname}</strong>
                 <span>{formatDate(comment.createdAt)}</span>
               </div>
-              <p>{comment.content}</p>
+              <p aria-hidden="true">{comment.content}</p>
             </li>
           ))}
         </ul>
