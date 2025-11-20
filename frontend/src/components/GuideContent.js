@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, forwardRef } from 'react';
 import { useAccessibility } from '../contexts/AccessibilityContext';
 import './GuideContent.css';
 
-const GuideContent = () => {
+const GuideContent = forwardRef((props, ref) => {
   const { announcePolite } = useAccessibility();
   const [isCopied, setIsCopied] = useState(false);
 
@@ -20,7 +20,7 @@ const GuideContent = () => {
 
   return (
     <div className="guide-content">
-        <h3>서비스 이용 방법</h3>
+        <h3 ref={ref}>서비스 이용 방법</h3>
         <div style={{ textAlign: 'left', marginBottom: '20px' }}>
           <h4>1. 영상 찾기 및 생성</h4>
           <p>홈 화면 입력창에 유튜브 주소(URL)나 검색어를 입력 후 '검색 또는 생성' 버튼을 누르세요. 검색 결과에서 원하는 영상을 선택하면 재생 화면으로 이동합니다.</p>
@@ -49,6 +49,6 @@ const GuideContent = () => {
         </div>
     </div>
   );
-};
+});
 
 export default GuideContent;
