@@ -62,7 +62,7 @@ function BoardScreen() {
                 <Link 
                   to={`/board/${post.id}`} 
                   className="post-link"
-                  aria-label={`${post.is_notice ? '공지사항,' : ''} 제목: ${post.title}, 작성자: ${post.nickname}, 댓글: ${post.commentCount}개`}
+                  aria-label={`${post.is_notice ? '공지, ' : ''} 제목: ${post.title}, 작성자: ${post.nickname}, 댓글: ${post.commentCount}개`}
                 >
                   <div className="post-title" aria-hidden="true">
                     {post.is_notice && <strong>[공지] </strong>}
