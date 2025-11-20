@@ -508,13 +508,12 @@ const Admin = () => {
                         <div className="table-container dashboard-table">
                             <h4>실패한 영상 목록</h4>
                             <table>
-                                <thead><tr><th scope="col">실패 시간</th><th scope="col">제목</th><th scope="col">Video ID</th><th scope="col">실패 원인</th></tr></thead>
+                                <thead><tr><th scope="col">실패 시간</th><th scope="col">제목</th><th scope="col">실패 원인</th></tr></thead>
                                 <tbody>
                                     {stats.failedVideos.map(v => (
                                         <tr key={v.videoId}>
                                             <td>{new Date(v.createdAt).toLocaleString()}</td>
                                             <td>{v.title}</td>
-                                            <td>{v.videoId}</td>
                                             <td className="fail-reason-cell" title={v.fail_reason || ''}>{v.fail_reason}</td>
                                         </tr>
                                     ))}
@@ -541,13 +540,14 @@ const Admin = () => {
                                 </form>
                                 <div className="table-container">
                                     <table>
-                                        <thead><tr><th scope="col">생성일</th><th scope="col">제목</th><th scope="col">상태</th><th scope="col">작업</th></tr></thead>
+                                        <thead><tr><th scope="col">생성일</th><th scope="col">제목</th><th scope="col">상태</th><th scope="col">실패 원인</th><th scope="col">작업</th></tr></thead>
                                         <tbody>
                                             {(videos || []).map(v => (
                                                 <tr key={v.videoId}>
                                                     <td>{new Date(v.createdAt).toLocaleString()}</td>
                                                     <td>{v.title}</td>
                                                     <td>{v.status}</td>
+                                                    <td className="fail-reason-cell" title={v.fail_reason || ''}>{v.fail_reason}</td>
                                                     <td><button className="delete-btn" onClick={() => handleDeleteVideo(v.videoId, v.title)}>삭제</button></td>
                                                 </tr>
                                             ))}
