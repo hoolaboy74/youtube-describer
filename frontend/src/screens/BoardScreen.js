@@ -59,12 +59,16 @@ function BoardScreen() {
           {posts.length > 0 ? (
             posts.map(post => (
               <li key={post.id} className={post.is_notice ? 'notice-post' : ''}>
-                <Link to={`/board/${post.id}`} className="post-link">
-                  <div className="post-title">
+                <Link 
+                  to={`/board/${post.id}`} 
+                  className="post-link"
+                  aria-label={`${post.is_notice ? '공지사항,' : ''} 제목: ${post.title}, 작성자: ${post.nickname}, 댓글: ${post.commentCount}개`}
+                >
+                  <div className="post-title" aria-hidden="true">
                     {post.is_notice && <strong>[공지] </strong>}
                     {post.title}
                   </div>
-                  <div className="post-meta">
+                  <div className="post-meta" aria-hidden="true">
                     <span>{post.nickname}</span>
                     <span>{formatDate(post.createdAt)}</span>
                     <span>댓글: {post.commentCount}</span>

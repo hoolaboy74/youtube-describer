@@ -142,12 +142,17 @@ function PostScreen() {
         <h2>댓글 ({post.comments.length})</h2>
         <ul className="comment-list">
           {post.comments.map(comment => (
-            <li key={comment.id} className="comment-item">
-              <div className="comment-header">
+            <li 
+              key={comment.id} 
+              className="comment-item"
+              role="group"
+              aria-label={`댓글 작성자: ${comment.nickname}, 내용: ${comment.content}`}
+            >
+              <div className="comment-header" aria-hidden="true">
                 <strong>{comment.nickname}</strong>
                 <span>{formatDate(comment.createdAt)}</span>
               </div>
-              <p>{comment.content}</p>
+              <p aria-hidden="true">{comment.content}</p>
             </li>
           ))}
         </ul>
