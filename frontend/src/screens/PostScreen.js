@@ -129,9 +129,9 @@ function PostScreen() {
     <div className="post-container">
       <Header title={post.title} ref={pageTitleRef} />
       
-      <div className="post-meta">
-          <span>작성자: {post.nickname}</span>
-          <span>작성일: {formatDate(post.createdAt)}</span>
+      <div className="post-meta" role="group" aria-label={`작성자: ${post.nickname}, 작성일: ${formatDate(post.createdAt)}`}>
+          <span aria-hidden="true">작성자: {post.nickname}</span>
+          <span aria-hidden="true">작성일: {formatDate(post.createdAt)}</span>
       </div>
 
       <div className="post-content" dangerouslySetInnerHTML={{ __html: post.content.replace(/\n/g, '<br />') }}></div>
@@ -145,14 +145,14 @@ function PostScreen() {
             <li 
               key={comment.id} 
               className="comment-item"
-              role="group"
-              aria-label={`댓글 작성자: ${comment.nickname}, 내용: ${comment.content}`}
+              tabIndex="0"
+              aria-label={`댓글. 작성자: ${comment.nickname}, 작성일: ${formatDate(comment.createdAt)}, 내용: ${comment.content}`}
             >
-              <div className="comment-header" aria-hidden="true">
+              <div className="comment-header">
                 <strong>{comment.nickname}</strong>
                 <span>{formatDate(comment.createdAt)}</span>
               </div>
-              <p aria-hidden="true">{comment.content}</p>
+              <p>{comment.content}</p>
             </li>
           ))}
         </ul>
