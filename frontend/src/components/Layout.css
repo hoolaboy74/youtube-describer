@@ -6,7 +6,7 @@
 
 .main-content {
   padding-top: 50px; /* Header height */
-  padding-bottom: 90px; /* BottomNav height + extra space */
+  padding-bottom: 120px; /* BottomNav height + extra space */
   /* overflow-y: auto; */ /* Removed to allow natural body scroll */
   /* flex-grow: 1; */ /* Removed as flex context is changed */
 }
