@@ -34,15 +34,16 @@ const Layout = () => {
     return <Outlet />;
   }
 
-  return (
-    <div className="layout">
-      <Header title={title} ref={titleRef} />
-      <main className="main-content">
-        <Outlet />
-      </main>
-      <BottomNav />
-    </div>
-  );
-};
+      return (
+        <>
+          <div className="layout">
+            <Header title={title} ref={titleRef} />
+            <main className="main-content">
+              <Outlet />
+            </main>
+          </div>
+          <BottomNav />
+        </>
+      );};
 
 export default Layout;
