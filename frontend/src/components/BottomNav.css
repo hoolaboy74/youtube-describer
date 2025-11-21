@@ -10,6 +10,8 @@
   align-items: center;
   border-top: 1px solid #dee2e6;
   z-index: 1000;
+  -webkit-transform: translate3d(0, 0, 0); /* iOS fixed position bug fix */
+  transform: translate3d(0, 0, 0); /* iOS fixed position bug fix */
   padding-bottom: env(safe-area-inset-bottom, 20px); /* Add safe area padding with fallback */
   box-sizing: border-box; /* Ensure padding is included in height */
 }
