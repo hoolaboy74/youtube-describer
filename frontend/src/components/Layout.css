@@ -1,12 +1,12 @@
 .layout {
   display: flex;
   flex-direction: column;
-  /* height: 100vh; */ /* Removed to allow natural body scroll */
+  height: 100vh; /* Removed to allow natural body scroll */
 }
 
 .main-content {
   padding-top: 50px; /* Header height */
   padding-bottom: 90px; /* BottomNav height + extra space */
-  /* overflow-y: auto; */ /* Removed to allow natural body scroll */
-  /* flex-grow: 1; */ /* Removed as flex context is changed */
+  overflow-y: auto; /* Removed to allow natural body scroll */
+  flex-grow: 1; /* Removed as flex context is changed */
 }
