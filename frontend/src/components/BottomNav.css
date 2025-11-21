@@ -3,7 +3,7 @@
   bottom: 0;
   left: 0;
   right: 0;
-  height: 80px; /* Increased height */
+  height: 100px; /* Increased height for accessibility */
   background-color: #f8f9fa;
   display: flex;
   justify-content: space-around;
