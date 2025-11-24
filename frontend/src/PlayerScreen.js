@@ -490,7 +490,22 @@ function PlayerScreen({ mainRef, announcePolite, announceAssertive }) {
                             }
                         }}
                         onReady={(e) => setPlayer(e.target)}
-                        onStateChange={(e) => setIsPlaying(e.data === window.YT.PlayerState.PLAYING)}
+                        onStateChange={(e) => {
+                            const isNowPlaying = e.data === window.YT.PlayerState.PLAYING;
+                            setIsPlaying(isNowPlaying);
+
+                            // If the video is just starting to play, specifically check for a script at timestamp 0.
+                            // This is more reliable than relying on the interval loop which can have race conditions.
+                            if (isNowPlaying && player && player.getCurrentTime() < 1) {
+                                const firstScript = filteredScript.find((line, index) => index === 0 && line.timestamp === 0);
+                                // Ensure we only do this once by checking lastSpokenIndexRef
+                                if (firstScript && lastSpokenIndexRef.current < 0) {
+                                    console.log("onStateChange: Force playing script at timestamp 0");
+                                    lastSpokenIndexRef.current = 0; // Mark it as spoken
+                                    playDescription(firstScript);
+                                }
+                            }
+                        }}
                     />
                 </div>
             );
