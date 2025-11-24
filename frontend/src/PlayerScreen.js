@@ -270,6 +270,7 @@ function PlayerScreen({ mainRef, announcePolite, announceAssertive }) {
         hasAnnouncedAiStart.current = false;
         hasAnnouncedFrameExtraction.current = false;
         messageIndexRef.current = 0;
+        lastSpokenIndexRef.current = -1;
 
         axios.get(`/api/script/${videoId}`)
             .then(response => {
@@ -402,21 +403,31 @@ function PlayerScreen({ mainRef, announcePolite, announceAssertive }) {
         if (!isPlaying || !player) return;
 
         const intervalId = setInterval(() => {
-            // Guard against running when TTS is playing or description is disabled
             if (isTtsPlayingRef.current || !isDescriptionEnabledRef.current || !player || typeof player.getPlayerState !== 'function' || player.getPlayerState() !== 1) {
                 return;
             }
             
             const currentTime = player.getCurrentTime();
-            
-            // Find the index of the last script that should have been played by now
-            const currentLineIndex = filteredScript.findLastIndex(line => currentTime >= line.timestamp);
 
-            // If we found a script AND it's a different one than the last one we spoke
-            if (currentLineIndex !== -1 && currentLineIndex !== lastSpokenIndexRef.current) {
-                console.log(`Playing script at index ${currentLineIndex} for time ${currentTime}`);
-                lastSpokenIndexRef.current = currentLineIndex;
-                playDescription(filteredScript[currentLineIndex]);
+            // This robust logic handles sequential playback and backward seeks.
+            // Find what the current index *should* be based on the video's current time.
+            const correctLineIndex = filteredScript.findLastIndex(line => currentTime >= line.timestamp);
+
+            // If the user seeks backward, this resets the index to the correct position.
+            if (correctLineIndex < lastSpokenIndexRef.current) {
+                console.log('Seek-back detected. Resetting last spoken index.');
+                lastSpokenIndexRef.current = correctLineIndex;
+            }
+
+            // Find the next script to play sequentially from the last known point.
+            const nextScriptIndex = lastSpokenIndexRef.current + 1;
+            if (nextScriptIndex < filteredScript.length) {
+                const nextScript = filteredScript[nextScriptIndex];
+                if (currentTime >= nextScript.timestamp) {
+                    console.log(`Playing script at index ${nextScriptIndex} for time ${currentTime}`);
+                    lastSpokenIndexRef.current = nextScriptIndex;
+                    playDescription(nextScript);
+                }
             }
         }, 250);
 
@@ -427,6 +438,12 @@ function PlayerScreen({ mainRef, announcePolite, announceAssertive }) {
         setVerbosity(level);
         const label = { 0: '없음', ...verbosityLabels }[level];
         announcePolite(`상세 수준이 ${label}으로 변경되었습니다.`);
+        
+        // Reset last spoken index when verbosity changes, as filteredScript is now different
+        if (player && typeof player.getCurrentTime === 'function') {
+            const currentTime = player.getCurrentTime();
+            lastSpokenIndexRef.current = filteredScript.findLastIndex(line => currentTime >= line.timestamp);
+        }
     };
 
     const handleTogglePlay = () => {
@@ -485,18 +502,6 @@ function PlayerScreen({ mainRef, announcePolite, announceAssertive }) {
                         onStateChange={(e) => {
                             const isNowPlaying = e.data === window.YT.PlayerState.PLAYING;
                             setIsPlaying(isNowPlaying);
-
-                            // If the video is just starting to play, specifically check for a script at timestamp 0.
-                            // This is more reliable than relying on the interval loop which can have race conditions.
-                            if (isNowPlaying && player && player.getCurrentTime() < 1) {
-                                const firstScript = filteredScript.find((line, index) => index === 0 && line.timestamp === 0);
-                                // Ensure we only do this once by checking lastSpokenIndexRef
-                                if (firstScript && lastSpokenIndexRef.current < 0) {
-                                    console.log("onStateChange: Force playing script at timestamp 0");
-                                    lastSpokenIndexRef.current = 0; // Mark it as spoken
-                                    playDescription(firstScript);
-                                }
-                            }
                         }}
                     />
                 </div>
