@@ -449,21 +449,54 @@ function PlayerScreen({ mainRef, announcePolite, announceAssertive }) {
     const handleTogglePlay = () => {
         if (!player) return;
 
+        const playerState = player.getPlayerState();
+        
+        // This is the logic for a regular pause action.
+        if (playerState === 1) { // 1 means playing
+            player.pauseVideo();
+            return;
+        }
+
+        // From here on, the logic is to START playback.
+
+        // If it's the very first user interaction, we need to unlock the audio context first.
         if (!isInteractionDone) {
             setIsInteractionDone(true);
-            if (audioPlayerRef.current) {
-                audioPlayerRef.current.src = SILENT_AUDIO;
-                audioPlayerRef.current.volume = 0;
-                audioPlayerRef.current.play().catch(e => console.warn("Audio context could not be unlocked.", e));
+            const audioPlayer = audioPlayerRef.current;
+            
+            if (audioPlayer) {
+                // This function will start the actual video playback.
+                const startVideoPlayback = () => {
+                    player.playVideo();
+                    // Clean up the listeners to avoid multiple calls.
+                    audioPlayer.removeEventListener('ended', startVideoPlayback);
+                    audioPlayer.removeEventListener('error', startVideoPlayback);
+                };
+
+                // Add listeners that will trigger video playback AFTER the silent audio is done.
+                audioPlayer.addEventListener('ended', startVideoPlayback);
+                audioPlayer.addEventListener('error', startVideoPlayback); // Also start on error.
+                
+                audioPlayer.src = SILENT_AUDIO;
+                audioPlayer.volume = 0;
+                
+                // Attempt to play the silent audio.
+                const playPromise = audioPlayer.play();
+                if (playPromise !== undefined) {
+                    playPromise.catch(error => {
+                        console.warn("Audio context unlock failed, starting video anyway.", error);
+                        // If the play promise fails, we must still start the video.
+                        startVideoPlayback();
+                    });
+                }
+                // IMPORTANT: We return here and wait for the 'ended' or 'error' event.
+                // We DO NOT start the video immediately.
+                return;
             }
         }
 
-        const playerState = player.getPlayerState();
-        if (playerState === 1) {
-            player.pauseVideo();
-        } else {
-            player.playVideo();
-        }
+        // If the audio context is already unlocked (not the first interaction), just play the video.
+        player.playVideo();
     };
 
     const renderContent = () => {
