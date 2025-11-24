@@ -402,34 +402,26 @@ function PlayerScreen({ mainRef, announcePolite, announceAssertive }) {
         if (!isPlaying || !player) return;
 
         const intervalId = setInterval(() => {
+            // Guard against running when TTS is playing or description is disabled
             if (isTtsPlayingRef.current || !isDescriptionEnabledRef.current || !player || typeof player.getPlayerState !== 'function' || player.getPlayerState() !== 1) {
                 return;
             }
-            const currentTime = Math.floor(player.getCurrentTime());
-            const nextLineIndex = filteredScript.findIndex((line, index) => 
-                index > lastSpokenIndexRef.current && currentTime >= line.timestamp
-            );
-            if (nextLineIndex !== -1) {
-                lastSpokenIndexRef.current = nextLineIndex;
-                playDescription(filteredScript[nextLineIndex]);
+            
+            const currentTime = player.getCurrentTime();
+            
+            // Find the index of the last script that should have been played by now
+            const currentLineIndex = filteredScript.findLastIndex(line => currentTime >= line.timestamp);
+
+            // If we found a script AND it's a different one than the last one we spoke
+            if (currentLineIndex !== -1 && currentLineIndex !== lastSpokenIndexRef.current) {
+                console.log(`Playing script at index ${currentLineIndex} for time ${currentTime}`);
+                lastSpokenIndexRef.current = currentLineIndex;
+                playDescription(filteredScript[currentLineIndex]);
             }
         }, 250);
 
         return () => clearInterval(intervalId);
     }, [isPlaying, player, filteredScript, playDescription]);
-    
-    useEffect(() => {
-        if (player && typeof player.getCurrentTime === 'function') {
-            const currentTime = player.getCurrentTime();
-            // Only sync if we are not at the very beginning of the video,
-            // to prevent skipping the first script at timestamp 0.
-            if (currentTime > 0.5) {
-                lastSpokenIndexRef.current = filteredScript.findLastIndex(line => line.timestamp <= currentTime);
-            } else {
-                lastSpokenIndexRef.current = -1;
-            }
-        }
-    }, [verbosity, filteredScript, player]);
 
     const handleVerbosityChange = (level) => {
         setVerbosity(level);
