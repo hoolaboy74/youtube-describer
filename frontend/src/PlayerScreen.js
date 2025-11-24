@@ -416,7 +416,13 @@ function PlayerScreen({ mainRef, announcePolite, announceAssertive }) {
     useEffect(() => {
         if (player && typeof player.getCurrentTime === 'function') {
             const currentTime = player.getCurrentTime();
-            lastSpokenIndexRef.current = filteredScript.findLastIndex(line => line.timestamp <= currentTime);
+            // Only sync if we are not at the very beginning of the video,
+            // to prevent skipping the first script at timestamp 0.
+            if (currentTime > 0.5) {
+                lastSpokenIndexRef.current = filteredScript.findLastIndex(line => line.timestamp <= currentTime);
+            } else {
+                lastSpokenIndexRef.current = -1;
+            }
         }
     }, [verbosity, filteredScript, player]);
 
