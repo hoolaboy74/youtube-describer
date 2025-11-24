@@ -275,6 +275,7 @@ function PlayerScreenV2() {
         hasAnnouncedAiStart.current = false;
         hasAnnouncedFrameExtraction.current = false;
         messageIndexRef.current = 0;
+        lastSpokenIndexRef.current = -1;
 
         axios.get(`/api/script/${videoId}`)
             .then(response => {
@@ -474,21 +475,76 @@ function PlayerScreenV2() {
         announcePolite(`상세 수준이 ${label}으로 변경되었습니다.`);
     };
 
+    const playAndUnlockAudio = useCallback(() => {
+        const audioPlayer = audioPlayerRef.current;
+        if (!player || !audioPlayer) {
+            if (player) player.playVideo();
+            return;
+        }
+
+        const startVideoPlayback = () => {
+            if (player) player.playVideo();
+            audioPlayer.removeEventListener('ended', startVideoPlayback);
+            audioPlayer.removeEventListener('error', startVideoPlayback);
+        };
+
+        audioPlayer.addEventListener('ended', startVideoPlayback);
+        audioPlayer.addEventListener('error', startVideoPlayback);
+
+        const scriptAtZero = playableScript.find(line => line.timestamp === 0);
+
+        if (scriptAtZero) {
+            console.log("First play: Found 0-sec script. Playing it to unlock audio.");
+            lastSpokenIndexRef.current = 0;
+
+            const playFromUrl = (url) => {
+                audioPlayer.src = url;
+                audioPlayer.volume = 1.0;
+                audioPlayer.playbackRate = 1.3;
+                audioPlayer.play().catch(e => {
+                    console.error("0-sec script playback failed, starting video.", e);
+                    startVideoPlayback();
+                });
+            };
+
+            if (audioCache.current.has(scriptAtZero.id)) {
+                playFromUrl(audioCache.current.get(scriptAtZero.id));
+            } else {
+                axios.post(`/api/tts`, { text: scriptAtZero.text }, { responseType: 'blob' })
+                    .then(response => {
+                        const audioUrl = URL.createObjectURL(response.data);
+                        audioCache.current.set(scriptAtZero.id, audioUrl);
+                        playFromUrl(audioUrl);
+                    })
+                    .catch(err => {
+                        console.error("Fetching 0-sec script TTS failed, starting video.", err);
+                        startVideoPlayback();
+                    });
+            }
+        } else {
+            console.log("Playing silent audio to unlock.");
+            audioPlayer.src = SILENT_AUDIO;
+            audioPlayer.volume = 0;
+            audioPlayer.play().catch(e => {
+                console.error("Silent audio playback failed, starting video.", e);
+                startVideoPlayback();
+            });
+        }
+    }, [player, playableScript, audioCache]);
+
+
     const handleTogglePlay = () => {
         if (!player) return;
 
-        if (!isInteractionDone) {
-            setIsInteractionDone(true);
-            if (audioPlayerRef.current) {
-                audioPlayerRef.current.src = SILENT_AUDIO;
-                audioPlayerRef.current.volume = 0;
-                audioPlayerRef.current.play().catch(e => console.warn("Audio context could not be unlocked.", e));
-            }
+        const playerState = player.getPlayerState();
+        if (playerState === 1) { // 1 means playing
+            player.pauseVideo();
+            return;
         }
 
-        const playerState = player.getPlayerState();
-        if (playerState === 1) {
-            player.pauseVideo();
+        if (!isInteractionDone) {
+            setIsInteractionDone(true);
+            playAndUnlockAudio(); // Call the new, dedicated function for the first play
         } else {
             player.playVideo();
         }
