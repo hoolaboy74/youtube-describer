@@ -10,7 +10,7 @@ function formatTime(seconds) {
     return new Date(seconds * 1000).toISOString().substr(11, 8);
 }
 
-const SILENT_AUDIO = 'data:audio/wav;base64,U1JpZ0AAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA';
+const SILENT_AUDIO = 'data:audio/wav;base64,UklGRiUAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQEAAAAA';
 
 function ShareButton({ announcePolite }) {
     const [isCopied, setIsCopied] = useState(false);
