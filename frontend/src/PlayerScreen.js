@@ -447,13 +447,16 @@ function PlayerScreen({ mainRef, announcePolite, announceAssertive }) {
     };
 
     const playAndUnlockAudio = useCallback(() => {
+        console.log("playAndUnlockAudio: 함수 시작.");
         const audioPlayer = audioPlayerRef.current;
         if (!player || !audioPlayer) {
+            console.error("playAndUnlockAudio: player 또는 audioPlayer가 준비되지 않음.");
             if (player) player.playVideo();
             return;
         }
 
         const startVideoPlayback = () => {
+            console.log("playAndUnlockAudio: startVideoPlayback 호출됨.");
             if (player) {
                 // When starting the video, duck the volume if the 0-sec script was just played
                 if (isTtsPlayingRef.current) {
@@ -471,42 +474,46 @@ function PlayerScreen({ mainRef, announcePolite, announceAssertive }) {
         const scriptAtZero = filteredScript.find(line => line.timestamp === 0);
 
         if (scriptAtZero) {
-            console.log("First play: Found 0-sec script. Playing it to unlock audio.");
+            console.log("playAndUnlockAudio: 0초 스크립트 발견.", scriptAtZero);
             lastSpokenIndexRef.current = 0;
             isTtsPlayingRef.current = true; // Signal that a description is playing
 
             // This function is a simplified version of playAudioFromUrl for this specific case
             const playFromUrl = (url) => {
+                console.log("playAndUnlockAudio: playFromUrl 호출됨, URL:", url);
                 audioPlayer.src = url;
                 audioPlayer.volume = 1.0;
                 audioPlayer.playbackRate = 1.3;
                 audioPlayer.play().catch(e => {
-                    console.error("Playback of 0-sec script failed, starting video.", e);
+                    console.error("playAndUnlockAudio: 0초 스크립트 재생 실패, 비디오를 대신 시작합니다.", e);
                     startVideoPlayback();
                 });
             };
 
             if (audioCache.current.has(scriptAtZero.id)) {
+                console.log("playAndUnlockAudio: 스크립트가 캐시에 있습니다.");
                 playFromUrl(audioCache.current.get(scriptAtZero.id));
             } else {
+                console.log("playAndUnlockAudio: 스크립트가 캐시에 없습니다. TTS API를 호출합니다.");
                 axios.post(`/api/tts`, { text: scriptAtZero.text }, { responseType: 'blob' })
                     .then(response => {
+                        console.log("playAndUnlockAudio: TTS API 호출 성공.");
                         const audioUrl = URL.createObjectURL(response.data);
                         audioCache.current.set(scriptAtZero.id, audioUrl);
                         playFromUrl(audioUrl);
                     })
                     .catch(err => {
-                        console.error("Fetching TTS for 0-sec script failed, starting video.", err);
+                        console.error("playAndUnlockAudio: 0초 스크립트 TTS 호출 실패, 비디오를 대신 시작합니다.", err);
                         startVideoPlayback();
                     });
             }
         } else {
-            console.log("First play: No 0-sec script. Playing silent audio to unlock.");
+            console.log("playAndUnlockAudio: 0초 스크립트 없음. 무음 오디오를 재생합니다.");
             isTtsPlayingRef.current = false;
             audioPlayer.src = SILENT_AUDIO;
             audioPlayer.volume = 0;
             audioPlayer.play().catch(e => {
-                console.error("Silent audio playback failed, starting video.", e);
+                console.error("playAndUnlockAudio: 무음 오디오 재생 실패, 비디오를 대신 시작합니다.", e);
                 startVideoPlayback();
             });
         }
