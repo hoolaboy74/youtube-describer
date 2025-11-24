@@ -355,7 +355,12 @@ function PlayerScreen({ mainRef, announcePolite, announceAssertive }) {
 
         isTtsPlayingRef.current = true;
         player.setVolume(30);
-        player.pauseVideo();
+        
+        // Only pause if the video has actually started playing.
+        // This prevents the video from pausing at timestamp 0.
+        if (player.getCurrentTime() > 0.5) {
+            player.pauseVideo();
+        }
 
         const audioPlayer = audioPlayerRef.current;
 
