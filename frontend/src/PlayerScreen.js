@@ -446,68 +446,87 @@ function PlayerScreen({ mainRef, announcePolite, announceAssertive }) {
         }
     };
 
+    const playAndUnlockAudio = useCallback(() => {
+        const audioPlayer = audioPlayerRef.current;
+        if (!player || !audioPlayer) {
+            if (player) player.playVideo();
+            return;
+        }
+
+        const startVideoPlayback = () => {
+            if (player) {
+                // When starting the video, duck the volume if the 0-sec script was just played
+                if (isTtsPlayingRef.current) {
+                    player.setVolume(30);
+                }
+                player.playVideo();
+            }
+            audioPlayer.removeEventListener('ended', startVideoPlayback);
+            audioPlayer.removeEventListener('error', startVideoPlayback);
+        };
+
+        audioPlayer.addEventListener('ended', startVideoPlayback);
+        audioPlayer.addEventListener('error', startVideoPlayback);
+
+        const scriptAtZero = filteredScript.find(line => line.timestamp === 0);
+
+        if (scriptAtZero) {
+            console.log("First play: Found 0-sec script. Playing it to unlock audio.");
+            lastSpokenIndexRef.current = 0;
+            isTtsPlayingRef.current = true; // Signal that a description is playing
+
+            // This function is a simplified version of playAudioFromUrl for this specific case
+            const playFromUrl = (url) => {
+                audioPlayer.src = url;
+                audioPlayer.volume = 1.0;
+                audioPlayer.playbackRate = 1.3;
+                audioPlayer.play().catch(e => {
+                    console.error("Playback of 0-sec script failed, starting video.", e);
+                    startVideoPlayback();
+                });
+            };
+
+            if (audioCache.current.has(scriptAtZero.id)) {
+                playFromUrl(audioCache.current.get(scriptAtZero.id));
+            } else {
+                axios.post(`/api/tts`, { text: scriptAtZero.text }, { responseType: 'blob' })
+                    .then(response => {
+                        const audioUrl = URL.createObjectURL(response.data);
+                        audioCache.current.set(scriptAtZero.id, audioUrl);
+                        playFromUrl(audioUrl);
+                    })
+                    .catch(err => {
+                        console.error("Fetching TTS for 0-sec script failed, starting video.", err);
+                        startVideoPlayback();
+                    });
+            }
+        } else {
+            console.log("First play: No 0-sec script. Playing silent audio to unlock.");
+            isTtsPlayingRef.current = false;
+            audioPlayer.src = SILENT_AUDIO;
+            audioPlayer.volume = 0;
+            audioPlayer.play().catch(e => {
+                console.error("Silent audio playback failed, starting video.", e);
+                startVideoPlayback();
+            });
+        }
+    }, [player, filteredScript, audioCache, isTtsPlayingRef]);
+
     const handleTogglePlay = () => {
         if (!player) return;
 
         const playerState = player.getPlayerState();
-        
-        // This is the logic for a regular pause action.
         if (playerState === 1) { // 1 means playing
             player.pauseVideo();
             return;
         }
 
-        // From here on, the logic is to START playback.
-
-        // If it's the very first user interaction, handle audio unlock.
         if (!isInteractionDone) {
             setIsInteractionDone(true);
-            
-            // User's suggestion: Check for a script at timestamp 0.
-            const scriptAtZero = filteredScript.find(line => line.timestamp === 0);
-
-            if (scriptAtZero) {
-                // If a script at 0s exists, play it to unlock the audio context.
-                console.log("First play: Found script at 0s. Playing it to unlock audio and start the video.");
-                
-                // Mark index 0 as spoken immediately to prevent the interval loop from playing it again.
-                lastSpokenIndexRef.current = 0; 
-                
-                // Play the description. The `onAudioEnded` callback inside `playDescription` will then start the video playback.
-                playDescription(scriptAtZero);
-                
-                // The video will start after the description finishes, so we're done here.
-                return;
-            } else {
-                // If no script at 0s, fall back to the silent audio unlock method.
-                const audioPlayer = audioPlayerRef.current;
-                if (audioPlayer) {
-                    const startVideoPlayback = () => {
-                        player.playVideo();
-                        audioPlayer.removeEventListener('ended', startVideoPlayback);
-                        audioPlayer.removeEventListener('error', startVideoPlayback);
-                    };
-
-                    audioPlayer.addEventListener('ended', startVideoPlayback);
-                    audioPlayer.addEventListener('error', startVideoPlayback);
-                    
-                    audioPlayer.src = SILENT_AUDIO;
-                    audioPlayer.volume = 0;
-                    
-                    const playPromise = audioPlayer.play();
-                    if (playPromise !== undefined) {
-                        playPromise.catch(error => {
-                            console.warn("Audio context unlock failed, starting video anyway.", error);
-                            startVideoPlayback();
-                        });
-                    }
-                    return; // Wait for the silent audio to finish.
-                }
-            }
+            playAndUnlockAudio(); // Call the new, dedicated function for the first play
+        } else {
+            player.playVideo();
         }
-
-        // If audio context is already unlocked (not the first interaction), just play the video.
-        player.playVideo();
     };
 
     const renderContent = () => {
