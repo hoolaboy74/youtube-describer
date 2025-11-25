@@ -112,6 +112,7 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
     time(totalTimeLabel);
 
     const baseTempDir = path.join(__dirname, 'temp', videoId);
+    let cookiePath = null;
 
     try {
         const cachedData = db.getVideo(videoId);
@@ -131,7 +132,7 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
 
         if (sseHandler) sseHandler('status_update', { message: '영상 정보 확인 중...' });
 
-        const cookiePath = getRandomCookiePath();
+        cookiePath = getRandomCookiePath();
         const cookieArgs = cookiePath ? ['--cookies', cookiePath] : [];
         const proxyArgs = process.env.YTDLP_PROXY ? ['--proxy', process.env.YTDLP_PROXY] : [];
 
@@ -337,6 +338,18 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
     } catch (error) {
         db.updateVideoStatus(videoId, 'failed', error.message);
         logger.error(new Error(`[${requestHash}] Error processing request: ${error.message}`));
+        
+        // Invalidate cookie on auth error
+        if (cookiePath && (error.message.includes('Sign in to confirm') || error.message.includes('cookies are no longer valid'))) {
+            const invalidPath = cookiePath + '.invalid';
+            logger.warn(`[${requestHash}] Authentication error detected. Renaming cookie file to ${path.basename(invalidPath)}`);
+            try {
+                fs.renameSync(cookiePath, invalidPath);
+            } catch (renameError) {
+                logger.error(`[${requestHash}] Failed to rename invalid cookie file:`, renameError);
+            }
+        }
+
         if (sseHandler) {
             let clientMessage = 'An unexpected error occurred.';
             if (error.message.includes('duration')) clientMessage = error.message;
@@ -371,6 +384,7 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
     time(totalTimeLabel);
 
     const baseTempDir = path.join(__dirname, 'temp', videoId);
+    let cookiePath = null;
 
     try {
         const cachedData = db.getVideo(videoId);
@@ -385,7 +399,7 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
         const extractionLabel = `[${requestHash}] Initial Data Extraction Time`;
         time(extractionLabel);
 
-        const cookiePath = getRandomCookiePath();
+        cookiePath = getRandomCookiePath();
         const cookieArgs = cookiePath ? ['--cookies', cookiePath] : [];
         const proxyArgs = process.env.YTDLP_PROXY ? ['--proxy', process.env.YTDLP_PROXY] : [];
 
@@ -503,6 +517,17 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
     } catch (error) {
         db.updateVideoStatus(videoId, 'failed', error.message);
         logger.error(new Error(`[${requestHash}] Error in batch processing: ${error.message}`));
+        
+        // Invalidate cookie on auth error
+        if (cookiePath && (error.message.includes('Sign in to confirm') || error.message.includes('cookies are no longer valid'))) {
+            const invalidPath = cookiePath + '.invalid';
+            logger.warn(`[${requestHash}] Authentication error detected. Renaming cookie file to ${path.basename(invalidPath)}`);
+            try {
+                fs.renameSync(cookiePath, invalidPath);
+            } catch (renameError) {
+                logger.error(`[${requestHash}] Failed to rename invalid cookie file:`, renameError);
+            }
+        }
     } finally {
         if (fs.existsSync(baseTempDir)) {
             await fs.promises.rm(baseTempDir, { recursive: true, force: true });

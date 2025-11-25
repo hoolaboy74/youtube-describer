@@ -7,6 +7,10 @@ import { usePageFocus } from '../hooks';
 import Header from '../components/Header';
 import { useAccessibility } from '../contexts/AccessibilityContext';
 
+function isMobile() {
+    return /Mobi|Android/i.test(navigator.userAgent);
+}
+
 const verbosityLabels = { 1: '최소', 2: '기본', 3: '최대' };
 function formatTime(seconds) {
     return new Date(seconds * 1000).toISOString().substr(11, 8);
@@ -85,6 +89,11 @@ function PlayerScreenV2() {
 
     const [player, setPlayer] = useState(null);
     const [verbosity, setVerbosity] = useState(2); // Default to '기본'
+    const [playbackMode, setPlaybackMode] = useState(isMobile() ? 'pause' : 'together'); // 'pause' or 'together'
+    const playbackModeRef = useRef(playbackMode);
+    useEffect(() => {
+        playbackModeRef.current = playbackMode;
+    }, [playbackMode]);
     const [isPlaying, setIsPlaying] = useState(false);
     const audioCache = useRef(new Map());
     const isTtsPlayingRef = useRef(false);
@@ -394,19 +403,29 @@ function PlayerScreenV2() {
     const handleTtsStart = useCallback(() => {
         if (!player || typeof player.pauseVideo !== 'function') return;
         isTtsPlayingRef.current = true;
-        // Only pause the video if it's not at the very beginning.
-        // This allows the 0-second description to play over the starting video.
-        if (player.getCurrentTime() > 0.5) {
-            player.pauseVideo();
+        
+        const currentMode = playbackModeRef.current;
+        
+        if (currentMode === 'pause') {
+            if (player.getPlayerState() === 1) player.pauseVideo();
+        } else if (currentMode === 'together' && !isMobile()) {
+            player.setVolume(30); // Audio ducking for PC
         }
+        // For mobile 'together', we just let it play over.
     }, [player]);
 
     const handleTtsEnd = useCallback(() => {
         if (!player) return;
         isTtsPlayingRef.current = false;
-        if (player.getPlayerState() !== 1) {
-            player.playVideo();
+        
+        const currentMode = playbackModeRef.current;
+
+        if (currentMode === 'pause') {
+            if (player.getPlayerState() !== 1) player.playVideo();
+        } else if (currentMode === 'together' && !isMobile()) {
+            player.setVolume(100); // Restore volume for PC
         }
+        // For mobile 'together', no volume change was made.
     }, [player]);
 
     const playDescription = useCallback(async (scriptLine) => {
@@ -566,6 +585,15 @@ function PlayerScreenV2() {
                             {newVerbosityLabels[level]}
                         </button>
                     ))}
+                </div>
+                <div className="playback-mode-control">
+                    <span>재생 방식:</span>
+                    <button onClick={() => setPlaybackMode('pause')} aria-pressed={playbackMode === 'pause'}>
+                        일시정지
+                    </button>
+                    <button onClick={() => setPlaybackMode('together')} aria-pressed={playbackMode === 'together'}>
+                        같이 재생
+                    </button>
                 </div>
                 <button onClick={() => setIsScriptVisible(prev => !prev)} aria-expanded={isScriptVisible}>
                     {isScriptVisible ? '대본 숨기기' : '대본 보기'}
