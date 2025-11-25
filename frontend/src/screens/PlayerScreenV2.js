@@ -283,10 +283,27 @@ function PlayerScreenV2() {
                 if (video) {
                     setVideoInfo({ videoId: video.videoId, title: video.title });
                     if (video.status === 'completed') {
-                        setScript(video.script || []);
+                        const fetchedScript = video.script || [];
+                        setScript(fetchedScript);
                         setIsPlayerReady(true);
                         setIsGenerationComplete(true);
-                        announcePolite(video.script && video.script.length > 0 ? '캐시된 영상 데이터를 불러왔습니다.' : '영상 처리가 완료되었지만, 생성된 화면 해설이 없습니다.');
+                        announcePolite(fetchedScript.length > 0 ? '캐시된 영상 데이터를 불러왔습니다.' : '영상 처리가 완료되었지만, 생성된 화면 해설이 없습니다.');
+                        
+                        // Preload audio for the 0-second script to ensure smooth playback on first play
+                        const scriptAtZero = fetchedScript.find(line => line.timestamp === 0);
+                        if (scriptAtZero && !audioCache.current.has(scriptAtZero.id)) {
+                            console.log("Preloading audio for 0-second script...");
+                            axios.post(`/api/tts`, { text: scriptAtZero.text }, { responseType: 'blob' })
+                                .then(res => {
+                                    const audioUrl = URL.createObjectURL(res.data);
+                                    audioCache.current.set(scriptAtZero.id, audioUrl);
+                                    console.log("Preloading complete for 0-second script.");
+                                })
+                                .catch(err => {
+                                    console.error("Failed to preload 0-second script audio.", err);
+                                });
+                        }
+
                     } else if (['failed', 'pending'].includes(video.status)) {
                         announcePolite('이전에 실패했거나 미완료된 영상입니다. 다시 생성을 시작합니다.');
                         startNewGeneration();
@@ -394,7 +411,11 @@ function PlayerScreenV2() {
     const handleTtsStart = useCallback(() => {
         if (!player || typeof player.pauseVideo !== 'function') return;
         isTtsPlayingRef.current = true;
-        player.pauseVideo();
+        // Only pause the video if it's not at the very beginning.
+        // This allows the 0-second description to play over the starting video.
+        if (player.getCurrentTime() > 0.5) {
+            player.pauseVideo();
+        }
     }, [player]);
 
     const handleTtsEnd = useCallback(() => {
@@ -484,24 +505,37 @@ function PlayerScreenV2() {
             return;
         }
 
-        // On the first play, unlock audio context and start the video simultaneously.
-        // This is crucial for mobile browser compatibility.
         if (!isInteractionDone) {
             setIsInteractionDone(true);
+            const scriptAtZero = playableScript.find(line => line.timestamp === 0);
             const audioPlayer = audioPlayerRef.current;
-            if (audioPlayer) {
-                // Play a silent audio track to unlock the audio context.
-                // The user's single tap must be used to initiate both audio and video.
-                audioPlayer.src = SILENT_AUDIO;
-                audioPlayer.volume = 0;
-                audioPlayer.play().catch(e => {
-                    // This can fail on some strict browsers, but the attempt is what matters.
-                    console.warn("Silent audio play for unlocking context failed (this is often ok).", e);
-                });
+
+            // If there's a 0s script and it has been preloaded, play it synchronously with the video
+            if (scriptAtZero && audioCache.current.has(scriptAtZero.id) && audioPlayer) {
+                console.log("First play: Playing preloaded 0s script and video simultaneously.");
+                
+                lastSpokenIndexRef.current = 0; // Mark as spoken
+
+                // Manually trigger the first description play using the main playDescription function
+                playDescription(scriptAtZero);
+                
+                // Synchronously start the video
+                player.playVideo();
+
+            } else {
+                // Fallback for no 0s script or if preloading isn't finished in time
+                console.log("First play: Using silent audio unlock because 0s script is not preloaded.");
+                if (audioPlayer) {
+                    audioPlayer.src = SILENT_AUDIO;
+                    audioPlayer.volume = 0;
+                    audioPlayer.play().catch(e => console.warn("Silent audio unlock failed.", e));
+                }
+                player.playVideo();
             }
+            return;
         }
-        
-        // For both first play and subsequent plays, start the video.
+
+        // For subsequent plays
         player.playVideo();
     };
 
