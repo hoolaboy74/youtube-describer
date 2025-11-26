@@ -120,6 +120,17 @@ router.get('/cached-videos', (req, res) => {
     }
 });
 
+// Endpoint to get a list of random videos for recommendation
+router.get('/videos/random', (req, res) => {
+    try {
+        const videos = db.getRandomVideos(3); // Get 3 random videos
+        res.json(videos);
+    } catch (error) {
+        logger.error('Failed to fetch random videos:', error);
+        res.status(500).json({ error: 'Failed to fetch random videos' });
+    }
+});
+
 // Endpoint to check if a video exists
 router.get('/video-exists/:videoId', (req, res) => {
     const { videoId } = req.params;

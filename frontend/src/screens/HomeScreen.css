@@ -682,6 +682,47 @@ main {
     background-color: #61dafb;
 }
 
+.recommended-videos-container {
+  margin-bottom: 30px;
+  width: 100%;
+}
+
+.recommended-videos-container h2 {
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 10px;
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.recommended-videos-container ol {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.recommended-videos-container button {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  text-align: left;
+  padding: 10px;
+  background-color: #fff;
+  color: #333;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  margin-bottom: 10px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  transition: box-shadow 0.2s, border-color 0.2s;
+}
+
+.recommended-videos-container button:hover {
+  border-color: #bbb;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
 .modal-footer {
     display: flex;
     justify-content: space-between;

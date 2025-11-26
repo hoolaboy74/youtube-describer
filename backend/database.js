@@ -283,6 +283,17 @@ function searchVideosByTitle(query) {
   return rows;
 }
 
+function getRandomVideos(limit = 3) {
+  const rows = db.prepare(`
+    SELECT videoId, title 
+    FROM videos 
+    WHERE status = 'completed' 
+    ORDER BY RANDOM() 
+    LIMIT ?
+  `).all(limit);
+  return rows;
+}
+
 // 처리 시작 시 호출. status를 'processing'으로 설정.
 function ensureVideoRecord({ videoId, title, duration, filesize }) {
   try {
@@ -883,6 +894,7 @@ module.exports = {
   saveVideoChunk,
   listVideos,
   searchVideosByTitle,
+  getRandomVideos,
   getComments,
   addComment,
   getCommentById,

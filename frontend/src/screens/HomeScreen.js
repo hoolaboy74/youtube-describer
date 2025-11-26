@@ -35,6 +35,7 @@ function HomeScreen() {
     const [notice, setNotice] = useState({ id: '', title: '', content: '' });
     const [isNoticeVisible, setIsNoticeVisible] = useState(false);
     const [dontShowNoticeToday, setDontShowNoticeToday] = useState(false);
+    const [recommendedVideos, setRecommendedVideos] = useState([]);
     
     const [initialVideosLimit, setInitialVideosLimit] = useState(10);
     const [dbResultsLimit, setDbResultsLimit] = useState(10);
@@ -68,6 +69,11 @@ function HomeScreen() {
                 setError(errorMsg);
                 announceAssertive(`오류: ${errorMsg}`);
             });
+
+        // Fetch random videos for recommendation
+        axios.get('/api/videos/random')
+            .then(response => setRecommendedVideos(response.data || []))
+            .catch(err => console.error('추천 영상을 불러오는 데 실패했습니다:', err));
 
         // Fetch financial summary and notice
         axios.get('/api/financial-summary')
@@ -386,6 +392,21 @@ function HomeScreen() {
                 />
                 <button type="submit" disabled={isSubmitDisabled}>{'검색 또는 생성'}</button>
             </form>
+
+            {!showSearchResults && recommendedVideos.length > 0 && (
+                <div className="recommended-videos-container">
+                    <h2>이런 영상은 어때요?</h2>
+                    <ol>
+                        {recommendedVideos.map(video => (
+                            <li key={video.videoId}>
+                                <button onClick={() => handleVideoSelect({ id: video.videoId, source: 'db' })}>
+                                    {video.title}
+                                </button>
+                            </li>
+                        ))}
+                    </ol>
+                </div>
+            )}
 
             <div className="cached-list-container">
                 <h2>{showSearchResults ? '검색 결과' : '사용자들의 최근 생성 영상'}</h2>
