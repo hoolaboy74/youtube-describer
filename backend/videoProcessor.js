@@ -336,11 +336,12 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
         if (sseHandler) sseHandler('end', { message: 'Processing complete.' });
         
     } catch (error) {
-        db.updateVideoStatus(videoId, 'failed', error.message);
-        logger.error(new Error(`[${requestHash}] Error processing request: ${error.message}`));
+        const errorMessage = error.message || 'Unknown error';
+        db.updateVideoStatus(videoId, 'failed', errorMessage);
+        logger.error(new Error(`[${requestHash}] Error processing request: ${errorMessage}`));
         
         // Invalidate cookie on auth error
-        if (cookiePath && (error.message.includes('Sign in to confirm') || error.message.includes('cookies are no longer valid'))) {
+        if (cookiePath && (errorMessage.includes('Sign in to confirm') || errorMessage.includes('cookies are no longer valid'))) {
             const invalidPath = cookiePath + '.invalid';
             logger.warn(`[${requestHash}] Authentication error detected. Renaming cookie file to ${path.basename(invalidPath)}`);
             try {
@@ -351,10 +352,38 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
         }
 
         if (sseHandler) {
-            let clientMessage = 'An unexpected error occurred.';
-            if (error.message.includes('duration')) clientMessage = error.message;
-            if (error.message.includes('Live stream')) clientMessage = 'Live streams cannot be processed.';
-            sseHandler('backend_error', { message: 'Failed to process video', details: clientMessage });
+            let errorPayload;
+            const lowerErrorMessage = errorMessage.toLowerCase();
+
+            if (lowerErrorMessage.includes('exceeds the limit')) {
+                const limitMatch = errorMessage.match(/limit of (\d+)/);
+                errorPayload = {
+                    message: 'duration_exceeded',
+                    details: errorMessage,
+                    limit: limitMatch ? parseInt(limitMatch[1], 10) : 30
+                };
+            } else if (lowerErrorMessage.includes('live streams')) {
+                errorPayload = {
+                    message: 'live_stream_not_supported',
+                    details: 'Live streams cannot be processed.'
+                };
+            } else if (lowerErrorMessage.includes('blocked') || lowerErrorMessage.includes('prohibited_content')) {
+                errorPayload = {
+                    message: 'gemini_rejection',
+                    details: 'The content was blocked by the generative AI.',
+                };
+            } else if (lowerErrorMessage.includes('overloaded') || lowerErrorMessage.includes('unavailable') || lowerErrorMessage.includes('429') || lowerErrorMessage.includes('quota') || lowerErrorMessage.includes('exhausted')) {
+                errorPayload = {
+                    message: 'gemini_unavailable',
+                    details: 'The generative AI service is temporarily unavailable or experiencing issues.',
+                };
+            } else {
+                errorPayload = {
+                    message: 'video_processing_failed',
+                    details: errorMessage
+                };
+            }
+            sseHandler('backend_error', errorPayload);
         }
     } finally {
         if (fs.existsSync(baseTempDir)) {

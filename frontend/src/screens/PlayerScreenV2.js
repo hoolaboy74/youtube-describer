@@ -155,40 +155,35 @@ function PlayerScreenV2() {
                     console.error('Backend Error Event:', data);
                     
                     if (data.message === 'funds_depleted') {
-                        const fundsDepletedError = '서비스 운영을 위한 후원금이 모두 소진되어 현재 새로운 영상을 생성할 수 없습니다. 여러분의 따뜻한 후원이 필요합니다.';
-                        setError(fundsDepletedError);
-                        announcePolite(fundsDepletedError);
+                        setError('서비스 운영을 위한 후원금이 모두 소진되어 현재 새로운 영상을 생성할 수 없습니다. 여러분의 따뜻한 후원이 필요합니다.');
                     } else if (data.message === 'duration_exceeded') {
                         const limit = data.limit || 30;
-                        const durationError = `${limit}분이 넘는 영상은 비용 문제로 인해 처리할 수 없습니다. 양해 부탁드립니다.`;
-                        setError(durationError);
-                        announcePolite(durationError);
+                        setError(`${limit}분이 넘는 영상은 비용 문제로 인해 처리할 수 없습니다. 양해 부탁드립니다.`);
                     } else if (data.message === 'service_paused') {
-                        const servicePausedError = '현재 관리자에 의해 신규 영상 생성이 일시 중지되었습니다. 잠시 후 다시 시도해주세요.';
-                        setError(servicePausedError);
-                        announcePolite(servicePausedError);
+                        setError('현재 관리자에 의해 신규 영상 생성이 일시 중지되었습니다. 잠시 후 다시 시도해주세요.');
                     } else if (data.message === 'live_stream_not_supported') {
-                        const liveStreamError = '라이브 스트리밍 영상은 현재 지원되지 않습니다. 영상이 종료된 후 다시 시도해주세요.';
-                        setError(liveStreamError);
-                        announcePolite(liveStreamError);
+                        setError('라이브 스트리밍 영상은 현재 지원되지 않습니다. 영상이 종료된 후 다시 시도해주세요.');
+                    } else if (data.message === 'gemini_unavailable') {
+                        setError('AI 생성기가 일시적인 과부하 또는 할당량 문제로 응답하지 않습니다. 잠시 후 다시 시도해 주세요.');
+                    } else if (data.message === 'gemini_rejection') {
+                        setError('AI가 부적절하거나 유해한 콘텐츠를 감지하여 생성을 중단했습니다.');
+                    } else if (data.message === 'Invalid or missing YouTube URL' || data.message === 'Could not extract YouTube video ID from URL') {
+                        setError('유효하지 않거나 지원되지 않는 YouTube URL입니다. 올바른 주소를 입력해주세요.');
+                    } else if (data.message === 'video_processing_failed' || data.message === 'An unexpected error occurred on the server.' || data.message === 'A critical database error occurred.') {
+                        setError('죄송합니다. 서비스 처리 중 예상치 못한 서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
                     } else {
-                        const errorMessage = data.details || data.message || '알 수 없는 오류가 발생했습니다.';
-                        setError(errorMessage);
-                        announcePolite(`오류: ${errorMessage}`);
+                        setError(data.details || data.message || '알 수 없는 오류가 발생했습니다.');
                     }
                 } catch (parseError) {
                     console.error('Failed to parse backend error event:', parseError, errorPayload);
                     setError('서버에서 알 수 없는 오류가 발생했습니다.');
-                    announcePolite('오류: 서버에서 알 수 없는 오류');
                 }
             } else if (errorType === 'network') {
                 if (isDuplicate) return;
                 console.error('EventSource failed:', errorPayload);
                 setError(currentError => {
                     if (currentError) return currentError;
-                    const errorMsg = '대본 생성 중 네트워크 오류가 발생했습니다. 인터넷 연결을 확인해주세요.';
-                    announcePolite(`오류: ${errorMsg}`);
-                    return errorMsg;
+                    return '대본 생성 중 네트워크 오류가 발생했습니다. 인터넷 연결을 확인해주세요.';
                 });
             }
         };
