@@ -490,7 +490,7 @@ function PlayerScreenV2() {
     const handleVerbosityChange = (level) => {
         setVerbosity(level);
         const label = { 0: '없음', ...verbosityLabels }[level];
-        announcePolite(`상세 수준이 ${label}으로 변경되었습니다.`);
+        announcePolite(`해설정도가 ${label}으로 변경되었습니다.`);
     };
 
     const handleTogglePlay = () => {
@@ -539,7 +539,7 @@ function PlayerScreenV2() {
             return (
                 <div className="video-container">
                     <div className={`play-overlay ${isPlaying ? 'is-playing' : ''}`}>
-                        <button className="big-play-button" onClick={handleTogglePlay} aria-label={isPlaying ? "일시정지" : "재생"}>
+                        <button className="big-play-button" onClick={handleTogglePlay} aria-label={isPlaying ? "멈춘 후 해설" : "재생"}>
                             {isPlaying ? '❚❚' : '▶'}
                         </button>
                     </div>
@@ -574,7 +574,7 @@ function PlayerScreenV2() {
 
             <div className="controls-container">
                 <div className="verbosity-control">
-                    <span>상세 수준:</span>
+                    <span>해설정도:</span>
                     {[0, 1, 2, 3].map(level => (
                         <button key={level} onClick={() => handleVerbosityChange(level)} aria-pressed={verbosity === level}>
                             {newVerbosityLabels[level]}
@@ -582,12 +582,12 @@ function PlayerScreenV2() {
                     ))}
                 </div>
                 <div className="playback-mode-control">
-                    <span>재생 방식:</span>
+                    <span>해설방식:</span>
                     <button onClick={() => setPlaybackMode('pause')} aria-pressed={playbackMode === 'pause'}>
-                        일시정지
+                        멈춘 후 해설
                     </button>
                     <button onClick={() => setPlaybackMode('together')} aria-pressed={playbackMode === 'together'}>
-                        같이 재생
+                        영상과 같이
                     </button>
                 </div>
                 <button onClick={() => setIsScriptVisible(prev => !prev)} aria-expanded={isScriptVisible}>
