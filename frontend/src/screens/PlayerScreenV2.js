@@ -88,8 +88,22 @@ function PlayerScreenV2() {
     const [hasAiProcessingStarted, setHasAiProcessingStarted] = useState(false);
 
     const [player, setPlayer] = useState(null);
-    const [verbosity, setVerbosity] = useState(2); // Default to '기본'
-    const [playbackMode, setPlaybackMode] = useState(isMobile() ? 'pause' : 'together'); // 'pause' or 'together'
+    const [verbosity, setVerbosity] = useState(() => {
+        const savedVerbosity = localStorage.getItem('playerVerbosity');
+        return savedVerbosity !== null ? JSON.parse(savedVerbosity) : 2;
+    });
+
+    useEffect(() => {
+        localStorage.setItem('playerVerbosity', JSON.stringify(verbosity));
+    }, [verbosity]);
+    const [playbackMode, setPlaybackMode] = useState(() => {
+        const savedPlaybackMode = localStorage.getItem('playerPlaybackMode');
+        return savedPlaybackMode !== null ? savedPlaybackMode : (isMobile() ? 'pause' : 'together');
+    });
+
+    useEffect(() => {
+        localStorage.setItem('playerPlaybackMode', playbackMode);
+    }, [playbackMode]);
     const playbackModeRef = useRef(playbackMode);
     useEffect(() => {
         playbackModeRef.current = playbackMode;
