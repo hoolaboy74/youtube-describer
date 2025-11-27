@@ -555,7 +555,7 @@ function PlayerScreenV2() {
             return (
                 <div className="video-container">
                     <div className={`play-overlay ${isPlaying ? 'is-playing' : ''}`}>
-                        <button className="big-play-button" onClick={handleTogglePlay} aria-label={isPlaying ? "멈춘 후 해설" : "재생"}>
+                        <button className="big-play-button" onClick={handleTogglePlay} aria-label={isPlaying ? "일시정지" : "재생"}>
                             {isPlaying ? '❚❚' : '▶'}
                         </button>
                     </div>
