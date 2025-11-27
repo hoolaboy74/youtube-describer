@@ -185,6 +185,8 @@ function PlayerScreenV2() {
                         setError('유효하지 않거나 지원되지 않는 YouTube URL입니다. 올바른 주소를 입력해주세요.');
                     } else if (data.message === 'video_processing_failed' || data.message === 'An unexpected error occurred on the server.' || data.message === 'A critical database error occurred.') {
                         setError('죄송합니다. 서비스 처리 중 예상치 못한 서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+                    } else if (data.message === 'auth_error') { // New condition for authentication errors
+                        setError('해당 영상은 로그인(인증)이 필요하거나 처리 시스템의 문제로 인해 화면 해설을 생성할 수 없습니다. 다른 영상을 시도해 주세요.');
                     } else {
                         setError(data.details || data.message || '알 수 없는 오류가 발생했습니다.');
                     }
