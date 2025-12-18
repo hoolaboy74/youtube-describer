@@ -19,7 +19,7 @@ function getYouTubeId(url) {
 }
 
 function isValidYoutubeUrl(url) {
-    const YOUTUBE_URL_REGEX = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/(watch\?v=|embed\/|v\/|)([\w-]+)$/;
+    const YOUTUBE_URL_REGEX = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/(watch\?v=|embed\/|v\/|)([\w-]+)([\?&].*)?$/;
     return YOUTUBE_URL_REGEX.test(url);
 }
 
