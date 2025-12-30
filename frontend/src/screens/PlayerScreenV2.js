@@ -93,9 +93,30 @@ function PlayerScreenV2() {
         return savedVerbosity !== null ? JSON.parse(savedVerbosity) : 2;
     });
 
+    const [isReadingSubtitles, setIsReadingSubtitles] = useState(() => {
+        const saved = localStorage.getItem('playerReadingSubtitles');
+        return saved !== null ? JSON.parse(saved) : true;
+    });
+
+    const [playbackRate, setPlaybackRate] = useState(() => {
+        const saved = localStorage.getItem('playerPlaybackRate');
+        return saved !== null ? JSON.parse(saved) : 1.5;
+    });
+
     useEffect(() => {
         localStorage.setItem('playerVerbosity', JSON.stringify(verbosity));
     }, [verbosity]);
+
+    useEffect(() => {
+        localStorage.setItem('playerReadingSubtitles', JSON.stringify(isReadingSubtitles));
+    }, [isReadingSubtitles]);
+
+    const playbackRateRef = useRef(playbackRate);
+    useEffect(() => {
+        playbackRateRef.current = playbackRate;
+        localStorage.setItem('playerPlaybackRate', JSON.stringify(playbackRate));
+    }, [playbackRate]);
+
     const [playbackMode, setPlaybackMode] = useState(() => {
         const savedPlaybackMode = localStorage.getItem('playerPlaybackMode');
         return savedPlaybackMode !== null ? savedPlaybackMode : (isMobile() ? 'pause' : 'together');
@@ -118,7 +139,7 @@ function PlayerScreenV2() {
     // UI State
     const [isScriptVisible, setIsScriptVisible] = useState(false);
 
-    const isDescriptionEnabled = verbosity > 0;
+    const isDescriptionEnabled = verbosity > 0 || isReadingSubtitles;
     const isDescriptionEnabledRef = useRef(isDescriptionEnabled);
     useEffect(() => { isDescriptionEnabledRef.current = isDescriptionEnabled; }, [isDescriptionEnabled]);
 
@@ -361,20 +382,27 @@ function PlayerScreenV2() {
     }, [hasAiProcessingStarted, isGenerationComplete, announcePolite, error, isPlayerReady]);
 
     const filteredScript = useMemo(() => {
-        if (verbosity === 0) return [];
+        const vLinesMap = new Map();
+        const textLines = [];
 
-        const linesByTimestamp = new Map();
         for (const line of script) {
-            const lineVerbosity = parseInt(line.verbosity.replace('v', ''));
-            if (lineVerbosity <= verbosity) {
-                const existingLine = linesByTimestamp.get(line.timestamp);
-                if (!existingLine || lineVerbosity > parseInt(existingLine.verbosity.replace('v', ''))) {
-                    linesByTimestamp.set(line.timestamp, line);
+            if (line.verbosity === 'text') {
+                if (isReadingSubtitles) {
+                    textLines.push(line);
+                }
+            } else {
+                if (verbosity === 0) continue;
+                const lineVerbosity = parseInt(line.verbosity.replace('v', ''));
+                if (lineVerbosity <= verbosity) {
+                    const existingLine = vLinesMap.get(line.timestamp);
+                    if (!existingLine || lineVerbosity > parseInt(existingLine.verbosity.replace('v', ''))) {
+                        vLinesMap.set(line.timestamp, line);
+                    }
                 }
             }
         }
-        return Array.from(linesByTimestamp.values()).sort((a, b) => a.timestamp - b.timestamp);
-    }, [script, verbosity]);
+        return [...vLinesMap.values(), ...textLines].sort((a, b) => a.timestamp - b.timestamp);
+    }, [script, verbosity, isReadingSubtitles]);
 
     const playableScript = useMemo(() => {
         if (filteredScript.length === 0) return [];
@@ -382,7 +410,7 @@ function PlayerScreenV2() {
         const finalScript = [];
         const COLLISION_THRESHOLD_SECONDS = 3.5;
 
-        const getPriority = (v) => parseInt(v.replace('v', ''));
+        const getPriority = (v) => v === 'text' ? 4 : parseInt(v.replace('v', ''));
 
         for (const currentLine of filteredScript) {
             if (finalScript.length === 0) {
@@ -452,7 +480,7 @@ function PlayerScreenV2() {
 
         const playAudioFromUrl = (url) => {
             audioPlayer.src = url;
-            audioPlayer.playbackRate = 1.3;
+            audioPlayer.playbackRate = playbackRateRef.current;
             audioPlayer.volume = 1;
             audioPlayer.play().catch(e => {
                 console.error("Audio play failed:", e);
@@ -507,6 +535,14 @@ function PlayerScreenV2() {
         setVerbosity(level);
         const label = { 0: '없음', ...verbosityLabels }[level];
         announcePolite(`해설정도가 ${label}으로 변경되었습니다.`);
+    };
+
+    const handleSubtitleToggle = () => {
+        setIsReadingSubtitles(prev => {
+            const newState = !prev;
+            announcePolite(newState ? '자막 읽기가 켜졌습니다.' : '자막 읽기가 꺼졌습니다.');
+            return newState;
+        });
     };
 
     const handleTogglePlay = () => {
@@ -596,6 +632,14 @@ function PlayerScreenV2() {
                             {newVerbosityLabels[level]}
                         </button>
                     ))}
+                    <button 
+                        className="subtitle-toggle" 
+                        onClick={handleSubtitleToggle} 
+                        aria-pressed={isReadingSubtitles}
+                        style={{ marginLeft: '10px', borderLeft: '1px solid #ccc', paddingLeft: '10px' }}
+                    >
+                        자막 읽기
+                    </button>
                 </div>
                 <div className="playback-mode-control">
                     <span>해설방식:</span>
@@ -606,7 +650,22 @@ function PlayerScreenV2() {
                         영상과 같이
                     </button>
                 </div>
-                <button onClick={() => setIsScriptVisible(prev => !prev)} aria-expanded={isScriptVisible}>
+                <div className="playback-rate-control" style={{ marginTop: '10px' }}>
+                    <span>해설속도:</span>
+                    {[1.5, 2.5, 3.5].map(rate => (
+                        <button 
+                            key={rate} 
+                            onClick={() => {
+                                setPlaybackRate(rate);
+                                announcePolite(`해설 속도가 ${rate}배속으로 변경되었습니다.`);
+                            }} 
+                            aria-pressed={playbackRate === rate}
+                        >
+                            {rate.toFixed(1)}
+                        </button>
+                    ))}
+                </div>
+                <button onClick={() => setIsScriptVisible(prev => !prev)} aria-expanded={isScriptVisible} style={{ marginTop: '10px' }}>
                     {isScriptVisible ? '대본 숨기기' : '대본 보기'}
                 </button>
                 <ShareButton />
