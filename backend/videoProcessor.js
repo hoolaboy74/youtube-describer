@@ -189,7 +189,7 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
                 youtubeUrl
             ];
             
-            const ffmpegArgs = ['-i', '-', '-vf', "select='isnan(prev_selected_t)+gt(scene,0.4)+gte(t-prev_selected_t,5)',showinfo", '-vsync', 'vfr', path.join(baseTempDir, 'frame-%04d.png')];
+            const ffmpegArgs = ['-i', '-', '-vf', "select='isnan(prev_selected_t)+gt(scene,0.4)+gte(t-prev_selected_t,2)',showinfo", '-vsync', 'vfr', path.join(baseTempDir, 'frame-%04d.png')];
             
             const ytdlpProcess = spawn('yt-dlp', ytdlpArgs, { cwd: baseTempDir }); // Set CWD to temp directory
             const ffmpegProcess = spawn('ffmpeg', ffmpegArgs);
@@ -288,7 +288,7 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
                     const newScriptData = completeLines.map(line => {
                         const match = line.match(/^\s*\[(\d+)\]\s*\[(v\d|txt)\]\s*(.*)\s*$/);
                         if (!match) return null;
-                        return { id: crypto.createHash('sha256').update(line).digest('hex'), timestamp: parseInt(match[1], 10), text: match[3].trim(), verbosity: match[2] === 'txt' ? 'text' : match[2] };
+                        return { id: crypto.createHash('sha256').update(line).digest('hex'), timestamp: parseInt(match[1], 10) === 0 ? 1 : parseInt(match[1], 10), text: match[3].trim(), verbosity: match[2] === 'txt' ? 'text' : match[2] };
                     }).filter(Boolean);
 
                     if (newScriptData.length > 0) {
@@ -308,7 +308,7 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
             const finalLines = scriptBuffer.split('\n').map(line => {
                 const match = line.match(/^\s*\[(\d+)\]\s*\[(v\d|txt)\]\s*(.*)\s*$/);
                 if (!match) return null;
-                return { id: crypto.createHash('sha256').update(line).digest('hex'), timestamp: parseInt(match[1], 10), text: match[3].trim(), verbosity: match[2] === 'txt' ? 'text' : match[2] };
+                return { id: crypto.createHash('sha256').update(line).digest('hex'), timestamp: parseInt(match[1], 10) === 0 ? 1 : parseInt(match[1], 10), text: match[3].trim(), verbosity: match[2] === 'txt' ? 'text' : match[2] };
             }).filter(Boolean);
             if (finalLines.length > 0) {
                 if (sseHandler) sseHandler('script_chunk', finalLines);
@@ -456,7 +456,7 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
         // YT-DLP Call 2: Stream video AND download subtitles
         const allTimestamps = await new Promise((resolve, reject) => {
             const ytdlpArgs = ['-f', 'bestvideo[height<=480][ext=mp4]/best[height<=480][ext=mp4]', '-o', '-', '--no-progress', '--write-auto-sub', '--sub-lang', 'ko', ...cookieArgs, ...proxyArgs, youtubeUrl];
-            const ffmpegArgs = ['-i', '-', '-vf', "select='isnan(prev_selected_t)+gt(scene,0.4)+gte(t-prev_selected_t,5)',showinfo", '-vsync', 'vfr', path.join(baseTempDir, 'frame-%04d.png')];
+            const ffmpegArgs = ['-i', '-', '-vf', "select='isnan(prev_selected_t)+gt(scene,0.4)+gte(t-prev_selected_t,2)',showinfo", '-vsync', 'vfr', path.join(baseTempDir, 'frame-%04d.png')];
             const ytdlpProcess = spawn('yt-dlp', ytdlpArgs, { cwd: baseTempDir });
             const ffmpegProcess = spawn('ffmpeg', ffmpegArgs);
             ytdlpProcess.stdout.pipe(ffmpegProcess.stdin);
@@ -532,7 +532,7 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
         const finalScriptData = scriptLines.map((line) => {
             const match = line.match(/^\s*\[(\d+)\]\s*\[(v\d|txt)\]\s*(.*)\s*$/);
             if (!match) return null;
-            return { id: crypto.createHash('sha256').update(line).digest('hex'), timestamp: parseInt(match[1], 10), text: match[3].trim(), verbosity: match[2] === 'txt' ? 'text' : match[2] };
+            return { id: crypto.createHash('sha256').update(line).digest('hex'), timestamp: parseInt(match[1], 10) === 0 ? 1 : parseInt(match[1], 10), text: match[3].trim(), verbosity: match[2] === 'txt' ? 'text' : match[2] };
         }).filter(Boolean);
 
         finalScriptData.sort((a, b) => a.timestamp - b.timestamp);

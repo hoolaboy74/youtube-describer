@@ -652,18 +652,21 @@ function PlayerScreenV2() {
                 </div>
                 <div className="playback-rate-control" style={{ marginTop: '10px' }}>
                     <span>해설속도:</span>
-                    {[1.5, 2.5, 3.5].map(rate => (
-                        <button 
-                            key={rate} 
-                            onClick={() => {
-                                setPlaybackRate(rate);
-                                announcePolite(`해설 속도가 ${rate}배속으로 변경되었습니다.`);
-                            }} 
-                            aria-pressed={playbackRate === rate}
-                        >
-                            {rate.toFixed(1)}
-                        </button>
-                    ))}
+                    {[1.5, 2.5, 3.5].map(rate => {
+                        const label = { 1.5: '초보', 2.5: '중수', 3.5: '고수' }[rate];
+                        return (
+                            <button 
+                                key={rate} 
+                                onClick={() => {
+                                    setPlaybackRate(rate);
+                                    announcePolite(`해설 속도가 ${label} 모드로 변경되었습니다.`);
+                                }} 
+                                aria-pressed={playbackRate === rate}
+                            >
+                                {label}
+                            </button>
+                        );
+                    })}
                 </div>
                 <button onClick={() => setIsScriptVisible(prev => !prev)} aria-expanded={isScriptVisible} style={{ marginTop: '10px' }}>
                     {isScriptVisible ? '대본 숨기기' : '대본 보기'}
