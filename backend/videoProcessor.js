@@ -141,6 +141,7 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
             '-j',
             '-f', 'bestvideo[height<=480][ext=mp4]/best[height<=480][ext=mp4]',
             '--no-progress',
+            '--force-ipv4',
             ...cookieArgs,
             ...proxyArgs,
             youtubeUrl
@@ -171,30 +172,40 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
         const subtitleFilename = autoSubtitleInfo ? `${videoInfo.id}.ko.vtt` : null;
         const subtitlePath = subtitleFilename ? path.join(baseTempDir, subtitleFilename) : null;
         
-        if (sseHandler) sseHandler('status_update', { message: '프레임/자막 처리 중...' });
+        if (sseHandler) sseHandler('status_update', { message: '영상 다운로드 중 (고속 모드)...' });
 
-        // YT-DLP Call 2: Stream video for frames AND download subtitles
+        // YT-DLP Call 2: Download video using aria2c for speed (Proxy Optimization)
+        const tempVideoFilename = `${videoInfo.id}.mp4`;
+        const tempVideoPath = path.join(baseTempDir, tempVideoFilename);
+
+        await util.promisify(execFile)('yt-dlp', [
+            '-f', 'bestvideo[height<=480][ext=mp4]/best[height<=480][ext=mp4]',
+            '-o', tempVideoFilename,
+            '--force-ipv4',
+            '--downloader', 'aria2c',
+            '--downloader-args', 'aria2c:-x 16 -s 16 -k 1M',
+            '--no-progress',
+            '--write-auto-sub',
+            '--sub-lang', 'ko',
+            ...cookieArgs,
+            ...proxyArgs,
+            youtubeUrl
+        ], { cwd: baseTempDir });
+
+        if (sseHandler) sseHandler('status_update', { message: '프레임 및 자막 추출 중...' });
+
+        // FFmpeg: Process the downloaded local file
         const allTimestamps = await new Promise((resolve, reject) => {
             const extractedTimestamps = [];
             let lastReportedProgress = -1;
+            
+            if (!fs.existsSync(tempVideoPath)) {
+                return reject(new Error('Video file download failed or file not found.'));
+            }
 
-            const ytdlpArgs = [
-                '-f', 'bestvideo[height<=480][ext=mp4]/best[height<=480][ext=mp4]',
-                '-o', '-',
-                '--no-progress',
-                '--write-auto-sub',
-                '--sub-lang', 'ko',
-                ...cookieArgs,
-                ...proxyArgs,
-                youtubeUrl
-            ];
+            const ffmpegArgs = ['-i', tempVideoFilename, '-vf', "select='isnan(prev_selected_t)+gt(scene,0.4)+gte(t-prev_selected_t,2)',showinfo", '-vsync', 'vfr', 'frame-%04d.png'];
             
-            const ffmpegArgs = ['-i', '-', '-vf', "select='isnan(prev_selected_t)+gt(scene,0.4)+gte(t-prev_selected_t,2)',showinfo", '-vsync', 'vfr', path.join(baseTempDir, 'frame-%04d.png')];
-            
-            const ytdlpProcess = spawn('yt-dlp', ytdlpArgs, { cwd: baseTempDir }); // Set CWD to temp directory
-            const ffmpegProcess = spawn('ffmpeg', ffmpegArgs);
-            
-            ytdlpProcess.stdout.pipe(ffmpegProcess.stdin);
+            const ffmpegProcess = spawn('ffmpeg', ffmpegArgs, { cwd: baseTempDir });
             
             let ffmpegStderr = '';
             ffmpegProcess.stderr.on('data', (data) => {
@@ -222,7 +233,6 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
                 }
             });
 
-            ytdlpProcess.on('error', (err) => reject(new Error(`yt-dlp spawn error: ${err.message}`)));
             ffmpegProcess.on('error', (err) => reject(new Error(`ffmpeg spawn error: ${err.message}`)));
             
             ffmpegProcess.on('close', (code) => {
@@ -433,7 +443,15 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
         const proxyArgs = process.env.YTDLP_PROXY ? ['--proxy', process.env.YTDLP_PROXY] : [];
 
         // YT-DLP Call 1: Get metadata
-        const { stdout: stdoutJson } = await util.promisify(execFile)('yt-dlp', ['-j', '-f', 'bestvideo[height<=480][ext=mp4]/best[height<=480][ext=mp4]', '--no-progress', ...cookieArgs, ...proxyArgs, youtubeUrl]);
+        const { stdout: stdoutJson } = await util.promisify(execFile)('yt-dlp', [
+            '-j',
+            '-f', 'bestvideo[height<=480][ext=mp4]/best[height<=480][ext=mp4]',
+            '--no-progress',
+            '--force-ipv4',
+            ...cookieArgs,
+            ...proxyArgs,
+            youtubeUrl
+        ]);
         const videoInfo = JSON.parse(stdoutJson);
 
         const videoTitle = videoInfo.title;
@@ -453,15 +471,37 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
         const subtitleFilename = autoSubtitleInfo ? `${videoInfo.id}.ko.vtt` : null;
         const subtitlePath = subtitleFilename ? path.join(baseTempDir, subtitleFilename) : null;
         
-        // YT-DLP Call 2: Stream video AND download subtitles
+        // YT-DLP Call 2: Download video using aria2c for speed (Proxy Optimization)
+        const tempVideoFilename = `${videoInfo.id}.mp4`;
+        const tempVideoPath = path.join(baseTempDir, tempVideoFilename);
+
+        await util.promisify(execFile)('yt-dlp', [
+            '-f', 'bestvideo[height<=480][ext=mp4]/best[height<=480][ext=mp4]',
+            '-o', tempVideoFilename,
+            '--force-ipv4',
+            '--downloader', 'aria2c',
+            '--downloader-args', 'aria2c:-x 16 -s 16 -k 1M',
+            '--no-progress',
+            '--write-auto-sub',
+            '--sub-lang', 'ko',
+            ...cookieArgs,
+            ...proxyArgs,
+            youtubeUrl
+        ], { cwd: baseTempDir });
+
+        // FFmpeg: Process the downloaded local file
         const allTimestamps = await new Promise((resolve, reject) => {
-            const ytdlpArgs = ['-f', 'bestvideo[height<=480][ext=mp4]/best[height<=480][ext=mp4]', '-o', '-', '--no-progress', '--write-auto-sub', '--sub-lang', 'ko', ...cookieArgs, ...proxyArgs, youtubeUrl];
-            const ffmpegArgs = ['-i', '-', '-vf', "select='isnan(prev_selected_t)+gt(scene,0.4)+gte(t-prev_selected_t,2)',showinfo", '-vsync', 'vfr', path.join(baseTempDir, 'frame-%04d.png')];
-            const ytdlpProcess = spawn('yt-dlp', ytdlpArgs, { cwd: baseTempDir });
-            const ffmpegProcess = spawn('ffmpeg', ffmpegArgs);
-            ytdlpProcess.stdout.pipe(ffmpegProcess.stdin);
+            if (!fs.existsSync(tempVideoPath)) {
+                return reject(new Error('Video file download failed or file not found.'));
+            }
+
+            const ffmpegArgs = ['-i', tempVideoFilename, '-vf', "select='isnan(prev_selected_t)+gt(scene,0.4)+gte(t-prev_selected_t,2)',showinfo", '-vsync', 'vfr', 'frame-%04d.png'];
+            
+            const ffmpegProcess = spawn('ffmpeg', ffmpegArgs, { cwd: baseTempDir });
+            
             let ffmpegStderr = '';
             const extractedTimestamps = [];
+            
             ffmpegProcess.stderr.on('data', (data) => {
                 ffmpegStderr += data.toString();
                 const timeMatches = data.toString().matchAll(/pts_time:(\d+\.?\d*)/g);
@@ -469,8 +509,9 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
                     extractedTimestamps.push(parseFloat(match[1]));
                 }
             });
-            ytdlpProcess.on('error', (err) => reject(new Error(`yt-dlp spawn error: ${err.message}`)));
+            
             ffmpegProcess.on('error', (err) => reject(new Error(`ffmpeg spawn error: ${err.message}`)));
+            
             ffmpegProcess.on('close', (code) => {
                 if (code === 0) resolve(extractedTimestamps.sort((a,b) => a - b));
                 else reject(new Error(`ffmpeg frame extraction exited with code ${code}. Stderr: ${ffmpegStderr}`));
