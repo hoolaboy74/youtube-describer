@@ -203,7 +203,7 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
                 return reject(new Error('Video file download failed or file not found.'));
             }
 
-            const ffmpegArgs = ['-i', tempVideoFilename, '-vf', "select='isnan(prev_selected_t)+gt(scene,0.4)+gte(t-prev_selected_t,2)',showinfo", '-vsync', 'vfr', 'frame-%04d.png'];
+            const ffmpegArgs = ['-i', tempVideoFilename, '-vf', "select='isnan(prev_selected_t)+gt(scene,0.4)+gte(t-prev_selected_t,2)',showinfo", '-vsync', 'vfr', '-q:v', '2', 'frame-%04d.jpg'];
             
             const ffmpegProcess = spawn('ffmpeg', ffmpegArgs, { cwd: baseTempDir });
             
@@ -259,14 +259,14 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
 
         if (sseHandler) sseHandler('status_update', { message: 'AI로 전체 대본 생성 중...' });
 
-        const allFrameFiles = (await fs.promises.readdir(baseTempDir)).filter(f => f.endsWith('.png')).sort();
+        const allFrameFiles = (await fs.promises.readdir(baseTempDir)).filter(f => f.endsWith('.jpg')).sort();
         const imageParts = [];
 
         for (let i = 0; i < allTimestamps.length; i++) {
             const timestamp = allTimestamps[i];
             const frameFile = allFrameFiles[i];
             if (frameFile && fs.existsSync(path.join(baseTempDir, frameFile))) {
-                imageParts.push({ inlineData: { data: Buffer.from(await fs.promises.readFile(path.join(baseTempDir, frameFile))).toString("base64"), mimeType: 'image/png' } });
+                imageParts.push({ inlineData: { data: Buffer.from(await fs.promises.readFile(path.join(baseTempDir, frameFile))).toString("base64"), mimeType: 'image/jpeg' } });
                 imageParts.push({ text: `Timestamp: [${Math.round(timestamp)}]` });
             }
         }
@@ -495,7 +495,7 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
                 return reject(new Error('Video file download failed or file not found.'));
             }
 
-            const ffmpegArgs = ['-i', tempVideoFilename, '-vf', "select='isnan(prev_selected_t)+gt(scene,0.4)+gte(t-prev_selected_t,2)',showinfo", '-vsync', 'vfr', 'frame-%04d.png'];
+            const ffmpegArgs = ['-i', tempVideoFilename, '-vf', "select='isnan(prev_selected_t)+gt(scene,0.4)+gte(t-prev_selected_t,2)',showinfo", '-vsync', 'vfr', '-q:v', '2', 'frame-%04d.jpg'];
             
             const ffmpegProcess = spawn('ffmpeg', ffmpegArgs, { cwd: baseTempDir });
             
@@ -532,14 +532,14 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
         const aiLabel = `[${requestHash}] Full AI Process Time`;
         time(aiLabel);
 
-        const allFrameFiles = (await fs.promises.readdir(baseTempDir)).filter(f => f.endsWith('.png')).sort();
+        const allFrameFiles = (await fs.promises.readdir(baseTempDir)).filter(f => f.endsWith('.jpg')).sort();
         const imageParts = [];
 
         for (let i = 0; i < allTimestamps.length; i++) {
             const timestamp = allTimestamps[i];
             const frameFile = allFrameFiles[i];
             if (frameFile && fs.existsSync(path.join(baseTempDir, frameFile))) {
-                imageParts.push({ inlineData: { data: Buffer.from(await fs.promises.readFile(path.join(baseTempDir, frameFile))).toString("base64"), mimeType: 'image/png' } });
+                imageParts.push({ inlineData: { data: Buffer.from(await fs.promises.readFile(path.join(baseTempDir, frameFile))).toString("base64"), mimeType: 'image/jpeg' } });
                 imageParts.push({ text: `Timestamp: [${Math.round(timestamp)}]` });
             }
         }
