@@ -183,7 +183,7 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
             '-o', tempVideoFilename,
             '--force-ipv4',
             '--downloader', 'aria2c',
-            '--downloader-args', 'aria2c:-x 16 -s 16 -k 1M',
+            '--downloader-args', 'aria2c:-x 8 -s 8 -k 1M',
             '--no-progress',
             '--write-auto-sub',
             '--sub-lang', 'ko',
@@ -211,6 +211,9 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
             ffmpegProcess.stderr.on('data', (data) => {
                 const stderrChunk = data.toString();
                 ffmpegStderr += stderrChunk;
+                if (ffmpegStderr.length > 10000) {
+                    ffmpegStderr = ffmpegStderr.substring(ffmpegStderr.length - 10000);
+                }
 
                 const timeMatches = stderrChunk.matchAll(/pts_time:(\d+\.?\d*)/g);
                 for (const match of timeMatches) {
@@ -480,7 +483,7 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
             '-o', tempVideoFilename,
             '--force-ipv4',
             '--downloader', 'aria2c',
-            '--downloader-args', 'aria2c:-x 16 -s 16 -k 1M',
+            '--downloader-args', 'aria2c:-x 8 -s 8 -k 1M',
             '--no-progress',
             '--write-auto-sub',
             '--sub-lang', 'ko',
@@ -503,8 +506,12 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
             const extractedTimestamps = [];
             
             ffmpegProcess.stderr.on('data', (data) => {
-                ffmpegStderr += data.toString();
-                const timeMatches = data.toString().matchAll(/pts_time:(\d+\.?\d*)/g);
+                const stderrChunk = data.toString();
+                ffmpegStderr += stderrChunk;
+                if (ffmpegStderr.length > 10000) {
+                    ffmpegStderr = ffmpegStderr.substring(ffmpegStderr.length - 10000);
+                }
+                const timeMatches = stderrChunk.matchAll(/pts_time:(\d+\.?\d*)/g);
                 for (const match of timeMatches) {
                     extractedTimestamps.push(parseFloat(match[1]));
                 }

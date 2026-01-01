@@ -625,53 +625,70 @@ function PlayerScreenV2() {
             {renderContent()}
 
             <div className="controls-container">
-                <div className="verbosity-control">
-                    <span>해설정도:</span>
-                    {[0, 1, 2, 3].map(level => (
-                        <button key={level} onClick={() => handleVerbosityChange(level)} aria-pressed={verbosity === level}>
-                            {newVerbosityLabels[level]}
-                        </button>
-                    ))}
-                    <button 
-                        className="subtitle-toggle" 
-                        onClick={handleSubtitleToggle} 
-                        aria-pressed={isReadingSubtitles}
-                        style={{ marginLeft: '10px', borderLeft: '1px solid #ccc', paddingLeft: '10px' }}
+                <div className="control-group" style={{ marginBottom: '15px' }}>
+                    <label htmlFor="verbosity-select" style={{ marginRight: '10px', fontWeight: 'bold' }}>해설정도:</label>
+                    <select
+                        id="verbosity-select"
+                        value={verbosity}
+                        onChange={(e) => handleVerbosityChange(Number(e.target.value))}
+                        style={{ padding: '5px', fontSize: '1rem' }}
                     >
-                        자막 읽기
-                    </button>
+                        <option value={0}>없음</option>
+                        <option value={1}>최소</option>
+                        <option value={2}>기본</option>
+                        <option value={3}>최대</option>
+                    </select>
+
+                    <div style={{ display: 'inline-block', marginLeft: '15px' }}>
+                        <input
+                            type="checkbox"
+                            id="subtitle-check"
+                            checked={isReadingSubtitles}
+                            onChange={handleSubtitleToggle}
+                            style={{ width: '1.2rem', height: '1.2rem', verticalAlign: 'middle' }}
+                        />
+                        <label htmlFor="subtitle-check" style={{ marginLeft: '5px', verticalAlign: 'middle' }}>자막 읽기</label>
+                    </div>
                 </div>
-                <div className="playback-mode-control">
-                    <span>해설방식:</span>
-                    <button onClick={() => setPlaybackMode('pause')} aria-pressed={playbackMode === 'pause'}>
-                        멈춘 후 해설
-                    </button>
-                    <button onClick={() => setPlaybackMode('together')} aria-pressed={playbackMode === 'together'}>
-                        영상과 같이
-                    </button>
+
+                <div className="control-group" style={{ marginBottom: '15px' }}>
+                    <label htmlFor="mode-select" style={{ marginRight: '10px', fontWeight: 'bold' }}>해설방식:</label>
+                    <select
+                        id="mode-select"
+                        value={playbackMode}
+                        onChange={(e) => setPlaybackMode(e.target.value)}
+                        style={{ padding: '5px', fontSize: '1rem' }}
+                    >
+                        <option value="pause">멈춘 후 해설</option>
+                        <option value="together">영상과 같이</option>
+                    </select>
                 </div>
-                <div className="playback-rate-control" style={{ marginTop: '10px' }}>
-                    <span>해설속도:</span>
-                    {[1.5, 2.5, 3.5].map(rate => {
-                        const label = { 1.5: '초보', 2.5: '중수', 3.5: '고수' }[rate];
-                        return (
-                            <button 
-                                key={rate} 
-                                onClick={() => {
-                                    setPlaybackRate(rate);
-                                    announcePolite(`해설 속도가 ${label} 모드로 변경되었습니다.`);
-                                }} 
-                                aria-pressed={playbackRate === rate}
-                            >
-                                {label}
-                            </button>
-                        );
-                    })}
+
+                <div className="control-group" style={{ marginBottom: '15px' }}>
+                    <label htmlFor="rate-select" style={{ marginRight: '10px', fontWeight: 'bold' }}>해설속도:</label>
+                    <select
+                        id="rate-select"
+                        value={playbackRate}
+                        onChange={(e) => {
+                            const rate = Number(e.target.value);
+                            setPlaybackRate(rate);
+                            const label = { 1.5: '초보', 2.5: '중수', 3.5: '고수' }[rate];
+                            announcePolite(`해설 속도가 ${label} 모드로 변경되었습니다.`);
+                        }}
+                        style={{ padding: '5px', fontSize: '1rem' }}
+                    >
+                        <option value={1.5}>초보 (1.5x)</option>
+                        <option value={2.5}>중수 (2.5x)</option>
+                        <option value={3.5}>고수 (3.5x)</option>
+                    </select>
                 </div>
-                <button onClick={() => setIsScriptVisible(prev => !prev)} aria-expanded={isScriptVisible} style={{ marginTop: '10px' }}>
-                    {isScriptVisible ? '대본 숨기기' : '대본 보기'}
-                </button>
-                <ShareButton />
+
+                <div className="secondary-controls" style={{ display: 'flex', gap: '10px' }}>
+                    <button onClick={() => setIsScriptVisible(prev => !prev)} aria-expanded={isScriptVisible} style={{ flex: 1, padding: '10px' }}>
+                        {isScriptVisible ? '대본 숨기기' : '대본 보기'}
+                    </button>
+                    <ShareButton />
+                </div>
             </div>
 
             {isScriptVisible && (

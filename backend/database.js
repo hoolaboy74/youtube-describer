@@ -219,7 +219,7 @@ function saveVideo({ videoId, title, duration, filesize, script }) {
 
     // Step 3: Insert all the new script lines.
     if (script && script.length > 0) {
-      const insertScript = db.prepare('INSERT INTO scripts (id, videoId, timestamp, text, verbosity) VALUES (?, ?, ?, ?, ?)');
+      const insertScript = db.prepare('INSERT OR IGNORE INTO scripts (id, videoId, timestamp, text, verbosity) VALUES (?, ?, ?, ?, ?)');
       for (const line of script) {
         insertScript.run(line.id, videoId, line.timestamp, line.text, line.verbosity);
       }
