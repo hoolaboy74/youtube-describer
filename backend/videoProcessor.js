@@ -183,7 +183,7 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
             '-o', tempVideoFilename,
             '--force-ipv4',
             '--downloader', 'aria2c',
-            '--downloader-args', 'aria2c:-x 8 -s 8 -k 1M',
+            '--downloader-args', 'aria2c:-x 10 -s 10 -k 1M',
             '--no-progress',
             '--write-auto-sub',
             '--sub-lang', 'ko',
@@ -203,7 +203,7 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
                 return reject(new Error('Video file download failed or file not found.'));
             }
 
-            const ffmpegArgs = ['-i', tempVideoFilename, '-vf', "select='isnan(prev_selected_t)+gt(scene,0.4)+gte(t-prev_selected_t,2)',showinfo", '-vsync', 'vfr', '-q:v', '2', 'frame-%04d.jpg'];
+            const ffmpegArgs = ['-i', tempVideoFilename, '-vf', "select='isnan(prev_selected_t)+gte(t-prev_selected_t,2)',showinfo", '-vsync', 'vfr', '-q:v', '2', 'frame-%04d.jpg'];
             
             const ffmpegProcess = spawn('ffmpeg', ffmpegArgs, { cwd: baseTempDir });
             
@@ -483,7 +483,7 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
             '-o', tempVideoFilename,
             '--force-ipv4',
             '--downloader', 'aria2c',
-            '--downloader-args', 'aria2c:-x 8 -s 8 -k 1M',
+            '--downloader-args', 'aria2c:-x 10 -s 10 -k 1M',
             '--no-progress',
             '--write-auto-sub',
             '--sub-lang', 'ko',
@@ -498,7 +498,7 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
                 return reject(new Error('Video file download failed or file not found.'));
             }
 
-            const ffmpegArgs = ['-i', tempVideoFilename, '-vf', "select='isnan(prev_selected_t)+gt(scene,0.4)+gte(t-prev_selected_t,2)',showinfo", '-vsync', 'vfr', '-q:v', '2', 'frame-%04d.jpg'];
+            const ffmpegArgs = ['-i', tempVideoFilename, '-vf', "select='isnan(prev_selected_t)+gte(t-prev_selected_t,2)',showinfo", '-vsync', 'vfr', '-q:v', '2', 'frame-%04d.jpg'];
             
             const ffmpegProcess = spawn('ffmpeg', ffmpegArgs, { cwd: baseTempDir });
             
