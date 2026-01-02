@@ -12,8 +12,9 @@ async function testTTS() {
     // 2. Instantiate the client
     let ttsClient;
     try {
-        ttsClient = new TextToSpeechClient();
-        console.log('TextToSpeechClient instantiated successfully.');
+        // Force REST/HTTP transport to respect Node.js global agent settings (NODE_EXTRA_CA_CERTS)
+        ttsClient = new TextToSpeechClient({ fallback: 'rest' });
+        console.log('TextToSpeechClient instantiated successfully (fallback: rest).');
     } catch (e) {
         console.error('!!! FAILED to instantiate TextToSpeechClient:', e);
         return;

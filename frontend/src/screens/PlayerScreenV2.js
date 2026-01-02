@@ -419,6 +419,17 @@ function PlayerScreenV2() {
             }
 
             const lastAcceptedLine = finalScript[finalScript.length - 1];
+
+            // 자막(text) 타입은 충돌 검사를 하지 않고 무조건 포함시킵니다.
+            // 또한 이전 라인이 자막인 경우에도, 이번 라인이 자막이면 충돌 무시하고 포함 (자막 연쇄 허용)
+            if (currentLine.verbosity === 'text') {
+                finalScript.push(currentLine);
+                continue;
+            }
+
+            // 이전 라인이 자막인데 현재 라인이 해설인 경우 -> 충돌나면 해설을 버림 (자막 우선)
+            // 해설 vs 해설인 경우 -> 기존 로직대로 3.5초 체크
+
             const isCollision = currentLine.timestamp < lastAcceptedLine.timestamp + COLLISION_THRESHOLD_SECONDS;
 
             if (isCollision) {
@@ -426,13 +437,12 @@ function PlayerScreenV2() {
                 const lastPriority = getPriority(lastAcceptedLine.verbosity);
 
                 if (currentPriority > lastPriority) {
-                    // Current line is more important, replace the last one
+                    // 현재(해설) 중요도가 더 높으면 교체 (사실 text 우선이라 여기 올 일은 거의 없음)
                     finalScript.pop();
                     finalScript.push(currentLine);
                 }
-                // Else, do nothing (skip the current line)
+                // 그렇지 않으면 현재 라인(해설) 스킵
             } else {
-                // No collision, add the current line
                 finalScript.push(currentLine);
             }
         }
@@ -450,7 +460,6 @@ function PlayerScreenV2() {
         } else if (currentMode === 'together' && !isMobile()) {
             player.setVolume(30); // Audio ducking for PC
         }
-        // For mobile 'together', we just let it play over.
     }, [player]);
 
     const handleTtsEnd = useCallback(() => {
@@ -459,12 +468,16 @@ function PlayerScreenV2() {
         
         const currentMode = playbackModeRef.current;
 
-        if (currentMode === 'pause') {
-            if (player.getPlayerState() !== 1) player.playVideo();
-        } else if (currentMode === 'together' && !isMobile()) {
+        // 1. 'pause' 모드인 경우 -> 무조건 다시 재생
+        // 2. 'together' 모드인데 자막 대기를 위해 강제로 멈춰있던 경우 -> 다시 재생
+        // (playerState !== 1 은 일시정지 등을 의미)
+        if (player.getPlayerState() !== 1) {
+             player.playVideo();
+        }
+        
+        if (currentMode === 'together' && !isMobile()) {
             player.setVolume(100); // Restore volume for PC
         }
-        // For mobile 'together', no volume change was made.
     }, [player]);
 
     const playDescription = useCallback(async (scriptLine) => {
@@ -508,16 +521,35 @@ function PlayerScreenV2() {
         if (!isPlaying || !player) return;
 
         const intervalId = setInterval(() => {
-            if (isTtsPlayingRef.current || !isDescriptionEnabledRef.current || !player || typeof player.getPlayerState !== 'function' || player.getPlayerState() !== 1) {
+            // 기본 조건 체크
+            if (!isDescriptionEnabledRef.current || !player || typeof player.getPlayerState !== 'function') {
                 return;
             }
+
             const currentTime = Math.floor(player.getCurrentTime());
+            
+            // 아직 읽지 않은 다음 스크립트 찾기
             const nextLineIndex = playableScript.findIndex((line, index) => 
                 index > lastSpokenIndexRef.current && currentTime >= line.timestamp
             );
+
             if (nextLineIndex !== -1) {
+                const nextLine = playableScript[nextLineIndex];
+
+                // [중요] 이미 TTS가 재생 중인 경우의 처리
+                if (isTtsPlayingRef.current) {
+                    // 다음 읽을 것이 자막(text)이고 영상이 재생 중이라면
+                    // -> "잠깐 멈춰, 앞의 설명 다 듣고 이거 읽고 가자"
+                    if (nextLine.verbosity === 'text' && player.getPlayerState() === 1) {
+                        player.pauseVideo();
+                    }
+                    // 오디오 끝날 때까지 대기 (이번 interval 루프 종료)
+                    return; 
+                }
+
+                // 재생 가능한 상태이므로 재생 시작
                 lastSpokenIndexRef.current = nextLineIndex;
-                playDescription(playableScript[nextLineIndex]);
+                playDescription(nextLine);
             }
         }, 250);
 

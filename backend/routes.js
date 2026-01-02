@@ -9,7 +9,10 @@ const { processVideo, processVideoBatch } = require('./videoProcessor');
 const logger = require('./logger');
 
 const router = express.Router();
-const ttsClient = new TextToSpeechClient();
+// Initialize Google Cloud Text-to-Speech Client
+// Use 'rest' fallback only if custom CA certs are present (local dev environment)
+const ttsClientOptions = process.env.NODE_EXTRA_CA_CERTS ? { fallback: 'rest' } : {};
+const ttsClient = new TextToSpeechClient(ttsClientOptions);
 const audioCacheDir = path.join(__dirname, 'public', 'audio');
 
 const YouTube = require('youtube-sr').default;
