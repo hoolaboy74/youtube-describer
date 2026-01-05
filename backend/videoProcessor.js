@@ -136,24 +136,26 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
         const cookieArgs = cookiePath ? ['--cookies', cookiePath] : [];
         const proxyArgs = process.env.YTDLP_PROXY ? ['--proxy', process.env.YTDLP_PROXY] : [];
 
-        // YT-DLP Call 1: Get video metadata
-        const { stdout } = await util.promisify(execFile)('yt-dlp', [
-            '-j',
-            '-f', 'bestvideo[height<=480][ext=mp4]/best[height<=480][ext=mp4]',
-            '--no-progress',
-            '--force-ipv4',
-            ...cookieArgs,
-            ...proxyArgs,
-            youtubeUrl
-        ]);
-        const videoInfo = JSON.parse(stdout);
+        // 1. Use Official YouTube API for Metadata (Fast & Safe)
+        const videoResponse = await youtube.videos.list({
+            part: 'snippet,contentDetails',
+            id: videoId
+        });
 
-        const videoTitle = videoInfo.title;
-        const totalDuration = videoInfo.duration;
-        const filesize = videoInfo.filesize || videoInfo.filesize_approx || 0;
-        const autoSubtitleInfo = videoInfo.automatic_captions?.ko;
+        if (!videoResponse.data.items || videoResponse.data.items.length === 0) {
+            const reason = 'Invalid or missing YouTube URL';
+            db.updateVideoStatus(videoId, 'failed', reason);
+            throw new Error(reason);
+        }
 
-        if (videoInfo.is_live) {
+        const videoItem = videoResponse.data.items[0];
+        const videoTitle = videoItem.snippet.title;
+        const durationIso = videoItem.contentDetails.duration;
+        const totalDuration = parseISO8601Duration(durationIso);
+        const filesize = 0; // API doesn't provide filesize, will be updated after download if possible
+        const autoSubtitleInfo = null; // Will be checked during download
+
+        if (videoItem.snippet.liveBroadcastContent === 'live') {
             const reason = `live_stream_not_supported`;
             db.updateVideoStatus(videoId, 'failed', reason);
             throw new Error('Live streams cannot be processed.');
@@ -169,13 +171,14 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
         db.ensureVideoRecord({ videoId, title: videoTitle, duration: Math.round(totalDuration), filesize });
         
         let subtitleContent = '';
-        const subtitleFilename = autoSubtitleInfo ? `${videoInfo.id}.ko.vtt` : null;
-        const subtitlePath = subtitleFilename ? path.join(baseTempDir, subtitleFilename) : null;
+        // Filename logic remains same, but we check existence later
+        const subtitleFilename = `${videoId}.ko.vtt`; 
+        const subtitlePath = path.join(baseTempDir, subtitleFilename);
         
         if (sseHandler) sseHandler('status_update', { message: '영상 다운로드 중...' });
 
         // YT-DLP Call 2: Download video using default downloader (more stable with proxy)
-        const tempVideoFilename = `${videoInfo.id}.mp4`;
+        const tempVideoFilename = `${videoId}.mp4`;
         const tempVideoPath = path.join(baseTempDir, tempVideoFilename);
 
         await new Promise((resolve, reject) => {
@@ -480,24 +483,23 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
         const cookieArgs = cookiePath ? ['--cookies', cookiePath] : [];
         const proxyArgs = process.env.YTDLP_PROXY ? ['--proxy', process.env.YTDLP_PROXY] : [];
 
-        // YT-DLP Call 1: Get metadata
-        const { stdout: stdoutJson } = await util.promisify(execFile)('yt-dlp', [
-            '-j',
-            '-f', 'bestvideo[height<=480][ext=mp4]/best[height<=480][ext=mp4]',
-            '--no-progress',
-            '--force-ipv4',
-            ...cookieArgs,
-            ...proxyArgs,
-            youtubeUrl
-        ]);
-        const videoInfo = JSON.parse(stdoutJson);
+        // 1. Use Official YouTube API for Metadata (Fast & Safe)
+        const videoResponse = await youtube.videos.list({
+            part: 'snippet,contentDetails',
+            id: videoId
+        });
 
-        const videoTitle = videoInfo.title;
-        const totalDuration = videoInfo.duration;
-        const filesize = videoInfo.filesize || videoInfo.filesize_approx || 0;
-        const autoSubtitleInfo = videoInfo.automatic_captions?.ko;
+        if (!videoResponse.data.items || videoResponse.data.items.length === 0) {
+            throw new Error('Invalid or missing YouTube URL');
+        }
 
-        if (videoInfo.is_live) throw new Error('Live streams cannot be processed.');
+        const videoItem = videoResponse.data.items[0];
+        const videoTitle = videoItem.snippet.title;
+        const durationIso = videoItem.contentDetails.duration;
+        const totalDuration = parseISO8601Duration(durationIso);
+        const filesize = 0;
+        
+        if (videoItem.snippet.liveBroadcastContent === 'live') throw new Error('Live streams cannot be processed.');
         const durationLimitMinutes = parseInt(db.getSetting('videoDurationLimit') || '30', 10);
         if (durationLimitMinutes > 0 && totalDuration >= durationLimitMinutes * 60) {
             throw new Error(`Video duration (${totalDuration}s) exceeds the limit of ${durationLimitMinutes} minutes.`);
@@ -506,11 +508,11 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
         db.ensureVideoRecord({ videoId, title: videoTitle, duration: Math.round(totalDuration), filesize });
 
         let subtitleContent = '';
-        const subtitleFilename = autoSubtitleInfo ? `${videoInfo.id}.ko.vtt` : null;
-        const subtitlePath = subtitleFilename ? path.join(baseTempDir, subtitleFilename) : null;
+        const subtitleFilename = `${videoId}.ko.vtt`;
+        const subtitlePath = path.join(baseTempDir, subtitleFilename);
         
         // YT-DLP Call 2: Download video using default downloader (more stable with proxy)
-        const tempVideoFilename = `${videoInfo.id}.mp4`;
+        const tempVideoFilename = `${videoId}.mp4`;
         const tempVideoPath = path.join(baseTempDir, tempVideoFilename);
 
         await util.promisify(execFile)('yt-dlp', [
@@ -609,6 +611,9 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
         if (result.response.promptFeedback && result.response.promptFeedback.blockReason) {
             throw new Error(`The AI prompt was blocked due to prohibited content: ${result.response.promptFeedback.blockReason}`);
         }
+
+        const scriptText = result.response.text();
+        const scriptLines = scriptText.split('\n');
 
         const finalScriptData = scriptLines.map((line) => {
             const match = line.match(/^\s*\[(\d+)\]\s*\[(v\d|txt)\]\s*(.*)\s*$/);
