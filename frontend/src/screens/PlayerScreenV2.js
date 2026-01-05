@@ -256,7 +256,7 @@ function PlayerScreenV2() {
             } else if (isDownloadStart) {
                 announcePolite('영상을 다운로드 중입니다.');
             } else if (isDownloadEnd) {
-                announcePolite('다운로드가 완료되었습니다. 곧 처리를 시작합니다.');
+                announcePolite('다운로드가 완료되었습니다. 파일을 저장하고 있습니다.');
             } else if (isProgressMessage) {
                 announcePolite(data.message);
             } else {

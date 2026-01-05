@@ -195,19 +195,19 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
             let lastProgress = -1;
 
             downloadProcess.stdout.on('data', (data) => {
-                const lines = data.toString().split(/[\r\n]+/); // Handle both \r and \n
-                for (const line of lines) {
-                    const match = line.match(/\[download\]\s+(\d+\.?\d*)%/);
-                    if (match) {
-                        const progress = parseFloat(match[1]);
-                        // Report progress every 5% or at 100%
+                const text = data.toString();
+                // Match all percentages in the chunk
+                const matches = [...text.matchAll(/(\d+\.?\d*)%/g)];
+                
+                for (const match of matches) {
+                    const progress = parseFloat(match[1]);
+                    if (!isNaN(progress)) {
                         if (Math.floor(progress) >= lastProgress + 5 || progress === 100) {
                             lastProgress = Math.floor(progress);
                             if (sseHandler) sseHandler('status_update', { message: `${Math.round(progress)}%` });
                             
-                            // If download is complete, notify immediately
                             if (progress === 100 && sseHandler) {
-                                sseHandler('status_update', { message: '다운로드 완료, 처리 준비 중...' });
+                                sseHandler('status_update', { message: '다운로드 완료, 파일 저장 및 정리 중...' });
                             }
                         }
                     }
