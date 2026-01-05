@@ -172,25 +172,54 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
         const subtitleFilename = autoSubtitleInfo ? `${videoInfo.id}.ko.vtt` : null;
         const subtitlePath = subtitleFilename ? path.join(baseTempDir, subtitleFilename) : null;
         
-        if (sseHandler) sseHandler('status_update', { message: '영상 다운로드 중 (고속 모드)...' });
+        if (sseHandler) sseHandler('status_update', { message: '영상 다운로드 중...' });
 
-        // YT-DLP Call 2: Download video using aria2c for speed (Proxy Optimization)
+        // YT-DLP Call 2: Download video using default downloader (more stable with proxy)
         const tempVideoFilename = `${videoInfo.id}.mp4`;
         const tempVideoPath = path.join(baseTempDir, tempVideoFilename);
 
-        await util.promisify(execFile)('yt-dlp', [
-            '-f', 'bestvideo[height<=480][ext=mp4]/best[height<=480][ext=mp4]',
-            '-o', tempVideoFilename,
-            '--force-ipv4',
-            '--downloader', 'aria2c',
-            '--downloader-args', 'aria2c:-x 10 -s 10 -k 1M',
-            '--no-progress',
-            '--write-auto-sub',
-            '--sub-lang', 'ko',
-            ...cookieArgs,
-            ...proxyArgs,
-            youtubeUrl
-        ], { cwd: baseTempDir });
+        await new Promise((resolve, reject) => {
+            const ytdlpArgs = [
+                '-f', 'bestvideo[height<=480][ext=mp4]/best[height<=480][ext=mp4]',
+                '-o', tempVideoFilename,
+                '--force-ipv4',
+                '--newline', // Output progress on new lines for easier parsing
+                '--write-auto-sub',
+                '--sub-lang', 'ko',
+                ...cookieArgs,
+                ...proxyArgs,
+                youtubeUrl
+            ];
+
+            const downloadProcess = spawn('yt-dlp', ytdlpArgs, { cwd: baseTempDir });
+            let lastProgress = -1;
+
+            downloadProcess.stdout.on('data', (data) => {
+                const lines = data.toString().split('\n');
+                for (const line of lines) {
+                    const match = line.match(/\[download\]\s+(\d+\.?\d*)%/);
+                    if (match) {
+                        const progress = parseFloat(match[1]);
+                        if (Math.floor(progress) >= lastProgress + 5 || progress === 100) {
+                            lastProgress = Math.floor(progress);
+                            if (sseHandler) sseHandler('status_update', { message: `${Math.round(progress)}%` });
+                        }
+                    }
+                }
+            });
+
+            let stderrData = '';
+            downloadProcess.stderr.on('data', (data) => {
+                stderrData += data.toString();
+            });
+
+            downloadProcess.on('close', (code) => {
+                if (code === 0) resolve();
+                else reject(new Error(`yt-dlp download failed with code ${code}. Stderr: ${stderrData}`));
+            });
+
+            downloadProcess.on('error', (err) => reject(new Error(`Failed to spawn yt-dlp: ${err.message}`)));
+        });
 
         if (sseHandler) sseHandler('status_update', { message: '프레임 및 자막 추출 중...' });
 
@@ -474,7 +503,7 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
         const subtitleFilename = autoSubtitleInfo ? `${videoInfo.id}.ko.vtt` : null;
         const subtitlePath = subtitleFilename ? path.join(baseTempDir, subtitleFilename) : null;
         
-        // YT-DLP Call 2: Download video using aria2c for speed (Proxy Optimization)
+        // YT-DLP Call 2: Download video using default downloader (more stable with proxy)
         const tempVideoFilename = `${videoInfo.id}.mp4`;
         const tempVideoPath = path.join(baseTempDir, tempVideoFilename);
 
@@ -482,8 +511,6 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
             '-f', 'bestvideo[height<=480][ext=mp4]/best[height<=480][ext=mp4]',
             '-o', tempVideoFilename,
             '--force-ipv4',
-            '--downloader', 'aria2c',
-            '--downloader-args', 'aria2c:-x 10 -s 10 -k 1M',
             '--no-progress',
             '--write-auto-sub',
             '--sub-lang', 'ko',
