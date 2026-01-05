@@ -237,8 +237,9 @@ function PlayerScreenV2() {
             setStatusMessage(data.message);
 
             const isAiMessage = data.message.includes('AI로 전체 대본 생성 중');
-            const isFrameExtractionStart = data.message.includes('주요 장면 프레임 추출 중');
+            const isFrameExtractionStart = data.message.includes('프레임 및 자막 추출 중');
             const isDownloadStart = data.message.includes('영상 다운로드 중');
+            const isDownloadEnd = data.message.includes('다운로드 완료');
             const isProgressMessage = /^\d+%$/.test(data.message); // matches "xx%"
 
             if (isAiMessage) {
@@ -249,13 +250,15 @@ function PlayerScreenV2() {
                 }
             } else if (isFrameExtractionStart) {
                 if (!hasAnnouncedFrameExtraction.current) {
-                    announcePolite('주요 장면 프레임 추출을 시작합니다.');
+                    announcePolite('영상 분석 및 프레임 추출을 시작합니다.');
                     hasAnnouncedFrameExtraction.current = true;
                 }
             } else if (isDownloadStart) {
                 announcePolite('영상을 다운로드 중입니다.');
+            } else if (isDownloadEnd) {
+                announcePolite('다운로드가 완료되었습니다. 곧 처리를 시작합니다.');
             } else if (isProgressMessage) {
-                announcePolite(data.message); // Announces "xx%"
+                announcePolite(data.message);
             } else {
                 announcePolite(data.message);
             }
