@@ -152,7 +152,7 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
         const videoTitle = videoItem.snippet.title;
         const durationIso = videoItem.contentDetails.duration;
         const totalDuration = parseISO8601Duration(durationIso);
-        const filesize = 0; // API doesn't provide filesize, will be updated after download if possible
+        let filesize = 0; // API doesn't provide filesize, will be updated after download if possible
         const autoSubtitleInfo = null; // Will be checked during download
 
         if (videoItem.snippet.liveBroadcastContent === 'live') {
@@ -229,6 +229,12 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
 
             downloadProcess.on('error', (err) => reject(new Error(`Failed to spawn yt-dlp: ${err.message}`)));
         });
+
+        // Update filesize after download
+        if (fs.existsSync(tempVideoPath)) {
+            filesize = fs.statSync(tempVideoPath).size;
+            logger.info(`[${requestHash}] Downloaded video size: ${(filesize / 1024 / 1024).toFixed(2)} MB`);
+        }
 
         if (sseHandler) sseHandler('status_update', { message: '프레임 및 자막 추출 중...' });
 
@@ -497,7 +503,7 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
         const videoTitle = videoItem.snippet.title;
         const durationIso = videoItem.contentDetails.duration;
         const totalDuration = parseISO8601Duration(durationIso);
-        const filesize = 0;
+        let filesize = 0;
         
         if (videoItem.snippet.liveBroadcastContent === 'live') throw new Error('Live streams cannot be processed.');
         const durationLimitMinutes = parseInt(db.getSetting('videoDurationLimit') || '30', 10);
@@ -526,6 +532,12 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
             ...proxyArgs,
             youtubeUrl
         ], { cwd: baseTempDir });
+
+        // Update filesize after download
+        if (fs.existsSync(tempVideoPath)) {
+            filesize = fs.statSync(tempVideoPath).size;
+            logger.info(`[${requestHash}] Downloaded video size: ${(filesize / 1024 / 1024).toFixed(2)} MB`);
+        }
 
         // FFmpeg: Process the downloaded local file
         const allTimestamps = await new Promise((resolve, reject) => {
