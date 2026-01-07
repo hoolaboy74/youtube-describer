@@ -186,6 +186,7 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
                 '-f', 'bestvideo[height<=480][ext=mp4]/best[height<=480][ext=mp4]',
                 '-o', tempVideoFilename,
                 '--force-ipv4',
+                '--legacy-server-connect',
                 '--newline', // Output progress on new lines for easier parsing
                 '--write-auto-sub',
                 '--sub-lang', 'ko',
@@ -525,6 +526,7 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
             '-f', 'bestvideo[height<=480][ext=mp4]/best[height<=480][ext=mp4]',
             '-o', tempVideoFilename,
             '--force-ipv4',
+            '--legacy-server-connect',
             '--no-progress',
             '--write-auto-sub',
             '--sub-lang', 'ko',
