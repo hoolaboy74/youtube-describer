@@ -187,6 +187,7 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
                 '-o', tempVideoFilename,
                 '--force-ipv4',
                 '--legacy-server-connect',
+                '--no-check-certificate',
                 '--newline', // Output progress on new lines for easier parsing
                 '--write-auto-sub',
                 '--sub-lang', 'ko',
@@ -527,6 +528,7 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
             '-o', tempVideoFilename,
             '--force-ipv4',
             '--legacy-server-connect',
+            '--no-check-certificate',
             '--no-progress',
             '--write-auto-sub',
             '--sub-lang', 'ko',
