@@ -198,21 +198,24 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
 
             const downloadProcess = spawn('yt-dlp', ytdlpArgs, { cwd: baseTempDir });
             let lastProgress = -1;
+            let stdoutBuffer = '';
 
             downloadProcess.stdout.on('data', (data) => {
-                const text = data.toString();
-                // Match all percentages in the chunk
-                const matches = [...text.matchAll(/(\d+\.?\d*)%/g)];
-                
-                for (const match of matches) {
-                    const progress = parseFloat(match[1]);
-                    if (!isNaN(progress)) {
-                        if (Math.floor(progress) >= lastProgress + 5 || progress === 100) {
-                            lastProgress = Math.floor(progress);
-                            if (sseHandler) sseHandler('status_update', { message: `${Math.round(progress)}%` });
-                            
-                            if (progress === 100 && sseHandler) {
-                                sseHandler('status_update', { message: '다운로드 완료, 파일 저장 및 정리 중...' });
+                stdoutBuffer += data.toString();
+                let lineEndIndex;
+                while ((lineEndIndex = stdoutBuffer.indexOf('\n')) !== -1) {
+                    const line = stdoutBuffer.substring(0, lineEndIndex);
+                    stdoutBuffer = stdoutBuffer.substring(lineEndIndex + 1);
+
+                    if (line.includes('[download]') && line.includes('%')) {
+                        const match = line.match(/(\d+\.?\d*)%/);
+                        if (match) {
+                            const progress = parseFloat(match[1]);
+                            if (!isNaN(progress)) {
+                                if (Math.floor(progress) >= lastProgress + 5 || progress === 100) {
+                                    lastProgress = Math.floor(progress);
+                                    if (sseHandler) sseHandler('status_update', { message: `${Math.round(progress)}%` });
+                                }
                             }
                         }
                     }
