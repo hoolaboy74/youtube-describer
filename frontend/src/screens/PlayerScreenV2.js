@@ -644,46 +644,59 @@ function PlayerScreenV2() {
         
         // 2-2. 오디오가 재생 중이었다면, 오디오 먼저 확실하게 켜고 -> 그 다음 영상 고민
         const audio = audioPlayerRef.current;
-        // currentTime > 0 조건 제거: 모바일에서 일시정지 시 값을 제대로 못 가져오는 경우 방지
-        // SILENT_AUDIO 체크 추가: 무음 트랙이 아닌 실제 콘텐츠일 때만 재개
+        
         if (audio && audio.paused && !audio.ended && audio.src && audio.src !== SILENT_AUDIO) {
              
-             // 오디오 재생 시도 (Promise 반환)
-             audio.play()
-                .then(() => {
-                    // 오디오 재생 성공! 이제 영상을 켤지 말지 결정
-                    let shouldWaitVideo = false;
+             // 영상 재생 로직을 함수로 분리 (중복 방지)
+             const tryResumeVideo = () => {
+                 let shouldWaitVideo = false;
+                 // 조건 1: '멈춘 후 해설' 모드면 영상 켜지 않음
+                 if (playbackModeRef.current === 'pause') {
+                     shouldWaitVideo = true;
+                 }
+                 // 조건 2: 다음 읽을 내용이 '자막(text)'이면 영상 켜지 않음
+                 const currentTime = player.getCurrentTime();
+                 const nextLineIndex = playableScript.findIndex((line, index) => 
+                     index > lastSpokenIndexRef.current && currentTime >= line.timestamp
+                 );
 
-                    // 조건 1: '멈춘 후 해설' 모드면 영상 켜지 않음
-                    if (playbackModeRef.current === 'pause') {
-                        shouldWaitVideo = true;
-                    }
-                    
-                    // 조건 2: 다음 읽을 내용이 '자막(text)'이면 영상 켜지 않음 (모든 모드 공통)
-                    const currentTime = player.getCurrentTime();
-                    const nextLineIndex = playableScript.findIndex((line, index) => 
-                        index > lastSpokenIndexRef.current && currentTime >= line.timestamp
-                    );
+                 if (nextLineIndex !== -1) {
+                     const nextLine = playableScript[nextLineIndex];
+                     if (nextLine.verbosity === 'text') {
+                         shouldWaitVideo = true;
+                     }
+                 }
 
-                    if (nextLineIndex !== -1) {
-                        const nextLine = playableScript[nextLineIndex];
-                        if (nextLine.verbosity === 'text') {
-                            shouldWaitVideo = true;
-                        }
-                    }
+                 if (!shouldWaitVideo) {
+                     player.playVideo();
+                 }
+             };
 
-                    // 기다려야 하는 상황이 아니라면 영상도 재생
-                    if (!shouldWaitVideo) {
-                        player.playVideo();
-                    }
-                })
-                .catch(e => {
-                    console.error("Resume audio failed", e);
-                    // 오디오 실패해도 영상은 틀어줘야 함
-                    player.playVideo();
-                });
+             // 실제 재생('playing') 이벤트가 발생하면 안전하게 영상을 켭니다.
+             const onAudioPlaying = () => {
+                 audio.removeEventListener('playing', onAudioPlaying);
+                 // 200ms 딜레이: 오디오 세션이 안정화될 시간을 줍니다 (모바일 필수)
+                 setTimeout(tryResumeVideo, 200);
+             };
+
+             audio.addEventListener('playing', onAudioPlaying);
              
-             return; // 오디오 재생 로직이 비동기로 처리되므로 함수 종료
+             // 타임아웃 안전장치: 0.5초 동안 오디오가 안 나오면 그냥 영상이라도 틉니다.
+             const safetyTimeout = setTimeout(() => {
+                 audio.removeEventListener('playing', onAudioPlaying);
+                 if (audio.paused) { // 여전히 멈춰있다면 실패로 간주
+                    tryResumeVideo();
+                 }
+             }, 500);
+
+             audio.play().catch(e => {
+                 console.error("Resume audio failed", e);
+                 clearTimeout(safetyTimeout);
+                 audio.removeEventListener('playing', onAudioPlaying);
+                 tryResumeVideo();
+             });
+             
+             return; 
         }
 
         // 3. 오디오 재생할 게 없으면 -> 그냥 영상 재생
