@@ -642,62 +642,33 @@ function PlayerScreenV2() {
             }
         }
         
-        // 2-2. 오디오가 재생 중이었다면, 오디오 먼저 확실하게 켜고 -> 그 다음 영상 고민
+        // 2-2. 멈췄던 오디오 처리
         const audio = audioPlayerRef.current;
+        const isPauseMode = playbackModeRef.current === 'pause';
         
         if (audio && audio.paused && !audio.ended && audio.src && audio.src !== SILENT_AUDIO) {
              
-             // 영상 재생 로직을 함수로 분리 (중복 방지)
-             const tryResumeVideo = () => {
-                 let shouldWaitVideo = false;
-                 // 조건 1: '멈춘 후 해설' 모드면 영상 켜지 않음
-                 if (playbackModeRef.current === 'pause') {
-                     shouldWaitVideo = true;
-                 }
-                 // 조건 2: 다음 읽을 내용이 '자막(text)'이면 영상 켜지 않음
-                 const currentTime = player.getCurrentTime();
-                 const nextLineIndex = playableScript.findIndex((line, index) => 
-                     index > lastSpokenIndexRef.current && currentTime >= line.timestamp
-                 );
-
-                 if (nextLineIndex !== -1) {
-                     const nextLine = playableScript[nextLineIndex];
-                     if (nextLine.verbosity === 'text') {
-                         shouldWaitVideo = true;
-                     }
-                 }
-
-                 if (!shouldWaitVideo) {
-                     player.playVideo();
-                 }
-             };
-
-             // 실제 재생('playing') 이벤트가 발생하면 안전하게 영상을 켭니다.
-             const onAudioPlaying = () => {
-                 audio.removeEventListener('playing', onAudioPlaying);
-                 // 200ms 딜레이: 오디오 세션이 안정화될 시간을 줍니다 (모바일 필수)
-                 setTimeout(tryResumeVideo, 200);
-             };
-
-             audio.addEventListener('playing', onAudioPlaying);
+             // Case A: '멈춘 후 해설' 모드 -> 무조건 오디오만 재생 (PC/모바일 공통)
+             if (isPauseMode) {
+                 audio.play().catch(e => {
+                     console.error("Resume audio failed", e);
+                     player.playVideo(); // 오디오 실패 시 영상 재생
+                 });
+                 return;
+             }
              
-             // 타임아웃 안전장치: 0.5초 동안 오디오가 안 나오면 그냥 영상이라도 틉니다.
-             const safetyTimeout = setTimeout(() => {
-                 audio.removeEventListener('playing', onAudioPlaying);
-                 if (audio.paused) { // 여전히 멈춰있다면 실패로 간주
-                    tryResumeVideo();
-                 }
-             }, 500);
-
-             audio.play().catch(e => {
-                 console.error("Resume audio failed", e);
-                 clearTimeout(safetyTimeout);
-                 audio.removeEventListener('playing', onAudioPlaying);
-                 tryResumeVideo();
-             });
-             
-             return; 
+             // Case B: '영상과 같이' 모드
+             // PC: 오디오와 영상을 같이 재생 (기존 로직 유지)
+             // 모바일: 오디오 재개를 포기하고 영상만 재생 (충돌 방지)
+             if (!isMobile()) {
+                 audio.play().catch(e => console.error("Resume audio failed", e));
+             }
         }
+
+        // 3. 영상 재생
+        // (모바일 '영상과 같이' 모드에서는 위에서 오디오를 안 켰으므로 여기서 영상만 깔끔하게 시작됨)
+        player.playVideo();
+    };
 
         // 3. 오디오 재생할 게 없으면 -> 그냥 영상 재생
         player.playVideo();
