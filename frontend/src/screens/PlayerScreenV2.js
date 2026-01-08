@@ -122,6 +122,10 @@ function PlayerScreenV2() {
         return savedPlaybackMode !== null ? savedPlaybackMode : (isMobile() ? 'pause' : 'together');
     });
 
+    // Time & Navigation State
+    const [currentTime, setCurrentTime] = useState(0);
+    const [duration, setDuration] = useState(0);
+
     useEffect(() => {
         localStorage.setItem('playerPlaybackMode', playbackMode);
     }, [playbackMode]);
@@ -321,6 +325,10 @@ function PlayerScreenV2() {
         hasAnnouncedFrameExtraction.current = false;
         messageIndexRef.current = 0;
         lastSpokenIndexRef.current = -1;
+
+        // Reset time
+        setCurrentTime(0);
+        setDuration(0);
 
         axios.get(`/api/script/${videoId}`)
             .then(response => {
@@ -522,43 +530,54 @@ function PlayerScreenV2() {
     }, [player, handleTtsStart, handleTtsEnd]);
 
     useEffect(() => {
-        if (!isPlaying || !player) return;
+        // 기존 interval 로직에 시간 업데이트 추가
+        if (!player) return;
 
         const intervalId = setInterval(() => {
-            // 기본 조건 체크
-            if (!isDescriptionEnabledRef.current || !player || typeof player.getPlayerState !== 'function') {
-                return;
-            }
+            // Player가 유효하고 기능이 있는지 확인
+            if (player && typeof player.getPlayerState === 'function') {
+                // 1. 현재 시간 업데이트
+                const time = player.getCurrentTime();
+                setCurrentTime(time);
 
-            const currentTime = Math.floor(player.getCurrentTime());
-            
-            // 아직 읽지 않은 다음 스크립트 찾기
-            const nextLineIndex = playableScript.findIndex((line, index) => 
-                index > lastSpokenIndexRef.current && currentTime >= line.timestamp
-            );
-
-            if (nextLineIndex !== -1) {
-                const nextLine = playableScript[nextLineIndex];
-
-                // [중요] 이미 TTS가 재생 중인 경우의 처리
-                if (isTtsPlayingRef.current) {
-                    // 다음 읽을 것이 자막(text)이고 영상이 재생 중이라면
-                    // -> "잠깐 멈춰, 앞의 설명 다 듣고 이거 읽고 가자"
-                    if (nextLine.verbosity === 'text' && player.getPlayerState() === 1) {
-                        player.pauseVideo();
-                    }
-                    // 오디오 끝날 때까지 대기 (이번 interval 루프 종료)
-                    return; 
+                // 2. 총 길이 업데이트 (한 번만 설정되어도 되지만, 안전하게 확인)
+                if (duration === 0) {
+                    const dur = player.getDuration();
+                    if (dur) setDuration(dur);
                 }
 
-                // 재생 가능한 상태이므로 재생 시작
-                lastSpokenIndexRef.current = nextLineIndex;
-                playDescription(nextLine);
+                // 3. 기존 로직: 재생 중일 때 대본 체크
+                if (isPlaying && isDescriptionEnabledRef.current) {
+                    const currentTimeFloor = Math.floor(time);
+                    
+                    // 아직 읽지 않은 다음 스크립트 찾기
+                    const nextLineIndex = playableScript.findIndex((line, index) => 
+                        index > lastSpokenIndexRef.current && currentTimeFloor >= line.timestamp
+                    );
+
+                    if (nextLineIndex !== -1) {
+                        const nextLine = playableScript[nextLineIndex];
+
+                        // [중요] 이미 TTS가 재생 중인 경우의 처리
+                        if (isTtsPlayingRef.current) {
+                            // 다음 읽을 것이 자막(text)이고 영상이 재생 중이라면
+                            // -> "잠깐 멈춰, 앞의 설명 다 듣고 이거 읽고 가자"
+                            if (nextLine.verbosity === 'text' && player.getPlayerState() === 1) {
+                                player.pauseVideo();
+                            }
+                            // 오디오 끝날 때까지 대기
+                        } else {
+                            // 재생 가능한 상태이므로 재생 시작
+                            lastSpokenIndexRef.current = nextLineIndex;
+                            playDescription(nextLine);
+                        }
+                    }
+                }
             }
         }, 250);
 
         return () => clearInterval(intervalId);
-    }, [isPlaying, player, playableScript, playDescription]);
+    }, [isPlaying, player, playableScript, playDescription, duration]);
     
     useEffect(() => {
         if (player && typeof player.getCurrentTime === 'function') {
@@ -566,6 +585,20 @@ function PlayerScreenV2() {
             lastSpokenIndexRef.current = playableScript.findLastIndex(line => line.timestamp <= currentTime);
         }
     }, [verbosity, playableScript, player]);
+
+    const handleSkip = (seconds) => {
+        if (player && typeof player.getCurrentTime === 'function') {
+            const newTime = player.getCurrentTime() + seconds;
+            player.seekTo(newTime, true);
+            setCurrentTime(newTime); // 즉시 UI 반영
+            
+            // 접근성 안내
+            const minutes = Math.abs(seconds / 60);
+            const direction = seconds > 0 ? '앞으로' : '뒤로';
+            const msg = `${minutes}분 ${direction} 이동`;
+            announcePolite(msg);
+        }
+    };
 
     const handleVerbosityChange = (level) => {
         setVerbosity(level);
@@ -584,30 +617,37 @@ function PlayerScreenV2() {
     const handleTogglePlay = () => {
         if (!player) return;
 
-        const playerState = player.getPlayerState();
-        if (playerState === 1) { // 1 means playing
-            player.pauseVideo();
+        const isVideoPlaying = player.getPlayerState() === 1;
+        const isAudioPlaying = audioPlayerRef.current && !audioPlayerRef.current.paused && !audioPlayerRef.current.ended;
+
+        // 영상이나 오디오 중 하나라도 재생 중이면 -> 일시정지
+        if (isVideoPlaying || isAudioPlaying) {
+            if (isVideoPlaying) player.pauseVideo();
+            if (isAudioPlaying) audioPlayerRef.current.pause();
             return;
         }
 
-        // On the first play, unlock audio context and start the video simultaneously.
-        // This is crucial for mobile browser compatibility.
+        // 둘 다 멈춰있는 경우 -> 재생 시작
+
+        // 1. 모바일 브라우저 오디오 정책 대응 (최초 1회 Silent Audio 재생)
         if (!isInteractionDone) {
             setIsInteractionDone(true);
             const audioPlayer = audioPlayerRef.current;
             if (audioPlayer) {
-                // Play a silent audio track to unlock the audio context.
-                // The user's single tap must be used to initiate both audio and video.
                 audioPlayer.src = SILENT_AUDIO;
                 audioPlayer.volume = 0;
                 audioPlayer.play().catch(e => {
-                    // This can fail on some strict browsers, but the attempt is what matters.
                     console.warn("Silent audio play for unlocking context failed (this is often ok).", e);
                 });
             }
         }
         
-        // For both first play and subsequent plays, start the video.
+        // 2. 멈췄던 오디오가 있다면 이어서 재생
+        if (audioPlayerRef.current && audioPlayerRef.current.paused && audioPlayerRef.current.currentTime > 0 && !audioPlayerRef.current.ended) {
+             audioPlayerRef.current.play().catch(e => console.error("Resume audio failed", e));
+        }
+
+        // 3. 영상 재생
         player.playVideo();
     };
 
@@ -658,7 +698,98 @@ function PlayerScreenV2() {
         <div ref={mainContainerRef}>
             <Header title={videoInfo.title} ref={headingRef} />
 
-            {renderContent()}
+            {isPlayerReady ? (
+                <>
+                    <div className="video-container">
+                        <div className={`play-overlay ${isPlaying ? 'is-playing' : ''}`}>
+                            <button className="big-play-button" onClick={handleTogglePlay} aria-label={isPlaying ? "일시정지" : "재생"}>
+                                {isPlaying ? '❚❚' : '▶'}
+                            </button>
+                        </div>
+                        <YouTube
+                            videoId={videoId}
+                            opts={{
+                                width: '100%',
+                                height: '100%',
+                                playerVars: {
+                                    controls: 0,
+                                    rel: 0,
+                                    iv_load_policy: 3,
+                                    playsinline: 1
+                                }
+                            }}
+                            onReady={(e) => {
+                                setPlayer(e.target);
+                                setDuration(e.target.getDuration());
+                            }}
+                            onStateChange={(e) => setIsPlaying(e.data === window.YT.PlayerState.PLAYING)}
+                        />
+                    </div>
+                    
+                    {/* Time & Navigation Controls - High Contrast & Simple for Accessibility */}
+                    <div className="time-control-bar" style={{ 
+                        display: 'flex', 
+                        justifyContent: 'space-between', 
+                        alignItems: 'center', 
+                        padding: '15px 0',
+                        borderBottom: '1px solid #eee',
+                        marginBottom: '15px'
+                    }}>
+                                                                                                                        <div className="time-display" style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#333' }}>
+                                                                                                                            {/* Screen Reader Only Text */}
+                                                                                                                            <span style={{
+                                                                                                                                position: 'absolute',
+                                                                                                                                width: '1px',
+                                                                                                                                height: '1px',
+                                                                                                                                padding: 0,
+                                                                                                                                margin: '-1px',
+                                                                                                                                overflow: 'hidden',
+                                                                                                                                clip: 'rect(0,0,0,0)',
+                                                                                                                                whiteSpace: 'nowrap',
+                                                                                                                                border: 0
+                                                                                                                            }}>
+                                                                                                                                {`전체 ${formatTime(duration)} 중 현재 ${formatTime(currentTime)}`}
+                                                                                                                            </span>
+                                                                                                                            
+                                                                                                                            {/* Visual Only Text */}
+                                                                                                                            <span aria-hidden="true">
+                                                                                                                                {formatTime(currentTime)} / {formatTime(duration)}
+                                                                                                                            </span>
+                                                                                                                        </div>                        <div className="jump-buttons" style={{ display: 'flex', gap: '10px' }}>
+                            <button 
+                                onClick={() => handleSkip(-60)} 
+                                style={{ 
+                                    padding: '12px 16px', 
+                                    fontSize: '1.1rem', 
+                                    cursor: 'pointer',
+                                    backgroundColor: '#fff',
+                                    border: '2px solid #333',
+                                    borderRadius: '8px',
+                                    fontWeight: 'bold'
+                                }}
+                                aria-label="1분 뒤로"
+                            >
+                                ⏪ 1분 전
+                            </button>
+                            <button 
+                                onClick={() => handleSkip(60)} 
+                                style={{ 
+                                    padding: '12px 16px', 
+                                    fontSize: '1.1rem', 
+                                    cursor: 'pointer',
+                                    backgroundColor: '#fff',
+                                    border: '2px solid #333',
+                                    borderRadius: '8px',
+                                    fontWeight: 'bold'
+                                }}
+                                aria-label="1분 앞으로"
+                            >
+                                1분 후 ⏩
+                            </button>
+                        </div>
+                    </div>
+                </>
+            ) : null}
 
             <div className="controls-container">
                 <div className="control-group" style={{ marginBottom: '15px' }}>
