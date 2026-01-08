@@ -651,54 +651,23 @@ function PlayerScreenV2() {
         player.playVideo();
     };
 
-    const renderContent = () => {
-        if (isLoading) return <p>영상 데이터를 불러오는 중입니다...</p>;
-        if (error) return <p className="error-message" role="alert">{error}</p>;
-        if (isNewGeneration && !isPlayerReady) {
-            return (
-                <div className="status-container">
-                    <p>새로운 화면 해설을 생성하고 있습니다. 잠시만 기다려주세요...</p>
-                    <p className="status-message">{statusMessage}</p>
-                    <div className="spinner"></div>
-                </div>
-            );
-        }
-        if (isPlayerReady) {
-            return (
-                <div className="video-container">
-                    <div className={`play-overlay ${isPlaying ? 'is-playing' : ''}`}>
-                        <button className="big-play-button" onClick={handleTogglePlay} aria-label={isPlaying ? "일시정지" : "재생"}>
-                            {isPlaying ? '❚❚' : '▶'}
-                        </button>
-                    </div>
-                    <YouTube
-                        videoId={videoId}
-                        opts={{
-                            width: '100%',
-                            height: '100%',
-                            playerVars: {
-                                controls: 0,
-                                rel: 0,
-                                iv_load_policy: 3,
-                                playsinline: 1
-                            }
-                        }}
-                        onReady={(e) => setPlayer(e.target)}
-                        onStateChange={(e) => setIsPlaying(e.data === window.YT.PlayerState.PLAYING)}
-                    />
-                </div>
-            );
-        }
-        return <p>알 수 없는 상태입니다. 페이지를 새로고침 해주세요.</p>;
-    };
-
     const newVerbosityLabels = { 0: '없음', ...verbosityLabels };
 
     return (
         <div ref={mainContainerRef}>
             <Header title={videoInfo.title} ref={headingRef} />
 
-            {isPlayerReady ? (
+            {isLoading ? (
+                <p>영상 데이터를 불러오는 중입니다...</p>
+            ) : error ? (
+                <p className="error-message" role="alert">{error}</p>
+            ) : (isNewGeneration && !isPlayerReady) ? (
+                <div className="status-container">
+                    <p>새로운 화면 해설을 생성하고 있습니다. 잠시만 기다려주세요...</p>
+                    <p className="status-message">{statusMessage}</p>
+                    <div className="spinner"></div>
+                </div>
+            ) : isPlayerReady ? (
                 <>
                     <div className="video-container">
                         <div className={`play-overlay ${isPlaying ? 'is-playing' : ''}`}>
@@ -735,61 +704,48 @@ function PlayerScreenV2() {
                         borderBottom: '1px solid #eee',
                         marginBottom: '15px'
                     }}>
-                                                                                                                        <div className="time-display" style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#333' }}>
-                                                                                                                            {/* Screen Reader Only Text */}
-                                                                                                                            <span style={{
-                                                                                                                                position: 'absolute',
-                                                                                                                                width: '1px',
-                                                                                                                                height: '1px',
-                                                                                                                                padding: 0,
-                                                                                                                                margin: '-1px',
-                                                                                                                                overflow: 'hidden',
-                                                                                                                                clip: 'rect(0,0,0,0)',
-                                                                                                                                whiteSpace: 'nowrap',
-                                                                                                                                border: 0
-                                                                                                                            }}>
-                                                                                                                                {`전체 ${formatTime(duration)} 중 현재 ${formatTime(currentTime)}`}
-                                                                                                                            </span>
-                                                                                                                            
-                                                                                                                            {/* Visual Only Text */}
-                                                                                                                            <span aria-hidden="true">
-                                                                                                                                {formatTime(currentTime)} / {formatTime(duration)}
-                                                                                                                            </span>
-                                                                                                                        </div>                        <div className="jump-buttons" style={{ display: 'flex', gap: '10px' }}>
+                        <div className="time-display" style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#333' }}>
+                            {/* Screen Reader Only Text */}
+                            <span style={{
+                                position: 'absolute',
+                                width: '1px',
+                                height: '1px',
+                                padding: 0,
+                                margin: '-1px',
+                                overflow: 'hidden',
+                                clip: 'rect(0,0,0,0)',
+                                whiteSpace: 'nowrap',
+                                border: 0
+                            }}>
+                                {`전체 ${formatTime(duration)} 중 현재 ${formatTime(currentTime)}`}
+                            </span>
+                            
+                            {/* Visual Only Text */}
+                            <span aria-hidden="true">
+                                {formatTime(currentTime)} / {formatTime(duration)}
+                            </span>
+                        </div>
+                        <div className="jump-buttons" style={{ display: 'flex', gap: '15px' }}>
                             <button 
                                 onClick={() => handleSkip(-60)} 
-                                style={{ 
-                                    padding: '12px 16px', 
-                                    fontSize: '1.1rem', 
-                                    cursor: 'pointer',
-                                    backgroundColor: '#fff',
-                                    border: '2px solid #333',
-                                    borderRadius: '8px',
-                                    fontWeight: 'bold'
-                                }}
-                                aria-label="1분 뒤로"
+                                style={{ padding: '10px 15px', fontSize: '1.1rem', cursor: 'pointer' }}
+                                aria-label="1분 뒤로 이동"
                             >
                                 ⏪ 1분 전
                             </button>
                             <button 
                                 onClick={() => handleSkip(60)} 
-                                style={{ 
-                                    padding: '12px 16px', 
-                                    fontSize: '1.1rem', 
-                                    cursor: 'pointer',
-                                    backgroundColor: '#fff',
-                                    border: '2px solid #333',
-                                    borderRadius: '8px',
-                                    fontWeight: 'bold'
-                                }}
-                                aria-label="1분 앞으로"
+                                style={{ padding: '10px 15px', fontSize: '1.1rem', cursor: 'pointer' }}
+                                aria-label="1분 앞으로 이동"
                             >
                                 1분 후 ⏩
                             </button>
                         </div>
                     </div>
                 </>
-            ) : null}
+            ) : (
+                <p>알 수 없는 상태입니다. 페이지를 새로고침 해주세요.</p>
+            )}
 
             <div className="controls-container">
                 <div className="control-group" style={{ marginBottom: '15px' }}>
