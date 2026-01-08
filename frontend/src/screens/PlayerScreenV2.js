@@ -620,16 +620,16 @@ function PlayerScreenV2() {
         const isVideoPlaying = player.getPlayerState() === 1;
         const isAudioPlaying = audioPlayerRef.current && !audioPlayerRef.current.paused && !audioPlayerRef.current.ended;
 
-        // 영상이나 오디오 중 하나라도 재생 중이면 -> 일시정지
+        // 1. 영상이나 오디오 중 하나라도 재생 중이면 -> 둘 다 확실하게 일시정지
         if (isVideoPlaying || isAudioPlaying) {
             if (isVideoPlaying) player.pauseVideo();
             if (isAudioPlaying) audioPlayerRef.current.pause();
             return;
         }
 
-        // 둘 다 멈춰있는 경우 -> 재생 시작
+        // 2. 둘 다 멈춰있는 경우 -> 재생 재개 (Resume)
 
-        // 1. 모바일 브라우저 오디오 정책 대응 (최초 1회 Silent Audio 재생)
+        // 2-1. 모바일 브라우저 오디오 정책 대응 (최초 1회 Silent Audio 재생)
         if (!isInteractionDone) {
             setIsInteractionDone(true);
             const audioPlayer = audioPlayerRef.current;
@@ -642,12 +642,48 @@ function PlayerScreenV2() {
             }
         }
         
-        // 2. 멈췄던 오디오가 있다면 이어서 재생
+        // 2-2. 오디오가 재생 중이었다면, 오디오 먼저 확실하게 켜고 -> 그 다음 영상 고민
         if (audioPlayerRef.current && audioPlayerRef.current.paused && audioPlayerRef.current.currentTime > 0 && !audioPlayerRef.current.ended) {
-             audioPlayerRef.current.play().catch(e => console.error("Resume audio failed", e));
+             
+             // 오디오 재생 시도 (Promise 반환)
+             audioPlayerRef.current.play()
+                .then(() => {
+                    // 오디오 재생 성공! 이제 영상을 켤지 말지 결정
+                    let shouldWaitVideo = false;
+
+                    // 조건 1: '멈춘 후 해설' 모드면 영상 켜지 않음
+                    if (playbackModeRef.current === 'pause') {
+                        shouldWaitVideo = true;
+                    }
+                    
+                    // 조건 2: 다음 읽을 내용이 '자막(text)'이면 영상 켜지 않음 (모든 모드 공통)
+                    const currentTime = player.getCurrentTime();
+                    const nextLineIndex = playableScript.findIndex((line, index) => 
+                        index > lastSpokenIndexRef.current && currentTime >= line.timestamp
+                    );
+
+                    if (nextLineIndex !== -1) {
+                        const nextLine = playableScript[nextLineIndex];
+                        if (nextLine.verbosity === 'text') {
+                            shouldWaitVideo = true;
+                        }
+                    }
+
+                    // 기다려야 하는 상황이 아니라면 영상도 재생
+                    if (!shouldWaitVideo) {
+                        player.playVideo();
+                    }
+                })
+                .catch(e => {
+                    console.error("Resume audio failed", e);
+                    // 오디오 실패해도 영상은 틀어줘야 함
+                    player.playVideo();
+                });
+             
+             return; // 오디오 재생 로직이 비동기로 처리되므로 함수 종료
         }
 
-        // 3. 영상 재생
+        // 3. 오디오 재생할 게 없으면 -> 그냥 영상 재생
         player.playVideo();
     };
 
