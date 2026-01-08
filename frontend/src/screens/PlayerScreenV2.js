@@ -643,10 +643,13 @@ function PlayerScreenV2() {
         }
         
         // 2-2. 오디오가 재생 중이었다면, 오디오 먼저 확실하게 켜고 -> 그 다음 영상 고민
-        if (audioPlayerRef.current && audioPlayerRef.current.paused && audioPlayerRef.current.currentTime > 0 && !audioPlayerRef.current.ended) {
+        const audio = audioPlayerRef.current;
+        // currentTime > 0 조건 제거: 모바일에서 일시정지 시 값을 제대로 못 가져오는 경우 방지
+        // SILENT_AUDIO 체크 추가: 무음 트랙이 아닌 실제 콘텐츠일 때만 재개
+        if (audio && audio.paused && !audio.ended && audio.src && audio.src !== SILENT_AUDIO) {
              
              // 오디오 재생 시도 (Promise 반환)
-             audioPlayerRef.current.play()
+             audio.play()
                 .then(() => {
                     // 오디오 재생 성공! 이제 영상을 켤지 말지 결정
                     let shouldWaitVideo = false;
