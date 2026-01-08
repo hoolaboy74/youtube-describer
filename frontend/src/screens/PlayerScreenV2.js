@@ -658,15 +658,20 @@ function PlayerScreenV2() {
              }
              
              // Case B: '영상과 같이' 모드
-             // PC: 오디오와 영상을 같이 재생 (기존 로직 유지)
-             // 모바일: 오디오 재개를 포기하고 영상만 재생 (충돌 방지)
-             if (!isMobile()) {
+             if (isMobile()) {
+                 // 모바일: 오디오 세션 유지를 위해 '무음'으로 재생 시도 (결과 안 기다림)
+                 // 이렇게 해야 다음 TTS 타임에 오디오 채널이 살아있어서 영상이 안 멈춤
+                 audio.volume = 0; 
+                 audio.play().catch(e => console.warn("Mobile wake-up audio failed", e));
+             } else {
+                 // PC: 그냥 정상 재생
+                 audio.volume = 1;
                  audio.play().catch(e => console.error("Resume audio failed", e));
              }
         }
 
         // 3. 영상 재생
-        // (모바일 '영상과 같이' 모드에서는 위에서 오디오를 안 켰으므로 여기서 영상만 깔끔하게 시작됨)
+        // 모바일에서도 오디오(무음)와 영상을 동시에 때려버림 -> 랙 없이 즉시 반응
         player.playVideo();
     };
 
