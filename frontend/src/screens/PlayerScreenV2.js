@@ -588,10 +588,29 @@ function PlayerScreenV2() {
 
     const handleSkip = (seconds) => {
         if (player && typeof player.getCurrentTime === 'function') {
-            const newTime = player.getCurrentTime() + seconds;
+            const currentTime = player.getCurrentTime();
+            const newTime = currentTime + seconds;
             player.seekTo(newTime, true);
             setCurrentTime(newTime); // 즉시 UI 반영
             
+            // 1. 현재 재생 중인 오디오가 있다면 즉시 중단 및 초기화
+            // (이게 없으면 뒤로 갔을 때 이전 오디오가 계속 나오거나 꼬임)
+            if (audioPlayerRef.current) {
+                audioPlayerRef.current.pause();
+                audioPlayerRef.current.currentTime = 0;
+            }
+            
+            // 2. TTS 상태 리셋
+            // "지금 오디오 나오는 중 아님"으로 설정해야 setInterval 루프가 새로운 TTS를 트리거할 수 있음
+            isTtsPlayingRef.current = false;
+
+            // 3. TTS 포인터 재설정 (핵심)
+            // 이동한 시간(newTime)보다 작거나 같은 마지막 대본의 인덱스를 찾습니다.
+            // 앞으로 이동 시: 인덱스가 증가하여 사이의 대본 건너뜀 (OK)
+            // 뒤로 이동 시: 인덱스가 감소하여 해당 구간 대본을 다시 읽을 준비 됨 (OK)
+            const newIndex = playableScript.findLastIndex(line => line.timestamp <= newTime);
+            lastSpokenIndexRef.current = newIndex;
+
             // 접근성 안내
             const minutes = Math.abs(seconds / 60);
             const direction = seconds > 0 ? '앞으로' : '뒤로';
