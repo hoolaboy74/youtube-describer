@@ -202,17 +202,31 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
 
             downloadProcess.stdout.on('data', (data) => {
                 stdoutBuffer += data.toString();
-                let lineEndIndex;
-                while ((lineEndIndex = stdoutBuffer.indexOf('\n')) !== -1) {
+                
+                // Handle both \n (newline) and \r (carriage return) as line terminators
+                let match;
+                while ((match = stdoutBuffer.match(/[\r\n]/))) {
+                    const lineEndIndex = match.index;
                     const line = stdoutBuffer.substring(0, lineEndIndex);
-                    stdoutBuffer = stdoutBuffer.substring(lineEndIndex + 1);
+                    
+                    // Remove the terminator (and potentially the following \n if it was \r\n)
+                    if (stdoutBuffer[lineEndIndex] === '\r' && stdoutBuffer[lineEndIndex + 1] === '\n') {
+                        stdoutBuffer = stdoutBuffer.substring(lineEndIndex + 2);
+                    } else {
+                        stdoutBuffer = stdoutBuffer.substring(lineEndIndex + 1);
+                    }
 
                     if (line.includes('[download]') && line.includes('%')) {
                         const match = line.match(/(\d+\.?\d*)%/);
                         if (match) {
                             const progress = parseFloat(match[1]);
                             if (!isNaN(progress)) {
-                                if (Math.floor(progress) >= lastProgress + 5 || progress === 100) {
+                                // Reset lastProgress if new download starts (e.g. subtitle 100% -> video 0%)
+                                if (progress < lastProgress && progress < 5) {
+                                    lastProgress = -1;
+                                }
+
+                                if (Math.floor(progress) > lastProgress || progress === 100) {
                                     lastProgress = Math.floor(progress);
                                     if (sseHandler) sseHandler('status_update', { message: `${Math.round(progress)}%` });
                                 }
