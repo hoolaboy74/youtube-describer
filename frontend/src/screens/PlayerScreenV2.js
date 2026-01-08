@@ -648,30 +648,30 @@ function PlayerScreenV2() {
         
         if (audio && audio.paused && !audio.ended && audio.src && audio.src !== SILENT_AUDIO) {
              
-             // Case A: '멈춘 후 해설' 모드 -> 무조건 오디오만 재생 (PC/모바일 공통)
+             // Case A: '멈춘 후 해설' 모드 -> 무조건 오디오만 재생
              if (isPauseMode) {
                  audio.play().catch(e => {
                      console.error("Resume audio failed", e);
-                     player.playVideo(); // 오디오 실패 시 영상 재생
+                     player.playVideo(); 
                  });
                  return;
              }
              
              // Case B: '영상과 같이' 모드
              if (isMobile()) {
-                 // 모바일: 오디오 세션 유지를 위해 '무음'으로 재생 시도 (결과 안 기다림)
-                 // 이렇게 해야 다음 TTS 타임에 오디오 채널이 살아있어서 영상이 안 멈춤
-                 audio.volume = 0; 
-                 audio.play().catch(e => console.warn("Mobile wake-up audio failed", e));
+                 // 모바일: 멈췄던 오디오는 과감히 버립니다.
+                 // 억지로 재생하려다 큐가 꼬이는 것을 방지하기 위해,
+                 // 현재 오디오 재생 상태(Ref)를 강제로 끄고 영상만 틉니다.
+                 isTtsPlayingRef.current = false; 
+                 // (주의) audio.currentTime 등을 건드리면 또 로딩이 걸리므로, 그냥 놔두고 플래그만 내립니다.
              } else {
-                 // PC: 그냥 정상 재생
+                 // PC: 정상 재생
                  audio.volume = 1;
                  audio.play().catch(e => console.error("Resume audio failed", e));
              }
         }
 
         // 3. 영상 재생
-        // 모바일에서도 오디오(무음)와 영상을 동시에 때려버림 -> 랙 없이 즉시 반응
         player.playVideo();
     };
 
