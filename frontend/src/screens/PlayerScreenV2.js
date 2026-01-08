@@ -675,10 +675,6 @@ function PlayerScreenV2() {
         player.playVideo();
     };
 
-        // 3. 오디오 재생할 게 없으면 -> 그냥 영상 재생
-        player.playVideo();
-    };
-
     const newVerbosityLabels = { 0: '없음', ...verbosityLabels };
 
     return (
