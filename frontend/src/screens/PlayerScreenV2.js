@@ -202,6 +202,8 @@ function PlayerScreenV2() {
                         setError('현재 관리자에 의해 신규 영상 생성이 일시 중지되었습니다. 잠시 후 다시 시도해주세요.');
                     } else if (data.message === 'live_stream_not_supported') {
                         setError('라이브 스트리밍 영상은 현재 지원되지 않습니다. 영상이 종료된 후 다시 시도해주세요.');
+                    } else if (data.message === 'embed_disabled') {
+                        setError('이 영상은 소유자의 요청으로 다른 웹사이트에서의 재생이 금지되어 있어 화면 해설을 제공할 수 없습니다. 유튜브에서 직접 시청해주세요.');
                     } else if (data.message === 'gemini_unavailable') {
                         setError('AI 생성기가 일시적인 과부하 또는 할당량 문제로 응답하지 않습니다. 잠시 후 다시 시도해 주세요.');
                     } else if (data.message === 'gemini_rejection') {

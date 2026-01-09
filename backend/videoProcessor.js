@@ -138,7 +138,7 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
 
         // 1. Use Official YouTube API for Metadata (Fast & Safe)
         const videoResponse = await youtube.videos.list({
-            part: 'snippet,contentDetails',
+            part: 'snippet,contentDetails,status',
             id: videoId
         });
 
@@ -149,6 +149,13 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
         }
 
         const videoItem = videoResponse.data.items[0];
+        
+        if (videoItem.status && videoItem.status.embeddable === false) {
+            const reason = 'embed_disabled';
+            db.updateVideoStatus(videoId, 'failed', reason);
+            throw new Error('This video cannot be embedded and played on external sites.');
+        }
+
         const videoTitle = videoItem.snippet.title;
         const durationIso = videoItem.contentDetails.duration;
         const totalDuration = parseISO8601Duration(durationIso);
@@ -443,6 +450,11 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
                     message: 'live_stream_not_supported',
                     details: 'Live streams cannot be processed.'
                 };
+            } else if (lowerErrorMessage.includes('embedded')) {
+                errorPayload = {
+                    message: 'embed_disabled',
+                    details: 'This video cannot be embedded.'
+                };
             } else if (lowerErrorMessage.includes('blocked') || lowerErrorMessage.includes('prohibited_content')) {
                 errorPayload = {
                     message: 'gemini_rejection',
@@ -510,7 +522,7 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
 
         // 1. Use Official YouTube API for Metadata (Fast & Safe)
         const videoResponse = await youtube.videos.list({
-            part: 'snippet,contentDetails',
+            part: 'snippet,contentDetails,status',
             id: videoId
         });
 
@@ -519,6 +531,12 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
         }
 
         const videoItem = videoResponse.data.items[0];
+        
+        if (videoItem.status && videoItem.status.embeddable === false) {
+            db.updateVideoStatus(videoId, 'failed', 'embed_disabled');
+            throw new Error('This video cannot be embedded and played on external sites.');
+        }
+
         const videoTitle = videoItem.snippet.title;
         const durationIso = videoItem.contentDetails.duration;
         const totalDuration = parseISO8601Duration(durationIso);
