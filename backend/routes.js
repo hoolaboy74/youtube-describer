@@ -114,13 +114,23 @@ router.get('/financial-summary', (req, res) => {
 });
 
 router.get('/cached-videos', (req, res) => {
-    try {
-        const videos = db.listVideos();
-        res.json(videos);
-    } catch (error) {
-        logger.error('Failed to fetch cached videos:', error);
-        res.status(500).json({ error: 'Failed to fetch cached videos' });
-    }
+  try {
+    const videos = db.listVideos();
+    res.json(videos);
+  } catch (error) {
+    logger.error('Error fetching cached videos:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+router.get('/featured-videos', (req, res) => {
+  try {
+    const videos = db.getFeaturedVideos();
+    res.json(videos);
+  } catch (error) {
+    logger.error('Error fetching featured videos:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
 });
 
 // Endpoint to get a list of random videos for recommendation

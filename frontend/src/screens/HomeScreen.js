@@ -36,6 +36,7 @@ function HomeScreen() {
     const [isNoticeVisible, setIsNoticeVisible] = useState(false);
     const [dontShowNoticeToday, setDontShowNoticeToday] = useState(false);
     const [recommendedVideos, setRecommendedVideos] = useState([]);
+    const [featuredVideos, setFeaturedVideos] = useState([]);
     
     const [initialVideosLimit, setInitialVideosLimit] = useState(10);
     const [dbResultsLimit, setDbResultsLimit] = useState(10);
@@ -74,6 +75,11 @@ function HomeScreen() {
         axios.get('/api/videos/random')
             .then(response => setRecommendedVideos(response.data || []))
             .catch(err => console.error('추천 영상을 불러오는 데 실패했습니다:', err));
+
+        // Fetch featured videos (Admin picks)
+        axios.get('/api/featured-videos')
+            .then(response => setFeaturedVideos(response.data || []))
+            .catch(err => console.error('Featured 영상을 불러오는 데 실패했습니다:', err));
 
         // Fetch financial summary and notice
         axios.get('/api/financial-summary')
@@ -392,6 +398,25 @@ function HomeScreen() {
                 />
                 <button type="submit" disabled={isSubmitDisabled}>{'검색 또는 생성'}</button>
             </form>
+
+            {!showSearchResults && featuredVideos.length > 0 && (
+                <div className="featured-videos-container">
+                    <h2 className="section-title">💎 관리자 추천 명작</h2>
+                    <p className="section-subtitle">고품질 화면 해설이 제공되는 엄선된 영상입니다.</p>
+                    <div className="featured-grid">
+                        {featuredVideos.map(video => (
+                            <button 
+                                key={video.videoId}
+                                className="featured-card"
+                                onClick={() => handleVideoSelect({ id: video.videoId, source: 'db' })}
+                                aria-label={`추천 영상: ${video.title}`}>
+                                <div className="featured-title">{video.title}</div>
+                                <div className="featured-badge">추천</div>
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            )}
 
             {!showSearchResults && recommendedVideos.length > 0 && (
                 <div className="recommended-videos-container">

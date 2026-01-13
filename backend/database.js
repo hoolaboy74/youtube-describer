@@ -46,6 +46,12 @@ function init() {
     logger.info('Adding filesize column to videos table...');
     db.exec('ALTER TABLE videos ADD COLUMN filesize INTEGER DEFAULT 0');
   }
+  try {
+    db.prepare('SELECT is_featured FROM videos LIMIT 1').get();
+  } catch (error) {
+    logger.info('Adding is_featured column to videos table with default value 0...');
+    db.exec('ALTER TABLE videos ADD COLUMN is_featured INTEGER DEFAULT 0');
+  }
 
   // scripts 테이블: 각 영상에 속한 화면 해설 스크립트 정보 저장
   db.exec(`
@@ -250,7 +256,7 @@ function listVideos() {
     LEFT JOIN 
       comments AS c ON v.videoId = c.videoId
     WHERE
-      v.status = 'completed'
+      v.status = 'completed' AND v.is_featured = 0
     GROUP BY 
       v.videoId
     ORDER BY 
@@ -292,6 +298,16 @@ function getRandomVideos(limit = 3) {
     LIMIT ?
   `).all(limit);
   return rows;
+}
+
+// 추천 영상 목록을 가져오는 함수
+function getFeaturedVideos() {
+  return db.prepare(`
+    SELECT videoId, title, duration, filesize, createdAt 
+    FROM videos 
+    WHERE is_featured = 1 AND status = 'completed'
+    ORDER BY createdAt DESC
+  `).all();
 }
 
 // 처리 시작 시 호출. status를 'processing'으로 설정.
@@ -895,6 +911,7 @@ module.exports = {
   listVideos,
   searchVideosByTitle,
   getRandomVideos,
+  getFeaturedVideos, // Add this
   getComments,
   addComment,
   getCommentById,
@@ -933,4 +950,5 @@ module.exports = {
   listAllPostCommentsForAdmin,
   deletePostByIdAdmin,
   deletePostCommentByIdAdmin,
+  db, // Export the db instance directly
 };

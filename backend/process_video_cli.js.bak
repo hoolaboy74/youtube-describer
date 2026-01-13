@@ -1,0 +1,338 @@
+#!/usr/bin/env node
+
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+const fs = require('fs');
+const path = require('path');
+const util = require('util');
+const { execFile, spawn } = require('child_process');
+const crypto = require('crypto');
+const db = require('./database'); 
+require('dotenv').config({ path: path.join(__dirname, '.env') });
+
+// --- Configuration ---
+const CHUNK_DURATION_MIN = 15;
+const CHUNK_DURATION_SEC = CHUNK_DURATION_MIN * 60;
+const FRAME_INTERVAL = 2; // Extract frame every 2 seconds
+
+// --- API Setup ---
+const API_KEY = process.env.GOOGLE_API_KEY;
+if (!API_KEY) {
+    console.error("Error: GOOGLE_API_KEY is not defined in .env file.");
+    process.exit(1);
+}
+const genAI = new GoogleGenerativeAI(API_KEY);
+
+// --- Helpers ---
+const exec = util.promisify(execFile);
+
+const getVideoId = async (url) => {
+    try {
+        const { stdout } = await exec('yt-dlp', ['--print', 'id', '--no-warnings', url]);
+        return stdout.trim();
+    } catch (e) {
+        throw new Error(`Failed to extract Video ID: ${e.message}`);
+    }
+};
+
+const getVideoTitle = async (url) => {
+    try {
+        const { stdout } = await exec('yt-dlp', ['--print', 'title', '--no-warnings', url]);
+        return stdout.trim();
+    } catch (e) {
+        return `Unknown Title (${url})`;
+    }
+};
+
+const preprocessVtt = (vttContent) => {
+    const lines = vttContent.split('\n');
+    const result = [];
+    const timeRegex = /(\d{2}):(\d{2}):(\d{2})\.(\d{3}) --> (\d{2}):(\d{2}):(\d{2})\.(\d{3})/; 
+
+    for (let i = 0; i < lines.length; i++) {
+        const line = lines[i].trim();
+        if (line.includes('-->')) {
+            const match = line.match(timeRegex);
+            if (match) {
+                const hours = parseInt(match[1], 10);
+                const minutes = parseInt(match[2], 10);
+                const seconds = parseInt(match[3], 10);
+                const totalSeconds = hours * 3600 + minutes * 60 + seconds;
+                
+                let textLines = [];
+                let j = i + 1;
+                while (j < lines.length) {
+                    const nextLine = lines[j].trim();
+                    if (nextLine === '' || nextLine.includes('-->') || nextLine === 'WEBVTT' || nextLine.match(/^\d+$/)) {
+                        break;
+                    }
+                    // Clean subtitles: Remove tags and sound descriptions, KEEP original text
+                    let cleanLine = nextLine.replace(/<[^>]*>/g, '')
+                                            .replace(/\s*\[.*?\]/g, '')
+                                            .replace(/\s*\(.*?\)/g, '')
+                                            .replace(/[♪♫♬]/g, '')
+                                            .trim();
+                    if (cleanLine) textLines.push(cleanLine);
+                    j++;
+                }
+                if (textLines.length > 0) {
+                    result.push({ seconds: totalSeconds, text: textLines.join(' ') });
+                }
+            }
+        }
+    }
+    return result;
+};
+
+// --- Main Process ---
+const main = async () => {
+    const args = process.argv.slice(2);
+    if (args.length < 1) {
+        console.error("Usage: node process_video_cli.js <YOUTUBE_URL> [--part <PART_NUM>]");
+        process.exit(1);
+    }
+
+    const VIDEO_URL = args[0];
+    const partIndex = args.indexOf('--part');
+    const TARGET_PART = partIndex !== -1 ? parseInt(args[partIndex + 1]) : null;
+
+    console.log(`[CLI] Initializing process for: ${VIDEO_URL}`);
+    if (TARGET_PART) console.log(`[CLI] Targeting ONLY Part ${TARGET_PART}`);
+
+    let VIDEO_ID, VIDEO_TITLE;
+    try {
+        VIDEO_ID = await getVideoId(VIDEO_URL);
+        VIDEO_TITLE = await getVideoTitle(VIDEO_URL);
+        console.log(`[CLI] Video ID: ${VIDEO_ID}`);
+        console.log(`[CLI] Video Title: ${VIDEO_TITLE}`);
+    } catch (e) {
+        console.error(e.message);
+        process.exit(1);
+    }
+
+    const TEMP_DIR = path.join(__dirname, 'temp', `proc_${VIDEO_ID}`);
+    if (!fs.existsSync(TEMP_DIR)) fs.mkdirSync(TEMP_DIR, { recursive: true });
+
+    // 0. Database Cleanup (Only if NOT targeting a specific part)
+    if (!TARGET_PART) {
+        console.log('[CLI] Cleaning previous data from DB...');
+        try {
+            const dbInstance = db.db;
+            if (dbInstance) {
+                dbInstance.prepare('DELETE FROM scripts WHERE videoId = ?').run(VIDEO_ID);
+                dbInstance.prepare('DELETE FROM videos WHERE videoId = ?').run(VIDEO_ID);
+            }
+        } catch(e) { console.warn('[CLI] DB clear warning:', e.message); }
+        // Initial DB Record
+        db.ensureVideoRecord({ videoId: VIDEO_ID, title: VIDEO_TITLE, duration: 0, filesize: 0 });
+    }
+
+    // 1. Download Full Video
+    const fullVideoPath = path.join(TEMP_DIR, 'full.mp4');
+    
+    if (!fs.existsSync(fullVideoPath)) {
+        console.log('[CLI] Step 1: Downloading full video (High Speed)...');
+        try {
+            await exec('yt-dlp', [
+                '-f', 'bestvideo[height<=480][ext=mp4]+bestaudio[ext=m4a]/best[height<=480][ext=mp4]', 
+                '-o', fullVideoPath,
+                '--force-ipv4',
+                '--no-check-certificate',
+                '--write-sub',
+                '--sub-lang', 'en', 
+                VIDEO_URL
+            ], { cwd: TEMP_DIR });
+            console.log('[CLI] Download complete.');
+        } catch (err) { 
+            console.error('[CLI] Download Failed:', err.message); 
+            process.exit(1);
+        }
+    } else {
+        console.log('[CLI] Step 1: Video file already exists.');
+    }
+
+    // 2. Load Subtitles
+    let allSubtitles = [];
+    const files = fs.readdirSync(TEMP_DIR);
+    const subFile = files.find(f => f.endsWith('.en.vtt')) || files.find(f => f.endsWith('.vtt'));
+    if (subFile) {
+        console.log(`[CLI] Parsing subtitles from ${subFile}...`);
+        allSubtitles = preprocessVtt(fs.readFileSync(path.join(TEMP_DIR, subFile), 'utf-8'));
+    }
+
+    // 3. Get Duration
+    let totalDuration = 0;
+    try {
+        const probe = await exec('ffprobe', [
+            '-v', 'error', '-show_entries', 'format=duration', '-of', 'default=noprint_wrappers=1:nokey=1', fullVideoPath
+        ]);
+        totalDuration = parseFloat(probe.stdout);
+        if (!TARGET_PART) {
+             db.ensureVideoRecord({ videoId: VIDEO_ID, title: VIDEO_TITLE, duration: Math.floor(totalDuration), filesize: 0 });
+        }
+    } catch (e) {}
+
+    // 4. Processing Loop
+    const chunks = Math.ceil(totalDuration / CHUNK_DURATION_SEC);
+    let fullScriptContext = "Movie Start.";
+
+    for (let i = 0; i < chunks; i++) {
+        if (TARGET_PART && (i + 1) !== TARGET_PART) continue;
+
+        const startTime = i * CHUNK_DURATION_SEC;
+        const endTime = Math.min((i + 1) * CHUNK_DURATION_SEC, totalDuration);
+        const chunkName = `chunk_${i}`;
+        const chunkPath = path.join(TEMP_DIR, `${chunkName}.mp4`);
+        
+        console.log(`\n=== Processing Part ${i+1}/${chunks} (${Math.floor(startTime/60)}m - ${Math.floor(endTime/60)}m) ===`);
+
+        // Clean DB for this part to avoid duplicates
+        try {
+            const dbInstance = db.db;
+            console.log(`[CLI] Cleaning DB for this specific range (${startTime}s - ${endTime}s)...`);
+            dbInstance.prepare('DELETE FROM scripts WHERE videoId = ? AND timestamp >= ? AND timestamp < ?').run(VIDEO_ID, startTime, endTime);
+        } catch(e) { console.warn('[CLI] Part cleanup warning:', e.message); }
+
+        // Load Context from DB (Up to 500 lines for continuity)
+        if (i > 0) {
+            try {
+                const dbInstance = db.db;
+                const prevScripts = dbInstance.prepare(`SELECT text FROM scripts WHERE videoId = ? AND timestamp < ? ORDER BY timestamp DESC LIMIT 500`).all(VIDEO_ID, startTime);
+                if (prevScripts.length > 0) {
+                    fullScriptContext = "PREVIOUS STORY SO FAR:\n" + prevScripts.reverse().map(l => l.text).join('\n');
+                    console.log(`[CLI] Loaded extensive context (${prevScripts.length} lines).`);
+                }
+            } catch(e) {}
+        }
+
+        // A. Split Video
+        if (!fs.existsSync(chunkPath)) {
+            await exec('ffmpeg', [
+                '-ss', startTime,
+                '-i', fullVideoPath,
+                '-t', (endTime - startTime),
+                '-c', 'copy', '-y', chunkPath
+            ]);
+        }
+
+        // B. Filter Subtitles
+        const chunkSubtitles = allSubtitles.filter(s => s.seconds >= startTime && s.seconds < endTime);
+        const subText = chunkSubtitles.map(s => `[${s.seconds}] ${s.text}`).join('\n');
+
+        // C. Extract Frames
+        const frameDir = path.join(TEMP_DIR, `frames_${chunkName}`);
+        if (!fs.existsSync(frameDir)) fs.mkdirSync(frameDir);
+        else {
+             const old = fs.readdirSync(frameDir);
+             for (const f of old) fs.unlinkSync(path.join(frameDir, f));
+        }
+
+        const extractedTimestamps = [];
+        await new Promise((resolve, reject) => {
+            const ffmpegArgs = ['-i', chunkPath, '-vf', `select='isnan(prev_selected_t)+gte(t-prev_selected_t,${FRAME_INTERVAL})',showinfo`, '-vsync', 'vfr', '-q:v', '2', path.join(frameDir, 'frame-%04d.jpg')];
+            const p = spawn('ffmpeg', ffmpegArgs);
+            let stderr = '';
+            p.stderr.on('data', d => {
+                stderr += d;
+                const matches = d.toString().matchAll(/pts_time:(\d+\.?\d*)/g);
+                for (const m of matches) extractedTimestamps.push(parseFloat(m[1]) + startTime);
+            });
+            p.on('close', c => c === 0 ? resolve() : reject(new Error(stderr)));
+        });
+
+        // D. AI Generation
+        const frameFiles = fs.readdirSync(frameDir).filter(f => f.endsWith('.jpg')).sort();
+        const imageParts = [];
+        for (let j = 0; j < extractedTimestamps.length; j++) {
+            if (j >= frameFiles.length) break;
+            imageParts.push({ inlineData: { data: fs.readFileSync(path.join(frameDir, frameFiles[j])).toString("base64"), mimeType: 'image/jpeg' } });
+            imageParts.push({ text: `Timestamp: [${Math.round(extractedTimestamps[j])}]` }); 
+        }
+
+        if (imageParts.length === 0) continue;
+
+        const customPrompt = `
+YouYou are an intelligent Video Describer for the visually impaired.
+Target Video: ${VIDEO_TITLE} (Part ${i+1}/${chunks})
+
+**PREVIOUS CONTEXT:**
+${fullScriptContext.substring(Math.max(0, fullScriptContext.length - 40000))} 
+
+**INPUT DATA:**
+1. **Subtitle Track (Sync-Master):**
+${subText.substring(0, 25000)} ...
+
+2. **Visual Frames:** (Attached images with timestamps)
+
+**CORE INSTRUCTION: ADAPT TO THE GENRE**
+First, analyze the visuals and subtitles to identify the video genre. Then, apply the specific strategy:
+
+1.  **Narrative (Movie/Drama/Animation):**
+    *   **Focus:** Story flow, emotions, atmosphere, subtle actions.
+    *   **Style:** Descriptive, literary, immersive.
+    *   **Silence:** Fill gaps with detailed action descriptions.
+
+2.  **Information (Documentary/News/Lecture):**
+    *   **Focus:** Facts, diagrams, text on screen (OCR), speaker's gestures.
+    *   **Style:** Objective, clear, concise.
+    *   **Text:** Read aloud any important text or titles appearing on screen.
+
+3.  **Entertainment (Vlog/Variety/Reality):**
+    *   **Focus:** Reactions, visual jokes, screen captions, energetic edits.
+    *   **Style:** Lively, casual, explanatory.
+    *   **Captions:** Read the visual captions (자막) that provide humor or context.
+
+**UNIVERSAL RULES:**
+1.  **[txt] Tag (Translation):** Translate subtitles to natural **KOREAN**. **USE EXACT TIMESTAMPS.**
+2.  **[v2] Tag (Description):** Describe visuals in **KOREAN**.
+    *   **Do not describe the obvious source of sound** (e.g., if someone is speaking, don't say "He speaks").
+    *   **Detail:** Be specific. Instead of "text appears", say "Title card: 'The End'".
+3.  **Smart Editing:** If a major visual event clashes with trivial dialogue (e.g., "Um", "Ah"), delete the dialogue.
+
+**OUTPUT FORMAT:**
+[Seconds][Tag] Content
+
+**GENERATE THE ADAPTIVE SCRIPT IN KOREAN.**
+`;
+        const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro", generationConfig: { temperature: 0.7 } });
+        const result = await model.generateContentStream([customPrompt, ...imageParts]);
+        
+        let partScriptText = '';
+        process.stdout.write('[CLI] Receiving Stream: ');
+        for await (const chunk of result.stream) {
+            process.stdout.write('.'); 
+            partScriptText += chunk.text();
+        }
+        console.log(' Done.');
+
+        // E. Parse & Save
+        const scriptLines = partScriptText.split('\n');
+        const finalScriptData = scriptLines.map((line) => {
+            const match = line.match(/^\s*\[(\d+)\]\s*\[(v\d|txt|대사|해설)\]\s*(.*)\s*$/);
+            if (!match) return null;
+            let verbosity = 'v2';
+            const rawTag = match[2];
+            if (rawTag === 'txt' || rawTag === '대사') verbosity = 'text';
+            else if (rawTag === 'v2' || rawTag === '해설') verbosity = 'v2';
+
+            return { 
+                id: crypto.createHash('sha256').update(line).digest('hex'), 
+                timestamp: parseInt(match[1], 10), 
+                text: match[3].trim(), 
+                verbosity: verbosity 
+            };
+        }).filter(Boolean);
+
+        if (finalScriptData.length > 0) {
+            db.saveVideoChunk({ videoId: VIDEO_ID, scriptChunk: finalScriptData });
+            console.log(`[CLI] Saved ${finalScriptData.length} lines for Part ${i+1}.`);
+        }
+        
+        fs.unlinkSync(chunkPath);
+        fs.rmSync(frameDir, { recursive: true, force: true });
+    }
+
+    console.log(`\n[CLI] All processing complete for ${VIDEO_ID}`);
+    db.updateVideoStatus(VIDEO_ID, 'completed');
+};
+
+main();
