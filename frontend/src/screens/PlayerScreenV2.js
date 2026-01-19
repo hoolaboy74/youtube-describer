@@ -581,12 +581,33 @@ function PlayerScreenV2() {
         return () => clearInterval(intervalId);
     }, [isPlaying, player, playableScript, playDescription, duration]);
     
+    const prevVerbosityRef = useRef(verbosity);
+    const prevReadingSubtitlesRef = useRef(isReadingSubtitles);
+
     useEffect(() => {
         if (player && typeof player.getCurrentTime === 'function') {
+            const isVerbosityChanged = prevVerbosityRef.current !== verbosity || prevReadingSubtitlesRef.current !== isReadingSubtitles;
+            
+            // 상태 업데이트
+            prevVerbosityRef.current = verbosity;
+            prevReadingSubtitlesRef.current = isReadingSubtitles;
+
+            // 재생 중이고, 설정(상세도/자막)이 바뀌지 않았다면 (즉, 단순히 대본만 추가된 경우라면)
+            // 인덱스 재계산을 하지 않고 재생 루프에 맡깁니다. (Race Condition 방지)
+            if (isPlaying && !isVerbosityChanged) {
+                return;
+            }
+
             const currentTime = player.getCurrentTime();
-            lastSpokenIndexRef.current = playableScript.findLastIndex(line => line.timestamp <= currentTime);
+            // 영상 시작 부분(0.5초 이내)에서는 아직 첫 대사를 읽지 않은 상태(-1)로 유지하여
+            // 0초 타임스탬프를 가진 첫 대사가 스킵되지 않도록 보장합니다.
+            if (currentTime < 0.5) {
+                lastSpokenIndexRef.current = -1;
+            } else {
+                lastSpokenIndexRef.current = playableScript.findLastIndex(line => line.timestamp <= currentTime);
+            }
         }
-    }, [verbosity, playableScript, player]);
+    }, [verbosity, isReadingSubtitles, playableScript, player, isPlaying]);
 
     const handleSkip = (seconds) => {
         if (player && typeof player.getCurrentTime === 'function') {
