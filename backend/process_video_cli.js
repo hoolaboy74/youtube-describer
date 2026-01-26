@@ -135,39 +135,37 @@ const main = async () => {
     const TEMP_DIR = path.join(__dirname, 'temp', `proc_${VIDEO_ID}`);
     if (!fs.existsSync(TEMP_DIR)) fs.mkdirSync(TEMP_DIR, { recursive: true });
 
-    // 0. Database Cleanup & Initialization
+    // 0. Database Cleanup (Skip if partial)
     if (!TARGET_PART) {
-        // Full run: Clean everything
         try {
             db.db.prepare('DELETE FROM scripts WHERE videoId = ?').run(VIDEO_ID);
             db.db.prepare('DELETE FROM videos WHERE videoId = ?').run(VIDEO_ID);
         } catch(e) {}
+        
+        try {
+            db.db.prepare(`
+              INSERT INTO videos (videoId, title, duration, filesize, status, is_featured)
+              VALUES (?, ?, ?, ?, 'processing', ?)
+              ON CONFLICT(videoId) DO UPDATE SET
+                title = excluded.title,
+                duration = excluded.duration,
+                filesize = excluded.filesize,
+                status = 'processing',
+                is_featured = excluded.is_featured
+            `).run(VIDEO_ID, VIDEO_TITLE, Math.round(totalDuration), 0, isFeatured);
+        } catch(e) { console.error('DB Init Error:', e.message); }
     }
-
-    // Always ensure parent video record exists (Safe Insert)
-    try {
-        db.db.prepare(`
-          INSERT INTO videos (videoId, title, duration, filesize, status)
-          VALUES (?, ?, ?, ?, 'processing')
-          ON CONFLICT(videoId) DO UPDATE SET
-            title = excluded.title,
-            duration = excluded.duration,
-            filesize = excluded.filesize
-            -- Keep existing status if it exists, or update if needed. 
-            -- For CLI, 'processing' is fine.
-        `).run(VIDEO_ID, VIDEO_TITLE, Math.round(totalDuration), 0);
-    } catch(e) { console.error('DB Ensure Error:', e.message); }
 
     const fullVideoPath = path.join(TEMP_DIR, 'full.mp4');
     
     // Subtitle Strategy:
     // Korean Video -> Get 'ko'
-    // Foreign Video -> Get primary ones (en, ja) to find original
+    // Foreign Video -> Get all major (en, ja, fr...) to find original
     const subArgs = ['--write-sub', '--write-auto-sub'];
     if (isKoreanVideo) {
         subArgs.push('--sub-lang', 'ko');
     } else {
-        subArgs.push('--sub-lang', 'en,ja'); // Reduced to avoid 429 Too Many Requests
+        subArgs.push('--sub-lang', 'en,ja,fr,es,de,it,ru,zh,vi,th,id');
     }
 
     if (!fs.existsSync(fullVideoPath)) {
