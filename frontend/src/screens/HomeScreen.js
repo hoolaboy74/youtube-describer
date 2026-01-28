@@ -13,13 +13,21 @@ function getYouTubeId(url) {
     try {
         const urlObj = new URL(url);
         if (urlObj.hostname === 'youtu.be') return urlObj.pathname.substring(1);
-        if (urlObj.hostname.includes('youtube.com')) return urlObj.searchParams.get('v');
+        if (urlObj.hostname.includes('youtube.com')) {
+            const v = urlObj.searchParams.get('v');
+            if (v) return v;
+
+            const pathParts = urlObj.pathname.split('/');
+            if (['live', 'shorts', 'v', 'embed'].includes(pathParts[1])) {
+                return pathParts[2];
+            }
+        }
     } catch (e) { /* Ignore parsing errors */ }
     return null;
 }
 
 function isValidYoutubeUrl(url) {
-    const YOUTUBE_URL_REGEX = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/(watch\?v=|embed\/|v\/|)([\w-]+)([?&].*)?$/;
+    const YOUTUBE_URL_REGEX = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/(watch\?v=|embed\/|v\/|live\/|shorts\/|)([\w-]+)([?&].*)?$/;
     return YOUTUBE_URL_REGEX.test(url);
 }
 
