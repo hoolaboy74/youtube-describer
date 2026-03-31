@@ -327,6 +327,18 @@ function HomeScreen() {
         );
     };
 
+    const handleCopyAccount = () => {
+        const accountNumber = '우리은행 1005-980-321301 (예금주: 시각장애인MOM센터)';
+        navigator.clipboard.writeText(accountNumber)
+            .then(() => {
+                announcePolite('후원 계좌 번호가 복사되었습니다. 따뜻한 후원에 진심으로 감사드립니다.');
+            })
+            .catch(err => {
+                console.error('복사 실패:', err);
+                announceAssertive('계좌 번호 복사에 실패했습니다. 직접 입력해 주세요.');
+            });
+    };
+
     const renderFinancialSummary = () => {
         if (!financialSummary) return null;
 
@@ -334,21 +346,40 @@ function HomeScreen() {
         const rate = parseFloat(exchangeRate) || 1400;
         const totalUsedCost = (totalApiCosts || 0) + (totalProxyCost || 0);
         const totalUsedCostKRW = totalUsedCost * rate;
-        const balanceKRW = totalDonations - totalUsedCostKRW;
+        const balanceKRW = (totalDonations || 0) - totalUsedCostKRW;
 
         const formatCurrency = (num) => Math.floor(num).toLocaleString('ko-KR');
 
         return (
             <div className="financial-summary-container" aria-labelledby="financial-summary-heading">
-                <h2 id="financial-summary-heading" className="visually-hidden">실시간 운영 현황</h2>
-                <div className="financial-text">
-                    남은 운영비: <strong>{formatCurrency(balanceKRW)}원</strong>
+                <h2 id="financial-summary-heading" className="visually-hidden">실시간 운영 현황 및 후원 안내</h2>
+                
+                <div className="summary-card">
+                    <div className="financial-text">
+                        남은 운영비: <strong>{formatCurrency(balanceKRW)}원</strong>
+                    </div>
+                    <progress
+                        className="donation-progress"
+                        max={totalDonations || 100}
+                        value={totalUsedCostKRW}
+                        aria-label={`총 후원금 ${formatCurrency(totalDonations || 0)}원 중 ${formatCurrency(totalUsedCostKRW)}원 사용됨`}
+                    />
+                    
+                    <div className="donation-info-section">
+                        <p className="donation-message">시각장애인을 위한 화면 해설 서비스가 계속될 수 있도록 따뜻한 후원을 부탁드립니다.</p>
+                        <div className="account-box">
+                            <span className="account-info">
+                                <strong>후원 계좌:</strong> 우리은행 1005-980-321301 (예금주: 시각장애인MOM센터)
+                            </span>
+                            <button 
+                                onClick={handleCopyAccount} 
+                                className="copy-account-button"
+                                aria-label="계좌 번호 복사">
+                                복사
+                            </button>
+                        </div>
+                    </div>
                 </div>
-                <progress
-                    max={totalDonations}
-                    value={totalUsedCostKRW}
-                    aria-label={`총 후원금 ${formatCurrency(totalDonations)}원 중 ${formatCurrency(totalUsedCostKRW)}원 사용됨`}
-                />
             </div>
         );
     };

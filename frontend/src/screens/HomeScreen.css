@@ -644,42 +644,115 @@ main {
     min-height: 60px;
 }
 
-/* --- Financial Summary --- */
+/* --- Financial Summary & Donation Section --- */
 .financial-summary-container {
     width: 100%;
-    background-color: #fff;
-    border-radius: 8px;
-    padding: 15px 20px;
-    margin-bottom: 20px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    margin-bottom: 40px; /* 검색창과의 간격을 더 넓게 확보 */
     text-align: left;
 }
 
-.financial-summary-container .financial-text {
-    font-size: 1rem;
-    color: #333;
-    margin-bottom: 8px;
+.summary-card {
+    background-color: #fff;
+    border-radius: 14px; /* 조금 더 둥글게 */
+    padding: 24px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+    border: 1px solid #eef0f2;
 }
 
-.financial-summary-container progress {
+.financial-summary-container .financial-text {
+    font-size: 1.15rem;
+    color: #1a1a1a;
+    margin-bottom: 14px;
+    font-weight: 600;
+}
+
+.donation-progress {
     width: 100%;
-    height: 12px;
+    height: 12px; /* 살짝 얇게 하여 세련되게 */
     border-radius: 6px;
     overflow: hidden;
+    margin-bottom: 24px;
 }
 
-/* Styling for progress bar track */
-.financial-summary-container progress::-webkit-progress-bar {
-    background-color: #e9ecef;
+.donation-info-section {
+    background-color: #f8fbff; /* 더 맑은 배경색 */
+    border-radius: 10px;
+    padding: 18px;
+    border: 1px solid #e1e9f4;
 }
 
-/* Styling for progress bar value */
-.financial-summary-container progress::-webkit-progress-value {
-    background-color: #61dafb;
-    transition: width 0.5s ease-in-out;
+.donation-message {
+    font-size: 0.95rem;
+    color: #444;
+    line-height: 1.6;
+    margin: 0 0 16px 0;
+    word-break: keep-all;
 }
-.financial-summary-container progress::-moz-progress-bar {
-    background-color: #61dafb;
+
+.account-box {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    background-color: #fff;
+    padding: 12px 18px;
+    border-radius: 8px;
+    border: 1px solid #d0e3ff;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.02);
+}
+
+.account-info {
+    font-size: 1rem;
+    color: #333;
+    line-height: 1.4;
+    word-break: keep-all;
+}
+
+.account-info strong {
+    color: #0056b3;
+    font-weight: 700;
+}
+
+.copy-account-button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 18px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.copy-account-button:hover, .copy-account-button:focus {
+    background-color: #0056b3;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.copy-account-button:active {
+    transform: translateY(0);
+}
+
+@media (max-width: 600px) {
+    .account-box {
+        flex-direction: column;
+        align-items: stretch;
+        text-align: center;
+        gap: 10px;
+    }
+    
+    .account-number {
+        font-size: 1rem;
+    }
+    
+    .copy-account-button {
+        width: 100%;
+        padding: 12px;
+    }
 }
 
 .recommended-videos-container {
