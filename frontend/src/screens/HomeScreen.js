@@ -332,6 +332,12 @@ function HomeScreen() {
         navigator.clipboard.writeText(accountNumber)
             .then(() => {
                 announcePolite('후원 계좌 번호가 복사되었습니다. 따뜻한 후원에 진심으로 감사드립니다.');
+                
+                // Log the copy event to the backend for statistics
+                axios.post('/api/log-donation-copy', {
+                    timestamp: new Date().toISOString(),
+                    userAgent: navigator.userAgent
+                }).catch(err => console.error('Failed to log donation copy event:', err));
             })
             .catch(err => {
                 console.error('복사 실패:', err);

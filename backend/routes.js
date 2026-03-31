@@ -907,4 +907,11 @@ adminRouter.delete('/board/comments/:id', (req, res) => {
 router.use('/admin', adminRouter);
 
 
+// Log donation account copy event for statistics
+router.post('/log-donation-copy', (req, res) => {
+    const { userAgent, timestamp } = req.body;
+    logger.info(`[STATISTICS] Donation account copied. Time: ${timestamp}, UA: ${userAgent}`);
+    res.status(200).json({ success: true });
+});
+
 module.exports = router;
