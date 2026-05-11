@@ -19,6 +19,45 @@ const youtube = google.youtube({ version: 'v3', auth: API_KEY });
 const processingLocks = new Set();
 const timers = new Map();
 
+const getPoToken = async () => {
+    return new Promise((resolve) => {
+        const denoPath = 'deno'; // Assumes deno is in PATH
+        const scriptPath = path.join(__dirname, 'get_pot.ts');
+        
+        // Add --unsafely-ignore-certificate-errors to handle SSL issues in some dev environments
+        const child = spawn(denoPath, ['run', '--allow-net', '--unsafely-ignore-certificate-errors', scriptPath]);
+        let output = '';
+        
+        child.stdout.on('data', (data) => { output += data.toString(); });
+        child.on('close', (code) => {
+            if (code !== 0) {
+                logger.warn(`Deno PO Token generator exited with code ${code}`);
+                return resolve(null);
+            }
+            try {
+                const parsed = JSON.parse(output);
+                if (parsed.error) {
+                    logger.warn(`Deno PO Token error: ${parsed.error}`);
+                    return resolve(null);
+                }
+                resolve(parsed);
+            } catch (e) {
+                logger.warn(`Failed to parse PO Token output: ${output}`);
+                resolve(null);
+            }
+        });
+        
+        // Timeout after 10 seconds
+        setTimeout(() => {
+            if (child.exitCode === null) {
+                child.kill();
+                logger.warn('PO Token generation timed out');
+                resolve(null);
+            }
+        }, 10000);
+    });
+};
+
 const getRandomCookiePath = () => {
     const cookiesDir = path.join(__dirname, 'cookies');
     if (!fs.existsSync(cookiesDir)) {
@@ -188,6 +227,17 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
         const tempVideoFilename = `${videoId}.mp4`;
         const tempVideoPath = path.join(baseTempDir, tempVideoFilename);
 
+        // Fetch PO Token before download
+        const potData = await getPoToken();
+        const potArgs = potData ? [
+            '--extractor-args', 
+            `youtube:player_client=web;po_token=web+${potData.poToken};visitor_data=${potData.visitorData}`
+        ] : [];
+
+        if (potData) {
+            logger.info(`[${requestHash}] Using generated PO Token for download.`);
+        }
+
         await new Promise((resolve, reject) => {
             const ytdlpArgs = [
                 '-f', 'bestvideo[height<=480][ext=mp4]/best[height<=480][ext=mp4]',
@@ -200,6 +250,7 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
                 '--sub-lang', 'ko',
                 ...cookieArgs,
                 ...proxyArgs,
+                ...potArgs,
                 youtubeUrl
             ];
 
