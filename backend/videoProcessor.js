@@ -223,20 +223,9 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
         
         if (sseHandler) sseHandler('status_update', { message: '영상 다운로드 중...' });
 
-        // YT-DLP Call 2: Download video using default downloader (more stable with proxy)
+        // YT-DLP Call: Download video using default downloader
         const tempVideoFilename = `${videoId}.mp4`;
         const tempVideoPath = path.join(baseTempDir, tempVideoFilename);
-
-        // Fetch PO Token before download
-        const potData = await getPoToken();
-        const potArgs = potData ? [
-            '--extractor-args', 
-            `youtube:player_client=web;po_token=web+${potData.poToken};visitor_data=${potData.visitorData}`
-        ] : [];
-
-        if (potData) {
-            logger.info(`[${requestHash}] Using generated PO Token for download.`);
-        }
 
         let downloadSuccess = false;
         let downloadAttempt = 1;
@@ -248,7 +237,7 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
             const cookieArgs = activeCookiePath ? ['--cookies', activeCookiePath] : [];
             
             if (isRetry) {
-                logger.info(`[${requestHash}] Attempt 2: Retrying download without cookies but with POT.`);
+                logger.info(`[${requestHash}] Attempt 2: Retrying download without cookies. Relying on yt-dlp internal solver.`);
                 if (sseHandler) sseHandler('status_update', { message: '봇 감지 우회 재시도 중...' });
             }
 
@@ -260,12 +249,11 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
                         '--force-ipv4',
                         '--legacy-server-connect',
                         '--no-check-certificate',
-                        '--newline', // Output progress on new lines for easier parsing
+                        '--newline', 
                         '--write-auto-sub',
                         '--sub-lang', 'ko',
                         ...cookieArgs,
                         ...proxyArgs,
-                        ...potArgs,
                         youtubeUrl
                     ];
 
@@ -275,7 +263,14 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
                     let stderrData = '';
 
                     downloadProcess.stdout.on('data', (data) => {
-                        stdoutBuffer += data.toString();
+                        const dataStr = data.toString();
+                        stdoutBuffer += dataStr;
+                        
+                        // Monitor for Deno challenge solving
+                        if (dataStr.includes('[jsc:deno]') || dataStr.includes('Solving JS challenges')) {
+                            logger.info(`[${requestHash}] YT-DLP internal solver: ${dataStr.trim()}`);
+                        }
+
                         let match;
                         while ((match = stdoutBuffer.match(/[\r\n]/))) {
                             const lineEndIndex = match.index;
@@ -303,7 +298,11 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
                     });
 
                     downloadProcess.stderr.on('data', (data) => {
-                        stderrData += data.toString();
+                        const dataStr = data.toString();
+                        stderrData += dataStr;
+                        if (dataStr.includes('[jsc:deno]') || dataStr.includes('Solving JS challenges')) {
+                            logger.info(`[${requestHash}] YT-DLP internal solver: ${dataStr.trim()}`);
+                        }
                     });
 
                     downloadProcess.on('close', (code) => {
@@ -312,7 +311,7 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
                             const isBotError = stderrData.includes('confirm you’re not a bot') || stderrData.includes('cookies are no longer valid');
                             if (downloadAttempt === 1 && isBotError && activeCookiePath) {
                                 const invalidPath = activeCookiePath + '.invalid';
-                                logger.warn(`[${requestHash}] Bot detected with cookie ${path.basename(activeCookiePath)}. Invalidating and retrying...`);
+                                logger.warn(`[${requestHash}] Bot detected with cookie ${path.basename(activeCookiePath)}. Invalidating and retrying without cookies...`);
                                 try { fs.renameSync(activeCookiePath, invalidPath); } catch (e) {}
                                 reject({ type: 'bot_detected', message: stderrData });
                             } else {
@@ -592,17 +591,10 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
             const cookieArgs = activeCookiePath ? ['--cookies', activeCookiePath] : [];
 
             if (isRetry) {
-                logger.info(`[${requestHash}] Attempt 2: Retrying batch download without cookies but with POT.`);
+                logger.info(`[${requestHash}] Attempt 2: Retrying batch download without cookies. Relying on yt-dlp internal solver.`);
             }
 
             try {
-                // Fetch PO Token before download
-                const potData = await getPoToken();
-                const potArgs = potData ? [
-                    '--extractor-args', 
-                    `youtube:player_client=web;po_token=web+${potData.poToken};visitor_data=${potData.visitorData}`
-                ] : [];
-
                 await new Promise((resolve, reject) => {
                     const ytdlpArgs = [
                         '-f', 'bestvideo[height<=480][ext=mp4]/best[height<=480][ext=mp4]',
@@ -615,15 +607,25 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
                         '--sub-lang', 'ko',
                         ...cookieArgs,
                         ...proxyArgs,
-                        ...potArgs,
                         youtubeUrl
                     ];
 
                     const downloadProcess = spawn('yt-dlp', ytdlpArgs, { cwd: baseTempDir });
                     let stderrData = '';
 
+                    downloadProcess.stdout.on('data', (data) => {
+                        const dataStr = data.toString();
+                        if (dataStr.includes('[jsc:deno]') || dataStr.includes('Solving JS challenges')) {
+                            logger.info(`[${requestHash}] YT-DLP internal solver (batch): ${dataStr.trim()}`);
+                        }
+                    });
+
                     downloadProcess.stderr.on('data', (data) => {
-                        stderrData += data.toString();
+                        const dataStr = data.toString();
+                        stderrData += dataStr;
+                        if (dataStr.includes('[jsc:deno]') || dataStr.includes('Solving JS challenges')) {
+                            logger.info(`[${requestHash}] YT-DLP internal solver (batch): ${dataStr.trim()}`);
+                        }
                     });
 
                     downloadProcess.on('close', (code) => {
@@ -632,7 +634,7 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
                             const isBotError = stderrData.includes('confirm you’re not a bot') || stderrData.includes('cookies are no longer valid');
                             if (downloadAttempt === 1 && isBotError && activeCookiePath) {
                                 const invalidPath = activeCookiePath + '.invalid';
-                                logger.warn(`[${requestHash}] Bot detected in batch with cookie ${path.basename(activeCookiePath)}. Invalidating and retrying...`);
+                                logger.warn(`[${requestHash}] Bot detected in batch with cookie ${path.basename(activeCookiePath)}. Invalidating and retrying without cookies...`);
                                 try { fs.renameSync(activeCookiePath, invalidPath); } catch (e) {}
                                 reject({ type: 'bot_detected', message: stderrData });
                             } else {
