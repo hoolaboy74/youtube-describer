@@ -238,74 +238,100 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
             logger.info(`[${requestHash}] Using generated PO Token for download.`);
         }
 
-        await new Promise((resolve, reject) => {
-            const ytdlpArgs = [
-                '-f', 'bestvideo[height<=480][ext=mp4]/best[height<=480][ext=mp4]',
-                '-o', tempVideoFilename,
-                '--force-ipv4',
-                '--legacy-server-connect',
-                '--no-check-certificate',
-                '--newline', // Output progress on new lines for easier parsing
-                '--write-auto-sub',
-                '--sub-lang', 'ko',
-                ...cookieArgs,
-                ...proxyArgs,
-                ...potArgs,
-                youtubeUrl
-            ];
+        let downloadSuccess = false;
+        let downloadAttempt = 1;
+        let currentCookiePath = getRandomCookiePath();
 
-            const downloadProcess = spawn('yt-dlp', ytdlpArgs, { cwd: baseTempDir });
-            let lastProgress = -1;
-            let stdoutBuffer = '';
+        while (!downloadSuccess && downloadAttempt <= 2) {
+            const isRetry = downloadAttempt === 2;
+            const activeCookiePath = isRetry ? null : currentCookiePath;
+            const cookieArgs = activeCookiePath ? ['--cookies', activeCookiePath] : [];
+            
+            if (isRetry) {
+                logger.info(`[${requestHash}] Attempt 2: Retrying download without cookies but with POT.`);
+                if (sseHandler) sseHandler('status_update', { message: '봇 감지 우회 재시도 중...' });
+            }
 
-            downloadProcess.stdout.on('data', (data) => {
-                stdoutBuffer += data.toString();
-                
-                // Handle both \n (newline) and \r (carriage return) as line terminators
-                let match;
-                while ((match = stdoutBuffer.match(/[\r\n]/))) {
-                    const lineEndIndex = match.index;
-                    const line = stdoutBuffer.substring(0, lineEndIndex);
-                    
-                    // Remove the terminator (and potentially the following \n if it was \r\n)
-                    if (stdoutBuffer[lineEndIndex] === '\r' && stdoutBuffer[lineEndIndex + 1] === '\n') {
-                        stdoutBuffer = stdoutBuffer.substring(lineEndIndex + 2);
-                    } else {
-                        stdoutBuffer = stdoutBuffer.substring(lineEndIndex + 1);
-                    }
+            try {
+                await new Promise((resolve, reject) => {
+                    const ytdlpArgs = [
+                        '-f', 'bestvideo[height<=480][ext=mp4]/best[height<=480][ext=mp4]',
+                        '-o', tempVideoFilename,
+                        '--force-ipv4',
+                        '--legacy-server-connect',
+                        '--no-check-certificate',
+                        '--newline', // Output progress on new lines for easier parsing
+                        '--write-auto-sub',
+                        '--sub-lang', 'ko',
+                        ...cookieArgs,
+                        ...proxyArgs,
+                        ...potArgs,
+                        youtubeUrl
+                    ];
 
-                    if (line.includes('[download]') && line.includes('%')) {
-                        const match = line.match(/(\d+\.?\d*)%/);
-                        if (match) {
-                            const progress = parseFloat(match[1]);
-                            if (!isNaN(progress)) {
-                                // Reset lastProgress if new download starts (e.g. subtitle 100% -> video 0%)
-                                if (progress < lastProgress && progress < 5) {
-                                    lastProgress = -1;
-                                }
+                    const downloadProcess = spawn('yt-dlp', ytdlpArgs, { cwd: baseTempDir });
+                    let lastProgress = -1;
+                    let stdoutBuffer = '';
+                    let stderrData = '';
 
-                                if (Math.floor(progress) > lastProgress || progress === 100) {
-                                    lastProgress = Math.floor(progress);
-                                    if (sseHandler) sseHandler('status_update', { message: `${Math.round(progress)}%` });
+                    downloadProcess.stdout.on('data', (data) => {
+                        stdoutBuffer += data.toString();
+                        let match;
+                        while ((match = stdoutBuffer.match(/[\r\n]/))) {
+                            const lineEndIndex = match.index;
+                            const line = stdoutBuffer.substring(0, lineEndIndex);
+                            if (stdoutBuffer[lineEndIndex] === '\r' && stdoutBuffer[lineEndIndex + 1] === '\n') {
+                                stdoutBuffer = stdoutBuffer.substring(lineEndIndex + 2);
+                            } else {
+                                stdoutBuffer = stdoutBuffer.substring(lineEndIndex + 1);
+                            }
+
+                            if (line.includes('[download]') && line.includes('%')) {
+                                const match = line.match(/(\d+\.?\d*)%/);
+                                if (match) {
+                                    const progress = parseFloat(match[1]);
+                                    if (!isNaN(progress)) {
+                                        if (progress < lastProgress && progress < 5) lastProgress = -1;
+                                        if (Math.floor(progress) > lastProgress || progress === 100) {
+                                            lastProgress = Math.floor(progress);
+                                            if (sseHandler) sseHandler('status_update', { message: `${Math.round(progress)}%` });
+                                        }
+                                    }
                                 }
                             }
                         }
-                    }
+                    });
+
+                    downloadProcess.stderr.on('data', (data) => {
+                        stderrData += data.toString();
+                    });
+
+                    downloadProcess.on('close', (code) => {
+                        if (code === 0) resolve();
+                        else {
+                            const isBotError = stderrData.includes('confirm you’re not a bot') || stderrData.includes('cookies are no longer valid');
+                            if (downloadAttempt === 1 && isBotError && activeCookiePath) {
+                                const invalidPath = activeCookiePath + '.invalid';
+                                logger.warn(`[${requestHash}] Bot detected with cookie ${path.basename(activeCookiePath)}. Invalidating and retrying...`);
+                                try { fs.renameSync(activeCookiePath, invalidPath); } catch (e) {}
+                                reject({ type: 'bot_detected', message: stderrData });
+                            } else {
+                                reject(new Error(`yt-dlp download failed with code ${code}. Stderr: ${stderrData}`));
+                            }
+                        }
+                    });
+
+                    downloadProcess.on('error', (err) => reject(new Error(`Failed to spawn yt-dlp: ${err.message}`)));
+                });
+                downloadSuccess = true;
+            } catch (err) {
+                if (err.type === 'bot_detected' && downloadAttempt === 1) {
+                    downloadAttempt++;
+                    continue;
                 }
-            });
-
-            let stderrData = '';
-            downloadProcess.stderr.on('data', (data) => {
-                stderrData += data.toString();
-            });
-
-            downloadProcess.on('close', (code) => {
-                if (code === 0) resolve();
-                else reject(new Error(`yt-dlp download failed with code ${code}. Stderr: ${stderrData}`));
-            });
-
-            downloadProcess.on('error', (err) => reject(new Error(`Failed to spawn yt-dlp: ${err.message}`)));
-        });
+                throw err;
+            }
+        }
 
         // Update filesize after download
         if (fs.existsSync(tempVideoPath)) {
@@ -474,17 +500,6 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
         db.updateVideoStatus(videoId, 'failed', errorMessage);
         logger.error(new Error(`[${requestHash}] Error processing request: ${errorMessage}`));
         
-        // Invalidate cookie on auth error
-        if (cookiePath && (errorMessage.includes('Sign in to confirm') || errorMessage.includes('cookies are no longer valid'))) {
-            const invalidPath = cookiePath + '.invalid';
-            logger.warn(`[${requestHash}] Authentication error detected. Renaming cookie file to ${path.basename(invalidPath)}`);
-            try {
-                fs.renameSync(cookiePath, invalidPath);
-            } catch (renameError) {
-                logger.error(`[${requestHash}] Failed to rename invalid cookie file:`, renameError);
-            }
-        }
-
         if (sseHandler) {
             let errorPayload;
             const lowerErrorMessage = errorMessage.toLowerCase();
@@ -567,61 +582,76 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
         const extractionLabel = `[${requestHash}] Initial Data Extraction Time`;
         time(extractionLabel);
 
-        cookiePath = getRandomCookiePath();
-        const cookieArgs = cookiePath ? ['--cookies', cookiePath] : [];
-        const proxyArgs = process.env.YTDLP_PROXY ? ['--proxy', process.env.YTDLP_PROXY] : [];
+        let downloadSuccess = false;
+        let downloadAttempt = 1;
+        let currentCookiePath = getRandomCookiePath();
 
-        // 1. Use Official YouTube API for Metadata (Fast & Safe)
-        const videoResponse = await youtube.videos.list({
-            part: 'snippet,contentDetails,status',
-            id: videoId
-        });
+        while (!downloadSuccess && downloadAttempt <= 2) {
+            const isRetry = downloadAttempt === 2;
+            const activeCookiePath = isRetry ? null : currentCookiePath;
+            const cookieArgs = activeCookiePath ? ['--cookies', activeCookiePath] : [];
 
-        if (!videoResponse.data.items || videoResponse.data.items.length === 0) {
-            throw new Error('Invalid or missing YouTube URL');
+            if (isRetry) {
+                logger.info(`[${requestHash}] Attempt 2: Retrying batch download without cookies but with POT.`);
+            }
+
+            try {
+                // Fetch PO Token before download
+                const potData = await getPoToken();
+                const potArgs = potData ? [
+                    '--extractor-args', 
+                    `youtube:player_client=web;po_token=web+${potData.poToken};visitor_data=${potData.visitorData}`
+                ] : [];
+
+                await new Promise((resolve, reject) => {
+                    const ytdlpArgs = [
+                        '-f', 'bestvideo[height<=480][ext=mp4]/best[height<=480][ext=mp4]',
+                        '-o', tempVideoFilename,
+                        '--force-ipv4',
+                        '--legacy-server-connect',
+                        '--no-check-certificate',
+                        '--no-progress',
+                        '--write-auto-sub',
+                        '--sub-lang', 'ko',
+                        ...cookieArgs,
+                        ...proxyArgs,
+                        ...potArgs,
+                        youtubeUrl
+                    ];
+
+                    const downloadProcess = spawn('yt-dlp', ytdlpArgs, { cwd: baseTempDir });
+                    let stderrData = '';
+
+                    downloadProcess.stderr.on('data', (data) => {
+                        stderrData += data.toString();
+                    });
+
+                    downloadProcess.on('close', (code) => {
+                        if (code === 0) resolve();
+                        else {
+                            const isBotError = stderrData.includes('confirm you’re not a bot') || stderrData.includes('cookies are no longer valid');
+                            if (downloadAttempt === 1 && isBotError && activeCookiePath) {
+                                const invalidPath = activeCookiePath + '.invalid';
+                                logger.warn(`[${requestHash}] Bot detected in batch with cookie ${path.basename(activeCookiePath)}. Invalidating and retrying...`);
+                                try { fs.renameSync(activeCookiePath, invalidPath); } catch (e) {}
+                                reject({ type: 'bot_detected', message: stderrData });
+                            } else {
+                                reject(new Error(`yt-dlp batch download failed with code ${code}. Stderr: ${stderrData}`));
+                            }
+                        }
+                    });
+
+                    downloadProcess.on('error', (err) => reject(new Error(`Failed to spawn yt-dlp in batch: ${err.message}`)));
+                });
+                downloadSuccess = true;
+            } catch (err) {
+                if (err.type === 'bot_detected' && downloadAttempt === 1) {
+                    downloadAttempt++;
+                    continue;
+                }
+                throw err;
+            }
         }
-
-        const videoItem = videoResponse.data.items[0];
-        
-        if (videoItem.status && videoItem.status.embeddable === false) {
-            db.updateVideoStatus(videoId, 'failed', 'embed_disabled');
-            throw new Error('This video cannot be embedded and played on external sites.');
-        }
-
-        const videoTitle = videoItem.snippet.title;
-        const durationIso = videoItem.contentDetails.duration;
-        const totalDuration = parseISO8601Duration(durationIso);
-        let filesize = 0;
-        
-        if (videoItem.snippet.liveBroadcastContent === 'live') throw new Error('Live streams cannot be processed.');
-        const durationLimitMinutes = parseInt(db.getSetting('videoDurationLimit') || '30', 10);
-        if (durationLimitMinutes > 0 && totalDuration >= durationLimitMinutes * 60) {
-            throw new Error(`Video duration (${totalDuration}s) exceeds the limit of ${durationLimitMinutes} minutes.`);
-        }
-
-        db.ensureVideoRecord({ videoId, title: videoTitle, duration: Math.round(totalDuration), filesize });
-
-        let subtitleContent = '';
-        const subtitleFilename = `${videoId}.ko.vtt`;
-        const subtitlePath = path.join(baseTempDir, subtitleFilename);
-        
-        // YT-DLP Call 2: Download video using default downloader (more stable with proxy)
-        const tempVideoFilename = `${videoId}.mp4`;
-        const tempVideoPath = path.join(baseTempDir, tempVideoFilename);
-
-        await util.promisify(execFile)('yt-dlp', [
-            '-f', 'bestvideo[height<=480][ext=mp4]/best[height<=480][ext=mp4]',
-            '-o', tempVideoFilename,
-            '--force-ipv4',
-            '--legacy-server-connect',
-            '--no-check-certificate',
-            '--no-progress',
-            '--write-auto-sub',
-            '--sub-lang', 'ko',
-            ...cookieArgs,
-            ...proxyArgs,
-            youtubeUrl
-        ], { cwd: baseTempDir });
 
         // Update filesize after download
         if (fs.existsSync(tempVideoPath)) {
