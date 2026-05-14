@@ -237,8 +237,18 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
             const cookieArgs = activeCookiePath ? ['--cookies', activeCookiePath] : [];
             
             if (isRetry) {
-                logger.info(`[${requestHash}] Attempt 2: Retrying download without cookies. Relying on yt-dlp internal solver.`);
+                logger.info(`[${requestHash}] Attempt 2: Cleaning up and retrying download without cookies. Relying on yt-dlp internal solver.`);
                 if (sseHandler) sseHandler('status_update', { message: '봇 감지 우회 재시도 중...' });
+                
+                // Clean up any partial files from attempt 1 to ensure a fresh session
+                try {
+                    const files = await fs.promises.readdir(baseTempDir);
+                    for (const file of files) {
+                        await fs.promises.unlink(path.join(baseTempDir, file));
+                    }
+                } catch (cleanupErr) {
+                    logger.warn(`[${requestHash}] Minor error during retry cleanup: ${cleanupErr.message}`);
+                }
             }
 
             try {
@@ -591,7 +601,17 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
             const cookieArgs = activeCookiePath ? ['--cookies', activeCookiePath] : [];
 
             if (isRetry) {
-                logger.info(`[${requestHash}] Attempt 2: Retrying batch download without cookies. Relying on yt-dlp internal solver.`);
+                logger.info(`[${requestHash}] Attempt 2: Cleaning up and retrying batch download without cookies. Relying on yt-dlp internal solver.`);
+
+                // Clean up any partial files from attempt 1 to ensure a fresh session
+                try {
+                    const files = await fs.promises.readdir(baseTempDir);
+                    for (const file of files) {
+                        await fs.promises.unlink(path.join(baseTempDir, file));
+                    }
+                } catch (cleanupErr) {
+                    logger.warn(`[${requestHash}] Minor error during batch retry cleanup: ${cleanupErr.message}`);
+                }
             }
 
             try {
