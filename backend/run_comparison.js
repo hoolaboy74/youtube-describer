@@ -44,9 +44,11 @@ const run = async () => {
         console.time(extractionLabel);
 
         // Get video title
-        const { stdout } = await util.promisify(execFile)('yt-dlp', [
+        const { stdout } = await util.promisify(execFile)('python3', [
+            '-m', 'yt_dlp',
             '-j', // --print-json
             '--no-progress',
+            '--impersonate', 'safari',
             youtubeUrl
         ]);
         const videoInfo = JSON.parse(stdout);
@@ -59,13 +61,15 @@ const run = async () => {
                 let content = '';
                 const subtitlePath = path.join(baseTempDir, 'subtitles.ko.vtt');
                 try {
-                    await util.promisify(execFile)('yt-dlp', [
+                    await util.promisify(execFile)('python3', [
+                        '-m', 'yt_dlp',
                         '--write-auto-sub',
                         '--sub-lang', 'ko',
                         '--sub-format', 'vtt',
                         '--output', `${baseTempDir}/subtitles`,
                         '--skip-download',
                         '--no-progress',
+                        '--impersonate', 'safari',
                         youtubeUrl
                     ]);
                     
@@ -85,9 +89,9 @@ const run = async () => {
             (async () => {
                 const extractedTimestamps = [];
                 await new Promise((resolve, reject) => {
-                    const ytdlpArgs = ['-f', 'bestvideo[height<=480][ext=mp4]/best[height<=480][ext=mp4]', '-o', '-', '--no-progress', youtubeUrl];
+                    const ytdlpArgs = ['-m', 'yt_dlp', '-f', 'bestvideo[height<=480][ext=mp4]/best[height<=480][ext=mp4]', '-o', '-', '--no-progress', '--impersonate', 'safari', youtubeUrl];
                     const ffmpegArgs = ['-i', '-', '-vf', "select='gt(scene,0.4)',showinfo", '-vsync', 'vfr', path.join(baseTempDir, 'frame-%04d.png')];
-                    const ytdlpProcess = spawn('yt-dlp', ytdlpArgs);
+                    const ytdlpProcess = spawn('python3', ytdlpArgs);
                     const ffmpegProcess = spawn('ffmpeg', ffmpegArgs);
                     
                     ytdlpProcess.stdout.pipe(ffmpegProcess.stdin);

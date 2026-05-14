@@ -254,11 +254,13 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
             try {
                 await new Promise((resolve, reject) => {
                     const ytdlpArgs = [
+                        '-m', 'yt_dlp',
                         '-f', 'bestvideo[height<=480][ext=mp4]/best[height<=480][ext=mp4]',
                         '-o', tempVideoFilename,
                         '--force-ipv4',
                         '--legacy-server-connect',
                         '--no-check-certificate',
+                        '--impersonate', 'safari',
                         '--newline', 
                         '--write-auto-sub',
                         '--sub-lang', 'ko',
@@ -267,7 +269,8 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
                         youtubeUrl
                     ];
 
-                    const downloadProcess = spawn('yt-dlp', ytdlpArgs, { cwd: baseTempDir });
+                    logger.info(`[${requestHash}] Executing YT-DLP: python3 ${ytdlpArgs.join(' ')}`);
+                    const downloadProcess = spawn('python3', ytdlpArgs, { cwd: baseTempDir });
                     let lastProgress = -1;
                     let stdoutBuffer = '';
                     let stderrData = '';
@@ -617,11 +620,13 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
             try {
                 await new Promise((resolve, reject) => {
                     const ytdlpArgs = [
+                        '-m', 'yt_dlp',
                         '-f', 'bestvideo[height<=480][ext=mp4]/best[height<=480][ext=mp4]',
                         '-o', tempVideoFilename,
                         '--force-ipv4',
                         '--legacy-server-connect',
                         '--no-check-certificate',
+                        '--impersonate', 'safari',
                         '--no-progress',
                         '--write-auto-sub',
                         '--sub-lang', 'ko',
@@ -630,7 +635,8 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
                         youtubeUrl
                     ];
 
-                    const downloadProcess = spawn('yt-dlp', ytdlpArgs, { cwd: baseTempDir });
+                    logger.info(`[${requestHash}] Executing YT-DLP: python3 ${ytdlpArgs.join(' ')}`);
+                    const downloadProcess = spawn('python3', ytdlpArgs, { cwd: baseTempDir });
                     let stderrData = '';
 
                     downloadProcess.stdout.on('data', (data) => {

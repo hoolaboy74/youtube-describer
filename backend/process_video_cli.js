@@ -28,7 +28,7 @@ const exec = util.promisify(execFile);
 // --- Metadata Helper ---
 const getMetadata = async (url) => {
     try {
-        const { stdout } = await exec('yt-dlp', ['--dump-json', '--no-playlist', url], { maxBuffer: 1024 * 1024 * 10 });
+        const { stdout } = await exec('python3', ['-m', 'yt_dlp', '--dump-json', '--no-playlist', '--impersonate', 'safari', url], { maxBuffer: 1024 * 1024 * 10 });
         const data = JSON.parse(stdout);
         
         const videoId = data.id;
@@ -171,14 +171,18 @@ const main = async () => {
     if (!fs.existsSync(fullVideoPath)) {
         console.log(`[CLI] Step 1: Downloading full video & ${isKoreanVideo ? 'Korean' : 'Source'} subtitles...`);
         try {
-            await exec('yt-dlp', [
+            const ytdlpArgs = [
+                '-m', 'yt_dlp',
                 '-f', 'bestvideo[height<=480][ext=mp4]+bestaudio[ext=m4a]/best[height<=480][ext=mp4]', 
                 '-o', fullVideoPath,
                 '--force-ipv4',
                 '--no-check-certificate',
+                '--impersonate', 'safari',
                 ...subArgs,
                 VIDEO_URL
-            ], { cwd: TEMP_DIR });
+            ];
+            console.log(`[CLI] Executing: python3 ${ytdlpArgs.join(' ')}`);
+            await exec('python3', ytdlpArgs, { cwd: TEMP_DIR });
             console.log('[CLI] Download complete.');
         } catch (err) { 
             console.error('[CLI] Download Failed:', err.message); 

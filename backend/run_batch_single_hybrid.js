@@ -46,12 +46,12 @@ const run = async () => {
         const extractionLabel = `[${requestHash}] Initial Data Extraction Time`;
         console.time(extractionLabel);
 
-        const [videoTitle, { nonSpeechIntervals, totalDuration }, allTimestamps] = await Promise.all([
-            util.promisify(execFile)('yt-dlp', ['--get-title', '--encoding', 'utf-8', '--no-progress', '--cookies', 'cookies.txt', youtubeUrl]).then(result => result.stdout.trim()),
+        const [videoTitle, { totalDuration }, allTimestamps] = await Promise.all([
+            util.promisify(execFile)('python3', ['-m', 'yt_dlp', '--get-title', '--encoding', 'utf-8', '--no-progress', '--impersonate', 'safari', '--cookies', 'cookies.txt', youtubeUrl]).then(result => result.stdout.trim()),
             (async () => {
                 const audioPath = path.join(baseTempDir, 'audio.wav');
                 const downloadedAudio = path.join(baseTempDir, 'audio_source.m4a');
-                await util.promisify(execFile)('yt-dlp', ['-f', 'bestaudio', '-o', downloadedAudio, '--no-progress', '--cookies', 'cookies.txt', youtubeUrl]);
+                await util.promisify(execFile)('python3', ['-m', 'yt_dlp', '-f', 'bestaudio', '-o', downloadedAudio, '--no-progress', '--impersonate', 'safari', '--cookies', 'cookies.txt', youtubeUrl]);
                 const metadata = await util.promisify(ffmpeg.ffprobe)(downloadedAudio);
                 const duration = metadata.format.duration;
                 await new Promise((resolve, reject) => {
@@ -87,9 +87,9 @@ const run = async () => {
             (async () => {
                 const extractedTimestamps = [];
                 await new Promise((resolve, reject) => {
-                    const ytdlpArgs = ['-f', 'bestvideo[height<=720][ext=mp4]/best[height<=720][ext=mp4]', '-o', '-', '--no-progress', '--cookies', 'cookies.txt', youtubeUrl];
-                    const ffmpegArgs = ['-i', '-', '-vf', "select='gt(scene,0.4)+eq(mod(n,150),0)',showinfo", '-vsync', 'vfr', path.join(baseTempDir, 'frame-%04d.png')];
-                    const ytdlpProcess = spawn('yt-dlp', ytdlpArgs);
+                    const ytdlpArgs = ['-m', 'yt_dlp', '-f', 'bestvideo[height<=720][ext=mp4]/best[height<=720][ext=mp4]', '-o', '-', '--no-progress', '--impersonate', 'safari', '--cookies', 'cookies.txt', youtubeUrl];
+                    const ffmpegArgs = ['-i', '-', '-vf', "select='gt(scene,0.4)',showinfo", '-vsync', 'vfr', path.join(baseTempDir, 'frame-%04d.png')];
+                    const ytdlpProcess = spawn('python3', ytdlpArgs);
                     const ffmpegProcess = spawn('ffmpeg', ffmpegArgs);
                     ytdlpProcess.stdout.pipe(ffmpegProcess.stdin);
                     let ffmpegStderr = '';
