@@ -268,7 +268,7 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
                         youtubeUrl
                     ];
 
-                    const ytdlpPath = '/usr/local/bin/yt-dlp';
+                    const ytdlpPath = 'yt-dlp';
                     logger.info(`[${requestHash}] Executing YT-DLP: ${ytdlpPath} ${ytdlpArgs.join(' ')}`);
                     const downloadProcess = spawn(ytdlpPath, ytdlpArgs, { cwd: baseTempDir });
                     let lastProgress = -1;
@@ -634,7 +634,7 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
                         youtubeUrl
                     ];
 
-                    const ytdlpPath = '/usr/local/bin/yt-dlp';
+                    const ytdlpPath = 'yt-dlp';
                     logger.info(`[${requestHash}] Executing YT-DLP: ${ytdlpPath} ${ytdlpArgs.join(' ')}`);
                     const downloadProcess = spawn(ytdlpPath, ytdlpArgs, { cwd: baseTempDir });
                     let stderrData = '';
