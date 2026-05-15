@@ -254,7 +254,6 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
             try {
                 await new Promise((resolve, reject) => {
                     const ytdlpArgs = [
-                        '-m', 'yt_dlp',
                         '-f', 'bestvideo[height<=480][ext=mp4]/best[height<=480][ext=mp4]',
                         '-o', tempVideoFilename,
                         '--force-ipv4',
@@ -269,8 +268,9 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
                         youtubeUrl
                     ];
 
-                    logger.info(`[${requestHash}] Executing YT-DLP: python3 ${ytdlpArgs.join(' ')}`);
-                    const downloadProcess = spawn('python3', ytdlpArgs, { cwd: baseTempDir });
+                    const ytdlpPath = '/usr/local/bin/yt-dlp';
+                    logger.info(`[${requestHash}] Executing YT-DLP: ${ytdlpPath} ${ytdlpArgs.join(' ')}`);
+                    const downloadProcess = spawn(ytdlpPath, ytdlpArgs, { cwd: baseTempDir });
                     let lastProgress = -1;
                     let stdoutBuffer = '';
                     let stderrData = '';
@@ -620,7 +620,6 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
             try {
                 await new Promise((resolve, reject) => {
                     const ytdlpArgs = [
-                        '-m', 'yt_dlp',
                         '-f', 'bestvideo[height<=480][ext=mp4]/best[height<=480][ext=mp4]',
                         '-o', tempVideoFilename,
                         '--force-ipv4',
@@ -635,8 +634,9 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
                         youtubeUrl
                     ];
 
-                    logger.info(`[${requestHash}] Executing YT-DLP: python3 ${ytdlpArgs.join(' ')}`);
-                    const downloadProcess = spawn('python3', ytdlpArgs, { cwd: baseTempDir });
+                    const ytdlpPath = '/usr/local/bin/yt-dlp';
+                    logger.info(`[${requestHash}] Executing YT-DLP: ${ytdlpPath} ${ytdlpArgs.join(' ')}`);
+                    const downloadProcess = spawn(ytdlpPath, ytdlpArgs, { cwd: baseTempDir });
                     let stderrData = '';
 
                     downloadProcess.stdout.on('data', (data) => {
