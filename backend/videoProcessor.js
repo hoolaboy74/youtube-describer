@@ -262,7 +262,8 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
                         '--impersonate', 'safari',
                         '--newline', 
                         '--write-auto-sub',
-                        '--sub-lang', 'ko',
+                        '--write-sub',
+                        '--sub-lang', 'ko,en',
                         ...cookieArgs,
                         ...proxyArgs,
                         youtubeUrl
@@ -628,7 +629,9 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
                         '--impersonate', 'safari',
                         '--no-progress',
                         '--write-auto-sub',
-                        '--sub-lang', 'ko,en.*',
+                        '--write-auto-sub',
+                        '--write-sub',
+                        '--sub-lang', 'ko,en',
                         ...cookieArgs,
                         ...proxyArgs,
                         youtubeUrl
