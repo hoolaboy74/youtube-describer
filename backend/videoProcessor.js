@@ -729,7 +729,8 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
             finalSubtitlePath = path.join(baseTempDir, koSub);
             logger.info(`[${requestHash}] Found Korean subtitles (batch): ${koSub}`);
         } else {
-            const enSub = potentialSubtitles.find(f => f.includes('.en.'));
+            // Support en, en-US, en-en, etc.
+            const enSub = potentialSubtitles.find(f => f.includes('.en.') || f.includes('.en-'));
             if (enSub) {
                 finalSubtitlePath = path.join(baseTempDir, enSub);
                 logger.info(`[${requestHash}] Korean subtitles not found in batch. Using English fallback: ${enSub}`);
@@ -792,9 +793,11 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
         const scriptLines = scriptText.split('\n');
 
         const finalScriptData = scriptLines.map((line) => {
-            const match = line.match(/^\s*\[(\d+)\]\s*\[(v\d|txt)\]\s*(.*)\s*$/);
+            // More flexible regex to handle AI's numeric-ish timestamps like [7...]
+            const match = line.match(/^\s*\[(\d+)[^\]]*\]\s*\[(v\d|txt)\]\s*(.*)\s*$/);
             if (!match) return null;
-            return { id: crypto.createHash('sha256').update(line).digest('hex'), timestamp: parseInt(match[1], 10) === 0 ? 1 : parseInt(match[1], 10), text: match[3].trim(), verbosity: match[2] === 'txt' ? 'text' : match[2] };
+            const timestamp = parseInt(match[1], 10);
+            return { id: crypto.createHash('sha256').update(line).digest('hex'), timestamp: timestamp === 0 ? 1 : timestamp, text: match[3].trim(), verbosity: match[2] === 'txt' ? 'text' : match[2] };
         }).filter(Boolean);
 
         finalScriptData.sort((a, b) => a.timestamp - b.timestamp);

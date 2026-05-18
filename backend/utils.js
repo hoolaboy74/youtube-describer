@@ -19,19 +19,21 @@ function getYoutubeVideoId(url) {
     return null;
 }
 
-// Function to convert VTT timestamps to seconds
+// Function to convert VTT timestamps to seconds and cleanup content
 function preprocessVtt(vttContent) {
     if (!vttContent) return '';
 
-    // This regex captures HH:MM:SS.mmm format and converts it to seconds
-    return vttContent.replace(/(\d{2}):(\d{2}):(\d{2})\.(\d{3})/g, (match, hh, mm, ss, ms) => {
-        const hours = parseInt(hh, 10);
-        const minutes = parseInt(mm, 10);
-        const seconds = parseInt(ss, 10);
-        const milliseconds = parseInt(ms, 10);
-        const totalSeconds = hours * 3600 + minutes * 60 + seconds + milliseconds / 1000;
-        return `(${totalSeconds.toFixed(1)}s)`; // Returns (123.5s) format
-    });
+    return vttContent
+        .replace(/WEBVTT\n/g, '') // Remove header
+        .replace(/Kind:.*\n/g, '') // Remove Kind metadata
+        .replace(/Language:.*\n/g, '') // Remove Language metadata
+        .replace(/<[^>]*>/g, '') // Remove HTML tags
+        .replace(/(\d{2}):(\d{2}):(\d{2})\.(\d{3}) --> (\d{2}):(\d{2}):(\d{2})\.(\d{3})/g, (match, hh, mm, ss, ms, hh2, mm2, ss2, ms2) => {
+            const toSec = (h, m, s, msec) => parseInt(h, 10) * 3600 + parseInt(m, 10) * 60 + parseInt(s, 10) + parseInt(msec, 10) / 1000;
+            return `(${toSec(hh, mm, ss, ms).toFixed(1)}s) --> (${toSec(hh2, mm2, ss2, ms2).toFixed(1)}s)`;
+        })
+        .replace(/\n{2,}/g, '\n') // Remove multiple newlines
+        .trim();
 }
 
 
