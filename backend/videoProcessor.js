@@ -628,7 +628,7 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
                         '--impersonate', 'safari',
                         '--no-progress',
                         '--write-auto-sub',
-                        '--sub-lang', 'ko',
+                        '--sub-lang', 'ko,en.*',
                         ...cookieArgs,
                         ...proxyArgs,
                         youtubeUrl
@@ -720,11 +720,27 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
             });
         });
 
-        if (subtitlePath && fs.existsSync(subtitlePath)) {
-            subtitleContent = preprocessVtt(fs.readFileSync(subtitlePath, 'utf-8'));
+        // Load subtitle for batch: Prioritize Korean, fallback to English
+        let finalSubtitlePath = null;
+        const potentialSubtitles = fs.readdirSync(baseTempDir).filter(f => f.endsWith('.vtt'));
+        
+        const koSub = potentialSubtitles.find(f => f.includes('.ko.'));
+        if (koSub) {
+            finalSubtitlePath = path.join(baseTempDir, koSub);
+            logger.info(`[${requestHash}] Found Korean subtitles (batch): ${koSub}`);
+        } else {
+            const enSub = potentialSubtitles.find(f => f.includes('.en.'));
+            if (enSub) {
+                finalSubtitlePath = path.join(baseTempDir, enSub);
+                logger.info(`[${requestHash}] Korean subtitles not found in batch. Using English fallback: ${enSub}`);
+            }
+        }
+
+        if (finalSubtitlePath && fs.existsSync(finalSubtitlePath)) {
+            subtitleContent = preprocessVtt(fs.readFileSync(finalSubtitlePath, 'utf-8'));
             logger.info(`[${requestHash}] Successfully loaded subtitles for batch.`);
         } else {
-            logger.warn(`[${requestHash}] Subtitle file not found for batch.`);
+            logger.warn(`[${requestHash}] No suitable subtitle file found for batch (tried ko, en).`);
         }
 
         timeEnd(extractionLabel);
