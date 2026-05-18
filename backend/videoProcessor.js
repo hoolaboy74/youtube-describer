@@ -404,11 +404,28 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
             });
         });
         
-        if (subtitlePath && fs.existsSync(subtitlePath)) {
-            subtitleContent = preprocessVtt(fs.readFileSync(subtitlePath, 'utf-8'));
+        // Load subtitle: Prioritize Korean, fallback to English
+        let finalSubtitlePath = null;
+        const potentialSubtitles = fs.readdirSync(baseTempDir).filter(f => f.endsWith('.vtt'));
+        
+        const koSub = potentialSubtitles.find(f => f.includes('.ko.'));
+        if (koSub) {
+            finalSubtitlePath = path.join(baseTempDir, koSub);
+            logger.info(`[${requestHash}] Found Korean subtitles: ${koSub}`);
+        } else {
+            // Support en, en-US, en-en, etc.
+            const enSub = potentialSubtitles.find(f => f.includes('.en.') || f.includes('.en-'));
+            if (enSub) {
+                finalSubtitlePath = path.join(baseTempDir, enSub);
+                logger.info(`[${requestHash}] Korean subtitles not found. Using English fallback: ${enSub}`);
+            }
+        }
+
+        if (finalSubtitlePath && fs.existsSync(finalSubtitlePath)) {
+            subtitleContent = preprocessVtt(fs.readFileSync(finalSubtitlePath, 'utf-8'));
             logger.info(`[${requestHash}] Successfully loaded and preprocessed subtitles.`);
         } else {
-            logger.warn(`[${requestHash}] Subtitle file not found. Proceeding without subtitles.`);
+            logger.warn(`[${requestHash}] No suitable subtitle file found (tried ko, en). Proceeding without subtitles.`);
         }
 
         timeEnd(extractionLabel);
