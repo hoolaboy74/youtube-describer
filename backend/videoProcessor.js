@@ -476,9 +476,11 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
                     const completeLines = scriptBuffer.substring(0, lastNewline).split('\n');
                     scriptBuffer = scriptBuffer.substring(lastNewline + 1);
                     const newScriptData = completeLines.map(line => {
-                        const match = line.match(/^\s*\[(\d+)\]\s*\[(v\d|txt)\]\s*(.*)\s*$/);
+                        // More flexible regex to handle AI's numeric-ish timestamps like [7...]
+                        const match = line.match(/^\s*\[(\d+)[^\]]*\]\s*\[(v\d|txt)\]\s*(.*)\s*$/);
                         if (!match) return null;
-                        return { id: crypto.createHash('sha256').update(line).digest('hex'), timestamp: parseInt(match[1], 10) === 0 ? 1 : parseInt(match[1], 10), text: match[3].trim(), verbosity: match[2] === 'txt' ? 'text' : match[2] };
+                        const timestamp = parseInt(match[1], 10);
+                        return { id: crypto.createHash('sha256').update(line).digest('hex'), timestamp: timestamp === 0 ? 1 : timestamp, text: match[3].trim(), verbosity: match[2] === 'txt' ? 'text' : match[2] };
                     }).filter(Boolean);
 
                     if (newScriptData.length > 0) {
@@ -496,9 +498,11 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
         
         if (scriptBuffer.trim()) {
             const finalLines = scriptBuffer.split('\n').map(line => {
-                const match = line.match(/^\s*\[(\d+)\]\s*\[(v\d|txt)\]\s*(.*)\s*$/);
+                // More flexible regex to handle AI's numeric-ish timestamps like [7...]
+                const match = line.match(/^\s*\[(\d+)[^\]]*\]\s*\[(v\d|txt)\]\s*(.*)\s*$/);
                 if (!match) return null;
-                return { id: crypto.createHash('sha256').update(line).digest('hex'), timestamp: parseInt(match[1], 10) === 0 ? 1 : parseInt(match[1], 10), text: match[3].trim(), verbosity: match[2] === 'txt' ? 'text' : match[2] };
+                const timestamp = parseInt(match[1], 10);
+                return { id: crypto.createHash('sha256').update(line).digest('hex'), timestamp: timestamp === 0 ? 1 : timestamp, text: match[3].trim(), verbosity: match[2] === 'txt' ? 'text' : match[2] };
             }).filter(Boolean);
             if (finalLines.length > 0) {
                 if (sseHandler) sseHandler('script_chunk', finalLines);
