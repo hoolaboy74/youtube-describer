@@ -479,8 +479,11 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
                         // More flexible regex to handle AI's numeric-ish timestamps like [7...]
                         const match = line.match(/^\s*\[(\d+)[^\]]*\]\s*\[(v\d|txt)\]\s*(.*)\s*$/);
                         if (!match) return null;
-                        const timestamp = parseInt(match[1], 10);
-                        return { id: crypto.createHash('sha256').update(line).digest('hex'), timestamp: timestamp === 0 ? 1 : timestamp, text: match[3].trim(), verbosity: match[2] === 'txt' ? 'text' : match[2] };
+                        let timestamp = parseInt(match[1], 10);
+                        if (timestamp === 0) timestamp = 1;
+                        if (timestamp > totalDuration + 2) return null;
+                        timestamp = Math.min(timestamp, Math.floor(totalDuration));
+                        return { id: crypto.createHash('sha256').update(line).digest('hex'), timestamp, text: match[3].trim(), verbosity: match[2] === 'txt' ? 'text' : match[2] };
                     }).filter(Boolean);
 
                     if (newScriptData.length > 0) {
@@ -501,8 +504,11 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
                 // More flexible regex to handle AI's numeric-ish timestamps like [7...]
                 const match = line.match(/^\s*\[(\d+)[^\]]*\]\s*\[(v\d|txt)\]\s*(.*)\s*$/);
                 if (!match) return null;
-                const timestamp = parseInt(match[1], 10);
-                return { id: crypto.createHash('sha256').update(line).digest('hex'), timestamp: timestamp === 0 ? 1 : timestamp, text: match[3].trim(), verbosity: match[2] === 'txt' ? 'text' : match[2] };
+                let timestamp = parseInt(match[1], 10);
+                if (timestamp === 0) timestamp = 1;
+                if (timestamp > totalDuration + 2) return null;
+                timestamp = Math.min(timestamp, Math.floor(totalDuration));
+                return { id: crypto.createHash('sha256').update(line).digest('hex'), timestamp, text: match[3].trim(), verbosity: match[2] === 'txt' ? 'text' : match[2] };
             }).filter(Boolean);
             if (finalLines.length > 0) {
                 if (sseHandler) sseHandler('script_chunk', finalLines);
@@ -820,8 +826,17 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
             // More flexible regex to handle AI's numeric-ish timestamps like [7...]
             const match = line.match(/^\s*\[(\d+)[^\]]*\]\s*\[(v\d|txt)\]\s*(.*)\s*$/);
             if (!match) return null;
-            const timestamp = parseInt(match[1], 10);
-            return { id: crypto.createHash('sha256').update(line).digest('hex'), timestamp: timestamp === 0 ? 1 : timestamp, text: match[3].trim(), verbosity: match[2] === 'txt' ? 'text' : match[2] };
+            let timestamp = parseInt(match[1], 10);
+            if (timestamp === 0) timestamp = 1;
+            
+            // Safety check: ignore timestamps that exceed total video duration significantly
+            if (timestamp > totalDuration + 2) {
+                logger.warn(`[${requestHash}] Ignoring out-of-bounds timestamp: ${timestamp} (Max: ${totalDuration})`);
+                return null;
+            }
+            timestamp = Math.min(timestamp, Math.floor(totalDuration));
+            
+            return { id: crypto.createHash('sha256').update(line).digest('hex'), timestamp, text: match[3].trim(), verbosity: match[2] === 'txt' ? 'text' : match[2] };
         }).filter(Boolean);
 
         finalScriptData.sort((a, b) => a.timestamp - b.timestamp);
