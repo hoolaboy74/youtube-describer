@@ -1104,6 +1104,7 @@ router.post('/auth/register', async (req, res) => {
             const imageBuffer = Buffer.from(base64Data, 'base64');
 
             const ocrResult = await verifyCardOCR(imageBuffer, mimeType, name, birthdate);
+            logger.info(`[Card OCR Result] Name: ${name}, Birthdate: ${birthdate}, Result: ${JSON.stringify(ocrResult)}`);
             detailLogs = JSON.stringify(ocrResult);
 
             if (ocrResult.isValidCard) {
