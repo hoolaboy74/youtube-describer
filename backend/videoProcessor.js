@@ -649,6 +649,11 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
 
         await fs.promises.mkdir(baseTempDir, { recursive: true });
 
+        const tempVideoFilename = `${videoId}.mp4`;
+        const tempVideoPath = path.join(baseTempDir, tempVideoFilename);
+        let filesize = 0;
+        const proxyArgs = process.env.YTDLP_PROXY ? ['--proxy', process.env.YTDLP_PROXY] : [];
+
         logger.info(`[${requestHash}] Step 1: Starting initial data extraction...`);
         const extractionLabel = `[${requestHash}] Initial Data Extraction Time`;
         time(extractionLabel);
