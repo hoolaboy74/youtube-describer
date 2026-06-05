@@ -135,7 +135,20 @@ async function verifyCardOCR(imageBuffer, mimeType, userName, birthDate) {
         const genAI = new GoogleGenerativeAI(geminiApiKey);
         const model = genAI.getGenerativeModel({
             model: "gemini-2.5-flash",
-            generationConfig: { responseMimeType: "application/json" }
+            generationConfig: { 
+                responseMimeType: "application/json",
+                responseSchema: {
+                    type: "object",
+                    properties: {
+                        isValidCard: { type: "boolean" },
+                        nameMatched: { type: "boolean" },
+                        birthDateMatched: { type: "boolean" },
+                        isVisualImpairment: { type: "boolean" },
+                        confidenceScore: { type: "number" }
+                    },
+                    required: ["isValidCard", "nameMatched", "birthDateMatched", "isVisualImpairment", "confidenceScore"]
+                }
+            }
         });
 
         const imagePart = {
