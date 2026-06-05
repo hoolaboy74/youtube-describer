@@ -1,9 +1,15 @@
 const path = require('path');
+const fs = require('fs');
 const Database = require('better-sqlite3');
 const logger = require('./logger');
 const crypto = require('crypto');
 
-const dbPath = path.join(__dirname, 'db', 'cache.db');
+const dbDir = path.join(__dirname, 'db');
+if (!fs.existsSync(dbDir)) {
+  fs.mkdirSync(dbDir, { recursive: true });
+}
+
+const dbPath = path.join(dbDir, 'cache.db');
 const db = new Database(dbPath);
 
 // DB 초기화: 테이블 생성
