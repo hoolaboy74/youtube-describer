@@ -185,15 +185,15 @@ function RegisterScreen() {
                     </div>
 
                     <div className="form-group">
-                        <label className="form-label" htmlFor="birthdate">생년월일 (8자리)</label>
+                        <label className="form-label" htmlFor="birthdate">생년월일 (8자리 숫자만)</label>
                         <input
                             type="text"
                             id="birthdate"
                             className="form-input"
                             value={birthdate}
-                            onChange={(e) => setBirthdate(e.target.value)}
+                            onChange={(e) => setBirthdate(e.target.value.replace(/[^0-9]/g, ''))}
                             required
-                            placeholder={birthdate ? "" : "예: 1990-01-01"}
+                            placeholder={birthdate ? "" : "예: 19900101"}
                         />
                     </div>
 
@@ -204,7 +204,7 @@ function RegisterScreen() {
                             id="phone"
                             className="form-input"
                             value={phone}
-                            onChange={(e) => setPhone(e.target.value)}
+                            onChange={(e) => setPhone(e.target.value.replace(/[^0-9]/g, ''))}
                             required
                             placeholder={phone ? "" : "예: 01012345678"}
                         />
