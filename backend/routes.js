@@ -4,9 +4,20 @@ const { TextToSpeechClient } = require('@google-cloud/text-to-speech');
 const fs = require('fs');
 const path = require('path');
 const db = require('./database');
-const { getYoutubeVideoId } = require('./utils');
 const { processVideo, processVideoBatch } = require('./videoProcessor');
+const { 
+    getYoutubeVideoId, 
+    hashPassword, 
+    verifyPassword, 
+    verifySiloamMember, 
+    verifyCardOCR 
+} = require('./utils');
 const logger = require('./logger');
+
+// JWT 기반 세션 관리 설정
+const jwt = require('jsonwebtoken');
+const JWT_SECRET = process.env.JWT_SECRET || 'momcenter-jwt-secret-key-!!!';
+const JWT_EXPIRES_IN = '30d';
 
 const router = express.Router();
 // Initialize Google Cloud Text-to-Speech Client
@@ -198,8 +209,71 @@ router.post('/tts', async (req, res) => {
     }
 });
 
+// 인증 미들웨어: 로그인 완료된 회원만 허용 (시각장애인 여부 상관없음)
+function requireAuth(req, res, next) {
+    let token = null;
+    const authHeader = req.headers['authorization'];
+    
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+        token = authHeader.split(' ')[1];
+    } else if (req.query.token) {
+        token = req.query.token;
+    }
+
+    if (!token) {
+        return res.status(401).json({ error: '로그인이 필요한 서비스입니다.' });
+    }
+
+    try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        const user = db.getUserById(decoded.userId);
+        if (!user) {
+            return res.status(401).json({ error: '사용자를 찾을 수 없습니다. 다시 로그인해 주십시오.' });
+        }
+        req.user = user;
+        next();
+    } catch (e) {
+        logger.warn('[Auth] Invalid or expired JWT token:', e.message);
+        return res.status(401).json({ error: '인증 세션이 만료되었습니다. 다시 로그인해 주십시오.' });
+    }
+}
+
+// 인증 미들웨어: 로그인 완료 및 시각장애인으로 인증된 회원만 허용
+function requireBlindAuth(req, res, next) {
+    let token = null;
+    const authHeader = req.headers['authorization'];
+    
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+        token = authHeader.split(' ')[1];
+    } else if (req.query.token) {
+        token = req.query.token; // SSE(EventSource) 헤더 미지원 우회 처리
+    }
+
+    if (!token) {
+        return res.status(401).json({ error: '로그인이 필요한 서비스입니다.' });
+    }
+
+    try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        const user = db.getUserById(decoded.userId);
+        if (!user) {
+            return res.status(401).json({ error: '사용자를 찾을 수 없습니다. 다시 로그인해 주십시오.' });
+        }
+
+        if (user.is_blind !== 1) {
+            return res.status(403).json({ error: '시각장애인 인증이 완료된 회원만 신규 해설 생성이 가능합니다.' });
+        }
+
+        req.user = user;
+        next();
+    } catch (e) {
+        logger.warn('[Auth] Invalid or expired JWT token:', e.message);
+        return res.status(401).json({ error: '인증 세션이 만료되었습니다. 다시 로그인해 주십시오.' });
+    }
+}
+
 // --- MAIN PROCESSING API ENDPOINT (SSE) ---
-router.get('/process', async (req, res) => {
+router.get('/process', requireBlindAuth, async (req, res) => {
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
@@ -239,7 +313,7 @@ router.get('/process', async (req, res) => {
         }
 
         // Use the refactored processor, which now includes the duration check
-        await processVideo(videoId, youtubeUrl, sendSse);
+        await processVideo(videoId, youtubeUrl, sendSse, req.user.id);
         res.end();
 
     } catch (error) {
@@ -425,7 +499,19 @@ boardRouter.post('/posts', (req, res) => {
             }
         }
 
-        const newPostId = db.createPost({ title, content, nickname, password, is_notice: isNoticeBool });
+        let userId = null;
+        const authHeader = req.headers['authorization'];
+        if (authHeader && authHeader.startsWith('Bearer ')) {
+            const token = authHeader.split(' ')[1];
+            try {
+                const decoded = jwt.verify(token, JWT_SECRET);
+                userId = decoded.userId;
+            } catch (e) {
+                logger.debug('[Board] Optional token verification failed:', e.message);
+            }
+        }
+
+        const newPostId = db.createPost({ title, content, nickname, password, is_notice: isNoticeBool, userId });
         const newPost = db.getPost(newPostId);
         res.status(201).json(newPost);
     } catch (error) {
@@ -506,7 +592,20 @@ boardRouter.post('/posts/:id/comments', (req, res) => {
         if (!nickname || !password || !content) {
             return res.status(400).json({ error: 'Missing required fields' });
         }
-        const newCommentId = db.createPostComment({ postId, nickname, password, content });
+
+        let userId = null;
+        const authHeader = req.headers['authorization'];
+        if (authHeader && authHeader.startsWith('Bearer ')) {
+            const token = authHeader.split(' ')[1];
+            try {
+                const decoded = jwt.verify(token, JWT_SECRET);
+                userId = decoded.userId;
+            } catch (e) {
+                logger.debug('[Board] Optional token verification failed for comment:', e.message);
+            }
+        }
+
+        const newCommentId = db.createPostComment({ postId, nickname, password, content, userId });
         const newComment = db.getPostCommentById(newCommentId);
         res.status(201).json({
             id: newComment.id,
@@ -903,15 +1002,398 @@ adminRouter.delete('/board/comments/:id', (req, res) => {
     }
 });
 
+// GET list of users pending manual blind verification (is_blind = 9)
+adminRouter.get('/pending-users', (req, res) => {
+    try {
+        const users = db.listPendingUsers();
+        res.json(users);
+    } catch (error) {
+        logger.error('[Admin] Failed to fetch pending users:', error);
+        res.status(500).json({ error: 'Failed to fetch pending users' });
+    }
+});
+
+// POST approve a pending user
+adminRouter.post('/users/:userId/approve', (req, res) => {
+    try {
+        const { userId } = req.params;
+        const success = db.updateUserBlindStatus(userId, 1); // 1 = approved (blind)
+        if (success) {
+            logger.info(`[Admin] User ${userId} blind status approved successfully.`);
+            res.json({ success: true, message: '사용자 시각장애인 인증이 승인되었습니다.' });
+        } else {
+            res.status(404).json({ error: '사용자를 찾을 수 없습니다.' });
+        }
+    } catch (error) {
+        logger.error(`[Admin] Failed to approve user ${req.params.userId}:`, error);
+        res.status(500).json({ error: 'Failed to approve user' });
+    }
+});
+
+// POST reject a pending user
+adminRouter.post('/users/:userId/reject', (req, res) => {
+    try {
+        const { userId } = req.params;
+        const success = db.updateUserBlindStatus(userId, 2); // 2 = rejected
+        if (success) {
+            logger.info(`[Admin] User ${userId} blind status rejected.`);
+            res.json({ success: true, message: '사용자 시각장애인 인증이 반려되었습니다.' });
+        } else {
+            res.status(404).json({ error: '사용자를 찾을 수 없습니다.' });
+        }
+    } catch (error) {
+        logger.error(`[Admin] Failed to reject user ${req.params.userId}:`, error);
+        res.status(500).json({ error: 'Failed to reject user' });
+    }
+});
+
 // Mount the admin router
 router.use('/admin', adminRouter);
 
+
+// --- AUTHENTICATION API ROUTES ---
+
+// 1. 회원가입 API (실시간 인증 포함)
+router.post('/auth/register', async (req, res) => {
+    const { email, password, name, phone, birthdate, verificationMethod = 'siloam_api', cardImage, mimeType } = req.body;
+
+    if (!email || !password || !name || !phone || !birthdate) {
+        return res.status(400).json({ error: '필수 가입 정보가 누락되었습니다.' });
+    }
+
+    try {
+        // 1단계: 이메일(ID) 중복 확인
+        const existingUser = db.getUserByEmail(email);
+        if (existingUser) {
+            return res.status(400).json({ error: '이미 사용 중인 이메일 주소입니다.' });
+        }
+
+        // 2단계: 실명 + 생년월일 조합 중복 확인
+        const existingBio = db.getUserByBio(name, birthdate);
+        if (existingBio) {
+            return res.status(400).json({ error: '이미 해당 정보(실명 및 생년월일)로 가입된 회원이 존재합니다.' });
+        }
+
+        // 3단계: 연락처(휴대폰 번호) 중복 확인
+        const existingPhone = db.getUserByPhone(phone);
+        if (existingPhone) {
+            return res.status(400).json({ error: '이미 사용 중인 연락처(휴대폰 번호)입니다.' });
+        }
+
+        const userId = crypto.randomUUID();
+        const hashedPassword = hashPassword(password);
+        let isBlindStatus = 0; // 0: 미인증
+        let verificationStatus = 'pending';
+        let detailLogs = '';
+
+        if (verificationMethod === 'siloam_api') {
+            const result = await verifySiloamMember({ name, birthDate: birthdate, phoneNo: phone });
+            if (result.isValid) {
+                isBlindStatus = 1;
+                verificationStatus = 'approved';
+                detailLogs = JSON.stringify({ verifiedAt: result.verifiedAt });
+            } else {
+                return res.status(400).json({ error: '실로암 시각장애인 회원 정보와 일치하지 않습니다.' });
+            }
+        } else if (verificationMethod === 'card_ocr') {
+            if (!cardImage || !mimeType) {
+                return res.status(400).json({ error: '복지카드 이미지 데이터가 누락되었습니다.' });
+            }
+
+            const base64Data = cardImage.replace(/^data:image\/\w+;base64,/, "");
+            const imageBuffer = Buffer.from(base64Data, 'base64');
+
+            const ocrResult = await verifyCardOCR(imageBuffer, mimeType, name, birthdate);
+            detailLogs = JSON.stringify(ocrResult);
+
+            if (ocrResult.isValidCard) {
+                if (ocrResult.confidenceScore >= 0.85) {
+                    isBlindStatus = 1;
+                    verificationStatus = 'approved';
+                } else {
+                    isBlindStatus = 9; // 관리자 대기
+                    verificationStatus = 'pending';
+                }
+            } else {
+                return res.status(400).json({ error: '업로드된 복지카드에서 시각장애인 자격을 판독하지 못했습니다. 선명한 사진을 다시 업로드해 주세요.' });
+            }
+        } else {
+            return res.status(400).json({ error: '지원하지 않는 인증 방식입니다.' });
+        }
+
+        const userCreated = db.createUser({
+            id: userId,
+            email,
+            password: hashedPassword,
+            name,
+            phone,
+            birthdate,
+            is_blind: isBlindStatus
+        });
+
+        if (!userCreated) {
+            throw new Error('회원 DB 저장 실패');
+        }
+
+        db.createUserVerification({
+            userId,
+            verificationMethod,
+            status: verificationStatus,
+            details: detailLogs,
+            verifiedAt: isBlindStatus === 1 ? new Date().toISOString() : null
+        });
+
+        res.status(201).json({
+            success: true,
+            message: isBlindStatus === 9 
+                ? '회원가입이 완료되었습니다. 복지카드 수동 승인 대기 중입니다.' 
+                : '시각장애인 인증 및 회원가입이 완료되었습니다.',
+            isBlind: isBlindStatus
+        });
+
+    } catch (error) {
+        logger.error('Registration process failed:', error);
+        res.status(500).json({ error: '회원가입 처리 중 내부 서버 오류가 발생했습니다.' });
+    }
+});
+
+// 2. 로그인 API
+router.post('/auth/login', (req, res) => {
+    const { email, password } = req.body;
+    if (!email || !password) {
+        return res.status(400).json({ error: '이메일과 비밀번호를 입력하십시오.' });
+    }
+
+    try {
+        const user = db.getUserByEmail(email);
+        if (!user || !verifyPassword(password, user.password)) {
+            return res.status(401).json({ error: '이메일 또는 비밀번호가 잘못되었습니다.' });
+        }
+
+        const token = jwt.sign(
+            { 
+                userId: user.id, 
+                email: user.email, 
+                name: user.name, 
+                isBlind: user.is_blind 
+            }, 
+            JWT_SECRET, 
+            { expiresIn: JWT_EXPIRES_IN }
+        );
+
+        res.json({
+            success: true,
+            token,
+            user: {
+                id: user.id,
+                email: user.email,
+                name: user.name,
+                isBlind: user.is_blind
+            }
+        });
+    } catch (error) {
+        logger.error('Login error:', error);
+        res.status(500).json({ error: '로그인 처리 중 오류가 발생했습니다.' });
+    }
+});
+
+// 3. 로그인 정보 조회 API
+router.get('/auth/me', (req, res) => {
+    const authHeader = req.headers['authorization'];
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ error: '로그인이 필요합니다.' });
+    }
+
+    const token = authHeader.split(' ')[1];
+    try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        const user = db.getUserById(decoded.userId);
+        if (!user) {
+             return res.status(401).json({ error: '사용자를 찾을 수 없습니다.' });
+        }
+
+        res.json({
+            success: true,
+            user: {
+                id: user.id,
+                email: user.email,
+                name: user.name,
+                isBlind: user.is_blind
+            }
+        });
+    } catch (e) {
+        logger.warn('[Auth] Me check failed, invalid or expired JWT token:', e.message);
+        return res.status(401).json({ error: '유효하지 않거나 만료된 세션입니다.' });
+    }
+});
+
+// 4. 로그아웃 API
+router.post('/auth/logout', (req, res) => {
+    // JWT는 무상태(Stateless)이므로 서버 메모리 삭제 처리가 불필요합니다.
+    res.json({ success: true, message: '로그아웃 되었습니다.' });
+});
 
 // Log donation account copy event for statistics
 router.post('/log-donation-copy', (req, res) => {
     const { userAgent, timestamp } = req.body;
     logger.info(`[STATISTICS] Donation account copied. Time: ${timestamp}, UA: ${userAgent}`);
     res.status(200).json({ success: true });
+});
+
+// --- MY PAGE API ENDPOINTS ---
+
+// 1. 내 가입 정보 조회
+router.get('/users/me', requireAuth, (req, res) => {
+    res.json({
+        success: true,
+        user: {
+            id: req.user.id,
+            email: req.user.email,
+            name: req.user.name,
+            phone: req.user.phone,
+            birthdate: req.user.birthdate,
+            isBlind: req.user.is_blind,
+            createdAt: req.user.createdAt
+        }
+    });
+});
+
+// 2. 내 가입 정보 수정
+router.put('/users/me', requireAuth, (req, res) => {
+    const { name, phone } = req.body;
+    if (!name || !phone) {
+        return res.status(400).json({ error: '이름과 연락처는 필수 입력 사항입니다.' });
+    }
+    
+    try {
+        // 휴대폰 번호 중복 확인 (본인 제외)
+        const existingPhone = db.getUserByPhone(phone);
+        if (existingPhone && existingPhone.id !== req.user.id) {
+            return res.status(400).json({ error: '이미 사용 중인 연락처(휴대폰 번호)입니다.' });
+        }
+        
+        const success = db.updateUser(req.user.id, { name, phone });
+        if (success) {
+            res.json({ success: true, message: '회원 정보가 수정되었습니다.' });
+        } else {
+            res.status(500).json({ error: '회원 정보 수정에 실패했습니다.' });
+        }
+    } catch (error) {
+        logger.error('[MyPage] Failed to update user info:', error);
+        res.status(500).json({ error: '회원 정보 수정 중 서버 오류가 발생했습니다.' });
+    }
+});
+
+// 3. 비밀번호 변경
+router.put('/users/me/password', requireAuth, (req, res) => {
+    const { currentPassword, newPassword } = req.body;
+    if (!currentPassword || !newPassword) {
+        return res.status(400).json({ error: '현재 비밀번호와 새 비밀번호를 모두 입력해주십시오.' });
+    }
+    
+    try {
+        if (!verifyPassword(currentPassword, req.user.password)) {
+            return res.status(400).json({ error: '현재 비밀번호가 일치하지 않습니다.' });
+        }
+        
+        const newPasswordHash = hashPassword(newPassword);
+        const success = db.updateUserPassword(req.user.id, newPasswordHash);
+        if (success) {
+            res.json({ success: true, message: '비밀번호가 안전하게 변경되었습니다.' });
+        } else {
+            res.status(500).json({ error: '비밀번호 변경에 실패했습니다.' });
+        }
+    } catch (error) {
+        logger.error('[MyPage] Failed to update password:', error);
+        res.status(500).json({ error: '비밀번호 변경 중 서버 오류가 발생했습니다.' });
+    }
+});
+
+// 4. 내가 요청한 영상 목록 조회
+router.get('/users/me/videos/requested', requireAuth, (req, res) => {
+    try {
+        const videos = db.getRequestedVideosByUserId(req.user.id);
+        res.json({ success: true, videos });
+    } catch (error) {
+        logger.error('[MyPage] Failed to fetch requested videos:', error);
+        res.status(500).json({ error: '요청 영상 목록 조회 중 서버 오류가 발생했습니다.' });
+    }
+});
+
+// 5. 최근 시청 영상 목록 조회
+router.get('/users/me/videos/history', requireAuth, (req, res) => {
+    try {
+        const videos = db.getWatchHistory(req.user.id);
+        res.json({ success: true, videos });
+    } catch (error) {
+        logger.error('[MyPage] Failed to fetch watch history:', error);
+        res.status(500).json({ error: '최근 시청 목록 조회 중 서버 오류가 발생했습니다.' });
+    }
+});
+
+// 6. 시청 기록 추가
+router.post('/users/me/videos/history', requireAuth, (req, res) => {
+    const { videoId } = req.body;
+    if (!videoId) {
+        return res.status(400).json({ error: '영상 ID가 누락되었습니다.' });
+    }
+    try {
+        db.addWatchHistory(req.user.id, videoId);
+        res.json({ success: true });
+    } catch (error) {
+        logger.error('[MyPage] Failed to add watch history:', error);
+        res.status(500).json({ error: '시청 기록 저장 중 서버 오류가 발생했습니다.' });
+    }
+});
+
+// 7. 즐겨찾는 영상 목록 조회
+router.get('/users/me/videos/favorites', requireAuth, (req, res) => {
+    try {
+        const videos = db.getFavorites(req.user.id);
+        res.json({ success: true, videos });
+    } catch (error) {
+        logger.error('[MyPage] Failed to fetch favorites:', error);
+        res.status(500).json({ error: '즐겨찾는 영상 목록 조회 중 서버 오류가 발생했습니다.' });
+    }
+});
+
+// 8. 즐겨찾기 토글
+router.post('/users/me/videos/favorites/toggle', requireAuth, (req, res) => {
+    const { videoId } = req.body;
+    if (!videoId) {
+        return res.status(400).json({ error: '영상 ID가 누락되었습니다.' });
+    }
+    try {
+        const result = db.toggleFavorite(req.user.id, videoId);
+        res.json({ success: true, isFavorite: result.isFavorite });
+    } catch (error) {
+        logger.error('[MyPage] Failed to toggle favorite:', error);
+        res.status(500).json({ error: '즐겨찾기 상태 변경 중 서버 오류가 발생했습니다.' });
+    }
+});
+
+// 9. 특정 영상 즐겨찾기 여부 확인
+router.get('/users/me/videos/favorites/:videoId', requireAuth, (req, res) => {
+    const { videoId } = req.params;
+    try {
+        const favorited = db.isFavorite(req.user.id, videoId);
+        res.json({ success: true, isFavorite: favorited });
+    } catch (error) {
+        logger.error('[MyPage] Failed to check favorite status:', error);
+        res.status(500).json({ error: '즐겨찾기 상태 확인 중 서버 오류가 발생했습니다.' });
+    }
+});
+
+// 10. 내가 쓴 글/댓글 모아보기
+router.get('/users/me/activities', requireAuth, (req, res) => {
+    try {
+        const posts = db.getPostsByUserId(req.user.id);
+        const comments = db.getCommentsByUserId(req.user.id);
+        res.json({ success: true, posts, comments });
+    } catch (error) {
+        logger.error('[MyPage] Failed to fetch user activities:', error);
+        res.status(500).json({ error: '활동 내역 조회 중 서버 오류가 발생했습니다.' });
+    }
 });
 
 module.exports = router;

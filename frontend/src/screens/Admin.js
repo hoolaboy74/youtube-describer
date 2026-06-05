@@ -73,6 +73,8 @@ const Admin = () => {
         notice_content: '',
     });
 
+    const [pendingUsers, setPendingUsers] = useState([]);
+
     const headingRef = useRef(null);
     usePageFocus(headingRef);
 
@@ -159,6 +161,17 @@ const Admin = () => {
         }
     }, [isAuthenticated, costPagination.page, costPagination.limit, costSearchTerm, costSortOptions]);
 
+    const fetchPendingUsers = useCallback(async () => {
+        if (!isAuthenticated) return;
+        try {
+            const res = await api.get('/admin/pending-users');
+            setPendingUsers(res.data || []);
+        } catch (error) {
+            console.error('Failed to fetch pending users', error);
+            setPendingUsers([]);
+        }
+    }, [isAuthenticated]);
+
     const fetchAllData = useCallback(async () => {
         if (!isAuthenticated) return;
         try {
@@ -217,6 +230,12 @@ const Admin = () => {
         }
     }, [isAuthenticated, activeTab, fetchSettings]);
 
+    useEffect(() => {
+        if (isAuthenticated && activeTab === 'users') {
+            fetchPendingUsers();
+        }
+    }, [isAuthenticated, activeTab, fetchPendingUsers]);
+
     // --- Handlers ---
     const handleAuth = async () => {
         const password = passwordRef.current.value;
@@ -272,6 +291,32 @@ const Admin = () => {
             } catch (error) {
                 console.error('Failed to change password', error);
                 alert(error.response?.data?.error || '비밀번호 변경에 실패했습니다.');
+            }
+        }
+    };
+
+    const handleApproveUser = async (userId, userName) => {
+        if (window.confirm(`'${userName}' 사용자의 시각장애인 자격 인증을 승인하시겠습니까?`)) {
+            try {
+                const res = await api.post(`/admin/users/${userId}/approve`);
+                alert(res.data.message || '인증이 승인되었습니다.');
+                fetchPendingUsers();
+            } catch (error) {
+                console.error('Failed to approve user', error);
+                alert(error.response?.data?.error || '승인 처리에 실패했습니다.');
+            }
+        }
+    };
+
+    const handleRejectUser = async (userId, userName) => {
+        if (window.confirm(`'${userName}' 사용자의 시각장애인 자격 인증을 반려하시겠습니까?`)) {
+            try {
+                const res = await api.post(`/admin/users/${userId}/reject`);
+                alert(res.data.message || '인증이 반려되었습니다.');
+                fetchPendingUsers();
+            } catch (error) {
+                console.error('Failed to reject user', error);
+                alert(error.response?.data?.error || '반려 처리에 실패했습니다.');
             }
         }
     };
@@ -438,6 +483,7 @@ const Admin = () => {
                 <button role="tab" aria-selected={activeTab === 'board'} className={`tab-btn ${activeTab === 'board' ? 'active' : ''}`} onClick={() => setActiveTab('board')}>게시판 관리</button>
                 <button role="tab" aria-selected={activeTab === 'cost'} className={`tab-btn ${activeTab === 'cost' ? 'active' : ''}`} onClick={() => setActiveTab('cost')}>비용 관리</button>
                 <button role="tab" aria-selected={activeTab === 'settings'} className={`tab-btn ${activeTab === 'settings' ? 'active' : ''}`} onClick={() => setActiveTab('settings')}>서비스 설정</button>
+                <button role="tab" aria-selected={activeTab === 'users'} className={`tab-btn ${activeTab === 'users' ? 'active' : ''}`} onClick={() => setActiveTab('users')}>사용자 관리</button>
             </div>
 
             <div role="tabpanel" hidden={activeTab !== 'dashboard'}> 
@@ -524,7 +570,93 @@ const Admin = () => {
                 </section>
             </div>
 
-                        <div role="tabpanel" hidden={activeTab !== 'content'}>
+            <div role="tabpanel" hidden={activeTab !== 'users'}>
+                <section>
+                    <h2>인증 대기 사용자 관리</h2>
+                    <div className="table-container">
+                        {pendingUsers.length === 0 ? (
+                            <p className="no-data-msg">승인 대기 중인 사용자가 없습니다.</p>
+                        ) : (
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th scope="col">가입 신청일</th>
+                                        <th scope="col">성명</th>
+                                        <th scope="col">이메일</th>
+                                        <th scope="col">생년월일</th>
+                                        <th scope="col">연락처</th>
+                                        <th scope="col">인증 수단</th>
+                                        <th scope="col">OCR 판독 결과</th>
+                                        <th scope="col">작업</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {pendingUsers.map(user => {
+                                        let ocrInfo = null;
+                                        if (user.details) {
+                                            try {
+                                                ocrInfo = JSON.parse(user.details);
+                                            } catch (e) {
+                                                console.error("Failed to parse OCR details", e);
+                                            }
+                                        }
+                                        return (
+                                            <tr key={user.id}>
+                                                <td>{new Date(user.createdAt).toLocaleString()}</td>
+                                                <td>{user.name}</td>
+                                                <td>{user.email}</td>
+                                                <td>{user.birthdate}</td>
+                                                <td>{user.phone}</td>
+                                                <td>
+                                                    {user.verificationMethod === 'siloam_api' ? (
+                                                        <span className="badge method-siloam">실로암 API</span>
+                                                    ) : user.verificationMethod === 'card_ocr' ? (
+                                                        <span className="badge method-ocr">복지카드 OCR</span>
+                                                    ) : (
+                                                        <span className="badge method-manual">수동</span>
+                                                    )}
+                                                </td>
+                                                <td>
+                                                    {ocrInfo ? (
+                                                        <div className="ocr-details-container">
+                                                            <div className="ocr-score">
+                                                                신뢰도: <strong className={ocrInfo.confidenceScore >= 0.85 ? "text-success" : "text-warning"}>
+                                                                    {Math.round(ocrInfo.confidenceScore * 100)}%
+                                                                </strong>
+                                                            </div>
+                                                            <div className="ocr-badges">
+                                                                <span className={`badge ${ocrInfo.nameMatched ? 'badge-success' : 'badge-danger'}`}>
+                                                                    이름 {ocrInfo.nameMatched ? '일치' : '불일치'}
+                                                                </span>
+                                                                <span className={`badge ${ocrInfo.birthDateMatched ? 'badge-success' : 'badge-danger'}`}>
+                                                                    생일 {ocrInfo.birthDateMatched ? '일치' : '불일치'}
+                                                                </span>
+                                                                <span className={`badge ${ocrInfo.isVisualImpairment ? 'badge-success' : 'badge-danger'}`}>
+                                                                    시각장애 {ocrInfo.isVisualImpairment ? '확인' : '미확인'}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    ) : (
+                                                        <span className="text-muted">N/A</span>
+                                                    )}
+                                                </td>
+                                                <td>
+                                                    <div className="action-buttons">
+                                                        <button className="approve-btn" aria-label={`${user.name} 사용자 승인`} onClick={() => handleApproveUser(user.id, user.name)}>승인</button>
+                                                        <button className="reject-btn" aria-label={`${user.name} 사용자 반려`} onClick={() => handleRejectUser(user.id, user.name)}>반려</button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
+                                </tbody>
+                            </table>
+                        )}
+                    </div>
+                </section>
+            </div>
+
+            <div role="tabpanel" hidden={activeTab !== 'content'}>
                             <section>
                                 <h2>영상 관리</h2>
                                  <form className="filters-container" onSubmit={(e) => { e.preventDefault(); fetchVideos(); }}>

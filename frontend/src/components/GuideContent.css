@@ -1,11 +1,21 @@
 .guide-content {
-  padding: 1rem;
+  color: var(--color-text-main);
 }
 
-.guide-content h3,
+.guide-content h3 {
+  color: var(--color-text-bright);
+  font-size: 1.5em;
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  border-bottom: var(--glass-border-light);
+  padding-bottom: 10px;
+}
+
 .guide-content h4 {
+  color: var(--color-text-bright);
   margin-top: 1.5rem;
   margin-bottom: 0.5rem;
+  font-size: 1.1em;
 }
 
 .guide-content p,
@@ -14,13 +24,36 @@
   line-height: 1.6;
 }
 
+.guide-content ul {
+  padding-left: 20px;
+}
+
+.guide-content li {
+  margin-bottom: 8px;
+}
+
 .guide-content .sponsorship-info {
-  margin-top: 1rem;
-  padding: 1rem;
-  background-color: #f8f9fa;
-  border-radius: 4px;
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: var(--glass-border-light);
+  border-radius: 12px;
 }
 
 .guide-content .copy-button {
-  margin-top: 0.5rem;
+  margin-top: 0.8rem;
+  background: var(--gradient-accent);
+  color: var(--color-text-bright);
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.3s ease;
+  box-shadow: var(--glass-shadow-light);
+}
+
+.guide-content .copy-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
 }

@@ -4,26 +4,28 @@
   left: 0;
   right: 0;
   height: 50px;
-  background-color: #ffffff;
+  background-color: rgba(15, 15, 19, 0.8); /* Semi-transparent dark theme */
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
   display: flex;
   align-items: center;
-  justify-content: space-between; /* Change to space-between */
-  border-bottom: 1px solid #dee2e6;
+  justify-content: space-between;
+  border-bottom: var(--glass-border-light);
   z-index: 1000;
   padding: 0 1rem;
 }
 
-.header-left, .header-right {
-  width: 50px; /* Allocate space for buttons */
+.header-left {
+  width: 50px;
   display: flex;
   align-items: center;
-}
-
-.header-left {
   justify-content: flex-start;
 }
 
 .header-right {
+  min-width: 50px;
+  display: flex;
+  align-items: center;
   justify-content: flex-end;
 }
 
@@ -32,7 +34,10 @@
   font-size: 1.2rem;
   font-weight: bold;
   text-align: center;
-  flex-grow: 1; /* Allow title to take up remaining space */
+  flex-grow: 1;
+  /* Prevent title overlap on mobile/small screens by giving side margins */
+  margin: 0 10px;
+  color: var(--color-text-bright);
 }
 
 .header-link {
@@ -43,9 +48,66 @@
 .back-button-header {
   background: none;
   border: none;
-  font-size: 1.5rem; /* Make arrow larger */
+  font-size: 1.5rem;
   cursor: pointer;
-  color: #333;
+  color: var(--color-text-bright); /* White arrow */
   padding: 0;
   line-height: 1;
+}
+
+/* User Info & Authentication Styling */
+.user-info-header {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+.user-name-link {
+  text-decoration: none;
+  color: var(--color-text-main);
+  transition: color 0.2s ease;
+}
+
+.user-name-link:hover {
+  color: var(--color-accent-purple);
+  text-decoration: underline;
+}
+
+.user-name {
+  font-weight: 500;
+  max-width: 80px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.logout-button-header, .login-link-header {
+  background-color: var(--glass-bg);
+  border: var(--glass-border-light);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  color: var(--color-text-main);
+  text-decoration: none;
+  font-weight: bold;
+  transition: all 0.2s ease;
+}
+
+.logout-button-header:hover, .login-link-header:hover {
+  background-color: var(--glass-bg-hover);
+  color: var(--color-text-bright);
+  border-color: var(--color-accent-purple);
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 480px) {
+  .user-name {
+    display: none; /* Hide name on small screens to save space, showing only logout */
+  }
+  .header-title {
+    font-size: 1.05rem;
+  }
 }

@@ -1,4 +1,4 @@
-require('dotenv').config();
+require('dotenv').config({ path: require('path').join(__dirname, '.env') });
 const express = require('express');
 const cors = require('cors');
 const fs = require('fs');
@@ -12,7 +12,7 @@ const checkDiskSpace = require('check-disk-space').default;
 db.init();
 
 const app = express();
-const port = 4000;
+const port = process.env.PORT || 4000;
 
 // --- DIRECTORY SETUP ---
 const publicDir = path.join(__dirname, 'public');

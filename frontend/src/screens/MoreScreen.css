@@ -1,49 +1,76 @@
 .more-screen {
-  padding: 1rem;
+  max-width: 800px;
+  margin: 20px auto;
+  padding: 20px;
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: var(--glass-border);
+  border-radius: 16px;
+  box-shadow: var(--glass-shadow);
+  color: var(--color-text-main);
 }
 
 .more-menu {
   list-style: none;
   padding: 0;
   margin: 0;
-  border-top: 1px solid #dee2e6;
 }
 
 .more-menu-item {
-  border-bottom: 1px solid #dee2e6;
+  border-bottom: var(--glass-border-light);
 }
 
-.more-menu-item a {
+.more-menu-item:last-child {
+  border-bottom: none;
+}
+
+.more-menu-item a,
+.more-menu-button {
   display: block;
-  padding: 1rem;
+  width: 100%;
+  padding: 1.2rem;
   text-decoration: none;
-  color: #212529;
+  color: var(--color-text-bright);
+  background: none;
+  border: none;
+  text-align: left;
+  font-size: 1.1em;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
 }
 
 .more-menu-item a:hover,
 .more-menu-button:hover {
-  background-color: #f8f9fa;
+  background: var(--glass-bg-hover);
+  color: var(--color-accent-purple);
+  padding-left: 1.5rem;
 }
 
 .back-button {
-  background: none;
-  border: none;
-  color: #007bff;
+  background: var(--glass-bg);
+  border: var(--glass-border-light);
+  color: var(--color-text-bright);
   font-size: 1rem;
-  padding: 0.5rem 0;
+  padding: 8px 16px;
+  border-radius: 8px;
   cursor: pointer;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
+  transition: all 0.3s ease;
 }
 
-.more-menu-button {
-  display: block;
-  width: 100%;
-  padding: 1rem;
-  border: none;
-  background: none;
-  text-align: left;
-  font-size: inherit;
-  font-family: inherit;
-  color: #212529;
-  cursor: pointer;
+.back-button:hover {
+  background: var(--glass-bg-hover);
+  border-color: var(--color-accent-purple);
+  color: var(--color-accent-purple);
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+  .more-screen {
+    margin: 10px;
+    padding: 15px;
+  }
 }

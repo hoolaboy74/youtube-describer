@@ -3,11 +3,42 @@ const { google } = require("googleapis");
 const fs = require('fs');
 const path = require('path');
 const util = require('util');
-const { execFile, spawn } = require('child_process');
+const { execFile, spawn, execSync } = require('child_process');
 const crypto = require('crypto');
 const db = require('./database');
 const { formatTime, preprocessVtt, isValidYoutubeUrl } = require('./utils');
 const logger = require('./logger');
+
+let isSafariImpersonateSupported = false;
+try {
+    const output = execSync('yt-dlp --list-impersonate-targets', { encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'] });
+    const lines = output.split('\n');
+    const safariLine = lines.find(line => line.includes('Safari') || line.includes('safari'));
+    if (safariLine && !safariLine.toLowerCase().includes('unavailable')) {
+        isSafariImpersonateSupported = true;
+    }
+} catch (e) {
+    try {
+        execSync('yt-dlp --impersonate safari -s --playlist-items 0 ""', { encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'] });
+        isSafariImpersonateSupported = true;
+    } catch (err) {
+        const stderr = err.stderr ? err.stderr.toString() : '';
+        const stdout = err.stdout ? err.stdout.toString() : '';
+        const errorMsg = stderr + stdout;
+        if (errorMsg.includes('Impersonate target') || errorMsg.includes('missing dependencies') || errorMsg.includes('curl_cffi')) {
+            isSafariImpersonateSupported = false;
+        } else {
+            isSafariImpersonateSupported = true;
+        }
+    }
+}
+
+if (isSafariImpersonateSupported) {
+    logger.info('[Impersonate] yt-dlp supports Safari impersonation.');
+} else {
+    logger.warn('[Impersonate] yt-dlp Safari impersonation is NOT supported by the environment. Bypassing impersonation.');
+}
+const impersonateArgs = isSafariImpersonateSupported ? ['--impersonate', 'safari'] : [];
 
 const API_KEY = process.env.GOOGLE_API_KEY;
 if (!API_KEY) {
@@ -113,7 +144,7 @@ const parseISO8601Duration = (duration) => {
     return hours * 3600 + minutes * 60 + seconds;
 };
 
-const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
+const processVideo = async (videoId, youtubeUrl, sseHandler = null, userId = null) => {
     const requestHash = sseHandler ? videoId.substring(0, 8) : `batch-${videoId.substring(0, 8)}`;
 
     if (processingLocks.has(videoId)) {
@@ -214,7 +245,7 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
             throw new Error(`Video duration (${totalDuration}s) exceeds the limit of ${durationLimitMinutes} minutes.`);
         }
 
-        db.ensureVideoRecord({ videoId, title: videoTitle, duration: Math.round(totalDuration), filesize });
+        db.ensureVideoRecord({ videoId, title: videoTitle, duration: Math.round(totalDuration), filesize, requested_by: userId });
         
         let subtitleContent = '';
         // Filename logic remains same, but we check existence later
@@ -259,7 +290,7 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
                         '--force-ipv4',
                         '--legacy-server-connect',
                         '--no-check-certificate',
-                        '--impersonate', 'safari',
+                        ...impersonateArgs,
                         '--newline', 
                         '--write-auto-sub',
                         '--write-sub',
@@ -653,7 +684,7 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
                         '--force-ipv4',
                         '--legacy-server-connect',
                         '--no-check-certificate',
-                        '--impersonate', 'safari',
+                        ...impersonateArgs,
                         '--no-progress',
                         '--write-auto-sub',
                         '--write-auto-sub',

@@ -15,6 +15,7 @@ const Layout = () => {
     if (pathname === '/') return '뷰레이터';
     if (pathname.startsWith('/board')) return '와글와글 게시판';
     if (pathname === '/more') return '더보기';
+    if (pathname === '/mypage') return '마이페이지';
     return '유튜브 화면 해설';
   };
 

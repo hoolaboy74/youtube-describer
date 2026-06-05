@@ -159,6 +159,99 @@ function init() {
   }
 
 
+  // users 테이블: 가입 회원 정보 저장
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS users (
+      id TEXT PRIMARY KEY,
+      email TEXT UNIQUE NOT NULL,
+      password TEXT NOT NULL,
+      name TEXT NOT NULL,
+      phone TEXT NOT NULL,
+      birthdate TEXT NOT NULL,
+      is_blind INTEGER DEFAULT 0, -- 0: 미인증, 1: 인증완료, 2: 반려, 9: 관리자 대기
+      createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  // 'users' 테이블 컬럼 누락 시 자동 추가 (하위 호환 마이그레이션)
+  try {
+    db.prepare('SELECT is_blind FROM users LIMIT 1').get();
+  } catch (error) {
+    logger.info('Adding is_blind column to users table...');
+    db.exec('ALTER TABLE users ADD COLUMN is_blind INTEGER DEFAULT 0');
+  }
+  try {
+    db.prepare('SELECT updatedAt FROM users LIMIT 1').get();
+  } catch (error) {
+    logger.info('Adding updatedAt column to users table...');
+    db.exec('ALTER TABLE users ADD COLUMN updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP');
+  }
+
+  // user_verifications 테이블: 사용자 장애인 자격 검증 이력 저장
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS user_verifications (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      userId TEXT NOT NULL,
+      verificationMethod TEXT NOT NULL, -- 'siloam_api', 'card_ocr', 'admin_manual'
+      status TEXT DEFAULT 'pending', -- 'pending', 'approved', 'rejected'
+      details TEXT,
+      verifiedAt DATETIME,
+      createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (userId) REFERENCES users (id) ON DELETE CASCADE
+    )
+  `);
+
+  // 'videos' 테이블에 requested_by 컬럼 추가 (없을 경우)
+  try {
+    db.prepare('SELECT requested_by FROM videos LIMIT 1').get();
+  } catch (error) {
+    logger.info('Adding requested_by column to videos table...');
+    db.exec('ALTER TABLE videos ADD COLUMN requested_by TEXT');
+  }
+
+  // 'posts' 테이블에 userId 컬럼 추가 (없을 경우)
+  try {
+    db.prepare('SELECT userId FROM posts LIMIT 1').get();
+  } catch (error) {
+    logger.info('Adding userId column to posts table...');
+    db.exec('ALTER TABLE posts ADD COLUMN userId TEXT');
+  }
+
+  // 'post_comments' 테이블에 userId 컬럼 추가 (없을 경우)
+  try {
+    db.prepare('SELECT userId FROM post_comments LIMIT 1').get();
+  } catch (error) {
+    logger.info('Adding userId column to post_comments table...');
+    db.exec('ALTER TABLE post_comments ADD COLUMN userId TEXT');
+  }
+
+  // user_watch_histories 테이블 신설
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS user_watch_histories (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      userId TEXT NOT NULL,
+      videoId TEXT NOT NULL,
+      watchedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (userId) REFERENCES users (id) ON DELETE CASCADE,
+      FOREIGN KEY (videoId) REFERENCES videos (videoId) ON DELETE CASCADE,
+      UNIQUE(userId, videoId)
+    )
+  `);
+
+  // user_favorites 테이블 신설
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS user_favorites (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      userId TEXT NOT NULL,
+      videoId TEXT NOT NULL,
+      createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (userId) REFERENCES users (id) ON DELETE CASCADE,
+      FOREIGN KEY (videoId) REFERENCES videos (videoId) ON DELETE CASCADE,
+      UNIQUE(userId, videoId)
+    )
+  `);
+
   logger.info('Database initialized successfully.');
 }
 
@@ -311,17 +404,18 @@ function getFeaturedVideos() {
 }
 
 // 처리 시작 시 호출. status를 'processing'으로 설정.
-function ensureVideoRecord({ videoId, title, duration, filesize }) {
+function ensureVideoRecord({ videoId, title, duration, filesize, requested_by = null }) {
   try {
     db.prepare(`
-      INSERT INTO videos (videoId, title, duration, filesize, status)
-      VALUES (?, ?, ?, ?, 'processing')
+      INSERT INTO videos (videoId, title, duration, filesize, status, requested_by)
+      VALUES (?, ?, ?, ?, 'processing', ?)
       ON CONFLICT(videoId) DO UPDATE SET
         title = excluded.title,
         duration = excluded.duration,
         filesize = excluded.filesize,
-        status = 'processing'
-    `).run(videoId, title, Math.round(duration), filesize);
+        status = 'processing',
+        requested_by = COALESCE(excluded.requested_by, videos.requested_by)
+    `).run(videoId, title, Math.round(duration), filesize, requested_by);
   } catch (error) {
     logger.error(`[Database] Failed to ensure video record for ${videoId}:`, error);
     throw error;
@@ -697,11 +791,11 @@ function deleteCommentByIdAdmin(commentId) {
 // --- Board (게시판) Functions ---
 
 // 새 글 작성
-function createPost({ title, content, nickname, password, is_notice = false }) {
+function createPost({ title, content, nickname, password, is_notice = false, userId = null }) {
   const hashedPassword = hashPassword(password);
   const result = db.prepare(
-    'INSERT INTO posts (title, content, nickname, password, is_notice) VALUES (?, ?, ?, ?, ?)'
-  ).run(title, content, nickname, hashedPassword, is_notice ? 1 : 0);
+    'INSERT INTO posts (title, content, nickname, password, is_notice, userId) VALUES (?, ?, ?, ?, ?, ?)'
+  ).run(title, content, nickname, hashedPassword, is_notice ? 1 : 0, userId);
   return result.lastInsertRowid;
 }
 
@@ -777,11 +871,11 @@ function deletePost(id) {
 }
 
 // 새 댓글 작성 (게시판용)
-function createPostComment({ postId, nickname, password, content }) {
+function createPostComment({ postId, nickname, password, content, userId = null }) {
   const hashedPassword = hashPassword(password);
   const result = db.prepare(
-    'INSERT INTO post_comments (postId, nickname, password, content) VALUES (?, ?, ?, ?)'
-  ).run(postId, nickname, hashedPassword, content);
+    'INSERT INTO post_comments (postId, nickname, password, content, userId) VALUES (?, ?, ?, ?, ?)'
+  ).run(postId, nickname, hashedPassword, content, userId);
   return result.lastInsertRowid;
 }
 
@@ -900,8 +994,184 @@ function deletePostCommentByIdAdmin(id) {
   return result.changes > 0;
 }
 
+// --- User Management Functions ---
+function createUser({ id, email, password, name, phone, birthdate, is_blind }) {
+  const result = db.prepare(`
+    INSERT INTO users (id, email, password, name, phone, birthdate, is_blind)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
+  `).run(id, email, password, name, phone, birthdate, is_blind || 0);
+  return result.changes > 0;
+}
+
+function getUserByEmail(email) {
+  return db.prepare('SELECT * FROM users WHERE email = ?').get(email);
+}
+
+function getUserById(id) {
+  return db.prepare('SELECT * FROM users WHERE id = ?').get(id);
+}
+
+function getUserByBio(name, birthdate) {
+  return db.prepare('SELECT * FROM users WHERE name = ? AND birthdate = ?').get(name, birthdate);
+}
+
+function getUserByPhone(phone) {
+  return db.prepare('SELECT * FROM users WHERE phone = ?').get(phone);
+}
+
+function updateUserBlindStatus(userId, isBlind) {
+  const transaction = db.transaction(() => {
+    const userUpdate = db.prepare('UPDATE users SET is_blind = ?, updatedAt = CURRENT_TIMESTAMP WHERE id = ?')
+                         .run(isBlind, userId);
+
+    if (userUpdate.changes > 0) {
+      const statusMap = { 1: 'approved', 2: 'rejected' };
+      const status = statusMap[isBlind];
+      if (status) {
+        db.prepare(`
+          UPDATE user_verifications 
+          SET status = ?, verifiedAt = ? 
+          WHERE userId = ? AND status = 'pending'
+        `).run(status, status === 'approved' ? new Date().toISOString() : null, userId);
+      }
+    }
+    return userUpdate;
+  });
+
+  const result = transaction();
+  return result.changes > 0;
+}
+
+function createUserVerification({ userId, verificationMethod, status, details, verifiedAt }) {
+  const result = db.prepare(`
+    INSERT INTO user_verifications (userId, verificationMethod, status, details, verifiedAt)
+    VALUES (?, ?, ?, ?, ?)
+  `).run(userId, verificationMethod, status, details || null, verifiedAt || null);
+  return result.changes > 0;
+}
+
+function listPendingUsers() {
+  return db.prepare(`
+    SELECT u.*, uv.verificationMethod, uv.status AS verificationStatus, uv.details, uv.createdAt AS verificationCreatedAt
+    FROM users u
+    LEFT JOIN user_verifications uv ON u.id = uv.userId
+    WHERE u.is_blind = 9
+    ORDER BY u.createdAt DESC
+  `).all();
+}
+
+// --- MyPage Functions ---
+
+function updateUser(userId, { name, phone }) {
+  const result = db.prepare(`
+    UPDATE users
+    SET name = ?, phone = ?, updatedAt = CURRENT_TIMESTAMP
+    WHERE id = ?
+  `).run(name, phone, userId);
+  return result.changes > 0;
+}
+
+function updateUserPassword(userId, newPasswordHash) {
+  const result = db.prepare(`
+    UPDATE users
+    SET password = ?, updatedAt = CURRENT_TIMESTAMP
+    WHERE id = ?
+  `).run(newPasswordHash, userId);
+  return result.changes > 0;
+}
+
+function addWatchHistory(userId, videoId) {
+  db.prepare(`
+    INSERT INTO user_watch_histories (userId, videoId, watchedAt)
+    VALUES (?, ?, CURRENT_TIMESTAMP)
+    ON CONFLICT(userId, videoId) DO UPDATE SET watchedAt = CURRENT_TIMESTAMP
+  `).run(userId, videoId);
+
+  db.prepare(`
+    DELETE FROM user_watch_histories
+    WHERE userId = ? AND id NOT IN (
+      SELECT id FROM user_watch_histories
+      WHERE userId = ?
+      ORDER BY watchedAt DESC
+      LIMIT 20
+    )
+  `).run(userId, userId);
+}
+
+function getWatchHistory(userId) {
+  return db.prepare(`
+    SELECT h.watchedAt, v.videoId, v.title, v.duration, v.status
+    FROM user_watch_histories h
+    JOIN videos v ON h.videoId = v.videoId
+    WHERE h.userId = ?
+    ORDER BY h.watchedAt DESC
+  `).all(userId);
+}
+
+function toggleFavorite(userId, videoId) {
+  const fav = db.prepare('SELECT id FROM user_favorites WHERE userId = ? AND videoId = ?').get(userId, videoId);
+  if (fav) {
+    db.prepare('DELETE FROM user_favorites WHERE userId = ? AND videoId = ?').run(userId, videoId);
+    return { isFavorite: false };
+  } else {
+    db.prepare('INSERT INTO user_favorites (userId, videoId) VALUES (?, ?)').run(userId, videoId);
+    return { isFavorite: true };
+  }
+}
+
+function getFavorites(userId) {
+  return db.prepare(`
+    SELECT f.createdAt, v.videoId, v.title, v.duration, v.status
+    FROM user_favorites f
+    JOIN videos v ON f.videoId = v.videoId
+    WHERE f.userId = ?
+    ORDER BY f.createdAt DESC
+  `).all(userId);
+}
+
+function isFavorite(userId, videoId) {
+  const row = db.prepare('SELECT id FROM user_favorites WHERE userId = ? AND videoId = ?').get(userId, videoId);
+  return !!row;
+}
+
+function getRequestedVideosByUserId(userId) {
+  return db.prepare(`
+    SELECT videoId, title, duration, status, createdAt
+    FROM videos
+    WHERE requested_by = ?
+    ORDER BY createdAt DESC
+  `).all(userId);
+}
+
+function getPostsByUserId(userId) {
+  return db.prepare(`
+    SELECT id, title, createdAt
+    FROM posts
+    WHERE userId = ?
+    ORDER BY createdAt DESC
+  `).all(userId);
+}
+
+function getCommentsByUserId(userId) {
+  return db.prepare(`
+    SELECT pc.id, pc.content, pc.createdAt, pc.postId, p.title AS targetTitle, 'post' AS type
+    FROM post_comments pc
+    JOIN posts p ON pc.postId = p.id
+    WHERE pc.userId = ?
+    ORDER BY pc.createdAt DESC
+  `).all(userId);
+}
+
 module.exports = {
   init,
+  createUser,
+  getUserByEmail,
+  getUserById,
+  getUserByBio,
+  getUserByPhone,
+  updateUserBlindStatus,
+  createUserVerification,
+  listPendingUsers,
   getVideo,
   saveVideo,
   ensureVideoRecord,
@@ -934,6 +1204,17 @@ module.exports = {
   getDashboardStats,
   listAllCommentsForAdmin,
   deleteCommentByIdAdmin,
+  // MyPage operations
+  updateUser,
+  updateUserPassword,
+  addWatchHistory,
+  getWatchHistory,
+  toggleFavorite,
+  getFavorites,
+  isFavorite,
+  getRequestedVideosByUserId,
+  getPostsByUserId,
+  getCommentsByUserId,
   // Board functions
   createPost,
   getPost,
