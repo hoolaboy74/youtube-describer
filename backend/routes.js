@@ -360,18 +360,23 @@ router.get('/comments/:videoId', (req, res) => {
 });
 
 // POST a new comment
-router.post('/comments', (req, res) => {
+router.post('/comments', requireAuth, (req, res) => {
     try {
-        const { videoId, nickname, password, content } = req.body;
-        if (!videoId || !nickname || !password || !content) {
+        const { videoId, nickname, content } = req.body;
+        if (!videoId || !content) {
             return res.status(400).json({ error: 'Missing required fields' });
         }
-        const newCommentId = db.addComment({ videoId, nickname, password, content });
+        const authorNickname = nickname || req.user.name;
+        const userId = req.user.id;
+        const password = 'dummy_password';
+
+        const newCommentId = db.addComment({ videoId, userId, nickname: authorNickname, password, content });
         const newComment = db.getCommentById(newCommentId);
         // Return the newly created comment (without password)
         res.status(201).json({
             id: newComment.id,
             videoId: newComment.videoId,
+            userId: newComment.userId,
             nickname: newComment.nickname,
             content: newComment.content,
             createdAt: newComment.createdAt
@@ -383,13 +388,13 @@ router.post('/comments', (req, res) => {
 });
 
 // PUT (update) a comment
-router.put('/comments/:commentId', (req, res) => {
+router.put('/comments/:commentId', requireAuth, (req, res) => {
     try {
         const { commentId } = req.params;
-        const { password, content } = req.body;
+        const { content } = req.body;
 
-        if (!password || !content) {
-            return res.status(400).json({ error: 'Password and content are required' });
+        if (!content) {
+            return res.status(400).json({ error: 'Content is required' });
         }
 
         const comment = db.getCommentById(commentId);
@@ -397,9 +402,8 @@ router.put('/comments/:commentId', (req, res) => {
             return res.status(404).json({ error: 'Comment not found' });
         }
 
-        const isPasswordValid = db.verifyPassword(comment.password, password);
-        if (!isPasswordValid) {
-            return res.status(403).json({ error: 'Invalid password' });
+        if (!comment.userId || comment.userId !== req.user.id) {
+            return res.status(403).json({ error: '본인이 작성한 댓글만 수정할 수 있습니다.' });
         }
 
         const success = db.updateComment({ commentId, content });
@@ -415,23 +419,17 @@ router.put('/comments/:commentId', (req, res) => {
 });
 
 // DELETE a comment
-router.delete('/comments/:commentId', (req, res) => {
+router.delete('/comments/:commentId', requireAuth, (req, res) => {
     try {
         const { commentId } = req.params;
-        const { password } = req.body;
-
-        if (!password) {
-            return res.status(400).json({ error: 'Password is required' });
-        }
 
         const comment = db.getCommentById(commentId);
         if (!comment) {
             return res.status(404).json({ error: 'Comment not found' });
         }
 
-        const isPasswordValid = db.verifyPassword(comment.password, password);
-        if (!isPasswordValid) {
-            return res.status(403).json({ error: 'Invalid password' });
+        if (!comment.userId || comment.userId !== req.user.id) {
+            return res.status(403).json({ error: '본인이 작성한 댓글만 삭제할 수 있습니다.' });
         }
 
         const success = db.deleteComment(commentId);
@@ -482,12 +480,12 @@ boardRouter.get('/posts/:id', (req, res) => {
 });
 
 // POST a new post
-boardRouter.post('/posts', (req, res) => {
+boardRouter.post('/posts', requireAuth, (req, res) => {
     try {
-        const { title, content, nickname, password, is_notice = false, adminPassword } = req.body;
+        const { title, content, nickname, is_notice = false, adminPassword } = req.body;
         
-        if (!title || !content || !nickname || !password) {
-            return res.status(400).json({ error: '제목, 내용, 닉네임, 비밀번호는 필수입니다.' });
+        if (!title || !content) {
+            return res.status(400).json({ error: '제목과 내용은 필수입니다.' });
         }
 
         let isNoticeBool = Boolean(is_notice);
@@ -499,19 +497,11 @@ boardRouter.post('/posts', (req, res) => {
             }
         }
 
-        let userId = null;
-        const authHeader = req.headers['authorization'];
-        if (authHeader && authHeader.startsWith('Bearer ')) {
-            const token = authHeader.split(' ')[1];
-            try {
-                const decoded = jwt.verify(token, JWT_SECRET);
-                userId = decoded.userId;
-            } catch (e) {
-                logger.debug('[Board] Optional token verification failed:', e.message);
-            }
-        }
+        const authorNickname = nickname || req.user.name;
+        const password = 'dummy_password'; // 더미 비밀번호 설정 (DB null constraint 대응)
+        const userId = req.user.id;
 
-        const newPostId = db.createPost({ title, content, nickname, password, is_notice: isNoticeBool, userId });
+        const newPostId = db.createPost({ title, content, nickname: authorNickname, password, is_notice: isNoticeBool, userId });
         const newPost = db.getPost(newPostId);
         res.status(201).json(newPost);
     } catch (error) {
@@ -521,13 +511,13 @@ boardRouter.post('/posts', (req, res) => {
 });
 
 // PUT (update) a post
-boardRouter.put('/posts/:id', (req, res) => {
+boardRouter.put('/posts/:id', requireAuth, (req, res) => {
     try {
         const { id } = req.params;
-        const { title, content, password } = req.body;
+        const { title, content } = req.body;
 
-        if (!password || !title || !content) {
-            return res.status(400).json({ error: 'Password, title, and content are required' });
+        if (!title || !content) {
+            return res.status(400).json({ error: 'Title and content are required' });
         }
 
         const post = db.getPostWithPassword(id);
@@ -535,9 +525,8 @@ boardRouter.put('/posts/:id', (req, res) => {
             return res.status(404).json({ error: 'Post not found' });
         }
 
-        const isPasswordValid = db.verifyPassword(post.password, password);
-        if (!isPasswordValid) {
-            return res.status(403).json({ error: 'Invalid password' });
+        if (!post.userId || post.userId !== req.user.id) {
+            return res.status(403).json({ error: '본인이 작성한 글만 수정할 수 있습니다.' });
         }
 
         const success = db.updatePost({ id, title, content });
@@ -553,23 +542,17 @@ boardRouter.put('/posts/:id', (req, res) => {
 });
 
 // DELETE a post
-boardRouter.delete('/posts/:id', (req, res) => {
+boardRouter.delete('/posts/:id', requireAuth, (req, res) => {
     try {
         const { id } = req.params;
-        const { password } = req.body;
-
-        if (!password) {
-            return res.status(400).json({ error: 'Password is required' });
-        }
 
         const post = db.getPostWithPassword(id);
         if (!post) {
             return res.status(404).json({ error: 'Post not found' });
         }
 
-        const isPasswordValid = db.verifyPassword(post.password, password);
-        if (!isPasswordValid) {
-            return res.status(403).json({ error: 'Invalid password' });
+        if (!post.userId || post.userId !== req.user.id) {
+            return res.status(403).json({ error: '본인이 작성한 글만 삭제할 수 있습니다.' });
         }
 
         const success = db.deletePost(id);
@@ -585,34 +568,27 @@ boardRouter.delete('/posts/:id', (req, res) => {
 });
 
 // POST a new comment on a post
-boardRouter.post('/posts/:id/comments', (req, res) => {
+boardRouter.post('/posts/:id/comments', requireAuth, (req, res) => {
     try {
         const { id: postId } = req.params;
-        const { nickname, password, content } = req.body;
-        if (!nickname || !password || !content) {
-            return res.status(400).json({ error: 'Missing required fields' });
+        const { content, nickname } = req.body;
+        if (!content) {
+            return res.status(400).json({ error: '내용은 필수입니다.' });
         }
 
-        let userId = null;
-        const authHeader = req.headers['authorization'];
-        if (authHeader && authHeader.startsWith('Bearer ')) {
-            const token = authHeader.split(' ')[1];
-            try {
-                const decoded = jwt.verify(token, JWT_SECRET);
-                userId = decoded.userId;
-            } catch (e) {
-                logger.debug('[Board] Optional token verification failed for comment:', e.message);
-            }
-        }
+        const authorNickname = nickname || req.user.name;
+        const password = 'dummy_password';
+        const userId = req.user.id;
 
-        const newCommentId = db.createPostComment({ postId, nickname, password, content, userId });
+        const newCommentId = db.createPostComment({ postId, nickname: authorNickname, password, content, userId });
         const newComment = db.getPostCommentById(newCommentId);
         res.status(201).json({
             id: newComment.id,
             postId: newComment.postId,
             nickname: newComment.nickname,
             content: newComment.content,
-            createdAt: newComment.createdAt
+            createdAt: newComment.createdAt,
+            userId: newComment.userId
         });
     } catch (error) {
         logger.error(`[Board] Failed to add comment to post ${req.params.id}:`, error);
@@ -621,13 +597,13 @@ boardRouter.post('/posts/:id/comments', (req, res) => {
 });
 
 // PUT (update) a comment on a post
-boardRouter.put('/comments/:commentId', (req, res) => {
+boardRouter.put('/comments/:commentId', requireAuth, (req, res) => {
     try {
         const { commentId } = req.params;
-        const { password, content } = req.body;
+        const { content } = req.body;
 
-        if (!password || !content) {
-            return res.status(400).json({ error: 'Password and content are required' });
+        if (!content) {
+            return res.status(400).json({ error: 'Content is required' });
         }
 
         const comment = db.getPostCommentById(commentId);
@@ -635,9 +611,8 @@ boardRouter.put('/comments/:commentId', (req, res) => {
             return res.status(404).json({ error: 'Comment not found' });
         }
 
-        const isPasswordValid = db.verifyPassword(comment.password, password);
-        if (!isPasswordValid) {
-            return res.status(403).json({ error: 'Invalid password' });
+        if (!comment.userId || comment.userId !== req.user.id) {
+            return res.status(403).json({ error: '본인이 작성한 댓글만 수정할 수 있습니다.' });
         }
 
         const success = db.updatePostComment({ commentId, content });
@@ -653,23 +628,17 @@ boardRouter.put('/comments/:commentId', (req, res) => {
 });
 
 // DELETE a comment on a post
-boardRouter.delete('/comments/:commentId', (req, res) => {
+boardRouter.delete('/comments/:commentId', requireAuth, (req, res) => {
     try {
         const { commentId } = req.params;
-        const { password } = req.body;
-
-        if (!password) {
-            return res.status(400).json({ error: 'Password is required' });
-        }
 
         const comment = db.getPostCommentById(commentId);
         if (!comment) {
             return res.status(404).json({ error: 'Comment not found' });
         }
 
-        const isPasswordValid = db.verifyPassword(comment.password, password);
-        if (!isPasswordValid) {
-            return res.status(403).json({ error: 'Invalid password' });
+        if (!comment.userId || comment.userId !== req.user.id) {
+            return res.status(403).json({ error: '본인이 작성한 댓글만 삭제할 수 있습니다.' });
         }
 
         const success = db.deletePostComment(commentId);

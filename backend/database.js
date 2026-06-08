@@ -76,11 +76,13 @@ function init() {
     CREATE TABLE IF NOT EXISTS comments (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       videoId TEXT NOT NULL,
+      userId TEXT,
       nickname TEXT NOT NULL,
       password TEXT NOT NULL,
       content TEXT NOT NULL,
       createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (videoId) REFERENCES videos (videoId) ON DELETE CASCADE
+      FOREIGN KEY (videoId) REFERENCES videos (videoId) ON DELETE CASCADE,
+      FOREIGN KEY (userId) REFERENCES users (id) ON DELETE CASCADE
     )
   `);
 
@@ -230,6 +232,14 @@ function init() {
   } catch (error) {
     logger.info('Adding userId column to post_comments table...');
     db.exec('ALTER TABLE post_comments ADD COLUMN userId TEXT');
+  }
+
+  // 'comments' 테이블에 userId 컬럼 추가 (없을 경우)
+  try {
+    db.prepare('SELECT userId FROM comments LIMIT 1').get();
+  } catch (error) {
+    logger.info('Adding userId column to comments table...');
+    db.exec('ALTER TABLE comments ADD COLUMN userId TEXT REFERENCES users(id) ON DELETE CASCADE');
   }
 
   // user_watch_histories 테이블 신설
@@ -490,21 +500,21 @@ function verifyPassword(storedPassword, providedPassword) {
 
 // 댓글 가져오기
 function getComments(videoId) {
-  return db.prepare("SELECT id, videoId, nickname, content, strftime('%Y-%m-%dT%H:%M:%SZ', createdAt) as createdAt FROM comments WHERE videoId = ? ORDER BY createdAt ASC").all(videoId);
+  return db.prepare("SELECT id, videoId, userId, nickname, content, strftime('%Y-%m-%dT%H:%M:%SZ', createdAt) as createdAt FROM comments WHERE videoId = ? ORDER BY createdAt ASC").all(videoId);
 }
 
 // 댓글 추가
-function addComment({ videoId, nickname, password, content }) {
+function addComment({ videoId, userId = null, nickname, password = '', content }) {
   const hashedPassword = hashPassword(password);
   const result = db.prepare(
-    'INSERT INTO comments (videoId, nickname, password, content) VALUES (?, ?, ?, ?)'
-  ).run(videoId, nickname, hashedPassword, content);
+    'INSERT INTO comments (videoId, userId, nickname, password, content) VALUES (?, ?, ?, ?, ?)'
+  ).run(videoId, userId, nickname, hashedPassword, content);
   return result.lastInsertRowid;
 }
 
 // 댓글 ID로 댓글 가져오기 (비밀번호 포함)
 function getCommentById(commentId) {
-  return db.prepare("SELECT id, videoId, nickname, password, content, strftime('%Y-%m-%dT%H:%M:%fZ', createdAt) as createdAt FROM comments WHERE id = ?").get(commentId);
+  return db.prepare("SELECT id, videoId, userId, nickname, password, content, strftime('%Y-%m-%dT%H:%M:%fZ', createdAt) as createdAt FROM comments WHERE id = ?").get(commentId);
 }
 
 
@@ -809,7 +819,7 @@ function createPost({ title, content, nickname, password, is_notice = false, use
 function getPost(id) {
   const post = db.prepare(`
     SELECT 
-      p.id, p.title, p.content, p.nickname, strftime('%Y-%m-%dT%H:%M:%SZ', p.createdAt) as createdAt,
+      p.id, p.title, p.content, p.nickname, p.userId, strftime('%Y-%m-%dT%H:%M:%SZ', p.createdAt) as createdAt,
       (SELECT COUNT(*) FROM post_comments WHERE postId = p.id) as commentCount
     FROM posts p 
     WHERE p.id = ?
@@ -817,7 +827,7 @@ function getPost(id) {
   
   if (post) {
     const comments = db.prepare(`
-      SELECT id, postId, nickname, content, strftime('%Y-%m-%dT%H:%M:%SZ', createdAt) as createdAt 
+      SELECT id, postId, nickname, content, userId, strftime('%Y-%m-%dT%H:%M:%SZ', createdAt) as createdAt 
       FROM post_comments 
       WHERE postId = ? 
       ORDER BY createdAt ASC

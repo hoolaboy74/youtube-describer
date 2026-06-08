@@ -1,14 +1,15 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import axios from 'axios';
+import { useAuth } from './contexts/AuthContext';
 
 function Comments({ videoId, mainRef }) {
+    const { user } = useAuth();
     const [comments, setComments] = useState([]);
     const [editingComment, setEditingComment] = useState(null); // { id, content }
     const [error, setError] = useState('');
 
     const [newComment, setNewComment] = useState({
         nickname: '',
-        password: '',
         content: '',
     });
 
@@ -31,6 +32,15 @@ function Comments({ videoId, mainRef }) {
         }
     }, [videoId, fetchComments]);
 
+    // 로그인 시 기본 닉네임을 사용자 이름으로 설정
+    useEffect(() => {
+        if (user) {
+            setNewComment(prev => ({ ...prev, nickname: user.name || '' }));
+        } else {
+            setNewComment({ nickname: '', content: '' });
+        }
+    }, [user]);
+
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setNewComment(prev => ({ ...prev, [name]: value }));
@@ -38,18 +48,19 @@ function Comments({ videoId, mainRef }) {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const { nickname, password, content } = newComment;
+        if (!user) {
+            setError("로그인이 필요합니다.");
+            return;
+        }
 
-        if (!nickname.trim() || !password.trim() || !content.trim()) {
-            setError("닉네임, 비밀번호, 내용을 모두 입력해주세요.");
+        const { nickname, content } = newComment;
+
+        if (!nickname.trim() || !content.trim()) {
+            setError("닉네임과 내용을 모두 입력해주세요.");
             return;
         }
         if (nickname.trim().length < 2) {
             setError("닉네임은 2자 이상이어야 합니다.");
-            return;
-        }
-        if (password.trim().length < 4) {
-            setError("비밀번호는 4자 이상이어야 합니다.");
             return;
         }
         if (content.trim().length < 2) {
@@ -61,10 +72,9 @@ function Comments({ videoId, mainRef }) {
             await axios.post('/api/comments', { 
                 videoId, 
                 nickname: nickname.trim(), 
-                password: password.trim(), 
                 content: content.trim() 
             });
-            setNewComment({ nickname: '', password: '', content: '' }); // Clear form
+            setNewComment(prev => ({ ...prev, content: '' })); // Clear only content, retain nickname
             setError('');
             fetchComments();
         } catch (err) {
@@ -74,11 +84,10 @@ function Comments({ videoId, mainRef }) {
     };
 
     const handleDelete = async (commentId) => {
-        const pw = prompt("댓글을 삭제하려면 비밀번호를 입력하세요.");
-        if (!pw) return;
+        if (!window.confirm("정말로 이 댓글을 삭제하시겠습니까?")) return;
 
         try {
-            await axios.delete(`/api/comments/${commentId}`, { data: { password: pw } });
+            await axios.delete(`/api/comments/${commentId}`);
             fetchComments();
             mainRef.current?.focus();
         } catch (err) {
@@ -103,12 +112,8 @@ function Comments({ videoId, mainRef }) {
             return;
         }
 
-        const pw = prompt("댓글을 수정하려면 비밀번호를 입력하세요.");
-        if (!pw) return;
-
         try {
             await axios.put(`/api/comments/${editingComment.id}`, {
-                password: pw,
                 content: newContent.trim()
             });
             setEditingComment(null);
@@ -124,33 +129,28 @@ function Comments({ videoId, mainRef }) {
         <div className="comments-container">
             <h3>댓글</h3>
             {error && <p className="error-message" role="alert">{error}</p>}
+            
             <form onSubmit={handleSubmit} className="comment-form">
                 <div className="comment-meta">
                     <input
                         type="text"
                         name="nickname"
-                        placeholder="닉네임"
+                        placeholder={user ? "닉네임" : "로그인이 필요합니다"}
                         value={newComment.nickname}
                         onChange={handleInputChange}
                         required
-                    />
-                    <input
-                        type="password"
-                        name="password"
-                        placeholder="비밀번호"
-                        value={newComment.password}
-                        onChange={handleInputChange}
-                        required
+                        disabled={!user}
                     />
                 </div>
                 <textarea
                     name="content"
-                    placeholder="댓글을 입력하세요..."
+                    placeholder={user ? "댓글을 입력하세요..." : "댓글을 작성하려면 로그인이 필요합니다."}
                     value={newComment.content}
                     onChange={handleInputChange}
                     required
+                    disabled={!user}
                 ></textarea>
-                <button type="submit">등록</button>
+                <button type="submit" disabled={!user}>등록</button>
             </form>
 
             <ul className="comment-list">
@@ -177,10 +177,12 @@ function Comments({ videoId, mainRef }) {
                                     </span>
                                 </div>
                                 <p>{comment.content}</p>
-                                <div className="comment-actions">
-                                    <button onClick={() => handleEdit(comment)}>수정</button>
-                                    <button onClick={() => handleDelete(comment.id)}>삭제</button>
-                                </div>
+                                {user && user.id === comment.userId && (
+                                    <div className="comment-actions">
+                                        <button onClick={() => handleEdit(comment)}>수정</button>
+                                        <button onClick={() => handleDelete(comment.id)}>삭제</button>
+                                    </div>
+                                )}
                             </>
                         )}
                     </li>

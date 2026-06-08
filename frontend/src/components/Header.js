@@ -35,9 +35,14 @@ const Header = forwardRef(({ title }, ref) => {
             </button>
           </div>
         ) : (
-          <Link to="/login" className="login-link-header" aria-label="로그인">
-            로그인
-          </Link>
+          <>
+            <Link to="/login" className="login-link-header" aria-label="로그인">
+              로그인
+            </Link>
+            <Link to="/register" className="register-link-header" aria-label="회원가입">
+              회원가입
+            </Link>
+          </>
         )}
       </div>
     </header>

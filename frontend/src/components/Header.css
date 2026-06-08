@@ -27,6 +27,7 @@
   display: flex;
   align-items: center;
   justify-content: flex-end;
+  gap: 0.5rem;
 }
 
 .header-title {
@@ -83,7 +84,7 @@
   white-space: nowrap;
 }
 
-.logout-button-header, .login-link-header {
+.logout-button-header, .login-link-header, .register-link-header {
   background-color: var(--glass-bg);
   border: var(--glass-border-light);
   padding: 4px 8px;
@@ -94,9 +95,10 @@
   text-decoration: none;
   font-weight: bold;
   transition: all 0.2s ease;
+  white-space: nowrap;
 }
 
-.logout-button-header:hover, .login-link-header:hover {
+.logout-button-header:hover, .login-link-header:hover, .register-link-header:hover {
   background-color: var(--glass-bg-hover);
   color: var(--color-text-bright);
   border-color: var(--color-accent-purple);

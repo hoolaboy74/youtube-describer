@@ -1,14 +1,15 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { usePageFocus } from './hooks';
+import { useAuth } from './contexts/AuthContext';
 import './CreatePost.css';
 
 function CreatePost({ announcePolite, announceAssertive }) {
+  const { user } = useAuth();
   const titleRef = useRef(null);
   const contentRef = useRef(null);
   const nicknameRef = useRef(null);
-  const passwordRef = useRef(null);
   const pageTitleRef = useRef(null);
 
   usePageFocus(pageTitleRef);
@@ -17,15 +18,22 @@ function CreatePost({ announcePolite, announceAssertive }) {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  // 비로그인 사용자 튕겨내기
+  useEffect(() => {
+    if (!user) {
+      alert('로그인이 필요합니다.');
+      navigate('/board');
+    }
+  }, [user, navigate]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     
     const title = titleRef.current.value;
     const content = contentRef.current.value;
     const nickname = nicknameRef.current.value;
-    const password = passwordRef.current.value;
 
-    if (!title || !content || !nickname || !password) {
+    if (!title || !content || !nickname) {
       setError('모든 필드를 입력해주세요.');
       return;
     }
@@ -38,7 +46,6 @@ function CreatePost({ announcePolite, announceAssertive }) {
         title,
         content,
         nickname,
-        password,
       });
       
       announcePolite('새 글이 성공적으로 작성되었습니다.');
@@ -54,6 +61,8 @@ function CreatePost({ announcePolite, announceAssertive }) {
       setLoading(false);
     }
   };
+
+  if (!user) return null; // 리다이렉트 중 렌더링 방지
 
   return (
     <div className="create-post-container">
@@ -86,17 +95,7 @@ function CreatePost({ announcePolite, announceAssertive }) {
             type="text"
             id="nickname"
             ref={nicknameRef}
-            defaultValue=""
-            required
-          />
-        </div>
-        <div className="form-group">
-          <label htmlFor="password">비밀번호 (수정/삭제 시 필요)</label>
-          <input
-            type="password"
-            id="password"
-            ref={passwordRef}
-            defaultValue=""
+            defaultValue={user.name || ''}
             required
           />
         </div>
