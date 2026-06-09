@@ -1,0 +1,10 @@
+[dotenv@17.2.3] injecting env (1) from .env -- tip: ⚙️  write to custom object with { processEnv: myObject }
+[2026-06-09 13:26:50] [WARN] [Impersonate] yt-dlp Safari impersonation is NOT supported by the environment. Bypassing impersonation.
+[2026-06-09 13:26:50] [INFO] Initializing database...
+[2026-06-09 13:26:50] [INFO] Database initialized successfully.
+[2026-06-09 13:26:50] [INFO] Backend server listening on http://localhost:4099
+[2026-06-09 13:26:50] [INFO] Checking disk usage before cleaning old audio files...
+[2026-06-09 13:26:50] [INFO] Current disk usage: 64.72%
+[2026-06-09 13:26:50] [INFO] Disk usage is below the 70% threshold. Skipping cleanup.
+[2026-06-09 13:26:52] [INFO] [Siloam Verification] SILOAM_MOCK raw value: 'true' (length: 4)
+[2026-06-09 13:26:52] [INFO] [Siloam Mock API] Verifying - Name: 테스트유저, Phone: 01099991234

@@ -1024,9 +1024,9 @@ router.use('/admin', adminRouter);
 
 // 1. 회원가입 API (실시간 인증 포함)
 router.post('/auth/register', async (req, res) => {
-    const { email, password, name, phone, birthdate, verificationMethod = 'siloam_api', cardImage, mimeType } = req.body;
+    const { email, password, name, phone, birthdate, pin, verificationMethod = 'siloam_api', cardImage, mimeType } = req.body;
 
-    if (!email || !password || !name || !phone || !birthdate) {
+    if (!email || !password || !name || !phone || !birthdate || !pin) {
         return res.status(400).json({ error: '필수 가입 정보가 누락되었습니다.' });
     }
 
@@ -1098,7 +1098,8 @@ router.post('/auth/register', async (req, res) => {
             name,
             phone,
             birthdate,
-            is_blind: isBlindStatus
+            is_blind: isBlindStatus,
+            pin
         });
 
         if (!userCreated) {
@@ -1164,6 +1165,70 @@ router.post('/auth/login', (req, res) => {
     } catch (error) {
         logger.error('Login error:', error);
         res.status(500).json({ error: '로그인 처리 중 오류가 발생했습니다.' });
+    }
+});
+
+// 2.1 회원 ID 찾기 API
+router.post('/auth/find-id', (req, res) => {
+    const { name, birthdate } = req.body;
+    if (!name || !birthdate) {
+        return res.status(400).json({ error: '이름과 생년월일을 입력하십시오.' });
+    }
+
+    try {
+        const user = db.findUserEmail(name, birthdate);
+        if (!user) {
+            return res.status(404).json({ error: '일치하는 회원 정보가 존재하지 않습니다.' });
+        }
+        res.json({ success: true, email: user.email });
+    } catch (error) {
+        logger.error('Find ID error:', error);
+        res.status(500).json({ error: '회원 ID 찾기 처리 중 오류가 발생했습니다.' });
+    }
+});
+
+// 2.2 비밀번호 찾기용 인증 정보 확인 API
+router.post('/auth/verify-reset-credentials', (req, res) => {
+    const { name, birthdate, phone, pin } = req.body;
+    if (!name || !birthdate || !phone || !pin) {
+        return res.status(400).json({ error: '이름, 생년월일, 전화번호, PIN을 모두 입력하십시오.' });
+    }
+
+    try {
+        const user = db.verifyUserResetCredentials(name, birthdate, phone, pin);
+        if (!user) {
+            return res.status(400).json({ error: '입력하신 정보와 일치하는 회원이 없거나 PIN 번호가 다릅니다.' });
+        }
+        res.json({ success: true, message: '인증에 성공했습니다. 새 비밀번호를 입력해주세요.' });
+    } catch (error) {
+        logger.error('Verify reset credentials error:', error);
+        res.status(500).json({ error: '인증 확인 처리 중 오류가 발생했습니다.' });
+    }
+});
+
+// 2.3 비밀번호 재설정 API
+router.post('/auth/reset-password-with-pin', (req, res) => {
+    const { name, birthdate, phone, pin, newPassword } = req.body;
+    if (!name || !birthdate || !phone || !pin || !newPassword) {
+        return res.status(400).json({ error: '모든 필수 입력 정보가 누락되었습니다.' });
+    }
+
+    try {
+        const user = db.verifyUserResetCredentials(name, birthdate, phone, pin);
+        if (!user) {
+            return res.status(400).json({ error: '인증 정보가 올바르지 않습니다.' });
+        }
+
+        const hashedPassword = hashPassword(newPassword);
+        const success = db.updateUserPassword(user.id, hashedPassword);
+        if (!success) {
+            return res.status(500).json({ error: '비밀번호 재설정에 실패했습니다.' });
+        }
+
+        res.json({ success: true, message: '비밀번호가 성공적으로 재설정되었습니다.' });
+    } catch (error) {
+        logger.error('Reset password error:', error);
+        res.status(500).json({ error: '비밀번호 재설정 처리 중 오류가 발생했습니다.' });
     }
 });
 
@@ -1335,7 +1400,8 @@ router.post('/users/me/videos/favorites/toggle', requireAuth, (req, res) => {
     }
     try {
         const result = db.toggleFavorite(req.user.id, videoId);
-        res.json({ success: true, isFavorite: result.isFavorite });
+        const count = db.getFavoriteCount(videoId);
+        res.json({ success: true, isFavorite: result.isFavorite, likeCount: count });
     } catch (error) {
         logger.error('[MyPage] Failed to toggle favorite:', error);
         res.status(500).json({ error: '즐겨찾기 상태 변경 중 서버 오류가 발생했습니다.' });
@@ -1347,7 +1413,8 @@ router.get('/users/me/videos/favorites/:videoId', requireAuth, (req, res) => {
     const { videoId } = req.params;
     try {
         const favorited = db.isFavorite(req.user.id, videoId);
-        res.json({ success: true, isFavorite: favorited });
+        const count = db.getFavoriteCount(videoId);
+        res.json({ success: true, isFavorite: favorited, likeCount: count });
     } catch (error) {
         logger.error('[MyPage] Failed to check favorite status:', error);
         res.status(500).json({ error: '즐겨찾기 상태 확인 중 서버 오류가 발생했습니다.' });

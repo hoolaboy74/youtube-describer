@@ -11,6 +11,7 @@ function RegisterScreen() {
     const [name, setName] = useState('');
     const [phone, setPhone] = useState('');
     const [birthdate, setBirthdate] = useState('');
+    const [pin, setPin] = useState('');
     const [verificationMethod, setVerificationMethod] = useState('siloam_api'); // 'siloam_api' or 'card_ocr'
     
     // OCR 관련 상태
@@ -91,6 +92,7 @@ function RegisterScreen() {
                 name,
                 phone,
                 birthdate,
+                pin,
                 verificationMethod,
                 cardImage: verificationMethod === 'card_ocr' ? cardImage : undefined,
                 mimeType: verificationMethod === 'card_ocr' ? mimeType : undefined
@@ -211,6 +213,23 @@ function RegisterScreen() {
                     </div>
 
                     <div className="form-group">
+                        <label className="form-label" htmlFor="pin">비밀번호 찾기용 PIN 번호 (4~6자리 숫자)</label>
+                        <input
+                            type="password"
+                            id="pin"
+                            className="form-input"
+                            value={pin}
+                            onChange={(e) => setPin(e.target.value.replace(/[^0-9]/g, '').slice(0, 6))}
+                            required
+                            maxLength="6"
+                            placeholder="PIN 번호 입력"
+                        />
+                        <span className="form-hint" style={{ fontSize: '0.8rem', color: '#9ca3af', marginTop: '4px', display: 'block' }}>
+                            * 향후 비밀번호 분실 시 계정 보안 유지를 위한 본인 확인용 PIN 번호입니다. 안전하게 보관해 주십시오.
+                        </span>
+                    </div>
+
+                    <div className="form-group">
                         <span className="form-label" id="method-label">시각장애인 인증 방식 선택</span>
                         <div className="method-selector" role="radiogroup" aria-labelledby="method-label">
                             <button
@@ -279,7 +298,7 @@ function RegisterScreen() {
                             )}
 
                             <div className="ocr-warning-box" role="alert">
-                                ⚠️ <strong>개인정보 유출 주의:</strong> 법률 준수를 위해 복지카드 전면의 <strong>주민등록번호 뒷자리(성별구분 포함 7자리)는 포스트잇 등으로 반드시 가린 뒤 촬영</strong>해 주십시오. 이미지 파일은 분석 직후 휘발되며 절대 서버에 저장되지 않습니다.
+                                🔒 업로드된 복지카드 사진은 저장되지 않으며, 시각장애인 자격 확인 완료 즉시 안전하게 폐기됩니다.
                             </div>
                         </div>
                     )}

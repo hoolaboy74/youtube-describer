@@ -46,6 +46,14 @@ function MyPageScreen() {
     const [showAllComments, setShowAllComments] = useState(false);
 
     const [loading, setLoading] = useState(true);
+    const [theme, setTheme] = useState(() => localStorage.getItem('app-theme') || 'dark');
+
+    const handleThemeChange = (newTheme) => {
+        setTheme(newTheme);
+        localStorage.setItem('app-theme', newTheme);
+        document.documentElement.setAttribute('data-theme', newTheme);
+        announcePolite(newTheme === 'dark' ? '다크 모드로 전환되었습니다.' : '라이트 모드로 전환되었습니다.');
+    };
 
     // 로그인 검증
     useEffect(() => {
@@ -200,6 +208,54 @@ function MyPageScreen() {
     return (
         <div className="mypage-container">
             <h1 className="mypage-title">마이페이지</h1>
+
+            {/* 섹션 0: 화면 테마 설정 (저시력자/색반전 대응) */}
+            <section className="mypage-section" aria-labelledby="section-theme">
+                <h2 id="section-theme" style={{ fontSize: '1.25rem', marginBottom: '10px' }}>화면 테마 설정</h2>
+                <p style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)', marginBottom: '15px', lineHeight: '1.5' }}>
+                    * 스마트폰의 <strong>색 반전(Invert)</strong> 기능을 켜고 사용하시는 저시력 사용자 분들은 <strong>'☀️ 라이트 모드'</strong>를 선택하시면 화면이 반전되어 눈부심이 없는 다크 모드로 표현됩니다.
+                </p>
+                <div style={{ display: 'flex', gap: '15px' }} role="radiogroup" aria-labelledby="section-theme">
+                    <button
+                        type="button"
+                        onClick={() => handleThemeChange('dark')}
+                        className={`theme-btn ${theme === 'dark' ? 'active' : ''}`}
+                        role="radio"
+                        aria-checked={theme === 'dark'}
+                        style={{
+                            padding: '12px 24px',
+                            background: theme === 'dark' ? 'var(--gradient-accent)' : 'var(--glass-bg)',
+                            color: '#fff',
+                            border: theme === 'dark' ? 'none' : 'var(--glass-border)',
+                            borderRadius: '8px',
+                            cursor: 'pointer',
+                            fontWeight: 'bold',
+                            flex: 1
+                        }}
+                    >
+                        🌙 다크 모드 (기본)
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => handleThemeChange('light')}
+                        className={`theme-btn ${theme === 'light' ? 'active' : ''}`}
+                        role="radio"
+                        aria-checked={theme === 'light'}
+                        style={{
+                            padding: '12px 24px',
+                            background: theme === 'light' ? 'var(--gradient-accent)' : 'var(--glass-bg)',
+                            color: '#fff',
+                            border: theme === 'light' ? 'none' : 'var(--glass-border)',
+                            borderRadius: '8px',
+                            cursor: 'pointer',
+                            fontWeight: 'bold',
+                            flex: 1
+                        }}
+                    >
+                        ☀️ 라이트 모드 (색 반전 사용자용)
+                    </button>
+                </div>
+            </section>
 
             {/* 섹션 1: 가입 회원 정보 */}
             <section className="mypage-section" aria-labelledby="section-profile">
@@ -371,11 +427,11 @@ function MyPageScreen() {
                 )}
             </section>
 
-            {/* 섹션 5: 즐겨찾는 영상 */}
+            {/* 섹션 5: 좋아요 한 영상 */}
             <section className="mypage-section" aria-labelledby="section-favorites">
-                <h2 id="section-favorites">즐겨찾는 영상 (북마크)</h2>
+                <h2 id="section-favorites">좋아요 한 영상</h2>
                 {favorites.length === 0 ? (
-                    <p className="empty-list-text">즐겨찾기 추가한 영상이 없습니다.</p>
+                    <p className="empty-list-text">좋아요를 누른 영상이 없습니다.</p>
                 ) : (
                     <>
                         <ul className="video-list">

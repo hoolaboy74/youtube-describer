@@ -28,6 +28,32 @@
   --glass-shadow-light: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
+[data-theme="light"] {
+  --color-bg-dark: #f9fafb;
+  --gradient-bg-main: radial-gradient(circle at top right, rgba(139, 92, 246, 0.06), transparent),
+                      radial-gradient(circle at bottom left, rgba(244, 114, 182, 0.04), transparent),
+                      #f9fafb;
+  --color-accent-purple: #7c3aed;
+  --color-accent-pink: #db2777;
+  
+  /* Text Contrast Hierarchy (Light High Contrast) */
+  --color-text-main: #111827;
+  --color-text-bright: #000000;
+  --color-text-muted: #4b5563;
+  --color-text-dark-gray: #9ca3af;
+  
+  /* Glassmorphism Configuration for Light Mode */
+  --glass-bg: rgba(0, 0, 0, 0.03);
+  --glass-bg-hover: rgba(0, 0, 0, 0.06);
+  --glass-bg-input: rgba(255, 255, 255, 0.9);
+  --glass-bg-input-focus: #ffffff;
+  --glass-border: 1px solid rgba(0, 0, 0, 0.15);
+  --glass-border-light: 1px solid rgba(0, 0, 0, 0.1);
+  --glass-border-input: 1px solid rgba(0, 0, 0, 0.25);
+  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.08);
+  --glass-shadow-light: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
 /* General App Styles */
 body {
   margin: 0;

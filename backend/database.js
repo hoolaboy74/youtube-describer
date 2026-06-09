@@ -176,6 +176,7 @@ function init() {
       name TEXT NOT NULL,
       phone TEXT NOT NULL,
       birthdate TEXT NOT NULL,
+      pin TEXT, -- 비밀번호 찾기용 PIN
       is_blind INTEGER DEFAULT 0, -- 0: 미인증, 1: 인증완료, 2: 반려, 9: 관리자 대기
       createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
       updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
@@ -183,6 +184,12 @@ function init() {
   `);
 
   // 'users' 테이블 컬럼 누락 시 자동 추가 (하위 호환 마이그레이션)
+  try {
+    db.prepare('SELECT pin FROM users LIMIT 1').get();
+  } catch (error) {
+    logger.info('Adding pin column to users table...');
+    db.exec('ALTER TABLE users ADD COLUMN pin TEXT');
+  }
   try {
     db.prepare('SELECT is_blind FROM users LIMIT 1').get();
   } catch (error) {
@@ -1011,12 +1018,20 @@ function deletePostCommentByIdAdmin(id) {
 }
 
 // --- User Management Functions ---
-function createUser({ id, email, password, name, phone, birthdate, is_blind }) {
+function createUser({ id, email, password, name, phone, birthdate, is_blind, pin }) {
   const result = db.prepare(`
-    INSERT INTO users (id, email, password, name, phone, birthdate, is_blind)
-    VALUES (?, ?, ?, ?, ?, ?, ?)
-  `).run(id, email, password, name, phone, birthdate, is_blind || 0);
+    INSERT INTO users (id, email, password, name, phone, birthdate, is_blind, pin)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+  `).run(id, email, password, name, phone, birthdate, is_blind || 0, pin || null);
   return result.changes > 0;
+}
+
+function findUserEmail(name, birthdate) {
+  return db.prepare('SELECT email FROM users WHERE name = ? AND birthdate = ?').get(name, birthdate);
+}
+
+function verifyUserResetCredentials(name, birthdate, phone, pin) {
+  return db.prepare('SELECT * FROM users WHERE name = ? AND birthdate = ? AND phone = ? AND pin = ?').get(name, birthdate, phone, pin);
 }
 
 function getUserByEmail(email) {
@@ -1150,6 +1165,11 @@ function isFavorite(userId, videoId) {
   return !!row;
 }
 
+function getFavoriteCount(videoId) {
+  const row = db.prepare('SELECT COUNT(*) as count FROM user_favorites WHERE videoId = ?').get(videoId);
+  return row ? row.count : 0;
+}
+
 function getRequestedVideosByUserId(userId) {
   return db.prepare(`
     SELECT videoId, title, duration, status, createdAt
@@ -1228,6 +1248,7 @@ module.exports = {
   toggleFavorite,
   getFavorites,
   isFavorite,
+  getFavoriteCount,
   getRequestedVideosByUserId,
   getPostsByUserId,
   getCommentsByUserId,
@@ -1247,5 +1268,7 @@ module.exports = {
   listAllPostCommentsForAdmin,
   deletePostByIdAdmin,
   deletePostCommentByIdAdmin,
+  findUserEmail,
+  verifyUserResetCredentials,
   db, // Export the db instance directly
 };

@@ -93,8 +93,9 @@ function PlayerScreenV2() {
 
     const [player, setPlayer] = useState(null);
     const [isFavorite, setIsFavorite] = useState(false);
+    const [likeCount, setLikeCount] = useState(0);
 
-    // 즐겨찾기 상태 조회 및 토글 핸들러
+    // 좋아요 상태 조회 및 토글 핸들러
     useEffect(() => {
         const checkFavorite = async () => {
             if (user && videoId) {
@@ -102,6 +103,7 @@ function PlayerScreenV2() {
                     const res = await axios.get(`${API_BASE}/api/users/me/videos/favorites/${videoId}`);
                     if (res.data.success) {
                         setIsFavorite(res.data.isFavorite);
+                        setLikeCount(res.data.likeCount || 0);
                     }
                 } catch (err) {
                     console.error('Failed to check favorite status:', err);
@@ -120,11 +122,12 @@ function PlayerScreenV2() {
             const res = await axios.post(`${API_BASE}/api/users/me/videos/favorites/toggle`, { videoId });
             if (res.data.success) {
                 setIsFavorite(res.data.isFavorite);
-                announcePolite(res.data.isFavorite ? '즐겨찾기에 추가되었습니다.' : '즐겨찾기에서 해제되었습니다.');
+                setLikeCount(res.data.likeCount || 0);
+                announcePolite(res.data.isFavorite ? '좋아요가 반영되었습니다.' : '좋아요가 취소되었습니다.');
             }
         } catch (err) {
             console.error('Failed to toggle favorite:', err);
-            announcePolite('즐겨찾기 상태 변경에 실패했습니다.');
+            announcePolite('좋아요 상태 변경에 실패했습니다.');
         }
     };
     const [verbosity, setVerbosity] = useState(() => {
@@ -921,8 +924,8 @@ function PlayerScreenV2() {
                     </button>
                     <ShareButton />
                     {user && (
-                        <button onClick={handleToggleFavorite} className={`favorite-button ${isFavorite ? 'active' : ''}`} aria-label={isFavorite ? "즐겨찾기 완료" : "즐겨찾기"}>
-                            {isFavorite ? '★ 즐겨찾기 완료' : '☆ 즐겨찾기'}
+                        <button onClick={handleToggleFavorite} className={`favorite-button ${isFavorite ? 'active' : ''}`} aria-label={isFavorite ? `좋아요 완료, 현재 좋아요 총 ${likeCount}개` : `좋아요, 현재 좋아요 총 ${likeCount}개`}>
+                            {isFavorite ? `❤️ 좋아요 ${likeCount}` : `🖤 좋아요 ${likeCount}`}
                         </button>
                     )}
                 </div>

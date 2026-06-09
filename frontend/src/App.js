@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Layout from './components/Layout';
 import HomeScreen from './screens/HomeScreen';
@@ -17,6 +17,11 @@ import { AuthProvider } from './contexts/AuthContext';
 import './styles/main.css';
 
 function App() {
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('app-theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+  }, []);
+
   return (
     <AccessibilityProvider>
       <AuthProvider>
