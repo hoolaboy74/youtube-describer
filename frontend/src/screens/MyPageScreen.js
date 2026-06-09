@@ -16,6 +16,7 @@ function MyPageScreen() {
         email: '',
         phone: '',
         birthdate: '',
+        pin: '',
         isBlind: 0,
         createdAt: ''
     });
@@ -71,7 +72,10 @@ function MyPageScreen() {
                 // 1. 회원 정보 로드
                 const profileRes = await axios.get(`${API_BASE}/api/users/me`);
                 if (profileRes.data.success) {
-                    setProfile(profileRes.data.user);
+                    setProfile({
+                        ...profileRes.data.user,
+                        pin: profileRes.data.user.pin || ''
+                    });
                 }
 
                 // 2. 요청 영상 목록
@@ -115,16 +119,22 @@ function MyPageScreen() {
         setInfoMessage('');
         setInfoError('');
 
-        if (!profile.name || !profile.phone) {
-            setInfoError('이름과 연락처를 모두 입력해주세요.');
-            announcePolite('이름과 연락처를 모두 입력해주세요.');
+        if (!profile.name || !profile.phone || !profile.pin) {
+            setInfoError('이름, 연락처, PIN 번호를 모두 입력해주세요.');
+            announcePolite('이름, 연락처, PIN 번호를 모두 입력해주세요.');
+            return;
+        }
+        if (profile.pin.length < 4 || profile.pin.length > 6) {
+            setInfoError('PIN 번호는 4~6자리 숫자여야 합니다.');
+            announcePolite('PIN 번호는 4~6자리 숫자여야 합니다.');
             return;
         }
 
         try {
             const res = await axios.put(`${API_BASE}/api/users/me`, {
                 name: profile.name,
-                phone: profile.phone
+                phone: profile.phone,
+                pin: profile.pin
             });
             if (res.data.success) {
                 setInfoMessage('회원 정보가 성공적으로 수정되었습니다.');
@@ -289,6 +299,17 @@ function MyPageScreen() {
                             value={profile.phone}
                             onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
                             placeholder="010-0000-0000"
+                        />
+                    </div>
+                    <div className="form-group">
+                        <label htmlFor="profile-pin">비밀번호 찾기용 PIN 번호 (4~6자리 숫자)</label>
+                        <input
+                            type="password"
+                            id="profile-pin"
+                            value={profile.pin}
+                            onChange={(e) => setProfile({ ...profile, pin: e.target.value.replace(/[^0-9]/g, '').slice(0, 6) })}
+                            placeholder={profile.pin ? "" : "PIN 번호 입력"}
+                            maxLength="6"
                         />
                     </div>
                     <div className="form-group">

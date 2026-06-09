@@ -1093,12 +1093,12 @@ function listPendingUsers() {
 
 // --- MyPage Functions ---
 
-function updateUser(userId, { name, phone }) {
+function updateUser(userId, { name, phone, pin }) {
   const result = db.prepare(`
     UPDATE users
-    SET name = ?, phone = ?, updatedAt = CURRENT_TIMESTAMP
+    SET name = ?, phone = ?, pin = ?, updatedAt = CURRENT_TIMESTAMP
     WHERE id = ?
-  `).run(name, phone, userId);
+  `).run(name, phone, pin, userId);
   return result.changes > 0;
 }
 

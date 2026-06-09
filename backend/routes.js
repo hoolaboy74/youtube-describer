@@ -1287,6 +1287,7 @@ router.get('/users/me', requireAuth, (req, res) => {
             name: req.user.name,
             phone: req.user.phone,
             birthdate: req.user.birthdate,
+            pin: req.user.pin,
             isBlind: req.user.is_blind,
             createdAt: req.user.createdAt
         }
@@ -1295,9 +1296,12 @@ router.get('/users/me', requireAuth, (req, res) => {
 
 // 2. 내 가입 정보 수정
 router.put('/users/me', requireAuth, (req, res) => {
-    const { name, phone } = req.body;
-    if (!name || !phone) {
-        return res.status(400).json({ error: '이름과 연락처는 필수 입력 사항입니다.' });
+    const { name, phone, pin } = req.body;
+    if (!name || !phone || !pin) {
+        return res.status(400).json({ error: '이름, 연락처 및 PIN 번호는 필수 입력 사항입니다.' });
+    }
+    if (pin.length < 4 || pin.length > 6 || /[^0-9]/.test(pin)) {
+        return res.status(400).json({ error: 'PIN 번호는 4~6자리의 숫자여야 합니다.' });
     }
     
     try {
@@ -1307,7 +1311,7 @@ router.put('/users/me', requireAuth, (req, res) => {
             return res.status(400).json({ error: '이미 사용 중인 연락처(휴대폰 번호)입니다.' });
         }
         
-        const success = db.updateUser(req.user.id, { name, phone });
+        const success = db.updateUser(req.user.id, { name, phone, pin });
         if (success) {
             res.json({ success: true, message: '회원 정보가 수정되었습니다.' });
         } else {
