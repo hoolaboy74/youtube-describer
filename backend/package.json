@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "clear-cache": "node clear-cache.js"
+    "clear-cache": "node clear-cache.js",
+    "postinstall": "patch-package"
   },
   "keywords": [],
   "author": "",
@@ -28,5 +29,8 @@
     "wav": "^1.0.2",
     "youtube-sr": "^4.3.12",
     "ytdl-core": "^4.11.5"
+  },
+  "devDependencies": {
+    "patch-package": "^8.0.1"
   }
 }
