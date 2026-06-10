@@ -8,3 +8,10 @@ my-tts-service.json
 logs/
 cache.db
 
+# Local scratch files & tests
+scratch/
+temp_*
+*.scratch.js
+test_search.js
+
+
