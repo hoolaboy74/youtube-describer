@@ -1,0 +1,17 @@
+diff --git a/node_modules/youtube-sr/dist/mod.js b/node_modules/youtube-sr/dist/mod.js
+index f7714a9..844d8bb 100644
+--- a/node_modules/youtube-sr/dist/mod.js
++++ b/node_modules/youtube-sr/dist/mod.js
+@@ -698,9 +698,9 @@ var _Util = class _Util {
+         width: data.videoRenderer.thumbnail.thumbnails[data.videoRenderer.thumbnail.thumbnails.length - 1].width
+       },
+       channel: {
+-        id: data.videoRenderer.ownerText.runs[0].navigationEndpoint.browseEndpoint.browseId || null,
+-        name: data.videoRenderer.ownerText.runs[0].text || null,
+-        url: `https://www.youtube.com${data.videoRenderer.ownerText.runs[0].navigationEndpoint.browseEndpoint.canonicalBaseUrl || data.videoRenderer.ownerText.runs[0].navigationEndpoint.commandMetadata.webCommandMetadata.url}`,
++        id: (data.videoRenderer.ownerText && data.videoRenderer.ownerText.runs && data.videoRenderer.ownerText.runs[0] && data.videoRenderer.ownerText.runs[0].navigationEndpoint && data.videoRenderer.ownerText.runs[0].navigationEndpoint.browseEndpoint && data.videoRenderer.ownerText.runs[0].navigationEndpoint.browseEndpoint.browseId) || null,
++        name: (data.videoRenderer.ownerText && data.videoRenderer.ownerText.runs && data.videoRenderer.ownerText.runs[0] && data.videoRenderer.ownerText.runs[0].text) || null,
++        url: (data.videoRenderer.ownerText && data.videoRenderer.ownerText.runs && data.videoRenderer.ownerText.runs[0] && data.videoRenderer.ownerText.runs[0].navigationEndpoint && data.videoRenderer.ownerText.runs[0].navigationEndpoint.browseEndpoint) ? `https://www.youtube.com${data.videoRenderer.ownerText.runs[0].navigationEndpoint.browseEndpoint.canonicalBaseUrl || data.videoRenderer.ownerText.runs[0].navigationEndpoint.commandMetadata.webCommandMetadata.url}` : (data.videoRenderer.ownerText && data.videoRenderer.ownerText.runs && data.videoRenderer.ownerText.runs[0] && data.videoRenderer.ownerText.runs[0].navigationEndpoint && data.videoRenderer.ownerText.runs[0].navigationEndpoint.commandMetadata && data.videoRenderer.ownerText.runs[0].navigationEndpoint.commandMetadata.webCommandMetadata) ? `https://www.youtube.com${data.videoRenderer.ownerText.runs[0].navigationEndpoint.commandMetadata.webCommandMetadata.url}` : null,
+         icon: {
+           url: ((_c = (_b = (_a = data.videoRenderer.channelThumbnail) == null ? void 0 : _a.thumbnails) == null ? void 0 : _b[0]) == null ? void 0 : _c.url) || ((_h = (_g = (_f = (_e = (_d = data.videoRenderer.channelThumbnailSupportedRenderers) == null ? void 0 : _d.channelThumbnailWithLinkRenderer) == null ? void 0 : _e.thumbnail) == null ? void 0 : _f.thumbnails) == null ? void 0 : _g[0]) == null ? void 0 : _h.url),
+           width: ((_k = (_j = (_i = data.videoRenderer.channelThumbnail) == null ? void 0 : _i.thumbnails) == null ? void 0 : _j[0]) == null ? void 0 : _k.width) || ((_p = (_o = (_n = (_m = (_l = data.videoRenderer.channelThumbnailSupportedRenderers) == null ? void 0 : _l.channelThumbnailWithLinkRenderer) == null ? void 0 : _m.thumbnail) == null ? void 0 : _n.thumbnails) == null ? void 0 : _o[0]) == null ? void 0 : _p.width),
