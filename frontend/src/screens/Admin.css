@@ -396,10 +396,10 @@ tr:hover {
 .no-data-msg {
     text-align: center;
     padding: 3rem;
-    color: #888;
+    color: var(--color-text-muted);
     font-size: 1.1rem;
-    background-color: #fcfcfc;
-    border: 1px dashed #ddd;
+    background: var(--glass-bg);
+    border: 1px dashed var(--color-text-muted);
     border-radius: 8px;
 }
 

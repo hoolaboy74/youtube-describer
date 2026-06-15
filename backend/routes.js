@@ -1128,13 +1128,14 @@ router.use('/admin', adminRouter);
 
 // --- AUTHENTICATION API ROUTES ---
 
-// 1. 회원가입 API (실시간 인증 포함)
 router.post('/auth/register', async (req, res) => {
-    const { email, password, name, phone, birthdate, pin, verificationMethod = 'siloam_api', cardImage, mimeType } = req.body;
+    let { email, password, name, phone, birthdate, pin, verificationMethod = 'siloam_api', cardImage, mimeType } = req.body;
 
     if (!email || !password || !name || !phone || !birthdate || !pin) {
         return res.status(400).json({ error: '필수 가입 정보가 누락되었습니다.' });
     }
+    
+    email = email.toLowerCase();
 
     try {
         // 1단계: 이메일(ID) 중복 확인
@@ -1236,10 +1237,12 @@ router.post('/auth/register', async (req, res) => {
 
 // 2. 로그인 API
 router.post('/auth/login', (req, res) => {
-    const { email, password } = req.body;
+    let { email, password } = req.body;
     if (!email || !password) {
         return res.status(400).json({ error: '이메일과 비밀번호를 입력하십시오.' });
     }
+    
+    email = email.toLowerCase();
 
     try {
         const user = db.getUserByEmail(email);
