@@ -197,11 +197,24 @@ function init() {
     db.exec('ALTER TABLE users ADD COLUMN is_blind INTEGER DEFAULT 0');
   }
   try {
-    db.prepare('SELECT updatedAt FROM users LIMIT 1').get();
+    db.prepare('SELECT is_active FROM users LIMIT 1').get();
   } catch (error) {
-    logger.info('Adding updatedAt column to users table...');
-    db.exec('ALTER TABLE users ADD COLUMN updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP');
+    logger.info('Adding is_active column to users table...');
+    db.exec('ALTER TABLE users ADD COLUMN is_active INTEGER DEFAULT 1');
   }
+  try {
+    db.prepare('SELECT lastLoginIp FROM users LIMIT 1').get();
+  } catch (error) {
+    logger.info('Adding lastLoginIp column to users table...');
+    db.exec('ALTER TABLE users ADD COLUMN lastLoginIp TEXT');
+  }
+  try {
+    db.prepare('SELECT lastLoginAt FROM users LIMIT 1').get();
+  } catch (error) {
+    logger.info('Adding lastLoginAt column to users table...');
+    db.exec('ALTER TABLE users ADD COLUMN lastLoginAt DATETIME');
+  }
+
 
   // user_verifications 테이블: 사용자 장애인 자격 검증 이력 저장
   db.exec(`
@@ -1091,7 +1104,133 @@ function listPendingUsers() {
   `).all();
 }
 
+function updateUserLoginInfo(userId, ip) {
+  const result = db.prepare(`
+    UPDATE users
+    SET lastLoginIp = ?, lastLoginAt = CURRENT_TIMESTAMP
+    WHERE id = ?
+  `).run(ip, userId);
+  return result.changes > 0;
+}
+
+function listAllUsersForAdmin({ page = 1, limit = 20, search = null, isBlind = null, isActive = null }) {
+  const offset = (page - 1) * limit;
+  let whereClauses = [];
+  let params = [];
+
+  if (search) {
+    whereClauses.push('(name LIKE ? OR email LIKE ? OR phone LIKE ?)');
+    const searchTerm = `%${search}%`;
+    params.push(searchTerm, searchTerm, searchTerm);
+  }
+  if (isBlind !== null && isBlind !== '') {
+    whereClauses.push('is_blind = ?');
+    params.push(parseInt(isBlind, 10));
+  }
+  if (isActive !== null && isActive !== '') {
+    whereClauses.push('is_active = ?');
+    params.push(parseInt(isActive, 10));
+  }
+
+  const whereSql = whereClauses.length > 0 ? `WHERE ${whereClauses.join(' AND ')}` : '';
+
+  const countSql = `SELECT COUNT(*) AS count FROM users ${whereSql}`;
+  const total = db.prepare(countSql).get(...params).count;
+
+  const listSql = `
+    SELECT id, email, name, phone, birthdate, pin, is_blind, is_active, createdAt, updatedAt, lastLoginIp, lastLoginAt
+    FROM users
+    ${whereSql}
+    ORDER BY createdAt DESC
+    LIMIT ? OFFSET ?
+  `;
+  const users = db.prepare(listSql).all(...params, limit, offset);
+
+  return { users, totalUsers: total };
+}
+
+function updateUserStatusAdmin(userId, { isActive, isBlind }) {
+  const result = db.prepare(`
+    UPDATE users
+    SET is_active = ?, is_blind = ?, updatedAt = CURRENT_TIMESTAMP
+    WHERE id = ?
+  `).run(isActive, isBlind, userId);
+  return result.changes > 0;
+}
+
+function resetUserPasswordOrPinAdmin(userId, { type, newValue }) {
+  let query = '';
+  if (type === 'password') {
+    query = 'UPDATE users SET password = ?, updatedAt = CURRENT_TIMESTAMP WHERE id = ?';
+  } else if (type === 'pin') {
+    query = 'UPDATE users SET pin = ?, updatedAt = CURRENT_TIMESTAMP WHERE id = ?';
+  } else {
+    throw new Error('Invalid reset type');
+  }
+  const result = db.prepare(query).run(newValue, userId);
+  return result.changes > 0;
+}
+
+function deleteUserAdmin(userId) {
+  const transaction = db.transaction(() => {
+    db.prepare('UPDATE posts SET userId = NULL WHERE userId = ?').run(userId);
+    db.prepare('UPDATE post_comments SET userId = NULL WHERE userId = ?').run(userId);
+    db.prepare('UPDATE comments SET userId = NULL WHERE userId = ?').run(userId);
+    db.prepare('DELETE FROM user_verifications WHERE userId = ?').run(userId);
+    db.prepare('DELETE FROM users WHERE id = ?').run(userId);
+  });
+  
+  try {
+    transaction();
+    return true;
+  } catch (error) {
+    logger.error(`Failed to delete user ${userId} in admin transaction:`, error);
+    throw error;
+  }
+}
+
+function getUserDetailForAdmin(userId) {
+  const user = db.prepare(`
+    SELECT id, email, name, phone, birthdate, pin, is_blind, is_active, createdAt, updatedAt, lastLoginIp, lastLoginAt
+    FROM users
+    WHERE id = ?
+  `).get(userId);
+
+  if (!user) return null;
+
+  const requestedVideosCount = db.prepare(`
+    SELECT COUNT(*) AS count FROM videos WHERE requested_by = ?
+  `).get(userId).count;
+
+  const watchHistoryCount = db.prepare(`
+    SELECT COUNT(*) AS count FROM user_watch_histories WHERE userId = ?
+  `).get(userId).count;
+
+  const postsCount = db.prepare(`
+    SELECT COUNT(*) AS count FROM posts WHERE userId = ?
+  `).get(userId).count;
+
+  const videoCommentsCount = db.prepare(`
+    SELECT COUNT(*) AS count FROM comments WHERE userId = ?
+  `).get(userId).count;
+  const postCommentsCount = db.prepare(`
+    SELECT COUNT(*) AS count FROM post_comments WHERE userId = ?
+  `).get(userId).count;
+  const totalCommentsCount = videoCommentsCount + postCommentsCount;
+
+  return {
+    ...user,
+    stats: {
+      requestedVideosCount,
+      watchHistoryCount,
+      postsCount,
+      commentsCount: totalCommentsCount
+    }
+  };
+}
+
 // --- MyPage Functions ---
+
 
 function updateUser(userId, { name, phone, pin }) {
   const result = db.prepare(`
@@ -1240,6 +1379,12 @@ module.exports = {
   getDashboardStats,
   listAllCommentsForAdmin,
   deleteCommentByIdAdmin,
+  updateUserLoginInfo,
+  listAllUsersForAdmin,
+  updateUserStatusAdmin,
+  resetUserPasswordOrPinAdmin,
+  deleteUserAdmin,
+  getUserDetailForAdmin,
   // MyPage operations
   updateUser,
   updateUserPassword,

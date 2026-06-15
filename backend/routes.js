@@ -971,6 +971,112 @@ adminRouter.delete('/board/comments/:id', (req, res) => {
     }
 });
 
+// GET list of all users for admin
+adminRouter.get('/users', (req, res) => {
+    try {
+        const { page = 1, limit = 20, search = '', isBlind = '', isActive = '' } = req.query;
+        const result = db.listAllUsersForAdmin({
+            page: parseInt(page, 10),
+            limit: parseInt(limit, 10),
+            search: search || null,
+            isBlind: isBlind !== '' ? isBlind : null,
+            isActive: isActive !== '' ? isActive : null
+        });
+        res.json(result);
+    } catch (error) {
+        logger.error('[Admin] Failed to fetch users list:', error);
+        res.status(500).json({ error: 'Failed to fetch users list' });
+    }
+});
+
+// GET detail of a specific user
+adminRouter.get('/users/:userId', (req, res) => {
+    try {
+        const { userId } = req.params;
+        const userDetail = db.getUserDetailForAdmin(userId);
+        if (userDetail) {
+            res.json(userDetail);
+        } else {
+            res.status(404).json({ error: '사용자를 찾을 수 없습니다.' });
+        }
+    } catch (error) {
+        logger.error(`[Admin] Failed to fetch user detail for ${req.params.userId}:`, error);
+        res.status(500).json({ error: 'Failed to fetch user detail' });
+    }
+});
+
+// PUT update user status (isActive, isBlind)
+adminRouter.put('/users/:userId/status', (req, res) => {
+    try {
+        const { userId } = req.params;
+        const { isActive, isBlind } = req.body;
+        
+        if (isActive === undefined || isBlind === undefined) {
+            return res.status(400).json({ error: 'isActive와 isBlind 상태값이 필요합니다.' });
+        }
+        
+        const success = db.updateUserStatusAdmin(userId, {
+            isActive: parseInt(isActive, 10),
+            isBlind: parseInt(isBlind, 10)
+        });
+        
+        if (success) {
+            logger.info(`[Admin] User ${userId} status updated (isActive: ${isActive}, isBlind: ${isBlind}).`);
+            res.json({ success: true, message: '사용자 상태가 업데이트되었습니다.' });
+        } else {
+            res.status(404).json({ error: '사용자를 찾을 수 없습니다.' });
+        }
+    } catch (error) {
+        logger.error(`[Admin] Failed to update status for user ${req.params.userId}:`, error);
+        res.status(500).json({ error: 'Failed to update user status' });
+    }
+});
+
+// POST reset user password or PIN
+adminRouter.post('/users/:userId/reset', (req, res) => {
+    try {
+        const { userId } = req.params;
+        const { type, newValue } = req.body; // type: 'password' or 'pin'
+        
+        if (!type || !newValue) {
+            return res.status(400).json({ error: '재설정 유형(type)과 새 값(newValue)이 필요합니다.' });
+        }
+        
+        let valueToSave = newValue;
+        if (type === 'password') {
+            valueToSave = hashPassword(newValue);
+        }
+        
+        const success = db.resetUserPasswordOrPinAdmin(userId, { type, newValue: valueToSave });
+        if (success) {
+            logger.info(`[Admin] User ${userId} ${type} reset successfully.`);
+            res.json({ success: true, message: `${type === 'password' ? '비밀번호' : 'PIN'}가 정상적으로 재설정되었습니다.` });
+        } else {
+            res.status(404).json({ error: '사용자를 찾을 수 없습니다.' });
+        }
+    } catch (error) {
+        logger.error(`[Admin] Failed to reset ${req.body.type} for user ${req.params.userId}:`, error);
+        res.status(500).json({ error: `Failed to reset user ${req.body.type}` });
+    }
+});
+
+// DELETE delete/force-withdraw a user
+adminRouter.delete('/users/:userId', (req, res) => {
+    try {
+        const { userId } = req.params;
+        const success = db.deleteUserAdmin(userId);
+        if (success) {
+            logger.info(`[Admin] User ${userId} deleted/force-withdrawn successfully.`);
+            res.json({ success: true, message: '사용자가 강제 탈퇴 처리되었습니다.' });
+        } else {
+            res.status(404).json({ error: '사용자를 찾을 수 없습니다.' });
+        }
+    } catch (error) {
+        logger.error(`[Admin] Failed to delete user ${req.params.userId}:`, error);
+        res.status(500).json({ error: 'Failed to delete user' });
+    }
+});
+
 // GET list of users pending manual blind verification (is_blind = 9)
 adminRouter.get('/pending-users', (req, res) => {
     try {
@@ -1139,6 +1245,17 @@ router.post('/auth/login', (req, res) => {
         const user = db.getUserByEmail(email);
         if (!user || !verifyPassword(password, user.password)) {
             return res.status(401).json({ error: '이메일 또는 비밀번호가 잘못되었습니다.' });
+        }
+
+        if (user.is_active === 0) {
+            return res.status(403).json({ error: '비활성화된 계정입니다. 관리자에게 문의하십시오.' });
+        }
+
+        const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+        try {
+            db.updateUserLoginInfo(user.id, ip);
+        } catch (ipError) {
+            logger.error(`Failed to update user login info for ${user.id}:`, ipError);
         }
 
         const token = jwt.sign(

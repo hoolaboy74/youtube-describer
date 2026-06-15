@@ -74,8 +74,16 @@ const Admin = () => {
     });
 
     const [pendingUsers, setPendingUsers] = useState([]);
+    const [usersList, setUsersList] = useState([]);
+    const [userFilters, setUserFilters] = useState({ search: '', isBlind: '', isActive: '' });
+    const [userPagination, setUserPagination] = useState({ page: 1, limit: 10, totalUsers: 0 });
+    const [selectedUser, setSelectedUser] = useState(null);
+    const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+    const [resetForm, setResetForm] = useState({ type: 'password', newValue: '' });
+
 
     const headingRef = useRef(null);
+    const modalRef = useRef(null);
     usePageFocus(headingRef);
 
     // --- Fetching Functions ---
@@ -172,6 +180,26 @@ const Admin = () => {
         }
     }, [isAuthenticated]);
 
+    const fetchUsersList = useCallback(async () => {
+        if (!isAuthenticated) return;
+        try {
+            const params = {
+                page: userPagination.page,
+                limit: userPagination.limit,
+                search: userFilters.search,
+                isBlind: userFilters.isBlind,
+                isActive: userFilters.isActive
+            };
+            const res = await api.get('/admin/users', { params });
+            setUsersList(res.data.users || []);
+            setUserPagination(prev => ({ ...prev, totalUsers: res.data.totalUsers || 0 }));
+        } catch (error) {
+            console.error('Failed to fetch users list', error);
+            setUsersList([]);
+        }
+    }, [isAuthenticated, userPagination.page, userPagination.limit, userFilters.search, userFilters.isBlind, userFilters.isActive]);
+
+
     const fetchAllData = useCallback(async () => {
         if (!isAuthenticated) return;
         try {
@@ -233,8 +261,12 @@ const Admin = () => {
     useEffect(() => {
         if (isAuthenticated && activeTab === 'users') {
             fetchPendingUsers();
+            fetchUsersList();
         }
-    }, [isAuthenticated, activeTab, fetchPendingUsers]);
+    }, [isAuthenticated, activeTab, userPagination.page, userFilters.search, userFilters.isBlind, userFilters.isActive, fetchPendingUsers, fetchUsersList]);
+
+
+
 
     // --- Handlers ---
     const handleAuth = async () => {
@@ -320,6 +352,92 @@ const Admin = () => {
             }
         }
     };
+
+    const handleFetchUserDetail = async (userId) => {
+        try {
+            const res = await api.get(`/admin/users/${userId}`);
+            setSelectedUser(res.data);
+            setIsDetailModalOpen(true);
+            setResetForm({ type: 'password', newValue: '' });
+        } catch (error) {
+            console.error('Failed to fetch user detail', error);
+            alert('사용자 상세 정보를 불러오는 데 실패했습니다.');
+        }
+    };
+
+    const handleUpdateUserStatus = async (userId, newIsActive, newIsBlind) => {
+        if (window.confirm('사용자 상태를 변경하시겠습니까?')) {
+            try {
+                await api.put(`/admin/users/${userId}/status`, { isActive: newIsActive, isBlind: newIsBlind });
+                alert('사용자 상태가 성공적으로 변경되었습니다.');
+                const res = await api.get(`/admin/users/${userId}`);
+                setSelectedUser(res.data);
+                fetchUsersList();
+                fetchPendingUsers();
+            } catch (error) {
+                console.error('Failed to update user status', error);
+                alert('사용자 상태 변경에 실패했습니다.');
+            }
+        }
+    };
+
+    const handleResetUserCredential = async (userId) => {
+        const { type, newValue } = resetForm;
+        if (!newValue.trim()) {
+            alert('재설정할 값을 입력해주세요.');
+            return;
+        }
+        if (type === 'password' && newValue.length < 6) {
+            alert('비밀번호는 최소 6자 이상이어야 합니다.');
+            return;
+        }
+        if (type === 'pin' && (newValue.length < 4 || isNaN(newValue))) {
+            alert('PIN은 4자리 이상의 숫자여야 합니다.');
+            return;
+        }
+
+        const label = type === 'password' ? '비밀번호' : 'PIN';
+        if (window.confirm(`정말로 이 사용자의 ${label}를 재설정하시겠습니까?`)) {
+            try {
+                await api.post(`/admin/users/${userId}/reset`, { type, newValue });
+                alert(`사용자의 ${label}가 성공적으로 재설정되었습니다.`);
+                setResetForm(prev => ({ ...prev, newValue: '' }));
+                const res = await api.get(`/admin/users/${userId}`);
+                setSelectedUser(res.data);
+            } catch (error) {
+                console.error(`Failed to reset user ${type}`, error);
+                alert(`사용자 ${label} 재설정에 실패했습니다.`);
+            }
+        }
+    };
+
+    const handleDeleteUser = async (userId, userName) => {
+        if (window.confirm(`정말로 '${userName}' 사용자를 강제 탈퇴시키겠습니까?
+작성한 글과 댓글의 연결이 끊어지며 복구할 수 없습니다.`)) {
+            try {
+                await api.delete(`/admin/users/${userId}`);
+                alert('사용자가 강제 탈퇴 처리되었습니다.');
+                setIsDetailModalOpen(false);
+                setSelectedUser(null);
+                fetchUsersList();
+                fetchPendingUsers();
+            } catch (error) {
+                console.error('Failed to delete user', error);
+                alert('사용자 강제 탈퇴 처리에 실패했습니다.');
+            }
+        }
+    };
+
+    const handleUserFilterChange = (e) => {
+        const { name, value } = e.target;
+        setUserPagination(prev => ({ ...prev, page: 1 }));
+        setUserFilters(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleUserPageChange = (newPage) => {
+        setUserPagination(prev => ({ ...prev, page: newPage }));
+    };
+
 
     const handleSettingChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -475,7 +593,8 @@ const Admin = () => {
 
     return (
         <div className="admin-container">
-            <Header title="관리자 페이지" ref={headingRef} />
+            <div className="admin-main-wrapper" aria-hidden={isDetailModalOpen ? "true" : undefined}>
+                <Header title="관리자 페이지" ref={headingRef} />
 
             <div className="admin-tabs" role="tablist" aria-label="관리자 페이지 탭">
                 <button role="tab" aria-selected={activeTab === 'dashboard'} className={`tab-btn ${activeTab === 'dashboard' ? 'active' : ''}`} onClick={() => setActiveTab('dashboard')}>대시보드</button>
@@ -654,7 +773,107 @@ const Admin = () => {
                         )}
                     </div>
                 </section>
+
+                <section style={{ marginTop: '40px' }}>
+                    <h2>전체 사용자 관리</h2>
+                    <form className="filters-container" onSubmit={(e) => { e.preventDefault(); fetchUsersList(); }}>
+                        <input 
+                            type="search" 
+                            name="search" 
+                            placeholder="성명, 이메일, 연락처 검색..." 
+                            value={userFilters.search} 
+                            onChange={handleUserFilterChange} 
+                        />
+                        <select name="isBlind" value={userFilters.isBlind} onChange={handleUserFilterChange}>
+                            <option value="">모든 인증 상태</option>
+                            <option value="0">미인증 (일반)</option>
+                            <option value="1">인증완료 (시각장애인)</option>
+                            <option value="2">반려</option>
+                            <option value="9">관리자 대기</option>
+                        </select>
+                        <select name="isActive" value={userFilters.isActive} onChange={handleUserFilterChange}>
+                            <option value="">모든 계정 상태</option>
+                            <option value="1">활성</option>
+                            <option value="0">비활성 (정지)</option>
+                        </select>
+                        <button type="submit">검색</button>
+                    </form>
+                    <div className="table-container">
+                        {usersList.length === 0 ? (
+                            <p className="no-data-msg">조회된 사용자가 없습니다.</p>
+                        ) : (
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th scope="col">가입일</th>
+                                        <th scope="col">성명</th>
+                                        <th scope="col">이메일</th>
+                                        <th scope="col">연락처</th>
+                                        <th scope="col">인증 상태</th>
+                                        <th scope="col">계정 상태</th>
+                                        <th scope="col">작업</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {usersList.map(user => (
+                                        <tr key={user.id}>
+                                            <td>{new Date(user.createdAt).toLocaleDateString()}</td>
+                                            <td>{user.name}</td>
+                                            <td>{user.email}</td>
+                                            <td>{user.phone}</td>
+                                            <td>
+                                                {user.is_blind === 1 ? (
+                                                    <span className="badge method-siloam">인증완료</span>
+                                                ) : user.is_blind === 9 ? (
+                                                    <span className="badge method-ocr">대기중</span>
+                                                ) : user.is_blind === 2 ? (
+                                                    <span className="badge badge-danger">반려됨</span>
+                                                ) : (
+                                                    <span className="badge method-manual">미인증</span>
+                                                )}
+                                            </td>
+                                            <td>
+                                                {user.is_active === 1 ? (
+                                                    <span className="badge method-siloam">활성</span>
+                                                ) : (
+                                                    <span className="badge badge-danger">정지</span>
+                                                )}
+                                            </td>
+                                            <td>
+                                                <button className="approve-btn" onClick={() => handleFetchUserDetail(user.id)}>
+                                                    상세 / 관리
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        )}
+                    </div>
+                    {userPagination.totalUsers > userPagination.limit && (
+                        <div className="pagination-container">
+                            <button 
+                                onClick={() => handleUserPageChange(userPagination.page - 1)} 
+                                disabled={userPagination.page <= 1}
+                            >
+                                이전
+                            </button>
+                            <span>
+                                {userPagination.page} / {Math.ceil(userPagination.totalUsers / userPagination.limit)}
+                            </span>
+                            <button 
+                                onClick={() => handleUserPageChange(userPagination.page + 1)} 
+                                disabled={userPagination.page >= Math.ceil(userPagination.totalUsers / userPagination.limit)}
+                            >
+                                다음
+                            </button>
+                        </div>
+                    )}
+                </section>
             </div>
+
+
+
 
             <div role="tabpanel" hidden={activeTab !== 'content'}>
                             <section>
@@ -914,7 +1133,108 @@ const Admin = () => {
                                 <button className="save-btn" onClick={handleSaveSettings}>설정 저장</button>
                             </section>
                         </div>
+            </div>
+
+            {isDetailModalOpen && selectedUser && (
+                <div className="admin-modal-overlay" onClick={() => setIsDetailModalOpen(false)} role="presentation">
+                    <div 
+                        className="admin-modal-content" 
+                        onClick={(e) => e.stopPropagation()} 
+                        ref={modalRef} 
+                        role="dialog" 
+                        aria-modal="true" 
+                        aria-labelledby="modal-title"
+                    >
+                        <div className="modal-header">
+                            <h3 id="modal-title">사용자 상세 관리 ({selectedUser.name})</h3>
+                            <button className="close-btn" onClick={() => setIsDetailModalOpen(false)} aria-label="닫기">×</button>
+                        </div>
+                        <div className="modal-body">
+                            <div className="user-details-grid">
+                                <div><strong>유저 고유키(UID):</strong> {selectedUser.id}</div>
+                                <div><strong>로그인 이메일:</strong> {selectedUser.email}</div>
+                                <div><strong>성명:</strong> {selectedUser.name}</div>
+                                <div><strong>연락처:</strong> {selectedUser.phone}</div>
+                                <div><strong>생년월일:</strong> {selectedUser.birthdate}</div>
+                                <div><strong>가입일시:</strong> {new Date(selectedUser.createdAt).toLocaleString()}</div>
+                                <div><strong>최종 로그인 IP:</strong> {selectedUser.lastLoginIp || 'N/A'}</div>
+                                <div><strong>최종 로그인 일시:</strong> {selectedUser.lastLoginAt ? new Date(selectedUser.lastLoginAt).toLocaleString() : 'N/A'}</div>
+                            </div>
+
+                            <div className="stats-section" style={{ marginTop: '20px', padding: '15px', background: 'rgba(255,255,255,0.05)', borderRadius: '8px' }}>
+                                <h4>사용자 활동 통계</h4>
+                                <div className="user-details-grid" style={{ marginTop: '10px' }}>
+                                    <div><strong>요청 비디오 수:</strong> {selectedUser.stats?.requestedVideosCount || 0} 개</div>
+                                    <div><strong>최근 시청 수:</strong> {selectedUser.stats?.watchHistoryCount || 0} 개</div>
+                                    <div><strong>작성 게시글 수:</strong> {selectedUser.stats?.postsCount || 0} 개</div>
+                                    <div><strong>작성 댓글 수:</strong> {selectedUser.stats?.commentsCount || 0} 개</div>
+                                </div>
+                            </div>
+
+                            <div className="status-control-section" style={{ marginTop: '20px' }}>
+                                <h4>상태 제어</h4>
+                                <div style={{ display: 'flex', gap: '15px', marginTop: '10px' }}>
+                                    <div style={{ flex: 1 }}>
+                                        <label htmlFor="modal-is-blind">시각장애인 인증 상태:</label>
+                                        <select 
+                                            id="modal-is-blind"
+                                            value={selectedUser.is_blind}
+                                            onChange={(e) => handleUpdateUserStatus(selectedUser.id, selectedUser.is_active, parseInt(e.target.value, 10))}
+                                        >
+                                            <option value="0">0: 미인증</option>
+                                            <option value="1">1: 인증완료 (시각장애인)</option>
+                                            <option value="2">2: 반려</option>
+                                            <option value="9">9: 관리자 대기</option>
+                                        </select>
+                                    </div>
+                                    <div style={{ flex: 1 }}>
+                                        <label htmlFor="modal-is-active">계정 활성화 상태:</label>
+                                        <select 
+                                            id="modal-is-active"
+                                            value={selectedUser.is_active}
+                                            onChange={(e) => handleUpdateUserStatus(selectedUser.id, parseInt(e.target.value, 10), selectedUser.is_blind)}
+                                        >
+                                            <option value="1">1: 활성</option>
+                                            <option value="0">0: 비활성 (계정 잠금)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="credential-reset-section" style={{ marginTop: '25px', padding: '15px', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px' }}>
+                                <h4>비밀번호 / PIN 재설정</h4>
+                                <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+                                    <select 
+                                        value={resetForm.type} 
+                                        onChange={(e) => setResetForm(prev => ({ ...prev, type: e.target.value }))}
+                                        style={{ width: '120px' }}
+                                    >
+                                        <option value="password">비밀번호</option>
+                                        <option value="pin">PIN</option>
+                                    </select>
+                                    <input 
+                                        type="text" 
+                                        placeholder={resetForm.type === 'password' ? '새 비밀번호 (6자 이상)' : '새 PIN (4자리 숫자)'}
+                                        value={resetForm.newValue}
+                                        onChange={(e) => setResetForm(prev => ({ ...prev, newValue: e.target.value }))}
+                                        style={{ flex: 1 }}
+                                    />
+                                    <button className="approve-btn" onClick={() => handleResetUserCredential(selectedUser.id)}>재설정 적용</button>
+                                </div>
+                            </div>
+
+                            <div className="danger-zone" style={{ marginTop: '30px', borderTop: '1px solid rgba(255,0,0,0.3)', paddingTop: '20px' }}>
+                                <h4 style={{ color: '#ff4d4d' }}>위험 구역</h4>
+                                <p style={{ fontSize: '13px', color: '#aaa', margin: '5px 0 10px 0' }}>해당 사용자를 영구 탈퇴 처리합니다. 이 작업은 취소할 수 없습니다.</p>
+                                <button className="delete-btn" style={{ background: '#ff4d4d', color: '#fff', width: '100%' }} onClick={() => handleDeleteUser(selectedUser.id, selectedUser.name)}>
+                                    사용자 강제 탈퇴
+                                </button>
+                            </div>
+                        </div>
                     </div>
+                </div>
+            )}
+        </div>
                 );
             };
 export default Admin;

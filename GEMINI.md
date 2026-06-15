@@ -1,4 +1,7 @@
-# Project Analysis: youtube-screen-describer
+# Project Analysis: youtube-screen-describer (test branch)
+
+> [!IMPORTANT]
+> 이 프로젝트 루트는 뷰래이터 서비스의 **test 브랜치**입니다.
 
 ## Overall Purpose
 This project is a **YouTube video screen describer**. It takes a YouTube video URL, processes the video to extract keyframes, generates a descriptive script using a vision model, and creates a time-stamped Korean audio track for the visually impaired.
@@ -81,6 +84,16 @@ To run the backend server, the following command-line tools must be installed on
 ---
 
 ## 개선 기록 (Improvement Log)
+
+### 83차: 어드민 사용자 상세 모달 접근성(스크린리더 포커스 진입 불가) 패치 (2026-06-15)
+- **문제:**
+    1. 어드민 페이지 사용자 관리 탭에서 '상세 / 관리' 모달을 띄웠을 때, 스크린리더가 모달 내부로 들어가지 못하고 닫기 버튼을 포함한 모달 내부 전체를 인지하지 못하는 접근성 결함 발생.
+    2. 원인은 모달 오버레이 요소가 메인 콘텐츠 영역을 감싸는 `admin-main-wrapper` 컨테이너의 내부(자식)에 위치해 있었기 때문임. 모달이 활성화될 때 `admin-main-wrapper`에 `aria-hidden="true"`가 동적으로 걸리면서, 그 하위의 모달까지 스크린리더 인식 범위에서 영구 배제됨.
+    3. 기존에 추가했던 자바스크립트 수동 포커스 트랩(Focus Trap) 제어 방식이 오히려 사파리의 VoiceOver 가상 커서 탐색 흐름과 충돌하여 닫기 버튼에 영구적인 포커스 락(Lock)을 유발함.
+- **해결:**
+    1. **DOM 계층 구조 분리**: `Admin.js` 내의 모든 탭패널 요소를 `admin-main-wrapper` 안으로 정돈하여 감싸고, 오버레이 모달은 `admin-main-wrapper`의 바깥(형제 노드)이자 `admin-container` 최하단으로 마크업 위치를 이동시켰습니다. 이로써 뒷배경에만 `aria-hidden="true"`가 정상 부여되고 모달은 스크린리더 탐색 범위에 온전히 노출됩니다.
+    2. **수동 포커스 트랩 롤백**: 스크린리더 사용자의 자연스러운 가상 포커스 탐색을 방해하는 강제 포커스 락 및 탭 가로채기 이벤트를 완전히 제거하여 사파리 VoiceOver 및 스크린리더의 네이티브 포커스 흐름을 전면 복원했습니다.
+- **상태:** 로컬 React 컴파일 및 빌드 검증(Compile Success) 완료, 모달 계층 구조 분리를 통한 접근성 해결 확인 (2026-06-15)
 
 ### 82차: 유튜브 검색 API 예외 조치 및 patch-package 반영 (2026-06-10)
 - **문제:**
