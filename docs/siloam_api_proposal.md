@@ -2,7 +2,7 @@
 
 **발신:** blindmom.org 개발팀  
 **수신:** 실로암시각장애인복지관 시스템 어드민 및 개발 부서  
-**일자:** 2026년 6월 2일  
+**일자:** 2026년 6월 17일  
 
 ---
 
@@ -27,9 +27,9 @@ sequenceDiagram
     participant Siloam as 실로암 검증 API (신설)
     database DB as 실로암 DB
 
-    User->>Client: 실로암 인증 정보 입력<br/>(아이디, 이름, 생년월일)
+    User->>Client: 실로암 인증 정보 입력<br/>(이름, 생년월일)
     Client->>Server: 검증 요청 (HTTPS POST)
-    Server->>Siloam: POST /api/v1/members/verify<br/>(Header: X-API-Key / Body: 회원 정보 JSON)
+    Server->>Siloam: POST /api/v1/members/verify<br/>(Header: X-API-Key, X-Org / Body: 회원 정보 JSON)
     Siloam->>Siloam: API Key 및 호출 IP 검증
     Siloam->>DB: 일치 여부 및 시각장애 여부 조회 (SELECT)
     DB-->>Siloam: 결과 반환
@@ -48,8 +48,9 @@ sequenceDiagram
     *   SSL/TLS 1.2 이상 규격의 암호화 통신만 허용하여 전송 데이터의 가로채기를 방지합니다.
 2.  **호출 IP 화이트리스팅 (방화벽 통제):**
     *   실로암 API 서버 방화벽 단에서 `blindmom.org` 백엔드 서버의 고정 IP만 요청을 허용하도록 화이트리스팅을 설정합니다.
-3.  **API Key 인증 (Static Key):**
-    *   양사 간 사전 협의된 고유 API Key를 HTTP 헤더에 담아 전송하며, 실로암 서버는 이 키의 일치 여부만 1차 검증합니다.
+3.  **API Key 및 기관 식별자 인증:**
+    *   HTTP 헤더에 고유 API Key(`X-API-Key`)와 요청 기관 식별자(`X-Org`)를 함께 담아 전송합니다.
+    *   실로암 측은 API Key의 일치 여부를 검증하고, 요청 기관명이 `blindmom`으로 유효한지 확인하여 접근 권한을 확인해야 합니다.
 
 ---
 
@@ -57,17 +58,18 @@ sequenceDiagram
 
 ### 4.1. 요청 정보 (Request)
 
-*   **Method / URL:** `POST https://[siloam-api-domain]/api/v1/members/verify`
+*   **Method / URL:** `POST [실로암 측 지정 URL]`
+    *   *참고: 실제 호출 대상 URL(도메인 및 엔드포인트 경로)은 실로암 측에서 최종 결정하여 blindmom.org 측에 제공 및 통보해주셔야 합니다.*
 *   **Content-Type:** `application/json; charset=utf-8`
 *   **HTTP Headers:**
-    *   `X-API-Key`: 실로암에서 발급한 고유 API Key
+    *   `X-API-Key`: 실로암 측에서 발급하여 blindmom.org 측에 통보한 고유 API Key
+    *   `X-Org`: 요청 기관명 식별자 (`blindmom`으로 고정하여 전송)
 
 #### Request Body Schema
 ```json
 {
   "name": "홍길동",                    // 실명 (UTF-8)
-  "birthDate": "1990-01-01",           // 생년월일 (YYYY-MM-DD 형식)
-  "phoneNo": "01012345678"             // 휴대폰 번호 (하이픈 제외 숫자만)
+  "birthDate": "19900101"              // 생년월일 (YYYYMMDD 형식)
 }
 ```
 
@@ -136,6 +138,7 @@ const ALLOWED_IP = "xxx.xxx.xxx.xxx"; // blindmom.org 서버의 고정 IP
 // 검증 미들웨어
 function checkAccess(req, res, next) {
   const apiKey = req.headers['x-api-key'];
+  const org = req.headers['x-org'];
   const clientIp = req.ip || req.connection.remoteAddress;
 
   // 1. IP 화이트리스트 검증 (프록시 환경 시 x-forwarded-for 등 고려 필요)
@@ -148,17 +151,22 @@ function checkAccess(req, res, next) {
     return res.status(401).json({ status: "error", code: "ERR_UNAUTHORIZED", message: "Unauthorized API Key" });
   }
 
+  // 3. 기관 식별자 검증
+  if (!org || org !== 'blindmom') {
+    return res.status(400).json({ status: "error", code: "ERR_BAD_REQUEST", message: "Invalid or missing X-Org header" });
+  }
+
   next();
 }
 
 // 회원 검증 라우트
 app.post('/api/v1/members/verify', checkAccess, async (req, res) => {
-  const { name, birthDate, phoneNo } = req.body;
+  const { name, birthDate } = req.body;
 
   try {
     // 실로암 내부 DB 조회 쿼리 실행
-    // SELECT COUNT(*) as cnt FROM members WHERE name = ? AND birth_date = ? AND phone_no = ? AND is_blind = 1
-    const isBlindMember = await db.checkBlindMember(name, birthDate, phoneNo);
+    // SELECT COUNT(*) as cnt FROM members WHERE name = ? AND birth_date = ? AND is_blind = 1
+    const isBlindMember = await db.checkBlindMember(name, birthDate);
 
     if (isBlindMember) {
       return res.status(200).json({
