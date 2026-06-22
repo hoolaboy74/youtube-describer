@@ -384,7 +384,10 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
                     downloadProcess.on('close', (code) => {
                         if (code === 0) resolve();
                         else {
-                            const isBotError = stderrData.includes('confirm you’re not a bot') || stderrData.includes('cookies are no longer valid');
+                            const isBotError = stderrData.includes('confirm you’re not a bot') || 
+                                               stderrData.includes('cookies are no longer valid') ||
+                                               stderrData.includes('Too Many Requests') ||
+                                               stderrData.includes('429');
                             if (downloadAttempt === 1 && isBotError && activeCookiePath) {
                                 const invalidPath = activeCookiePath + '.invalid';
                                 logger.warn(`[${requestHash}] Bot detected with cookie ${path.basename(activeCookiePath)}. Invalidating and retrying without cookies...`);
@@ -752,7 +755,10 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
                     downloadProcess.on('close', (code) => {
                         if (code === 0) resolve();
                         else {
-                            const isBotError = stderrData.includes('confirm you’re not a bot') || stderrData.includes('cookies are no longer valid');
+                            const isBotError = stderrData.includes('confirm you’re not a bot') || 
+                                               stderrData.includes('cookies are no longer valid') ||
+                                               stderrData.includes('Too Many Requests') ||
+                                               stderrData.includes('429');
                             if (downloadAttempt === 1 && isBotError && activeCookiePath) {
                                 const invalidPath = activeCookiePath + '.invalid';
                                 logger.warn(`[${requestHash}] Bot detected in batch with cookie ${path.basename(activeCookiePath)}. Invalidating and retrying without cookies...`);
@@ -916,7 +922,12 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
         logger.error(new Error(`[${requestHash}] Error in batch processing: ${error.message}`));
         
         // Invalidate cookie on auth error
-        if (cookiePath && (error.message.includes('Sign in to confirm') || error.message.includes('cookies are no longer valid'))) {
+        if (cookiePath && (
+            error.message.includes('Sign in to confirm') || 
+            error.message.includes('cookies are no longer valid') ||
+            error.message.includes('Too Many Requests') ||
+            error.message.includes('429')
+        )) {
             const invalidPath = cookiePath + '.invalid';
             logger.warn(`[${requestHash}] Authentication error detected. Renaming cookie file to ${path.basename(invalidPath)}`);
             try {
