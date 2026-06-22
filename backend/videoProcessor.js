@@ -256,11 +256,13 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
         let downloadSuccess = false;
         let downloadAttempt = 1;
         let currentCookiePath = getRandomCookiePath();
+        let useImpersonate = true;
 
         while (!downloadSuccess && downloadAttempt <= 2) {
             const isRetry = downloadAttempt === 2;
             const activeCookiePath = isRetry ? null : currentCookiePath;
             const cookieArgs = activeCookiePath ? ['--cookies', activeCookiePath] : [];
+            const impersonateArgs = useImpersonate ? ['--impersonate', 'safari'] : [];
             
             if (isRetry) {
                 logger.info(`[${requestHash}] Attempt 2: Cleaning up and retrying download without cookies. Relying on yt-dlp internal solver.`);
@@ -285,7 +287,7 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
                         '--force-ipv4',
                         '--legacy-server-connect',
                         '--no-check-certificate',
-                        '--impersonate', 'safari',
+                        ...impersonateArgs,
                         '--newline', 
                         '--write-auto-sub',
                         '--write-sub',
@@ -348,8 +350,11 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
                     downloadProcess.on('close', (code) => {
                         if (code === 0) resolve();
                         else {
+                            const isImpersonateError = stderrData.includes('Impersonate target') || stderrData.includes('curl_cffi');
                             const isBotError = stderrData.includes('confirm you’re not a bot') || stderrData.includes('cookies are no longer valid');
-                            if (downloadAttempt === 1 && isBotError && activeCookiePath) {
+                            if (isImpersonateError) {
+                                reject({ type: 'impersonate_failed', message: stderrData });
+                            } else if (downloadAttempt === 1 && isBotError && activeCookiePath) {
                                 const invalidPath = activeCookiePath + '.invalid';
                                 logger.warn(`[${requestHash}] Bot detected with cookie ${path.basename(activeCookiePath)}. Invalidating and retrying without cookies...`);
                                 try { fs.renameSync(activeCookiePath, invalidPath); } catch (e) {}
@@ -364,6 +369,11 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
                 });
                 downloadSuccess = true;
             } catch (err) {
+                if (err.type === 'impersonate_failed') {
+                    logger.warn(`[${requestHash}] Impersonate target not available. Retrying without impersonation...`);
+                    useImpersonate = false;
+                    continue;
+                }
                 if (err.type === 'bot_detected' && downloadAttempt === 1) {
                     downloadAttempt++;
                     continue;
@@ -652,11 +662,13 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
         let downloadSuccess = false;
         let downloadAttempt = 1;
         let currentCookiePath = getRandomCookiePath();
+        let useImpersonate = true;
 
         while (!downloadSuccess && downloadAttempt <= 2) {
             const isRetry = downloadAttempt === 2;
             const activeCookiePath = isRetry ? null : currentCookiePath;
             const cookieArgs = activeCookiePath ? ['--cookies', activeCookiePath] : [];
+            const impersonateArgs = useImpersonate ? ['--impersonate', 'safari'] : [];
 
             if (isRetry) {
                 logger.info(`[${requestHash}] Attempt 2: Cleaning up and retrying batch download without cookies. Relying on yt-dlp internal solver.`);
@@ -680,7 +692,7 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
                         '--force-ipv4',
                         '--legacy-server-connect',
                         '--no-check-certificate',
-                        '--impersonate', 'safari',
+                        ...impersonateArgs,
                         '--no-progress',
                         '--write-auto-sub',
                         '--write-auto-sub',
@@ -714,8 +726,11 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
                     downloadProcess.on('close', (code) => {
                         if (code === 0) resolve();
                         else {
+                            const isImpersonateError = stderrData.includes('Impersonate target') || stderrData.includes('curl_cffi');
                             const isBotError = stderrData.includes('confirm you’re not a bot') || stderrData.includes('cookies are no longer valid');
-                            if (downloadAttempt === 1 && isBotError && activeCookiePath) {
+                            if (isImpersonateError) {
+                                reject({ type: 'impersonate_failed', message: stderrData });
+                            } else if (downloadAttempt === 1 && isBotError && activeCookiePath) {
                                 const invalidPath = activeCookiePath + '.invalid';
                                 logger.warn(`[${requestHash}] Bot detected in batch with cookie ${path.basename(activeCookiePath)}. Invalidating and retrying without cookies...`);
                                 try { fs.renameSync(activeCookiePath, invalidPath); } catch (e) {}
@@ -730,6 +745,11 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
                 });
                 downloadSuccess = true;
             } catch (err) {
+                if (err.type === 'impersonate_failed') {
+                    logger.warn(`[${requestHash}] Impersonate target not available in batch. Retrying without impersonation...`);
+                    useImpersonate = false;
+                    continue;
+                }
                 if (err.type === 'bot_detected' && downloadAttempt === 1) {
                     downloadAttempt++;
                     continue;
