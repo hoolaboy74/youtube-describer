@@ -8,6 +8,7 @@ const crypto = require('crypto');
 const db = require('./database');
 const { formatTime, preprocessVtt, isValidYoutubeUrl } = require('./utils');
 const logger = require('./logger');
+const sharp = require('sharp');
 
 const API_KEY = process.env.GOOGLE_API_KEY;
 if (!API_KEY) {
@@ -15,6 +16,31 @@ if (!API_KEY) {
 }
 const genAI = new GoogleGenerativeAI(API_KEY);
 const youtube = google.youtube({ version: 'v3', auth: API_KEY });
+
+const saveFrameCache = async (baseTempDir, allFrameFiles, allTimestamps, videoId) => {
+    const framesOutputDir = path.join(__dirname, 'public', 'frames', videoId);
+    try {
+        await fs.promises.mkdir(framesOutputDir, { recursive: true });
+        
+        for (let i = 0; i < allTimestamps.length; i++) {
+            const timestamp = allTimestamps[i];
+            const frameFile = allFrameFiles[i];
+            if (frameFile && fs.existsSync(path.join(baseTempDir, frameFile))) {
+                const srcPath = path.join(baseTempDir, frameFile);
+                const destFileName = `frame-${Math.round(timestamp)}.jpg`;
+                const destPath = path.join(framesOutputDir, destFileName);
+                
+                await sharp(srcPath)
+                    .resize({ width: 640 })
+                    .jpeg({ quality: 50, progressive: true })
+                    .toFile(destPath);
+            }
+        }
+        logger.info(`[${videoId.substring(0, 8)}] Saved ${allTimestamps.length} compressed frames to cache.`);
+    } catch (err) {
+        logger.error(`[${videoId.substring(0, 8)}] Failed to save frame cache:`, err);
+    }
+};
 
 const processingLocks = new Set();
 const timers = new Map();
@@ -532,6 +558,7 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
         }
 
         db.saveVideo({ videoId, title: videoTitle, duration: Math.round(totalDuration), filesize, script: fullScript });
+        await saveFrameCache(baseTempDir, allFrameFiles, allTimestamps, videoId);
         timeEnd(aiLabel);
         if (sseHandler) sseHandler('end', { message: 'Processing complete.' });
         
@@ -841,6 +868,7 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
 
         finalScriptData.sort((a, b) => a.timestamp - b.timestamp);
         db.saveVideo({ videoId, title: videoTitle, duration: Math.round(totalDuration), filesize, script: finalScriptData });
+        await saveFrameCache(baseTempDir, allFrameFiles, allTimestamps, videoId);
 
         timeEnd(aiLabel);
         logger.info(`[${requestHash}] Successfully generated and cached script text for batch processing.`);

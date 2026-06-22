@@ -7,6 +7,8 @@ const db = require('./database');
 const { getYoutubeVideoId } = require('./utils');
 const { processVideo, processVideoBatch } = require('./videoProcessor');
 const logger = require('./logger');
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+const { spawn, execFile } = require('child_process');
 
 const router = express.Router();
 // Initialize Google Cloud Text-to-Speech Client
@@ -269,6 +271,194 @@ router.post('/batch-process', (req, res) => {
     processVideoBatch(videoId, youtubeUrl).catch(err => {
         logger.error(`[batch-${videoId.substring(0,8)}] Unhandled error in batch processing:`, err);
     });
+});
+
+// Initialize Gemini API for Q&A
+const API_KEY = process.env.GOOGLE_API_KEY;
+const genAI = API_KEY ? new GoogleGenerativeAI(API_KEY) : null;
+
+// Q&A Helper: cookie path resolver for fallback yt-dlp call
+const getQACookiePath = () => {
+    const cookiesDir = path.join(__dirname, 'cookies');
+    if (!fs.existsSync(cookiesDir)) return null;
+    const cookieFiles = fs.readdirSync(cookiesDir).filter(file => file.endsWith('_cookies.txt') && fs.statSync(path.join(cookiesDir, file)).size > 0);
+    if (cookieFiles.length === 0) return null;
+    return path.join(cookiesDir, cookieFiles[Math.floor(Math.random() * cookieFiles.length)]);
+};
+
+// --- VIDEO Q&A API ENDPOINT ---
+router.post('/video-qa', async (req, res) => {
+    const { videoId, timestamp, question } = req.body;
+    if (!videoId || timestamp === undefined || !question) {
+        return res.status(400).json({ error: 'videoId, timestamp, and question are required.' });
+    }
+
+    if (!genAI) {
+        return res.status(500).json({ error: 'Gemini API key is not configured.' });
+    }
+
+    try {
+        const targetTime = parseFloat(timestamp);
+        
+        // 1. Get video record to check if it exists and fetch title
+        const videoData = db.getVideo(videoId);
+        if (!videoData) {
+            return res.status(404).json({ error: 'Video script data not found in DB.' });
+        }
+        const videoTitle = videoData.title;
+
+        // 2. Fetch adjacent script context from DB (T전후 45초 분량)
+        let scriptContext = '';
+        if (videoData.script && Array.isArray(videoData.script)) {
+            const contextLines = videoData.script.filter(line => {
+                return Math.abs(line.timestamp - targetTime) <= 45;
+            });
+            scriptContext = contextLines.map(line => `[${line.timestamp}초] ${line.text}`).join('\n');
+        }
+
+        // 3. Find adjacent cached frame files
+        const framesDir = path.join(__dirname, 'public', 'frames', videoId);
+        let selectedFrames = [];
+        let fromCache = true;
+
+        if (fs.existsSync(framesDir)) {
+            const files = await fs.promises.readdir(framesDir);
+            const frameFiles = files.filter(f => f.startsWith('frame-') && f.endsWith('.jpg'));
+            const frames = frameFiles.map(file => {
+                const match = file.match(/frame-(\d+(?:\.\d+)?)\.jpg/);
+                if (!match) return null;
+                return {
+                    file,
+                    timestamp: parseFloat(match[1]),
+                    absolutePath: path.join(framesDir, file)
+                };
+            }).filter(Boolean);
+
+            if (frames.length > 0) {
+                // targetTime 기준 T-3초 ~ T+1초 탐색
+                const rangeStart = targetTime - 3;
+                const rangeEnd = targetTime + 1;
+                selectedFrames = frames.filter(f => f.timestamp >= rangeStart && f.timestamp <= rangeEnd);
+
+                // 만약 이 범위 안에 없으면, 가장 가까운 프레임 2장 확보
+                if (selectedFrames.length === 0) {
+                    frames.sort((a, b) => Math.abs(a.timestamp - targetTime) - Math.abs(b.timestamp - targetTime));
+                    selectedFrames = frames.slice(0, 2);
+                } else {
+                    selectedFrames.sort((a, b) => a.timestamp - b.timestamp);
+                }
+            }
+        }
+
+        const imageParts = [];
+
+        // 4. If local cache hits, prepare image parts
+        if (selectedFrames.length > 0) {
+            for (const frame of selectedFrames) {
+                const data = await fs.promises.readFile(frame.absolutePath);
+                imageParts.push({
+                    inlineData: {
+                        data: data.toString('base64'),
+                        mimeType: 'image/jpeg'
+                    }
+                });
+                imageParts.push({ text: `Timestamp of this frame: [${Math.round(frame.timestamp)}s]` });
+            }
+        } else {
+            // 5. Cache miss: Fallback to on-demand frame extraction
+            logger.info(`[QA-${videoId.substring(0,8)}] Cache miss at timestamp ${targetTime}. Initiating on-demand extraction...`);
+            fromCache = false;
+            
+            const tempDir = path.join(__dirname, 'temp', `qa-${videoId}-${Date.now()}`);
+            await fs.promises.mkdir(tempDir, { recursive: true });
+
+            try {
+                const youtubeUrl = `https://www.youtube.com/watch?v=${videoId}`;
+                const cookiePath = getQACookiePath();
+                const ytdlpArgs = [];
+                if (cookiePath) ytdlpArgs.push('--cookies', cookiePath);
+                if (process.env.YTDLP_PROXY) ytdlpArgs.push('--proxy', process.env.YTDLP_PROXY);
+                ytdlpArgs.push('-g', '-f', 'bestvideo[height<=480]', youtubeUrl);
+
+                const streamUrl = await new Promise((resolve, reject) => {
+                    execFile('yt-dlp', ytdlpArgs, (err, stdout, stderr) => {
+                        if (err) return reject(new Error(`yt-dlp failed: ${stderr || err.message}`));
+                        resolve(stdout.trim().split('\n')[0]);
+                    });
+                });
+
+                const startTime = Math.max(0, targetTime - 2);
+                const ffmpegArgs = [
+                    '-ss', startTime.toString(),
+                    '-seekable', '1',
+                    '-i', streamUrl,
+                    '-t', '3.5',
+                    '-vf', 'fps=1,scale=640:360',
+                    '-q:v', '5',
+                    'frame-%04d.jpg'
+                ];
+
+                await new Promise((resolve, reject) => {
+                    const ffmpegProcess = spawn('ffmpeg', ffmpegArgs, { cwd: tempDir });
+                    ffmpegProcess.on('close', (code) => {
+                        if (code === 0) resolve();
+                        else reject(new Error(`ffmpeg exited with code ${code}`));
+                    });
+                    ffmpegProcess.on('error', reject);
+                });
+
+                const files = (await fs.promises.readdir(tempDir)).filter(f => f.endsWith('.jpg')).sort();
+                for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
+                    const filePath = path.join(tempDir, file);
+                    const data = await fs.promises.readFile(filePath);
+                    imageParts.push({
+                        inlineData: {
+                            data: data.toString('base64'),
+                            mimeType: 'image/jpeg'
+                        }
+                    });
+                    imageParts.push({ text: `Timestamp of this frame: [${Math.round(startTime + i)}s]` });
+                }
+            } catch (fallbackErr) {
+                logger.error(`Fallback frame extraction failed for ${videoId}:`, fallbackErr);
+                // Continue without images if extraction fails
+            } finally {
+                if (fs.existsSync(tempDir)) {
+                    await fs.promises.rm(tempDir, { recursive: true, force: true }).catch(() => {});
+                }
+            }
+        }
+
+        // 6. Build prompt and invoke Gemini
+        const systemPrompt = `You are a smart assistive AI companion for a visually impaired user watching YouTube videos. 
+The user paused the video at [${Math.round(targetTime)}s] to ask a question.
+Provide a clear, detailed, and helpful answer in Korean.
+Since the user cannot see, focus on describing visual elements, reading any text visible on the screen, or clarifying actions occurring in the video.
+Make sure your tone is polite and professional.
+
+Video Title: "${videoTitle}"
+Script Context around this timestamp:
+${scriptContext || '(No script context available)'}
+
+User's Question: "${question}"`;
+
+        const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" }); // Use faster model for low latency QA
+        const result = await model.generateContent([systemPrompt, ...imageParts]);
+        const answer = result.response.text().trim();
+
+        // 7. Output result
+        logger.info(`[QA-${videoId.substring(0,8)}] Answered question at ${targetTime}s (Source: ${fromCache ? 'cache' : 'on-demand'}).`);
+        res.json({
+            answer,
+            timestamp: targetTime,
+            fromCache
+        });
+
+    } catch (err) {
+        logger.error(`Q&A endpoint failed for videoId ${videoId}:`, err);
+        res.status(500).json({ error: 'Failed to process video Q&A.' });
+    }
 });
 
 // --- COMMENTS API ENDPOINTS ---
