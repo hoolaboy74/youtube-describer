@@ -42,6 +42,32 @@ const saveFrameCache = async (baseTempDir, allFrameFiles, allTimestamps, videoId
     }
 };
 
+let isImpersonateAvailable = null;
+
+const checkImpersonateSupport = async () => {
+    if (isImpersonateAvailable !== null) return isImpersonateAvailable;
+    
+    return new Promise((resolve) => {
+        const testProcess = spawn('yt-dlp', ['--list-impersonate-targets']);
+        let stderr = '';
+        testProcess.stderr.on('data', (data) => { stderr += data.toString(); });
+        testProcess.on('close', (code) => {
+            if (code === 0) {
+                isImpersonateAvailable = true;
+            } else {
+                const isUnsupported = stderr.includes('Impersonate target') || stderr.includes('curl_cffi') || stderr.includes('invalid option') || stderr.includes('unknown option');
+                isImpersonateAvailable = !isUnsupported;
+            }
+            logger.info(`[System] Checked yt-dlp impersonation support: ${isImpersonateAvailable ? 'AVAILABLE' : 'NOT AVAILABLE'}`);
+            resolve(isImpersonateAvailable);
+        });
+        testProcess.on('error', () => {
+            isImpersonateAvailable = false;
+            resolve(false);
+        });
+    });
+};
+
 const processingLocks = new Set();
 const timers = new Map();
 
@@ -256,7 +282,7 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
         let downloadSuccess = false;
         let downloadAttempt = 1;
         let currentCookiePath = getRandomCookiePath();
-        let useImpersonate = true;
+        const useImpersonate = await checkImpersonateSupport();
 
         while (!downloadSuccess && downloadAttempt <= 2) {
             const isRetry = downloadAttempt === 2;
@@ -350,11 +376,8 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
                     downloadProcess.on('close', (code) => {
                         if (code === 0) resolve();
                         else {
-                            const isImpersonateError = stderrData.includes('Impersonate target') || stderrData.includes('curl_cffi');
                             const isBotError = stderrData.includes('confirm you’re not a bot') || stderrData.includes('cookies are no longer valid');
-                            if (isImpersonateError) {
-                                reject({ type: 'impersonate_failed', message: stderrData });
-                            } else if (downloadAttempt === 1 && isBotError && activeCookiePath) {
+                            if (downloadAttempt === 1 && isBotError && activeCookiePath) {
                                 const invalidPath = activeCookiePath + '.invalid';
                                 logger.warn(`[${requestHash}] Bot detected with cookie ${path.basename(activeCookiePath)}. Invalidating and retrying without cookies...`);
                                 try { fs.renameSync(activeCookiePath, invalidPath); } catch (e) {}
@@ -369,11 +392,6 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
                 });
                 downloadSuccess = true;
             } catch (err) {
-                if (err.type === 'impersonate_failed') {
-                    logger.warn(`[${requestHash}] Impersonate target not available. Retrying without impersonation...`);
-                    useImpersonate = false;
-                    continue;
-                }
                 if (err.type === 'bot_detected' && downloadAttempt === 1) {
                     downloadAttempt++;
                     continue;
@@ -662,7 +680,7 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
         let downloadSuccess = false;
         let downloadAttempt = 1;
         let currentCookiePath = getRandomCookiePath();
-        let useImpersonate = true;
+        const useImpersonate = await checkImpersonateSupport();
 
         while (!downloadSuccess && downloadAttempt <= 2) {
             const isRetry = downloadAttempt === 2;
@@ -726,11 +744,8 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
                     downloadProcess.on('close', (code) => {
                         if (code === 0) resolve();
                         else {
-                            const isImpersonateError = stderrData.includes('Impersonate target') || stderrData.includes('curl_cffi');
                             const isBotError = stderrData.includes('confirm you’re not a bot') || stderrData.includes('cookies are no longer valid');
-                            if (isImpersonateError) {
-                                reject({ type: 'impersonate_failed', message: stderrData });
-                            } else if (downloadAttempt === 1 && isBotError && activeCookiePath) {
+                            if (downloadAttempt === 1 && isBotError && activeCookiePath) {
                                 const invalidPath = activeCookiePath + '.invalid';
                                 logger.warn(`[${requestHash}] Bot detected in batch with cookie ${path.basename(activeCookiePath)}. Invalidating and retrying without cookies...`);
                                 try { fs.renameSync(activeCookiePath, invalidPath); } catch (e) {}
@@ -745,11 +760,6 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
                 });
                 downloadSuccess = true;
             } catch (err) {
-                if (err.type === 'impersonate_failed') {
-                    logger.warn(`[${requestHash}] Impersonate target not available in batch. Retrying without impersonation...`);
-                    useImpersonate = false;
-                    continue;
-                }
                 if (err.type === 'bot_detected' && downloadAttempt === 1) {
                     downloadAttempt++;
                     continue;
