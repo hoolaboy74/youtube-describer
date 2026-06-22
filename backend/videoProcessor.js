@@ -49,14 +49,22 @@ const checkImpersonateSupport = async () => {
     
     return new Promise((resolve) => {
         const testProcess = spawn('yt-dlp', ['--list-impersonate-targets']);
+        let stdout = '';
         let stderr = '';
+        testProcess.stdout.on('data', (data) => { stdout += data.toString(); });
         testProcess.stderr.on('data', (data) => { stderr += data.toString(); });
+        
         testProcess.on('close', (code) => {
             if (code === 0) {
-                isImpersonateAvailable = true;
+                const lines = stdout.split('\n');
+                const safariLine = lines.find(line => line.includes('Safari'));
+                if (safariLine && !safariLine.includes('unavailable')) {
+                    isImpersonateAvailable = true;
+                } else {
+                    isImpersonateAvailable = false;
+                }
             } else {
-                const isUnsupported = stderr.includes('Impersonate target') || stderr.includes('curl_cffi') || stderr.includes('invalid option') || stderr.includes('unknown option');
-                isImpersonateAvailable = !isUnsupported;
+                isImpersonateAvailable = false;
             }
             logger.info(`[System] Checked yt-dlp impersonation support: ${isImpersonateAvailable ? 'AVAILABLE' : 'NOT AVAILABLE'}`);
             resolve(isImpersonateAvailable);
