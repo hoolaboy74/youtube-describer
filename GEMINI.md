@@ -85,6 +85,15 @@ To run the backend server, the following command-line tools must be installed on
 
 ## 개선 기록 (Improvement Log)
 
+### 84차: 텔레그램 실시간 에러 알림 연동 및 Node.js Happy Eyeballs 버그 우회 (2026-06-22)
+- **문제:** 뷰레이터 시스템의 주요 장애(유튜브 봇 감지, API 제한, 오디오 변환 실패 등)를 스마트폰을 통해 실시간으로 인지할 필요성이 대두됨. 또한, 원격 VM 환경에서 텔레그램 API(`/bot{token}/sendMessage`) 호출 시 Node.js의 Happy Eyeballs IPv6 우선 조회 정책과 인프라의 IPv6 비활성화 상태가 충돌하여 연결 타임아웃(`ETIMEDOUT`)이 발생하는 망 이슈 확인.
+- **해결:**
+    1. **텔레그램 알림 시스템 통합**: `logger.js` 내 에러 로깅 함수(`logger.error`)와 연동하여 치명적 장애 발생 시 지정된 텔레그램 봇으로 실시간 시스템 경고(`[Vurator System Alert]`)를 전송하도록 구현.
+    2. **알림 중복 방지 (Deduplication)**: 10초 윈도우 내의 동일한 에러 메시지는 전송을 제한하도록 디듀플리케이션 처리 내장.
+    3. **Node.js IPv4 통신 강제**: 아웃바운드 텔레그램 통신 장애 문제를 해결하기 위해 `https.request` 옵션에 `family: 4`를 명시하여 IPv6 시도로 인한 지연을 완전히 우회하고 즉시 성공하도록 조치.
+    4. **테스트/운영 환경 `.env` 설정 동기화**: 로컬/원격의 `main` 및 `test` 브랜치 설정 환경 파일에 `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`를 안전하게 주입 완료.
+- **상태:** 로컬/원격 메인 및 테스트 배포 환경 설정 및 로깅 연동 반영 완료 (2026-06-22)
+
 ### 83차: 로컬 PC gcloud SSL 검증 우회 및 REST API 호출 패턴 정립 (2026-06-12)
 - **문제:** 로컬 PC에서 `gcloud` 명령어 실행 시 사설 SSL 프록시/보안 프로그램의 영향으로 `SSLCertVerificationError`가 발생하여 API 조회가 완전히 마비됨.
 - **해결:**
