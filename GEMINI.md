@@ -85,6 +85,22 @@ To run the backend server, the following command-line tools must be installed on
 
 ## 개선 기록 (Improvement Log)
 
+### 86차: Q&A 질의응답 기능 강화 (Google Search 바인딩 및 접근성 준수 대화형 모달 UI 적용) (2026-06-23)
+- **문제:**
+    1. Q&A 기능이 로컬 지식(비디오 정보)에만 기반해 답변하므로, 최신 정보나 영상 내용 외적인 추가 맥락이 필요한 질문에 올바르게 대답하지 못함.
+    2. 기존 Q&A UI가 단순 비디오 플레이어 하단에 배치되어 접근성이 떨어지고, 스크린 리더 포커스 제어 및 라이브 리전 피드백이 미흡함.
+    3. 음성 안내나 모바일 환경에서의 재생/정지 흐름이 부드럽지 않고, 모달이 활성화되었을 때 스크린 리더 포커스가 모달 밖으로 나가는 현상(Focus Trap 미작동) 발생.
+- **해결:**
+    1. **Google Search Tool 바인딩**: Q&A 처리를 담당하는 백엔드 [routes.js](file:///Users/chacha/src/youtube-describer-qa/backend/routes.js)의 Gemini API 호출부에 `tools: [{ googleSearch: {} }]` 옵션을 추가하여 구글 검색 그라운딩(Grounding) 연동. 영상 외적인 맥락의 질의 시 웹 검색을 통해 보강된 정보를 기반으로 답변하도록 개선하고, 검색 결과 출처 기호(예: `[1]`, `[2]` 등)나 URL은 정규식으로 정제하여 오독을 방지.
+    2. **대화형 모달 UI 설계**: Q&A 전용 단축키(`q` 또는 `Q`)를 도입하여 오버레이 모달 대화창(`role="dialog"`, `aria-modal="true"`)을 띄우고, 채팅 형태의 말풍선 UI(사용자: 파란색, 답변: 흰색)로 재설계. 말풍선 내의 타임스탬프 클릭 시 해당 영상의 시점으로 이동(`player.seekTo`)하도록 동적 제어 결합.
+    3. **스크린 리더 접근성 및 Focus Trap 구현**:
+        - 모달 오픈 시 포커스를 질문 입력창으로 자동 전송하기 위해 Callback Ref(`setInputFocusRef`) 적용.
+        - 모달 밖으로 탭 포커스가 나가지 않도록 Focus Trap 제어.
+        - `aria-modal="true"` 상태에서 전역 Live Region이 차단되는 현상을 우회하기 위해, 모달 내부에 로컬 `aria-live` 알림 영역(`announceQaPolite`)을 신설하여 "질문 하세요", "잠시만요", "답변 완료" 등의 보이스 피드백 실시간 출력.
+        - 답변 수신 완료 후 포커스를 입력창으로 자동 복구하여 연속 대화 흐름 보장.
+    4. **라이프사이클 통합 제어**: 모달이 열릴 때 영상 재생 및 기존에 실행 중이던 TTS 오디오를 완전히 중단하고, 모달이 닫힐 때(ESC 키 또는 닫기 버튼) 진행 중이던 Q&A TTS를 정지시킨 뒤 본래의 비디오 재생 상태를 재개하도록 통합 관리.
+- **상태:** 로컬 개발 및 빌드 검증(React Production Build) 완료 (2026-06-23)
+
 ### 85차: 질의응답(Q&A) 실시간 프레임 추출 에러 및 403 Forbidden 다운로드 장애 조치 (2026-06-23)
 - **문제:**
     1. 로컬 개발 환경에서 `impersonate` 기능이 `NOT AVAILABLE` 상태일 때, 만료되거나 오염된 쿠키를 사용해 다운로드하면 `HTTP Error 403: Forbidden`이 발생함.

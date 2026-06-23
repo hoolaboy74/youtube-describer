@@ -142,6 +142,7 @@ function PlayerScreenV2() {
 
     // UI State
     const [isScriptVisible, setIsScriptVisible] = useState(false);
+    const [isQaModalOpen, setIsQaModalOpen] = useState(false);
 
     // Q&A States & Hooks
     const [question, setQuestion] = useState('');
@@ -150,6 +151,25 @@ function PlayerScreenV2() {
     const [isListening, setIsListening] = useState(false);
     const recognitionRef = useRef(null);
     const inputRef = useRef(null);
+    const setInputFocusRef = useCallback((node) => {
+        if (node !== null) {
+            inputRef.current = node;
+            node.focus();
+        }
+    }, []);
+    const [qaPoliteAnnouncement, setQaPoliteAnnouncement] = useState('');
+    const qaTimeoutRef = useRef(null);
+    const announceQaPolite = useCallback((message) => {
+        clearTimeout(qaTimeoutRef.current);
+        setQaPoliteAnnouncement('');
+        setTimeout(() => {
+            setQaPoliteAnnouncement(message);
+            qaTimeoutRef.current = setTimeout(() => setQaPoliteAnnouncement(''), 3000);
+        }, 100);
+    }, []);
+    const qaListEndRef = useRef(null);
+    const modalRef = useRef(null);
+    const closeBtnRef = useRef(null);
 
     const isDescriptionEnabled = verbosity > 0 || isReadingSubtitles;
     const isDescriptionEnabledRef = useRef(isDescriptionEnabled);
@@ -194,13 +214,22 @@ function PlayerScreenV2() {
             return;
         }
 
-        if (isListening) {
-            recognitionRef.current.stop();
-            setIsListening(false);
-        } else {
-            setIsListening(true);
-            announcePolite('질문을 말씀해주세요.');
-            recognitionRef.current.start();
+        try {
+            if (isListening) {
+                recognitionRef.current.stop();
+                setIsListening(false);
+            } else {
+                setIsListening(true);
+                announcePolite('질문을 말씀해주세요.');
+                recognitionRef.current.start();
+            }
+        } catch (e) {
+            console.warn("SpeechRecognition control error:", e);
+            if (e.message && (e.message.includes('started') || e.message.includes('starting'))) {
+                setIsListening(true);
+            } else {
+                setIsListening(false);
+            }
         }
     };
 
@@ -265,11 +294,114 @@ function PlayerScreenV2() {
         player.playVideo();
     }, [player, isInteractionDone]);
 
-    // Keyboard shortcut (Space key control logic for Q&A and video playback)
+    // Handle Q&A Modal State Changes
+    useEffect(() => {
+        if (isQaModalOpen) {
+            // Pause video on modal open
+            if (player && player.getPlayerState() === 1) {
+                player.pauseVideo();
+                setIsPlaying(false);
+            }
+            announceQaPolite('질문 하세요');
+        }
+    }, [isQaModalOpen, player, announceQaPolite]);
+
+    // Close QA Modal, stop TTS, and resume video playback
+    const handleCloseQaModal = useCallback(() => {
+        setIsQaModalOpen(false);
+
+        // 1. Stop QA TTS if playing and restore video volume
+        if (isTtsPlayingRef.current) {
+            isTtsPlayingRef.current = false;
+            if (audioPlayerRef.current) {
+                audioPlayerRef.current.pause();
+            }
+            if (player) {
+                player.setVolume(100);
+            }
+        }
+
+        // 2. Resume video playback
+        if (player) {
+            player.playVideo();
+            setIsPlaying(true);
+        }
+
+        announcePolite('질의응답 대화창이 닫혔으며 영상 재생을 재개합니다.');
+    }, [player, announcePolite]);
+
+    // Keyboard shortcut logic for Q&A and video playback
     useEffect(() => {
         const handleKeyDown = (e) => {
             const activeEl = document.activeElement;
+
+            // 1. If Q&A Modal is Open
+            if (isQaModalOpen) {
+                if (e.key === 'Escape') {
+                    e.preventDefault();
+                    handleCloseQaModal();
+                    return;
+                }
+
+                if (e.key === 'Tab') {
+                    if (!modalRef.current) return;
+                    
+                    const focusableEls = modalRef.current.querySelectorAll(
+                        'a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), [tabindex="0"]'
+                    );
+                    if (focusableEls.length > 0) {
+                        const firstEl = focusableEls[0];
+                        const lastEl = focusableEls[focusableEls.length - 1];
+
+                        if (e.shiftKey) { // Shift + Tab
+                            if (document.activeElement === firstEl) {
+                                lastEl.focus();
+                                e.preventDefault();
+                            }
+                        } else { // Tab
+                            if (document.activeElement === lastEl) {
+                                firstEl.focus();
+                                e.preventDefault();
+                            }
+                        }
+                    }
+                }
+                
+                // Allow space key inside input for text typing
+                if (activeEl && ['INPUT', 'TEXTAREA'].includes(activeEl.tagName)) {
+                    return;
+                }
+                
+                // Space bar toggle playback within Modal when not typing
+                if (e.key === ' ' || e.key === 'Spacebar') {
+                    e.preventDefault();
+                    handleTogglePlay();
+                }
+                return;
+            }
+
+            // 2. If Q&A Modal is Closed
             if (activeEl && ['INPUT', 'TEXTAREA', 'SELECT'].includes(activeEl.tagName)) {
+                return;
+            }
+
+            // Open QA Modal via 'q' or 'Q' key - Pause everything first
+            if (e.key === 'q' || e.key === 'Q') {
+                e.preventDefault();
+                if (player) {
+                    player.pauseVideo();
+                }
+                setIsPlaying(false);
+                if (isTtsPlayingRef.current) {
+                    isTtsPlayingRef.current = false;
+                    if (audioPlayerRef.current) {
+                        audioPlayerRef.current.pause();
+                    }
+                    if (player) {
+                        player.setVolume(100);
+                    }
+                }
+                setIsQaModalOpen(true);
                 return;
             }
 
@@ -282,7 +414,7 @@ function PlayerScreenV2() {
                 const isVideoPlaying = playerState === 1; // 1: PLAYING
                 const isAudioPlaying = audioPlayerRef.current && !audioPlayerRef.current.paused && !audioPlayerRef.current.ended;
 
-                // 재생 중인 경우 -> 일시 정지 및 질문 입력창 포커스
+                // 재생 중인 경우 -> 일시 정지 및 Q&A 모달 열기
                 if (isVideoPlaying || isAudioPlaying) {
                     if (isVideoPlaying) player.pauseVideo();
                     if (isAudioPlaying) {
@@ -290,14 +422,9 @@ function PlayerScreenV2() {
                         isTtsPlayingRef.current = false;
                     }
                     setIsPlaying(false);
-
-                    if (inputRef.current) {
-                        inputRef.current.focus();
-                        announcePolite('영상을 정지하고 질문 입력창으로 이동했습니다.');
-                    }
+                    setIsQaModalOpen(true);
                 } else {
                     // 정지 중인 경우 -> 재생 재개
-                    // Q&A TTS 도중에 다시 재생하는 경우에는 강제로 player 볼륨 복구 및 TTS 중단
                     if (isTtsPlayingRef.current) {
                         isTtsPlayingRef.current = false;
                         if (audioPlayerRef.current) {
@@ -314,7 +441,24 @@ function PlayerScreenV2() {
 
         document.addEventListener('keydown', handleKeyDown);
         return () => document.removeEventListener('keydown', handleKeyDown);
-    }, [player, announcePolite, handleTogglePlay]);
+    }, [player, announcePolite, handleTogglePlay, isQaModalOpen, handleCloseQaModal]);
+
+    // Seek to specific timestamp and resume play
+    const handleSeekTo = (timestamp) => {
+        if (player) {
+            player.seekTo(timestamp, true);
+            player.playVideo();
+            setIsPlaying(true);
+            announcePolite(`${formatTime(timestamp)} 시점으로 이동하여 영상을 재생합니다.`);
+        }
+    };
+
+    // Auto-scroll chat window to bottom on new messages
+    useEffect(() => {
+        if (qaListEndRef.current) {
+            qaListEndRef.current.scrollIntoView({ behavior: 'smooth' });
+        }
+    }, [qaList]);
 
     // Send question to backend Q&A API
     const handleAskQuestion = async () => {
@@ -343,7 +487,7 @@ function PlayerScreenV2() {
 
         setQaList(prev => [...prev, newQaItem]);
         setIsQaLoading(true);
-        announcePolite(`질문을 전송했습니다. 장면 분석 중입니다. 잠시만 기다려주세요.`);
+        announceQaPolite('잠시만요');
 
         // 이전 완료된 Q&A 히스토리 구성
         const qaHistory = qaList
@@ -395,13 +539,27 @@ function PlayerScreenV2() {
                 });
             }
 
+            // Refocus input field after answer is processed
+            setTimeout(() => {
+                if (inputRef.current) {
+                    inputRef.current.focus();
+                }
+            }, 100);
+
         } catch (error) {
             console.error('Q&A failed:', error);
             setQaList(prev => prev.map(qa => 
                 qa.id === newQaId ? { ...qa, answer: '답변을 생성하는 데 실패했습니다. 다시 시도해 주세요.', isGenerating: false } : qa
             ));
             setIsQaLoading(false);
-            announcePolite('장면 분석 및 답변 생성에 실패했습니다.');
+            announceQaPolite('장면 분석 및 답변 생성에 실패했습니다.');
+
+            // Refocus input field on error as well
+            setTimeout(() => {
+                if (inputRef.current) {
+                    inputRef.current.focus();
+                }
+            }, 100);
         }
     };
 
@@ -928,6 +1086,324 @@ function PlayerScreenV2() {
                         />
                     </div>
                     
+                    {/* Q&A Trigger Banner */}
+                    <div style={{
+                        margin: '20px 0',
+                        padding: '20px',
+                        borderRadius: '12px',
+                        backgroundColor: '#ffffff',
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
+                        border: '1px solid #eaeaea',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        gap: '15px'
+                    }}>
+                        <div>
+                            <h3 style={{ margin: '0 0 6px 0', fontSize: '1.15rem', color: '#1a1a1a', fontWeight: '700' }}>
+                                AI 동영상 질의응답 (Q&A)
+                            </h3>
+                            <p style={{ margin: 0, fontSize: '0.85rem', color: '#666', lineHeight: '1.4' }}>
+                                단축키 <kbd style={{ padding: '2px 6px', background: '#eee', borderRadius: '4px', border: '1px solid #ccc' }}>Q</kbd>를 누르거나 버튼을 클릭하면 Q&A 대화창이 열립니다. 질문 시 영상은 자동 정지됩니다.
+                            </p>
+                        </div>
+                        <button
+                            onClick={() => setIsQaModalOpen(true)}
+                            style={{
+                                padding: '10px 20px',
+                                borderRadius: '8px',
+                                backgroundColor: '#0070f3',
+                                color: '#ffffff',
+                                border: 'none',
+                                fontWeight: '600',
+                                cursor: 'pointer',
+                                fontSize: '0.9rem',
+                                flexShrink: 0
+                            }}
+                            aria-label="질의응답 대화창 열기 (단축키 Q)"
+                        >
+                            대화창 열기 (Q)
+                        </button>
+                    </div>
+
+                    {/* Q&A Modal */}
+                    {isQaModalOpen && (
+                        <div 
+                            ref={modalRef}
+                            role="dialog"
+                            aria-modal="true"
+                            aria-labelledby="qa-modal-title"
+                            style={{
+                                position: 'fixed',
+                                top: 0,
+                                left: 0,
+                                right: 0,
+                                bottom: 0,
+                                backgroundColor: 'rgba(0, 0, 0, 0.75)',
+                                display: 'flex',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                zIndex: 10000,
+                                padding: '20px'
+                            }}
+                        >
+                            {/* Local Live Region for Modal Accessibility */}
+                            <div className="visually-hidden" aria-live="polite" aria-atomic="true" style={{
+                                position: 'absolute',
+                                width: '1px',
+                                height: '1px',
+                                padding: 0,
+                                margin: '-1px',
+                                overflow: 'hidden',
+                                clip: 'rect(0,0,0,0)',
+                                whiteSpace: 'nowrap',
+                                border: 0
+                            }}>
+                                {qaPoliteAnnouncement}
+                            </div>
+
+                            <div style={{
+                                width: '100%',
+                                maxWidth: '600px',
+                                height: '80%',
+                                maxHeight: '650px',
+                                backgroundColor: '#ffffff',
+                                borderRadius: '16px',
+                                boxShadow: '0 12px 40px rgba(0,0,0,0.25)',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                overflow: 'hidden',
+                                border: '1px solid #eaeaea'
+                            }}>
+                                {/* Modal Header */}
+                                <div style={{
+                                    padding: '20px 24px',
+                                    borderBottom: '1px solid #eaeaea',
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    backgroundColor: '#f8f9fa',
+                                    flexShrink: 0
+                                }}>
+                                    <div>
+                                        <h2 id="qa-modal-title" style={{ margin: 0, fontSize: '1.2rem', fontWeight: '700', color: '#1a1a1a' }}>
+                                            AI 동영상 질의응답 (Q&A)
+                                        </h2>
+                                        <span style={{ fontSize: '0.8rem', color: '#666' }}>
+                                            현재 영상 시점: {formatTime(currentTime)}
+                                        </span>
+                                    </div>
+                                    <button
+                                        ref={closeBtnRef}
+                                        onClick={handleCloseQaModal}
+                                        style={{
+                                            padding: '8px 16px',
+                                            borderRadius: '8px',
+                                            backgroundColor: '#f5f5f5',
+                                            color: '#333',
+                                            border: '1px solid #ccc',
+                                            cursor: 'pointer',
+                                            fontSize: '0.9rem',
+                                            fontWeight: '600'
+                                        }}
+                                        aria-label="대화창 닫기 (ESC)"
+                                    >
+                                        닫기
+                                    </button>
+                                </div>
+
+                                {/* Modal Body (Chat History) */}
+                                <div style={{
+                                    flex: 1,
+                                    padding: '20px 24px',
+                                    backgroundColor: '#f4f5f7',
+                                    overflowY: 'auto',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    gap: '16px'
+                                }}>
+                                    {qaList.length === 0 ? (
+                                        <div style={{
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            justifyContent: 'center',
+                                            alignItems: 'center',
+                                            height: '100%',
+                                            minHeight: '200px',
+                                            color: '#888',
+                                            fontSize: '0.95rem',
+                                            textAlign: 'center',
+                                            gap: '8px',
+                                            padding: '0 20px'
+                                        }}>
+                                            <span style={{ fontSize: '1.5rem' }}>💡</span>
+                                            <span style={{ fontWeight: '600' }}>아직 대화 내역이 없습니다.</span>
+                                            <span style={{ fontSize: '0.85rem', color: '#aaa' }}>궁금한 내용을 아래 입력창에 작성해 보세요.</span>
+                                        </div>
+                                    ) : (
+                                        qaList.map((qa) => (
+                                            <div key={qa.id} style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                                {/* User Question Bubble */}
+                                                <div style={{
+                                                    alignSelf: 'flex-end',
+                                                    maxWidth: '85%',
+                                                    display: 'flex',
+                                                    flexDirection: 'column',
+                                                    alignItems: 'flex-end',
+                                                    gap: '4px'
+                                                }}>
+                                                    <span style={{ fontSize: '0.75rem', color: '#888' }}>
+                                                        {/* Timestamp Click to Seek */}
+                                                        <button
+                                                            onClick={() => handleSeekTo(qa.timestamp)}
+                                                            style={{
+                                                                background: 'none',
+                                                                border: 'none',
+                                                                color: '#0070f3',
+                                                                cursor: 'pointer',
+                                                                padding: 0,
+                                                                fontSize: '0.75rem',
+                                                                fontWeight: '600',
+                                                                textDecoration: 'underline'
+                                                            }}
+                                                            aria-label={`영상 ${formatTime(qa.timestamp)} 시점으로 이동`}
+                                                        >
+                                                            질문 시점: {formatTime(qa.timestamp)}
+                                                        </button>
+                                                    </span>
+                                                    <div style={{
+                                                        backgroundColor: '#0070f3',
+                                                        color: '#ffffff',
+                                                        padding: '10px 14px',
+                                                        borderRadius: '16px 16px 2px 16px',
+                                                        fontSize: '0.95rem',
+                                                        lineHeight: '1.45',
+                                                        wordBreak: 'break-word',
+                                                        boxShadow: '0 2px 6px rgba(0,112,243,0.15)'
+                                                    }}>
+                                                        {qa.question}
+                                                    </div>
+                                                </div>
+
+                                                {/* AI Answer Bubble */}
+                                                <div style={{
+                                                    alignSelf: 'flex-start',
+                                                    maxWidth: '85%',
+                                                    display: 'flex',
+                                                    flexDirection: 'column',
+                                                    alignItems: 'flex-start',
+                                                    gap: '4px'
+                                                }}>
+                                                    <span style={{ fontSize: '0.75rem', color: '#888', fontWeight: '600' }}>AI 비서</span>
+                                                    <div style={{
+                                                        backgroundColor: '#ffffff',
+                                                        color: '#222222',
+                                                        padding: '12px 16px',
+                                                        borderRadius: '16px 16px 16px 2px',
+                                                        fontSize: '0.95rem',
+                                                        lineHeight: '1.5',
+                                                        wordBreak: 'break-word',
+                                                        border: '1px solid #e2e8f0',
+                                                        boxShadow: '0 2px 6px rgba(0,0,0,0.02)'
+                                                    }}>
+                                                        {qa.isGenerating ? (
+                                                            <span style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#0070f3' }}>
+                                                                <span style={{ fontStyle: 'italic' }}>구글 검색 및 장면 정밀 분석 중...</span>
+                                                            </span>
+                                                        ) : (
+                                                            <span>{qa.answer}</span>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))
+                                    )}
+                                    <div ref={qaListEndRef} />
+                                </div>
+
+                                {/* Modal Footer (Input controls) */}
+                                <div style={{
+                                    padding: '20px 24px',
+                                    borderTop: '1px solid #eaeaea',
+                                    backgroundColor: '#ffffff',
+                                    display: 'flex',
+                                    gap: '10px',
+                                    alignItems: 'center',
+                                    flexShrink: 0
+                                }}>
+
+
+                                    <input
+                                        ref={setInputFocusRef}
+                                        autoFocus
+                                        type="text"
+                                        value={question}
+                                        onChange={(e) => setQuestion(e.target.value)}
+                                        placeholder="질문을 입력하세요... (예: 화면 중앙에 뭐가 있어?)"
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter') handleAskQuestion();
+                                        }}
+                                        style={{
+                                            flex: 1,
+                                            padding: '12px 16px',
+                                            borderRadius: '24px',
+                                            border: '1.5px solid #eaeaea',
+                                            fontSize: '0.95rem',
+                                            outline: 'none',
+                                            transition: 'border-color 0.2s',
+                                            boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.02)'
+                                        }}
+                                        aria-label="AI에게 질문할 내용을 입력하세요."
+                                    />
+
+                                    <button
+                                        onClick={toggleListening}
+                                        style={{
+                                            padding: '0 18px',
+                                            height: '46px',
+                                            borderRadius: '24px',
+                                            backgroundColor: isListening ? '#ff4d4f' : '#f5f5f5',
+                                            color: isListening ? '#fff' : '#333',
+                                            border: '1.5px solid #eaeaea',
+                                            fontSize: '0.9rem',
+                                            cursor: 'pointer',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '6px',
+                                            transition: 'all 0.2s',
+                                            flexShrink: 0
+                                        }}
+                                        aria-label={isListening ? "음성 인식 중지" : "마이크로 질문하기"}
+                                    >
+                                        <span>{isListening ? '🛑' : '🎤'}</span>
+                                        <span>{isListening ? '듣는 중' : '음성'}</span>
+                                    </button>
+
+                                    <button
+                                        onClick={handleAskQuestion}
+                                        disabled={isQaLoading || !question.trim()}
+                                        style={{
+                                            padding: '0 24px',
+                                            height: '46px',
+                                            borderRadius: '24px',
+                                            backgroundColor: '#0070f3',
+                                            color: '#fff',
+                                            border: 'none',
+                                            fontSize: '0.95rem',
+                                            fontWeight: '600',
+                                            cursor: (isQaLoading || !question.trim()) ? 'not-allowed' : 'pointer',
+                                            opacity: (isQaLoading || !question.trim()) ? 0.6 : 1,
+                                            transition: 'background-color 0.2s',
+                                            flexShrink: 0
+                                        }}
+                                    >
+                                        전송
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                    
                     {/* Time & Navigation Controls - High Contrast & Simple for Accessibility */}
                     <div className="time-control-bar" style={{ 
                         display: 'flex', 
@@ -974,118 +1450,6 @@ function PlayerScreenV2() {
                                 30초 후 ⏩
                             </button>
                         </div>
-                    </div>
-
-                    {/* Q&A Section */}
-                    <div className="qa-section" style={{
-                        margin: '20px 0',
-                        padding: '20px',
-                        borderRadius: '12px',
-                        backgroundColor: '#ffffff',
-                        boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
-                        border: '1px solid #eaeaea'
-                    }}>
-                        <h3 style={{ margin: '0 0 10px 0', fontSize: '1.25rem', color: '#1a1a1a' }}>영상 내용 질문하기</h3>
-                        <p style={{ margin: '0 0 15px 0', fontSize: '0.9rem', color: '#666', lineHeight: '1.4' }}>
-                            영상의 특정 장면에 대해 궁금한 점을 적거나 마이크 버튼을 눌러 말해보세요. 질문을 던지면 영상은 자동 일시정지되며, AI가 해당 시점의 장면을 분석하여 음성으로 답해줍니다. (단축키 <kbd style={{ padding: '2px 6px', background: '#eee', borderRadius: '4px', border: '1px solid #ccc' }}>Q</kbd>를 누르면 즉시 질문 입력창으로 포커스됩니다.)
-                        </p>
-                        
-                        <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
-                            <input
-                                ref={inputRef}
-                                type="text"
-                                value={question}
-                                onChange={(e) => setQuestion(e.target.value)}
-                                placeholder="예: 지금 주인공이 입고 있는 옷 색깔이 뭐야?"
-                                onKeyDown={(e) => {
-                                    if (e.key === 'Enter') handleAskQuestion();
-                                }}
-                                style={{
-                                    flex: 1,
-                                    padding: '12px 16px',
-                                    borderRadius: '8px',
-                                    border: '1.5px solid #ccc',
-                                    fontSize: '0.95rem',
-                                    outline: 'none',
-                                    transition: 'border-color 0.2s'
-                                }}
-                                aria-label="AI에게 질문할 내용을 입력하세요."
-                            />
-                            <button
-                                onClick={toggleListening}
-                                style={{
-                                    padding: '0 16px',
-                                    borderRadius: '8px',
-                                    backgroundColor: isListening ? '#ff4d4f' : '#f5f5f5',
-                                    color: isListening ? '#fff' : '#333',
-                                    border: '1.5px solid #ccc',
-                                    fontSize: '0.9rem',
-                                    cursor: 'pointer',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '6px',
-                                    transition: 'all 0.2s'
-                                }}
-                                aria-label={isListening ? "음성 인식 중지" : "마이크로 질문하기"}
-                            >
-                                <span>{isListening ? '🛑' : '🎤'}</span>
-                                <span>{isListening ? '듣는 중...' : '마이크'}</span>
-                            </button>
-                            <button
-                                onClick={handleAskQuestion}
-                                disabled={isQaLoading || !question.trim()}
-                                style={{
-                                    padding: '0 24px',
-                                    borderRadius: '8px',
-                                    backgroundColor: '#0070f3',
-                                    color: '#fff',
-                                    border: 'none',
-                                    fontSize: '0.95rem',
-                                    fontWeight: '600',
-                                    cursor: (isQaLoading || !question.trim()) ? 'not-allowed' : 'pointer',
-                                    opacity: (isQaLoading || !question.trim()) ? 0.6 : 1,
-                                    transition: 'background-color 0.2s'
-                                }}
-                            >
-                                질문하기
-                            </button>
-                        </div>
-
-                        {qaList.length > 0 && (
-                            <div style={{
-                                marginTop: '20px',
-                                borderTop: '1px solid #eaeaea',
-                                paddingTop: '15px'
-                            }}>
-                                <h4 style={{ margin: '0 0 15px 0', fontSize: '1.1rem', color: '#333' }}>질문 내역 및 답변</h4>
-                                <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-                                    {qaList.map((qa) => (
-                                        <li key={qa.id} style={{
-                                            marginBottom: '16px',
-                                            padding: '16px',
-                                            borderRadius: '8px',
-                                            backgroundColor: '#f9f9f9',
-                                            borderLeft: '4px solid #0070f3'
-                                        }}>
-                                            <div style={{ fontSize: '0.95rem', fontWeight: 'bold', color: '#444', marginBottom: '6px' }}>
-                                                <span>[{formatTime(qa.timestamp)}] 질문: </span>
-                                                <span style={{ fontWeight: 'normal', color: '#1a1a1a' }}>{qa.question}</span>
-                                            </div>
-                                            <div style={{ fontSize: '0.95rem', color: '#333', lineHeight: '1.5' }}>
-                                                <strong>답변: </strong>
-                                                {qa.isGenerating ? (
-                                                    <span style={{ color: '#0070f3', fontStyle: 'italic' }}>
-                                                        AI가 장면을 정밀하게 분석하고 있습니다. 잠시만 기다려주세요...
-                                                    </span>
-                                                ) : (
-                                                    <span>{qa.answer}</span>
-                                                )}
-                                            </div>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
-                        )}
                     </div>
                 </>
             ) : (

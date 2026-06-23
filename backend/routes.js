@@ -512,7 +512,7 @@ router.post('/video-qa', async (req, res) => {
             }
         }
 
-        // 6. Build prompt and invoke Gemini
+        // 6. Build prompt and invoke Gemini with Google Search tool
         let historyContext = '';
         if (history && Array.isArray(history) && history.length > 0) {
             historyContext = 'Previous Conversation History (Use this for context if the user asks follow-up questions):\n' +
@@ -526,9 +526,11 @@ Since the user cannot see, focus on describing visual elements, reading any text
 Make sure your tone is polite and professional.
 
 [CRITICAL REQUIREMENT]
-1. Do NOT use any Markdown formatting, symbols, or syntax. (Do NOT use asterisks like **, *, hashes like #, underscores, backticks, bullet dashes, or blockquotes). The visually impaired user uses a screen reader which will read out every punctuation mark, which is very annoying. Generate the response in strictly plain, natural conversational Korean text only.
+1. Do NOT use any Markdown formatting, symbols, syntax, or links. (Do NOT use asterisks like **, *, hashes like #, underscores, backticks, bullet dashes, or blockquotes). The visually impaired user uses a screen reader which will read out every punctuation mark, which is very annoying. Generate the response in strictly plain, natural conversational Korean text only.
 2. Do NOT spoil or describe any events, scripts, or details occurring AFTER the current timestamp [${Math.round(targetTime)}s]. The user is currently watching the video at this exact moment; revealing future story or visual details will ruin their experience.
 3. Only answer questions directly related to this video (its title, script context, visual frames, or narrative). If the user asks something completely unrelated to the video, politely decline and state that you can only answer questions related to the current video.
+4. If you use the Google Search tool, ONLY search for information directly relevant to the video's content, context, subjects, or concepts mentioned in the video. Do NOT search for unrelated external topics.
+5. Do NOT include any source links, URLs, citations, footnotes, or website references (e.g. "[1]", "(source: www.example.com)", links like "[text](url)") in your response. The answer must be a single natural conversational text without quoting where the information came from.
 
 Video Title: "${videoTitle}"
 Script Context around this timestamp:
@@ -536,12 +538,20 @@ ${scriptContext || '(No script context available)'}
 
 ${historyContext}User's Question: "${question}"`;
 
-        const model = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite" });
+        const model = genAI.getGenerativeModel({ 
+            model: "gemini-3.1-flash-lite",
+            tools: [{ googleSearch: {} }]
+        });
         const result = await model.generateContent([systemPrompt, ...imageParts]);
         let answer = result.response.text().trim();
 
-        // Strip any remaining markdown symbols to ensure pure plain text for screen readers
-        answer = answer.replace(/[\*\_\#\`\-\>\+\=\[\]]/g, '').trim();
+        // Strip any remaining markdown symbols, URLs, and citations to ensure pure plain text for screen readers
+        answer = answer
+            .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Remove markdown link structure but keep text
+            .replace(/https?:\/\/[^\s]+/g, '')        // Remove URLs
+            .replace(/\[\d+\]/g, '')                  // Remove citations like [1]
+            .replace(/[\*\_\#\`\-\>\+\=\[\]\{\}]/g, '') // Remove markdown syntax characters
+            .trim();
 
         // 7. Output result
         logger.info(`[QA-${videoId.substring(0,8)}] Answered question at ${targetTime}s (Source: ${fromCache ? 'cache' : 'on-demand'}).`);
