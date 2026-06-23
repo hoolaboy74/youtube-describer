@@ -37,8 +37,18 @@ function preprocessVtt(vttContent) {
 }
 
 
+let isImpersonateAvailable = false;
+
+function setIsImpersonateAvailable(val) {
+    isImpersonateAvailable = !!val;
+}
+
+function getIsImpersonateAvailable() {
+    return isImpersonateAvailable;
+}
+
 const YOUTUBE_URL_REGEX = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/(watch\?v=|embed\/|v\/|live\/|shorts\/|)([\w-]+)([?&].*)?$/;function isValidYoutubeUrl(url) {
     return YOUTUBE_URL_REGEX.test(url);
 }
 
-module.exports = { formatTime, getYoutubeVideoId, preprocessVtt, isValidYoutubeUrl };
+module.exports = { formatTime, getYoutubeVideoId, preprocessVtt, isValidYoutubeUrl, setIsImpersonateAvailable, getIsImpersonateAvailable };

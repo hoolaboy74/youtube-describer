@@ -286,6 +286,8 @@ main {
 .video-container {
     position: relative; /* Added for overlay positioning */
     width: 100%;
+    max-width: 800px;
+    margin: 0 auto 15px auto;
     aspect-ratio: 16 / 9;
     background-color: #000;
     border-radius: 8px;

@@ -6,7 +6,7 @@ const util = require('util');
 const { execFile, spawn } = require('child_process');
 const crypto = require('crypto');
 const db = require('./database');
-const { formatTime, preprocessVtt, isValidYoutubeUrl } = require('./utils');
+const { formatTime, preprocessVtt, isValidYoutubeUrl, getIsImpersonateAvailable } = require('./utils');
 const logger = require('./logger');
 const sharp = require('sharp');
 
@@ -42,39 +42,7 @@ const saveFrameCache = async (baseTempDir, allFrameFiles, allTimestamps, videoId
     }
 };
 
-let isImpersonateAvailable = null;
 
-const checkImpersonateSupport = async () => {
-    if (isImpersonateAvailable !== null) return isImpersonateAvailable;
-    
-    return new Promise((resolve) => {
-        const testProcess = spawn('yt-dlp', ['--list-impersonate-targets']);
-        let stdout = '';
-        let stderr = '';
-        testProcess.stdout.on('data', (data) => { stdout += data.toString(); });
-        testProcess.stderr.on('data', (data) => { stderr += data.toString(); });
-        
-        testProcess.on('close', (code) => {
-            if (code === 0) {
-                const lines = stdout.split('\n');
-                const safariLine = lines.find(line => line.includes('Safari'));
-                if (safariLine && !safariLine.includes('unavailable')) {
-                    isImpersonateAvailable = true;
-                } else {
-                    isImpersonateAvailable = false;
-                }
-            } else {
-                isImpersonateAvailable = false;
-            }
-            logger.info(`[System] Checked yt-dlp impersonation support: ${isImpersonateAvailable ? 'AVAILABLE' : 'NOT AVAILABLE'}`);
-            resolve(isImpersonateAvailable);
-        });
-        testProcess.on('error', () => {
-            isImpersonateAvailable = false;
-            resolve(false);
-        });
-    });
-};
 
 const processingLocks = new Set();
 const timers = new Map();
@@ -290,7 +258,7 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
         let downloadSuccess = false;
         let downloadAttempt = 1;
         let currentCookiePath = getRandomCookiePath();
-        const useImpersonate = await checkImpersonateSupport();
+        const useImpersonate = getIsImpersonateAvailable();
 
         while (!downloadSuccess && downloadAttempt <= 2) {
             const isRetry = downloadAttempt === 2;
@@ -387,7 +355,9 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
                             const isBotError = stderrData.includes('confirm you’re not a bot') || 
                                                stderrData.includes('cookies are no longer valid') ||
                                                stderrData.includes('Too Many Requests') ||
-                                               stderrData.includes('429');
+                                               stderrData.includes('429') ||
+                                               stderrData.includes('403') ||
+                                               stderrData.includes('Forbidden');
                             if (downloadAttempt === 1 && isBotError && activeCookiePath) {
                                 const invalidPath = activeCookiePath + '.invalid';
                                 logger.warn(`[${requestHash}] Bot detected with cookie ${path.basename(activeCookiePath)}. Invalidating and retrying without cookies...`);
@@ -654,7 +624,7 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
     }
 };
 
-const processVideoBatch = async (videoId, youtubeUrl) => {
+const processVideoBatch = async (videoId, youtubeUrl, forceRecreate = false) => {
     const requestHash = `batch-${videoId.substring(0, 8)}`;
     if (!isValidYoutubeUrl(youtubeUrl)) {
         logger.error(`[${requestHash}] Invalid YouTube URL provided: ${youtubeUrl}`);
@@ -673,13 +643,20 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
     time(totalTimeLabel);
 
     const baseTempDir = path.join(__dirname, 'temp', videoId);
+    const tempVideoFilename = `${videoId}.mp4`;
+    const tempVideoPath = path.join(baseTempDir, tempVideoFilename);
     let cookiePath = null;
+    const proxyArgs = process.env.YTDLP_PROXY ? ['--proxy', process.env.YTDLP_PROXY] : [];
+    let isAlreadyCompleted = false;
 
     try {
         const cachedData = db.getVideo(videoId);
         if (cachedData && cachedData.status === 'completed') {
-            logger.info(`[${requestHash}] Cache hit for videoId: ${videoId}. Batch processing not needed.`);
-            return;
+            isAlreadyCompleted = true;
+            if (!forceRecreate) {
+                logger.info(`[${requestHash}] Cache hit for videoId: ${videoId}. Batch processing not needed.`);
+                return;
+            }
         }
 
         await fs.promises.mkdir(baseTempDir, { recursive: true });
@@ -691,7 +668,7 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
         let downloadSuccess = false;
         let downloadAttempt = 1;
         let currentCookiePath = getRandomCookiePath();
-        const useImpersonate = await checkImpersonateSupport();
+        const useImpersonate = getIsImpersonateAvailable();
 
         while (!downloadSuccess && downloadAttempt <= 2) {
             const isRetry = downloadAttempt === 2;
@@ -758,7 +735,9 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
                             const isBotError = stderrData.includes('confirm you’re not a bot') || 
                                                stderrData.includes('cookies are no longer valid') ||
                                                stderrData.includes('Too Many Requests') ||
-                                               stderrData.includes('429');
+                                               stderrData.includes('429') ||
+                                               stderrData.includes('403') ||
+                                               stderrData.includes('Forbidden');
                             if (downloadAttempt === 1 && isBotError && activeCookiePath) {
                                 const invalidPath = activeCookiePath + '.invalid';
                                 logger.warn(`[${requestHash}] Bot detected in batch with cookie ${path.basename(activeCookiePath)}. Invalidating and retrying without cookies...`);
@@ -848,6 +827,13 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
         timeEnd(extractionLabel);
         logger.info(`[${requestHash}] Initial data extraction complete. Title: ${videoTitle}, Total Frames: ${allTimestamps.length}`);
 
+        if (isAlreadyCompleted) {
+            const allFrameFiles = (await fs.promises.readdir(baseTempDir)).filter(f => f.endsWith('.jpg')).sort();
+            await saveFrameCache(baseTempDir, allFrameFiles, allTimestamps, videoId);
+            logger.info(`[${requestHash}] Frame cache restored for already completed video ${videoId}. Skipping AI generation.`);
+            return;
+        }
+
         logger.info(`[${requestHash}] Step 2: Starting AI generation...`);
         const aiLabel = `[${requestHash}] Full AI Process Time`;
         time(aiLabel);
@@ -918,7 +904,11 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
         logger.info(`[${requestHash}] Successfully generated and cached script text for batch processing.`);
         
     } catch (error) {
-        db.updateVideoStatus(videoId, 'failed', error.message);
+        if (!isAlreadyCompleted) {
+            db.updateVideoStatus(videoId, 'failed', error.message);
+        } else {
+            logger.warn(`[${requestHash}] Batch recreate failed for completed video ${videoId}, keeping completed status. Error: ${error.message}`);
+        }
         logger.error(new Error(`[${requestHash}] Error in batch processing: ${error.message}`));
         
         // Invalidate cookie on auth error

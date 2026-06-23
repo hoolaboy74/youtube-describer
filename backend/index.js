@@ -7,6 +7,8 @@ const db = require('./database');
 const apiRoutes = require('./routes');
 const logger = require('./logger');
 const checkDiskSpace = require('check-disk-space').default;
+const { spawn } = require('child_process');
+const utils = require('./utils');
 
 // Initialize the database
 db.init();
@@ -78,9 +80,41 @@ app.use('/audio/tts_cache', express.static(ttsCacheDir));
 app.use('/api', apiRoutes);
 
 // --- SERVER START ---
-app.listen(port, () => {
-    logger.info(`Backend server listening on http://localhost:${port}`);
-    // Run cleanup on startup, then periodically
-    cleanupOldFiles();
-    setInterval(cleanupOldFiles, 24 * 60 * 60 * 1000);
-});
+const checkImpersonateSupport = () => {
+    return new Promise((resolve) => {
+        const testProcess = spawn('yt-dlp', ['--list-impersonate-targets']);
+        let stdout = '';
+        let stderr = '';
+        testProcess.stdout.on('data', (data) => { stdout += data.toString(); });
+        testProcess.stderr.on('data', (data) => { stderr += data.toString(); });
+        
+        testProcess.on('close', (code) => {
+            let available = false;
+            if (code === 0) {
+                const lines = stdout.split('\n');
+                const safariLine = lines.find(line => line.includes('Safari'));
+                if (safariLine && !safariLine.includes('unavailable')) {
+                    available = true;
+                }
+            }
+            logger.info(`[System] Checked yt-dlp impersonation support: ${available ? 'AVAILABLE' : 'NOT AVAILABLE'}`);
+            utils.setIsImpersonateAvailable(available);
+            resolve(available);
+        });
+        testProcess.on('error', () => {
+            logger.info(`[System] Checked yt-dlp impersonation support: NOT AVAILABLE (Failed to spawn)`);
+            utils.setIsImpersonateAvailable(false);
+            resolve(false);
+        });
+    });
+};
+
+(async () => {
+    await checkImpersonateSupport();
+    app.listen(port, () => {
+        logger.info(`Backend server listening on http://localhost:${port}`);
+        // Run cleanup on startup, then periodically
+        cleanupOldFiles();
+        setInterval(cleanupOldFiles, 24 * 60 * 60 * 1000);
+    });
+})();

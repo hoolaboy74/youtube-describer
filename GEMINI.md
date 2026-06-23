@@ -85,6 +85,17 @@ To run the backend server, the following command-line tools must be installed on
 
 ## 개선 기록 (Improvement Log)
 
+### 85차: 질의응답(Q&A) 실시간 프레임 추출 에러 및 403 Forbidden 다운로드 장애 조치 (2026-06-23)
+- **문제:**
+    1. 로컬 개발 환경에서 `impersonate` 기능이 `NOT AVAILABLE` 상태일 때, 만료되거나 오염된 쿠키를 사용해 다운로드하면 `HTTP Error 403: Forbidden`이 발생함.
+    2. 기존 [videoProcessor.js](file:///Users/chacha/src/youtube-describer-qa/backend/videoProcessor.js) 코드 내 `isBotError` 판정 조건에 `403` 또는 `Forbidden`에 대한 검사가 누락되어 있어, 해당 오류 시 2단계 자동 재시도(쿠키 제외 및 Deno 솔버 기반 생짜 다운로드)로 진입하지 못하고 전체 프로세스가 실패함.
+    3. Q&A 질의 처리 시 모델명을 `gemini-3.1-flash-lite` 대신 화면 해설용 모델과 동일하게 변경하면서 설정 모순이 발생하여, 2.5 pro 모델 대비 속도가 느려지고 품질이 저하됨.
+- **해결:**
+    1. **`isBotError` 감지 조건 강화**: [videoProcessor.js](file:///Users/chacha/src/youtube-describer-qa/backend/videoProcessor.js)의 2단계 재시도 감지부(`isBotError`)에 `403` 및 `Forbidden` 문자열 조건을 추가하여, 쿠키 차단 시 즉시 `.invalid`로 격리하고 쿠키 없는 순정 재시도 흐름으로 넘어가도록 개선.
+    2. **Q&A 및 화면 해설 모델 역할 구분 명확화**: 화면 해설 생성 모델은 성능 및 품질 최적화를 위해 **`gemini-2.5-pro`**로 복귀시키고, Q&A 응답 모델은 기존 설계 의도대로 **`gemini-3.1-flash-lite`**로 분리 적용 및 롤백 완료.
+    3. **비용 요율 정산 일치**: 화면 해설 생성 시 `gemini-2.5-pro` 전용 비용 요율($1.25 / $2.50 / $10.00 / $15.00)을 데이터베이스 로깅 및 API 비용 계산부에 완전히 일치시킴.
+- **상태:** 로컬 환경 조치 및 DB/캐시 정제 테스트 통과 완료 (2026-06-23)
+
 ### 84차: 텔레그램 실시간 에러 알림 연동 및 Node.js Happy Eyeballs 버그 우회 (2026-06-22)
 - **문제:** 뷰레이터 시스템의 주요 장애(유튜브 봇 감지, API 제한, 오디오 변환 실패 등)를 스마트폰을 통해 실시간으로 인지할 필요성이 대두됨. 또한, 원격 VM 환경에서 텔레그램 API(`/bot{token}/sendMessage`) 호출 시 Node.js의 Happy Eyeballs IPv6 우선 조회 정책과 인프라의 IPv6 비활성화 상태가 충돌하여 연결 타임아웃(`ETIMEDOUT`)이 발생하는 망 이슈 확인.
 - **해결:**

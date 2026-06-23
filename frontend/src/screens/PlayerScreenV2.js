@@ -143,12 +143,267 @@ function PlayerScreenV2() {
     // UI State
     const [isScriptVisible, setIsScriptVisible] = useState(false);
 
+    // Q&A States & Hooks
+    const [question, setQuestion] = useState('');
+    const [qaList, setQaList] = useState([]);
+    const [isQaLoading, setIsQaLoading] = useState(false);
+    const [isListening, setIsListening] = useState(false);
+    const recognitionRef = useRef(null);
+    const inputRef = useRef(null);
+
     const isDescriptionEnabled = verbosity > 0 || isReadingSubtitles;
     const isDescriptionEnabledRef = useRef(isDescriptionEnabled);
     useEffect(() => { isDescriptionEnabledRef.current = isDescriptionEnabled; }, [isDescriptionEnabled]);
 
     const headingRef = useRef(null);
     usePageFocus(headingRef);
+
+    // Initialize Speech Recognition (STT)
+    useEffect(() => {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (SpeechRecognition) {
+            const rec = new SpeechRecognition();
+            rec.continuous = false;
+            rec.lang = 'ko-KR';
+            rec.interimResults = false;
+
+            rec.onresult = (event) => {
+                const text = event.results[0][0].transcript;
+                setQuestion(text);
+                setIsListening(false);
+                announcePolite(`음성 인식 성공: "${text}" 입력됨.`);
+            };
+
+            rec.onerror = (event) => {
+                console.error('Speech recognition error:', event.error);
+                setIsListening(false);
+                announcePolite('음성 인식에 실패했습니다. 다시 시도해 주세요.');
+            };
+
+            rec.onend = () => {
+                setIsListening(false);
+            };
+
+            recognitionRef.current = rec;
+        }
+    }, [announcePolite]);
+
+    const toggleListening = () => {
+        if (!recognitionRef.current) {
+            announcePolite('이 브라우저는 음성 인식을 지원하지 않습니다.');
+            return;
+        }
+
+        if (isListening) {
+            recognitionRef.current.stop();
+            setIsListening(false);
+        } else {
+            setIsListening(true);
+            announcePolite('질문을 말씀해주세요.');
+            recognitionRef.current.start();
+        }
+    };
+
+    const handleTogglePlay = useCallback(() => {
+        if (!player) return;
+
+        const isVideoPlaying = player.getPlayerState() === 1;
+        const isAudioPlaying = audioPlayerRef.current && !audioPlayerRef.current.paused && !audioPlayerRef.current.ended;
+
+        // 1. 영상이나 오디오 중 하나라도 재생 중이면 -> 둘 다 확실하게 일시정지
+        if (isVideoPlaying || isAudioPlaying) {
+            if (isVideoPlaying) player.pauseVideo();
+            if (isAudioPlaying) audioPlayerRef.current.pause();
+            return;
+        }
+
+        // 2. 둘 다 멈춰있는 경우 -> 재생 재개 (Resume)
+
+        // 2-1. 모바일 브라우저 오디오 정책 대응 (최초 1회 Silent Audio 재생)
+        if (!isInteractionDone) {
+            setIsInteractionDone(true);
+            const audioPlayer = audioPlayerRef.current;
+            if (audioPlayer) {
+                audioPlayer.src = SILENT_AUDIO;
+                audioPlayer.volume = 0;
+                audioPlayer.play().catch(e => {
+                    console.warn("Silent audio play for unlocking context failed (this is often ok).", e);
+                });
+            }
+        }
+        
+        // 2-2. 멈췄던 오디오 처리
+        const audio = audioPlayerRef.current;
+        const isPauseMode = playbackModeRef.current === 'pause';
+        
+        if (audio && audio.paused && !audio.ended && audio.src && audio.src !== SILENT_AUDIO) {
+             
+             // Case A: '멈춘 후 해설' 모드 -> 무조건 오디오만 재생
+             if (isPauseMode) {
+                 audio.play().catch(e => {
+                     console.error("Resume audio failed", e);
+                     player.playVideo(); 
+                 });
+                 return;
+             }
+             
+             // Case B: '영상과 같이' 모드
+             if (isMobile()) {
+                 // 모바일: 멈췄던 오디오는 과감히 버립니다.
+                 // 억지로 재생하려다 큐가 꼬이는 것을 방지하기 위해,
+                 // 현재 오디오 재생 상태(Ref)를 강제로 끄고 영상만 틉니다.
+                 isTtsPlayingRef.current = false; 
+                 // (주의) audio.currentTime 등을 건드리면 또 로딩이 걸리므로, 그냥 놔두고 플래그만 내립니다.
+             } else {
+                 // PC: 정상 재생
+                 audio.volume = 1;
+                 audio.play().catch(e => console.error("Resume audio failed", e));
+             }
+        }
+
+        // 3. 영상 재생
+        player.playVideo();
+    }, [player, isInteractionDone]);
+
+    // Keyboard shortcut (Space key control logic for Q&A and video playback)
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            const activeEl = document.activeElement;
+            if (activeEl && ['INPUT', 'TEXTAREA', 'SELECT'].includes(activeEl.tagName)) {
+                return;
+            }
+
+            if (e.key === ' ' || e.key === 'Spacebar') {
+                e.preventDefault(); // Prevent default browser scroll
+
+                if (!player) return;
+
+                const playerState = player.getPlayerState();
+                const isVideoPlaying = playerState === 1; // 1: PLAYING
+                const isAudioPlaying = audioPlayerRef.current && !audioPlayerRef.current.paused && !audioPlayerRef.current.ended;
+
+                // 재생 중인 경우 -> 일시 정지 및 질문 입력창 포커스
+                if (isVideoPlaying || isAudioPlaying) {
+                    if (isVideoPlaying) player.pauseVideo();
+                    if (isAudioPlaying) {
+                        audioPlayerRef.current.pause();
+                        isTtsPlayingRef.current = false;
+                    }
+                    setIsPlaying(false);
+
+                    if (inputRef.current) {
+                        inputRef.current.focus();
+                        announcePolite('영상을 정지하고 질문 입력창으로 이동했습니다.');
+                    }
+                } else {
+                    // 정지 중인 경우 -> 재생 재개
+                    // Q&A TTS 도중에 다시 재생하는 경우에는 강제로 player 볼륨 복구 및 TTS 중단
+                    if (isTtsPlayingRef.current) {
+                        isTtsPlayingRef.current = false;
+                        if (audioPlayerRef.current) {
+                            audioPlayerRef.current.pause();
+                        }
+                        player.setVolume(100);
+                    }
+
+                    handleTogglePlay();
+                    announcePolite('영상을 다시 재생합니다.');
+                }
+            }
+        };
+
+        document.addEventListener('keydown', handleKeyDown);
+        return () => document.removeEventListener('keydown', handleKeyDown);
+    }, [player, announcePolite, handleTogglePlay]);
+
+    // Send question to backend Q&A API
+    const handleAskQuestion = async () => {
+        if (!question.trim() || !player) return;
+
+        // 질문 전송 시 질문창 포커스 아웃하여 스페이스바 단축키 활성화
+        if (inputRef.current) {
+            inputRef.current.blur();
+        }
+
+        player.pauseVideo();
+        setIsPlaying(false);
+
+        const currentTimestamp = player.getCurrentTime();
+        const userQuestion = question.trim();
+        setQuestion('');
+
+        const newQaId = (window.crypto && window.crypto.randomUUID) ? window.crypto.randomUUID() : (Math.random().toString(36).substring(2) + Date.now().toString(36));
+        const newQaItem = {
+            id: newQaId,
+            timestamp: currentTimestamp,
+            question: userQuestion,
+            answer: '',
+            isGenerating: true
+        };
+
+        setQaList(prev => [...prev, newQaItem]);
+        setIsQaLoading(true);
+        announcePolite(`질문을 전송했습니다. 장면 분석 중입니다. 잠시만 기다려주세요.`);
+
+        // 이전 완료된 Q&A 히스토리 구성
+        const qaHistory = qaList
+            .filter(qa => !qa.isGenerating && qa.answer)
+            .map(qa => ({
+                question: qa.question,
+                answer: qa.answer
+            }));
+
+        try {
+            const response = await axios.post('/api/video-qa', {
+                videoId,
+                timestamp: currentTimestamp,
+                question: userQuestion,
+                history: qaHistory
+            });
+
+            const answerText = response.data.answer;
+
+            setQaList(prev => prev.map(qa => 
+                qa.id === newQaId ? { ...qa, answer: answerText, isGenerating: false } : qa
+            ));
+            setIsQaLoading(false);
+
+            // Play answer with TTS audio
+            isTtsPlayingRef.current = true;
+            player.setVolume(10);
+            
+            const audioPlayer = audioPlayerRef.current;
+            if (audioPlayer) {
+                audioPlayer.pause();
+                
+                onAudioEndedRef.current = () => {
+                    isTtsPlayingRef.current = false;
+                    if (player) {
+                        player.setVolume(100);
+                    }
+                };
+
+                const ttsResponse = await axios.post(`/api/tts`, { text: answerText }, { responseType: 'blob' });
+                const audioUrl = URL.createObjectURL(ttsResponse.data);
+                
+                audioPlayer.src = audioUrl;
+                audioPlayer.playbackRate = playbackRateRef.current || 1.3;
+                audioPlayer.volume = 1.0;
+                audioPlayer.play().catch(e => {
+                    console.error("Q&A Audio play failed:", e);
+                    isTtsPlayingRef.current = false;
+                });
+            }
+
+        } catch (error) {
+            console.error('Q&A failed:', error);
+            setQaList(prev => prev.map(qa => 
+                qa.id === newQaId ? { ...qa, answer: '답변을 생성하는 데 실패했습니다. 다시 시도해 주세요.', isGenerating: false } : qa
+            ));
+            setIsQaLoading(false);
+            announcePolite('장면 분석 및 답변 생성에 실패했습니다.');
+        }
+    };
 
     useEffect(() => {
         const player = new Audio();
@@ -628,71 +883,11 @@ function PlayerScreenV2() {
         });
     };
 
-    const handleTogglePlay = () => {
-        if (!player) return;
-
-        const isVideoPlaying = player.getPlayerState() === 1;
-        const isAudioPlaying = audioPlayerRef.current && !audioPlayerRef.current.paused && !audioPlayerRef.current.ended;
-
-        // 1. 영상이나 오디오 중 하나라도 재생 중이면 -> 둘 다 확실하게 일시정지
-        if (isVideoPlaying || isAudioPlaying) {
-            if (isVideoPlaying) player.pauseVideo();
-            if (isAudioPlaying) audioPlayerRef.current.pause();
-            return;
-        }
-
-        // 2. 둘 다 멈춰있는 경우 -> 재생 재개 (Resume)
-
-        // 2-1. 모바일 브라우저 오디오 정책 대응 (최초 1회 Silent Audio 재생)
-        if (!isInteractionDone) {
-            setIsInteractionDone(true);
-            const audioPlayer = audioPlayerRef.current;
-            if (audioPlayer) {
-                audioPlayer.src = SILENT_AUDIO;
-                audioPlayer.volume = 0;
-                audioPlayer.play().catch(e => {
-                    console.warn("Silent audio play for unlocking context failed (this is often ok).", e);
-                });
-            }
-        }
-        
-        // 2-2. 멈췄던 오디오 처리
-        const audio = audioPlayerRef.current;
-        const isPauseMode = playbackModeRef.current === 'pause';
-        
-        if (audio && audio.paused && !audio.ended && audio.src && audio.src !== SILENT_AUDIO) {
-             
-             // Case A: '멈춘 후 해설' 모드 -> 무조건 오디오만 재생
-             if (isPauseMode) {
-                 audio.play().catch(e => {
-                     console.error("Resume audio failed", e);
-                     player.playVideo(); 
-                 });
-                 return;
-             }
-             
-             // Case B: '영상과 같이' 모드
-             if (isMobile()) {
-                 // 모바일: 멈췄던 오디오는 과감히 버립니다.
-                 // 억지로 재생하려다 큐가 꼬이는 것을 방지하기 위해,
-                 // 현재 오디오 재생 상태(Ref)를 강제로 끄고 영상만 틉니다.
-                 isTtsPlayingRef.current = false; 
-                 // (주의) audio.currentTime 등을 건드리면 또 로딩이 걸리므로, 그냥 놔두고 플래그만 내립니다.
-             } else {
-                 // PC: 정상 재생
-                 audio.volume = 1;
-                 audio.play().catch(e => console.error("Resume audio failed", e));
-             }
-        }
-
-        // 3. 영상 재생
-        player.playVideo();
-    };
 
     const newVerbosityLabels = { 0: '없음', ...verbosityLabels };
 
     return (
-        <div ref={mainContainerRef}>
+        <div ref={mainContainerRef} style={{ maxWidth: '800px', margin: '0 auto', padding: '0 20px 100px 20px' }}>
             <Header title={videoInfo.title} ref={headingRef} />
 
             {isLoading ? (
@@ -779,6 +974,118 @@ function PlayerScreenV2() {
                                 30초 후 ⏩
                             </button>
                         </div>
+                    </div>
+
+                    {/* Q&A Section */}
+                    <div className="qa-section" style={{
+                        margin: '20px 0',
+                        padding: '20px',
+                        borderRadius: '12px',
+                        backgroundColor: '#ffffff',
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
+                        border: '1px solid #eaeaea'
+                    }}>
+                        <h3 style={{ margin: '0 0 10px 0', fontSize: '1.25rem', color: '#1a1a1a' }}>영상 내용 질문하기</h3>
+                        <p style={{ margin: '0 0 15px 0', fontSize: '0.9rem', color: '#666', lineHeight: '1.4' }}>
+                            영상의 특정 장면에 대해 궁금한 점을 적거나 마이크 버튼을 눌러 말해보세요. 질문을 던지면 영상은 자동 일시정지되며, AI가 해당 시점의 장면을 분석하여 음성으로 답해줍니다. (단축키 <kbd style={{ padding: '2px 6px', background: '#eee', borderRadius: '4px', border: '1px solid #ccc' }}>Q</kbd>를 누르면 즉시 질문 입력창으로 포커스됩니다.)
+                        </p>
+                        
+                        <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
+                            <input
+                                ref={inputRef}
+                                type="text"
+                                value={question}
+                                onChange={(e) => setQuestion(e.target.value)}
+                                placeholder="예: 지금 주인공이 입고 있는 옷 색깔이 뭐야?"
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter') handleAskQuestion();
+                                }}
+                                style={{
+                                    flex: 1,
+                                    padding: '12px 16px',
+                                    borderRadius: '8px',
+                                    border: '1.5px solid #ccc',
+                                    fontSize: '0.95rem',
+                                    outline: 'none',
+                                    transition: 'border-color 0.2s'
+                                }}
+                                aria-label="AI에게 질문할 내용을 입력하세요."
+                            />
+                            <button
+                                onClick={toggleListening}
+                                style={{
+                                    padding: '0 16px',
+                                    borderRadius: '8px',
+                                    backgroundColor: isListening ? '#ff4d4f' : '#f5f5f5',
+                                    color: isListening ? '#fff' : '#333',
+                                    border: '1.5px solid #ccc',
+                                    fontSize: '0.9rem',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '6px',
+                                    transition: 'all 0.2s'
+                                }}
+                                aria-label={isListening ? "음성 인식 중지" : "마이크로 질문하기"}
+                            >
+                                <span>{isListening ? '🛑' : '🎤'}</span>
+                                <span>{isListening ? '듣는 중...' : '마이크'}</span>
+                            </button>
+                            <button
+                                onClick={handleAskQuestion}
+                                disabled={isQaLoading || !question.trim()}
+                                style={{
+                                    padding: '0 24px',
+                                    borderRadius: '8px',
+                                    backgroundColor: '#0070f3',
+                                    color: '#fff',
+                                    border: 'none',
+                                    fontSize: '0.95rem',
+                                    fontWeight: '600',
+                                    cursor: (isQaLoading || !question.trim()) ? 'not-allowed' : 'pointer',
+                                    opacity: (isQaLoading || !question.trim()) ? 0.6 : 1,
+                                    transition: 'background-color 0.2s'
+                                }}
+                            >
+                                질문하기
+                            </button>
+                        </div>
+
+                        {qaList.length > 0 && (
+                            <div style={{
+                                marginTop: '20px',
+                                borderTop: '1px solid #eaeaea',
+                                paddingTop: '15px'
+                            }}>
+                                <h4 style={{ margin: '0 0 15px 0', fontSize: '1.1rem', color: '#333' }}>질문 내역 및 답변</h4>
+                                <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                                    {qaList.map((qa) => (
+                                        <li key={qa.id} style={{
+                                            marginBottom: '16px',
+                                            padding: '16px',
+                                            borderRadius: '8px',
+                                            backgroundColor: '#f9f9f9',
+                                            borderLeft: '4px solid #0070f3'
+                                        }}>
+                                            <div style={{ fontSize: '0.95rem', fontWeight: 'bold', color: '#444', marginBottom: '6px' }}>
+                                                <span>[{formatTime(qa.timestamp)}] 질문: </span>
+                                                <span style={{ fontWeight: 'normal', color: '#1a1a1a' }}>{qa.question}</span>
+                                            </div>
+                                            <div style={{ fontSize: '0.95rem', color: '#333', lineHeight: '1.5' }}>
+                                                <strong>답변: </strong>
+                                                {qa.isGenerating ? (
+                                                    <span style={{ color: '#0070f3', fontStyle: 'italic' }}>
+                                                        AI가 장면을 정밀하게 분석하고 있습니다. 잠시만 기다려주세요...
+                                                    </span>
+                                                ) : (
+                                                    <span>{qa.answer}</span>
+                                                )}
+                                            </div>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
                     </div>
                 </>
             ) : (

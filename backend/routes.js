@@ -4,7 +4,7 @@ const { TextToSpeechClient } = require('@google-cloud/text-to-speech');
 const fs = require('fs');
 const path = require('path');
 const db = require('./database');
-const { getYoutubeVideoId } = require('./utils');
+const { getYoutubeVideoId, getIsImpersonateAvailable } = require('./utils');
 const { processVideo, processVideoBatch } = require('./videoProcessor');
 const logger = require('./logger');
 const { GoogleGenerativeAI } = require("@google/generative-ai");
@@ -286,9 +286,12 @@ const getQACookiePath = () => {
     return path.join(cookiesDir, cookieFiles[Math.floor(Math.random() * cookieFiles.length)]);
 };
 
+// Cache for direct stream URLs to prevent repetitive yt-dlp calls during continuous Q&A sessions (key: videoId, value: { url, expiresAt })
+const streamUrlCache = new Map();
+
 // --- VIDEO Q&A API ENDPOINT ---
 router.post('/video-qa', async (req, res) => {
-    const { videoId, timestamp, question } = req.body;
+    const { videoId, timestamp, question, history } = req.body;
     if (!videoId || timestamp === undefined || !question) {
         return res.status(400).json({ error: 'videoId, timestamp, and question are required.' });
     }
@@ -340,10 +343,13 @@ router.post('/video-qa', async (req, res) => {
                 const rangeEnd = targetTime + 1;
                 selectedFrames = frames.filter(f => f.timestamp >= rangeStart && f.timestamp <= rangeEnd);
 
-                // 만약 이 범위 안에 없으면, 가장 가까운 프레임 2장 확보
+                // 만약 이 범위 안에 없으면, 가장 가까운 프레임 중 시간 차이가 2초 이내인 것 2장 확보
                 if (selectedFrames.length === 0) {
                     frames.sort((a, b) => Math.abs(a.timestamp - targetTime) - Math.abs(b.timestamp - targetTime));
-                    selectedFrames = frames.slice(0, 2);
+                    const closest = frames[0];
+                    if (closest && Math.abs(closest.timestamp - targetTime) <= 2) {
+                        selectedFrames = frames.slice(0, 2);
+                    }
                 } else {
                     selectedFrames.sort((a, b) => a.timestamp - b.timestamp);
                 }
@@ -368,57 +374,133 @@ router.post('/video-qa', async (req, res) => {
             // 5. Cache miss: Fallback to on-demand frame extraction
             logger.info(`[QA-${videoId.substring(0,8)}] Cache miss at timestamp ${targetTime}. Initiating on-demand extraction...`);
             fromCache = false;
-            
+
             const tempDir = path.join(__dirname, 'temp', `qa-${videoId}-${Date.now()}`);
             await fs.promises.mkdir(tempDir, { recursive: true });
 
             try {
+                const startTime = parseFloat(Math.max(0, targetTime - 2).toFixed(1));
                 const youtubeUrl = `https://www.youtube.com/watch?v=${videoId}`;
+                const tempVideoPath = path.join(tempDir, 'temp_video.mp4');
+
                 const cookiePath = getQACookiePath();
-                const ytdlpArgs = [];
-                if (cookiePath) ytdlpArgs.push('--cookies', cookiePath);
-                if (process.env.YTDLP_PROXY) ytdlpArgs.push('--proxy', process.env.YTDLP_PROXY);
-                ytdlpArgs.push('-g', '-f', 'bestvideo[height<=480]', youtubeUrl);
+                const useImpersonate = getIsImpersonateAvailable();
 
-                const streamUrl = await new Promise((resolve, reject) => {
-                    execFile('yt-dlp', ytdlpArgs, (err, stdout, stderr) => {
-                        if (err) return reject(new Error(`yt-dlp failed: ${stderr || err.message}`));
-                        resolve(stdout.trim().split('\n')[0]);
-                    });
-                });
+                // 1. Download video using yt-dlp with 2-step retry (cookie -> no-cookie fallback)
+                let downloadSuccess = false;
+                let downloadAttempt = 1;
+                let activeCookiePath = cookiePath;
 
-                const startTime = Math.max(0, targetTime - 2);
+                while (!downloadSuccess && downloadAttempt <= 2) {
+                    const isRetry = downloadAttempt === 2;
+                    const currentCookiePath = isRetry ? null : activeCookiePath;
+                    
+                    const currentYtdlpArgs = [
+                        '-f', 'bestvideo[height<=480][ext=mp4]/best[height<=480][ext=mp4]'
+                    ];
+                    if (currentCookiePath) currentYtdlpArgs.push('--cookies', currentCookiePath);
+                    if (process.env.YTDLP_PROXY) currentYtdlpArgs.push('--proxy', process.env.YTDLP_PROXY);
+                    if (useImpersonate) currentYtdlpArgs.push('--impersonate', 'safari');
+                    currentYtdlpArgs.push(youtubeUrl, '-o', tempVideoPath);
+
+                    logger.info(`[QA-${videoId.substring(0,8)}] Download attempt ${downloadAttempt} with YT-DLP: ${currentYtdlpArgs.join(' ')}`);
+
+                    try {
+                        await new Promise((resolve, reject) => {
+                            const downloadProcess = spawn('yt-dlp', currentYtdlpArgs);
+                            let stderrData = '';
+                            
+                            downloadProcess.stderr.on('data', (data) => {
+                                stderrData += data.toString();
+                            });
+                            
+                            downloadProcess.on('close', (code) => {
+                                if (code === 0) resolve();
+                                else {
+                                    reject(new Error(`yt-dlp exited with code ${code}. Stderr: ${stderrData}`));
+                                }
+                            });
+                            downloadProcess.on('error', reject);
+                        });
+                        downloadSuccess = true;
+                    } catch (err) {
+                        logger.warn(`[QA-${videoId.substring(0,8)}] Download attempt ${downloadAttempt} failed: ${err.message}`);
+                        
+                        // If 1st attempt failed and we used a cookie, invalidate the cookie
+                        if (downloadAttempt === 1 && activeCookiePath) {
+                            const invalidPath = activeCookiePath + '.invalid';
+                            logger.warn(`[QA-${videoId.substring(0,8)}] Invalidating cookie: renaming to ${path.basename(invalidPath)}`);
+                            try {
+                                fs.renameSync(activeCookiePath, invalidPath);
+                            } catch (renameErr) {
+                                logger.error(`[QA-${videoId.substring(0,8)}] Failed to rename invalid cookie file:`, renameErr);
+                            }
+                        }
+                        
+                        if (downloadAttempt === 2) {
+                            throw err; // Re-throw to fallback block if second attempt fails
+                        }
+                        downloadAttempt++;
+                    }
+                }
+
+                // 2. Extract frames from local downloaded video using ffmpeg
                 const ffmpegArgs = [
                     '-ss', startTime.toString(),
-                    '-seekable', '1',
-                    '-i', streamUrl,
+                    '-i', tempVideoPath,
                     '-t', '3.5',
                     '-vf', 'fps=1,scale=640:360',
                     '-q:v', '5',
                     'frame-%04d.jpg'
                 ];
 
+                logger.info(`[QA-${videoId.substring(0,8)}] Extracting frames with ffmpeg: ffmpeg ${ffmpegArgs.join(' ')}`);
+
                 await new Promise((resolve, reject) => {
                     const ffmpegProcess = spawn('ffmpeg', ffmpegArgs, { cwd: tempDir });
+                    let stderrData = '';
+                    
+                    if (ffmpegProcess.stderr) {
+                        ffmpegProcess.stderr.on('data', (data) => {
+                            stderrData += data.toString();
+                        });
+                    }
+                    
                     ffmpegProcess.on('close', (code) => {
                         if (code === 0) resolve();
-                        else reject(new Error(`ffmpeg exited with code ${code}`));
+                        else {
+                            logger.error(`[QA-FFMPEG-ERROR] ffmpeg exited with code ${code}. Stderr:\n${stderrData}`);
+                            reject(new Error(`ffmpeg exited with code ${code}`));
+                        }
                     });
                     ffmpegProcess.on('error', reject);
                 });
 
-                const files = (await fs.promises.readdir(tempDir)).filter(f => f.endsWith('.jpg')).sort();
+                // 3. Process extracted frames
+                const files = (await fs.promises.readdir(tempDir)).filter(f => f.startsWith('frame-') && f.endsWith('.jpg')).sort();
+                const targetFramesDir = path.join(__dirname, 'public', 'frames', videoId);
+                await fs.promises.mkdir(targetFramesDir, { recursive: true });
+
                 for (let i = 0; i < files.length; i++) {
                     const file = files[i];
                     const filePath = path.join(tempDir, file);
-                    const data = await fs.promises.readFile(filePath);
+                    const timestampVal = startTime + i;
+                    const cacheFileName = `frame-${timestampVal}.jpg`;
+                    const cacheFilePath = path.join(targetFramesDir, cacheFileName);
+
+                    // Copy extracted frame to standard cache path for future Q&A hits
+                    if (!fs.existsSync(cacheFilePath)) {
+                        await fs.promises.copyFile(filePath, cacheFilePath);
+                    }
+
+                    const data = await fs.promises.readFile(cacheFilePath);
                     imageParts.push({
                         inlineData: {
                             data: data.toString('base64'),
                             mimeType: 'image/jpeg'
                         }
                     });
-                    imageParts.push({ text: `Timestamp of this frame: [${Math.round(startTime + i)}s]` });
+                    imageParts.push({ text: `Timestamp of this frame: [${Math.round(timestampVal)}s]` });
                 }
             } catch (fallbackErr) {
                 logger.error(`Fallback frame extraction failed for ${videoId}:`, fallbackErr);
@@ -431,21 +513,35 @@ router.post('/video-qa', async (req, res) => {
         }
 
         // 6. Build prompt and invoke Gemini
+        let historyContext = '';
+        if (history && Array.isArray(history) && history.length > 0) {
+            historyContext = 'Previous Conversation History (Use this for context if the user asks follow-up questions):\n' +
+                history.map(item => `User: ${item.question}\nAI Assistant: ${item.answer}`).join('\n\n') + '\n\n';
+        }
+
         const systemPrompt = `You are a smart assistive AI companion for a visually impaired user watching YouTube videos. 
 The user paused the video at [${Math.round(targetTime)}s] to ask a question.
 Provide a clear, detailed, and helpful answer in Korean.
 Since the user cannot see, focus on describing visual elements, reading any text visible on the screen, or clarifying actions occurring in the video.
 Make sure your tone is polite and professional.
 
+[CRITICAL REQUIREMENT]
+1. Do NOT use any Markdown formatting, symbols, or syntax. (Do NOT use asterisks like **, *, hashes like #, underscores, backticks, bullet dashes, or blockquotes). The visually impaired user uses a screen reader which will read out every punctuation mark, which is very annoying. Generate the response in strictly plain, natural conversational Korean text only.
+2. Do NOT spoil or describe any events, scripts, or details occurring AFTER the current timestamp [${Math.round(targetTime)}s]. The user is currently watching the video at this exact moment; revealing future story or visual details will ruin their experience.
+3. Only answer questions directly related to this video (its title, script context, visual frames, or narrative). If the user asks something completely unrelated to the video, politely decline and state that you can only answer questions related to the current video.
+
 Video Title: "${videoTitle}"
 Script Context around this timestamp:
 ${scriptContext || '(No script context available)'}
 
-User's Question: "${question}"`;
+${historyContext}User's Question: "${question}"`;
 
-        const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" }); // Use faster model for low latency QA
+        const model = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite" });
         const result = await model.generateContent([systemPrompt, ...imageParts]);
-        const answer = result.response.text().trim();
+        let answer = result.response.text().trim();
+
+        // Strip any remaining markdown symbols to ensure pure plain text for screen readers
+        answer = answer.replace(/[\*\_\#\`\-\>\+\=\[\]]/g, '').trim();
 
         // 7. Output result
         logger.info(`[QA-${videoId.substring(0,8)}] Answered question at ${targetTime}s (Source: ${fromCache ? 'cache' : 'on-demand'}).`);
