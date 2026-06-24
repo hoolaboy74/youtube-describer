@@ -1,0 +1,72 @@
+[dotenv@17.2.3] injecting env (3) from .env -- tip: 🔑 add access controls to secrets: https://dotenvx.com/ops
+[2026-06-22 18:42:42] [INFO] Initializing database...
+[2026-06-22 18:42:42] [INFO] Database initialized successfully.
+[2026-06-22 18:42:42] [INFO] Backend server listening on http://localhost:4000
+[2026-06-22 18:42:42] [INFO] Checking disk usage before cleaning old audio files...
+[2026-06-22 18:42:42] [INFO] Current disk usage: 64.67%
+[2026-06-22 18:42:42] [INFO] Disk usage is below the 70% threshold. Skipping cleanup.
+[2026-06-22 18:44:17] [INFO] [VhzWKwpN] Starting processing for https://www.youtube.com/watch?v=VhzWKwpNgZg
+[2026-06-22 18:44:17] [WARN] [VhzWKwpN] Duplicate request for VhzWKwpNgZg. The process is already running.
+[2026-06-22 18:44:17] [INFO] [VhzWKwpN] Step 1: Starting initial data extraction...
+[2026-06-22 18:44:17] [INFO] Using cookie file: toopacha99_cookies.txt
+[2026-06-22 18:44:17] [INFO] Using cookie file: c7861967_cookies.txt
+[2026-06-22 18:44:18] [INFO] [System] Checked yt-dlp impersonation support: NOT AVAILABLE
+[2026-06-22 18:44:18] [INFO] [VhzWKwpN] Executing YT-DLP: yt-dlp -f bestvideo[height<=480][ext=mp4]/best[height<=480][ext=mp4] -o VhzWKwpNgZg.mp4 --force-ipv4 --legacy-server-connect --no-check-certificate --newline --write-auto-sub --write-sub --sub-lang ko,en --cookies /Users/chacha/src/youtube-describer-qa/backend/cookies/c7861967_cookies.txt https://www.youtube.com/watch?v=VhzWKwpNgZg
+[2026-06-22 18:44:20] [INFO] [VhzWKwpN] YT-DLP internal solver: [youtube] [jsc:deno] Solving JS challenges using deno
+[2026-06-22 18:44:26] [INFO] [VhzWKwpN] Downloaded video size: 16.98 MB
+[2026-06-22 18:44:31] [INFO] [VhzWKwpN] Found Korean subtitles: VhzWKwpNgZg.ko.vtt
+[2026-06-22 18:44:31] [INFO] [VhzWKwpN] Successfully loaded and preprocessed subtitles.
+[2026-06-22 18:44:31] [INFO] [VhzWKwpN] Initial Data Extraction Time: 13.431s
+[2026-06-22 18:44:31] [INFO] [VhzWKwpN] Initial data extraction complete. Title: 집에서 조별과제 하면 안되는 이유[SUB], Total Frames: 385
+[2026-06-22 18:44:31] [INFO] [VhzWKwpN] Step 2: Starting AI generation...
+[2026-06-22 18:45:36] [INFO] [VhzWKwpN] Logged API cost: 0.152627 USD
+[2026-06-22 18:45:38] [INFO] [VhzWKwpN] Saved 385 compressed frames to cache.
+[2026-06-22 18:45:38] [INFO] [VhzWKwpN] Full AI Process Time: 67.060s
+[2026-06-22 18:45:38] [INFO] [VhzWKwpN] Total Process Time: 80.516s
+[2026-06-22 18:47:12] [INFO] [QA-VhzWKwpN] Answered question at 27.292823745209486s (Source: cache).
+[2026-06-22 18:54:54] [INFO] [QA-pcJPI53-] Cache miss at timestamp 14.35554719272267. Initiating on-demand extraction...
+[2026-06-22 18:54:54] [INFO] [batch-pcJPI53-] Starting batch processing for https://www.youtube.com/watch?v=pcJPI53-r0A
+[2026-06-22 18:54:54] [INFO] [batch-pcJPI53-] Step 1: Starting initial data extraction...
+[2026-06-22 18:54:54] [INFO] Using cookie file: hoolaboy_cookies.txt
+[2026-06-22 18:54:54] [INFO] [Database] Updated status for pcJPI53-r0A to failed with reason: proxyArgs is not defined
+[2026-06-22 18:54:54] [ERROR] Error: [batch-pcJPI53-] Error in batch processing: proxyArgs is not defined
+    at processVideoBatch (/Users/chacha/src/youtube-describer-qa/backend/videoProcessor.js:923:22)
+[2026-06-22 18:54:54] [INFO] [batch-pcJPI53-] Total Batch Process Time: 0.019s
+[2026-06-22 18:54:58] [ERROR] [QA-FFMPEG-ERROR] ffmpeg exited with code 8. Stderr:
+ffmpeg version 8.0 Copyright (c) 2000-2025 the FFmpeg developers
+  built with Apple clang version 17.0.0 (clang-1700.0.13.3)
+  configuration: --prefix=/opt/homebrew/Cellar/ffmpeg/8.0_1 --enable-shared --enable-pthreads --enable-version3 --cc=clang --host-cflags= --host-ldflags='-Wl,-ld_classic' --enable-ffplay --enable-gnutls --enable-gpl --enable-libaom --enable-libaribb24 --enable-libbluray --enable-libdav1d --enable-libharfbuzz --enable-libjxl --enable-libmp3lame --enable-libopus --enable-librav1e --enable-librist --enable-librubberband --enable-libsnappy --enable-libsrt --enable-libssh --enable-libsvtav1 --enable-libtesseract --enable-libtheora --enable-libvidstab --enable-libvmaf --enable-libvorbis --enable-libvpx --enable-libwebp --enable-libx264 --enable-libx265 --enable-libxml2 --enable-libxvid --enable-lzma --enable-libfontconfig --enable-libfreetype --enable-frei0r --enable-libass --enable-libopencore-amrnb --enable-libopencore-amrwb --enable-libopenjpeg --enable-libspeex --enable-libsoxr --enable-libzmq --enable-libzimg --disable-libjack --disable-indev=jack --enable-videotoolbox --enable-audiotoolbox --enable-neon
+  libavutil      60.  8.100 / 60.  8.100
+  libavcodec     62. 11.100 / 62. 11.100
+  libavformat    62.  3.100 / 62.  3.100
+  libavdevice    62.  1.100 / 62.  1.100
+  libavfilter    11.  4.100 / 11.  4.100
+  libswscale      9.  1.100 /  9.  1.100
+  libswresample   6.  1.100 /  6.  1.100
+[https @ 0xa5ec48000] HTTP error 403 Forbidden
+[in#0 @ 0xa5f030000] Error opening input: Server returned 403 Forbidden (access denied)
+Error opening input file https://rr5---sn-oj3pm5-5g.googlevideo.com/videoplayback?expire=1782143696&ei=cAY5asaWD5SXpt8P7qPUyAs&ip=124.243.13.203&id=o-APaMcI3uCj2_cuLTBbO54xUpA_l7acLrK1W6Fdxfo042&itag=397&aitags=133%2C134%2C135%2C136%2C137%2C160%2C242%2C243%2C244%2C247%2C248%2C271%2C278%2C394%2C395%2C396%2C397%2C398%2C399%2C400&source=youtube&requiressl=yes&xpc=EgVo2aDSNQ%3D%3D&cps=493&met=1782122096%2C&mh=ho&mm=31%2C29&mn=sn-oj3pm5-5g%2Csn-3pm7dnek&ms=au%2Crdu&mv=m&mvi=5&pl=20&rms=au%2Cau&initcwndbps=1346250&siu=1&bui=ARmQxEXaAk0nLj0rwNG6P2eH2FmLNHY0oH67KX-jyR05HrHZS51Zo3F8w3pAxP7JAt-QVGMTlA&spc=SQ-umncBh69gBth1wkOR5O-Y69M&vprv=1&svpuc=1&mime=video%2Fmp4&ns=eyHEzvrX7KL5Kt-FkBhCrYAW&rqh=1&gir=yes&clen=34294348&dur=745.899&lmt=1781963917676113&mt=1782121528&fvip=5&keepalive=yes&lmw=1&fexp=51565116%2C51565682%2C51987687&c=TVHTML5&sefc=1&txp=5532534&n=MBTkOi-zvOpYDQ&sparams=expire%2Cei%2Cip%2Cid%2Caitags%2Csource%2Crequiressl%2Cxpc%2Csiu%2Cbui%2Cspc%2Cvprv%2Csvpuc%2Cmime%2Cns%2Crqh%2Cgir%2Cclen%2Cdur%2Clmt&sig=AHEqNM4wRQIhANOPII-EoLP4MCVn90K9GgDgAxapUfOPBozdLCneFrWTAiA5cOTUrWHriEpxf9u2nrBoal4kOvei9pD-C-tvh5_rbQ%3D%3D&lsparams=cps%2Cmet%2Cmh%2Cmm%2Cmn%2Cms%2Cmv%2Cmvi%2Cpl%2Crms%2Cinitcwndbps&lsig=APaTxxMwRQIhALUJR17cXII55TUJs-hJ_joqu1acmDpcQ09AoZhFEbptAiAC5pfNXC-NcNx4iLyLlHm2E36vebaRuksws4-TaEqghw%3D%3D.
+Error opening input files: Server returned 403 Forbidden (access denied)
+[2026-06-22 18:54:58] [ERROR] Fallback frame extraction failed for pcJPI53-r0A: Error: ffmpeg exited with code 8
+    at ChildProcess.<anonymous> (/Users/chacha/src/youtube-describer-qa/backend/routes.js:445:36)
+    at ChildProcess.emit (node:events:508:28)
+    at maybeClose (node:internal/child_process:1101:16)
+    at ChildProcess._handle.onexit (node:internal/child_process:305:5)
+[2026-06-22 18:55:00] [INFO] [QA-pcJPI53-] Answered question at 14.35554719272267s (Source: on-demand).
+[2026-06-22 19:00:08] [INFO] [pcJPI53-] Starting processing for https://www.youtube.com/watch?v=pcJPI53-r0A
+[2026-06-22 19:00:08] [INFO] [pcJPI53-] Step 1: Starting initial data extraction...
+[2026-06-22 19:00:08] [INFO] Using cookie file: momcenter1_cookies.txt
+[2026-06-22 19:00:08] [WARN] [pcJPI53-] Duplicate request for pcJPI53-r0A. The process is already running.
+[2026-06-22 19:00:08] [INFO] Using cookie file: topacha99_cookies.txt
+[2026-06-22 19:00:08] [INFO] [pcJPI53-] Executing YT-DLP: yt-dlp -f bestvideo[height<=480][ext=mp4]/best[height<=480][ext=mp4] -o pcJPI53-r0A.mp4 --force-ipv4 --legacy-server-connect --no-check-certificate --newline --write-auto-sub --write-sub --sub-lang ko,en --cookies /Users/chacha/src/youtube-describer-qa/backend/cookies/topacha99_cookies.txt https://www.youtube.com/watch?v=pcJPI53-r0A
+[2026-06-22 19:00:10] [INFO] [pcJPI53-] YT-DLP internal solver: [youtube] [jsc:deno] Solving JS challenges using deno
+[2026-06-22 19:00:20] [INFO] [pcJPI53-] Downloaded video size: 32.71 MB
+[2026-06-22 19:00:27] [INFO] [pcJPI53-] Found Korean subtitles: pcJPI53-r0A.ko.vtt
+[2026-06-22 19:00:27] [INFO] [pcJPI53-] Successfully loaded and preprocessed subtitles.
+[2026-06-22 19:00:27] [INFO] [pcJPI53-] Initial Data Extraction Time: 19.684s
+[2026-06-22 19:00:27] [INFO] [pcJPI53-] Initial data extraction complete. Title: 한국 겨울철 음식 방어를 처음 먹어본 일본 동생의 솔직 리뷰ㅋㅋㅋㅋㅋㅋ, Total Frames: 373
+[2026-06-22 19:00:27] [INFO] [pcJPI53-] Step 2: Starting AI generation...
+[2026-06-22 19:02:19] [INFO] [pcJPI53-] Logged API cost: 0.199146 USD
+[2026-06-22 19:02:21] [INFO] [pcJPI53-] Saved 373 compressed frames to cache.
+[2026-06-22 19:02:21] [INFO] [pcJPI53-] Full AI Process Time: 113.616s
+[2026-06-22 19:02:21] [INFO] [pcJPI53-] Total Process Time: 133.324s

@@ -151,12 +151,7 @@ function PlayerScreenV2() {
     const [isListening, setIsListening] = useState(false);
     const recognitionRef = useRef(null);
     const inputRef = useRef(null);
-    const setInputFocusRef = useCallback((node) => {
-        if (node !== null) {
-            inputRef.current = node;
-            node.focus();
-        }
-    }, []);
+    const qaTriggerBtnRef = useRef(null);
     const [qaPoliteAnnouncement, setQaPoliteAnnouncement] = useState('');
     const qaTimeoutRef = useRef(null);
     const announceQaPolite = useCallback((message) => {
@@ -178,26 +173,68 @@ function PlayerScreenV2() {
     const headingRef = useRef(null);
     usePageFocus(headingRef);
 
-    // Initialize Speech Recognition (STT)
-    useEffect(() => {
+    // Speech Recognition (STT)
+    // iOS 등 모바일에서 미디어 재생과의 오디오 세션 충돌 방지 및 안전한 시작을 위해,
+    // 기존에 한 번만 선언하던 Effect 기반 인스턴스 생성을 제거하고 toggleListening 시점에 동적 생성하는 방식으로 전환한다.
+    const toggleListening = () => {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        if (SpeechRecognition) {
+        if (!SpeechRecognition) {
+            announcePolite('이 브라우저는 음성 인식을 지원하지 않습니다.');
+            return;
+        }
+
+        // 오디오 세션 점유 해제: 비디오 및 재생 중인 모든 TTS 일시 정지
+        if (player && player.getPlayerState() === 1) {
+            player.pauseVideo();
+            setIsPlaying(false);
+        }
+        if (isTtsPlayingRef.current) {
+            isTtsPlayingRef.current = false;
+            if (audioPlayerRef.current) {
+                audioPlayerRef.current.pause();
+            }
+        }
+        if (player) {
+            player.setVolume(100);
+        }
+
+        if (isListening) {
+            if (recognitionRef.current) {
+                try {
+                    recognitionRef.current.stop();
+                } catch (e) {
+                    console.warn('SpeechRecognition stop error:', e);
+                }
+            }
+            setIsListening(false);
+            return;
+        }
+
+        try {
             const rec = new SpeechRecognition();
             rec.continuous = false;
             rec.lang = 'ko-KR';
             rec.interimResults = false;
+
+            rec.onstart = () => {
+                setIsListening(true);
+                announcePolite('질문을 말씀해주세요.');
+            };
 
             rec.onresult = (event) => {
                 const text = event.results[0][0].transcript;
                 setQuestion(text);
                 setIsListening(false);
                 announcePolite(`음성 인식 성공: "${text}" 입력됨.`);
+                if (inputRef.current) {
+                    inputRef.current.focus();
+                }
             };
 
             rec.onerror = (event) => {
                 console.error('Speech recognition error:', event.error);
                 setIsListening(false);
-                announcePolite('음성 인식에 실패했습니다. 다시 시도해 주세요.');
+                announcePolite(`음성 인식 오류: ${event.error}. 다시 시도해 주세요.`);
             };
 
             rec.onend = () => {
@@ -205,31 +242,11 @@ function PlayerScreenV2() {
             };
 
             recognitionRef.current = rec;
-        }
-    }, [announcePolite]);
-
-    const toggleListening = () => {
-        if (!recognitionRef.current) {
-            announcePolite('이 브라우저는 음성 인식을 지원하지 않습니다.');
-            return;
-        }
-
-        try {
-            if (isListening) {
-                recognitionRef.current.stop();
-                setIsListening(false);
-            } else {
-                setIsListening(true);
-                announcePolite('질문을 말씀해주세요.');
-                recognitionRef.current.start();
-            }
+            rec.start();
         } catch (e) {
             console.warn("SpeechRecognition control error:", e);
-            if (e.message && (e.message.includes('started') || e.message.includes('starting'))) {
-                setIsListening(true);
-            } else {
-                setIsListening(false);
-            }
+            announcePolite(`음성 인식 시작 실패: ${e.message}`);
+            setIsListening(false);
         }
     };
 
@@ -339,6 +356,11 @@ function PlayerScreenV2() {
             setIsPlaying(true);
         }
 
+        // 3. 원래 대화창 열기 버튼으로 포커스 복원
+        if (qaTriggerBtnRef.current) {
+            qaTriggerBtnRef.current.focus();
+        }
+
         announcePolite('질의응답 닫힘');
     }, [player, announcePolite]);
 
@@ -414,6 +436,10 @@ function PlayerScreenV2() {
                     }
                 }
                 setIsQaModalOpen(true);
+                // 모바일 환경 대응: 동기적으로 포커스 주입하여 키보드 활성화
+                if (inputRef.current) {
+                    inputRef.current.focus();
+                }
                 return;
             }
 
@@ -435,6 +461,10 @@ function PlayerScreenV2() {
                     }
                     setIsPlaying(false);
                     setIsQaModalOpen(true);
+                    // 모바일 환경 대응: 동기적으로 포커스 주입하여 키보드 활성화
+                    if (inputRef.current) {
+                        inputRef.current.focus();
+                    }
                 } else {
                     // 정지 중인 경우 -> 재생 재개
                     if (isTtsPlayingRef.current) {
@@ -1120,7 +1150,14 @@ function PlayerScreenV2() {
                             </p>
                         </div>
                         <button
-                            onClick={() => setIsQaModalOpen(true)}
+                            ref={qaTriggerBtnRef}
+                            onClick={() => {
+                                setIsQaModalOpen(true);
+                                // 모바일 환경 대응: 사용자 클릭 이벤트 내 동기적 포커스 주입
+                                if (inputRef.current) {
+                                    inputRef.current.focus();
+                                }
+                            }}
                             style={{
                                 padding: '10px 20px',
                                 borderRadius: '8px',
@@ -1139,26 +1176,25 @@ function PlayerScreenV2() {
                     </div>
 
                     {/* Q&A Modal */}
-                    {isQaModalOpen && (
-                        <div 
-                            ref={modalRef}
-                            role="dialog"
-                            aria-modal="true"
-                            aria-labelledby="qa-modal-title"
-                            style={{
-                                position: 'fixed',
-                                top: 0,
-                                left: 0,
-                                right: 0,
-                                bottom: 0,
-                                backgroundColor: 'rgba(0, 0, 0, 0.75)',
-                                display: 'flex',
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                                zIndex: 10000,
-                                padding: '20px'
-                            }}
-                        >
+                    <div 
+                        ref={modalRef}
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="qa-modal-title"
+                        style={{
+                            position: 'fixed',
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            backgroundColor: 'rgba(0, 0, 0, 0.75)',
+                            display: isQaModalOpen ? 'flex' : 'none',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            zIndex: 10000,
+                            padding: '20px'
+                        }}
+                    >
                             {/* Local Live Region for Modal Accessibility */}
                             <div className="visually-hidden" aria-live="polite" aria-atomic="true" style={{
                                 position: 'absolute',
@@ -1346,8 +1382,7 @@ function PlayerScreenV2() {
 
 
                                     <input
-                                        ref={setInputFocusRef}
-                                        autoFocus
+                                        ref={inputRef}
                                         type="text"
                                         value={question}
                                         onChange={(e) => setQuestion(e.target.value)}
@@ -1414,7 +1449,6 @@ function PlayerScreenV2() {
                                 </div>
                             </div>
                         </div>
-                    )}
                     
                     {/* Time & Navigation Controls - High Contrast & Simple for Accessibility */}
                     <div className="time-control-bar" style={{ 

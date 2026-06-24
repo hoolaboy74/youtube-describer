@@ -14,4 +14,17 @@ temp_*
 *.scratch.js
 test_search.js
 
-
+# Backend caches & media
+backend/public/frames/
+backend/public/subtitles/
+backend/public/audio/
+backend/*.webm
+backend/*.mp4
+backend/*.mp3
+backend/*.nosub
+backend/db/cache.db
+backend/db/cache.db-journal
+backend/cookies/
+*.webm
+*.mp4
+*.mp3
