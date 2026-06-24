@@ -1046,14 +1046,16 @@ function PlayerScreenV2() {
                 </div>
             ) : isPlayerReady ? (
                 <>
-                    <div className="video-container">
-                        <div className={`play-overlay ${isPlaying ? 'is-playing' : ''}`}>
+                    <div className="video-container" role="none">
+                        <div className={`play-overlay ${isPlaying ? 'is-playing' : ''}`} role="none">
                             <button className="big-play-button" onClick={handleTogglePlay} aria-label={isPlaying ? "일시정지" : "재생"}>
                                 {isPlaying ? '❚❚' : '▶'}
                             </button>
                         </div>
                         <YouTube
                             videoId={videoId}
+                            aria-hidden="true"
+                            tabIndex="-1"
                             opts={{
                                 width: '100%',
                                 height: '100%',
@@ -1067,7 +1069,6 @@ function PlayerScreenV2() {
                             onReady={(e) => {
                                 setPlayer(e.target);
                                 setDuration(e.target.getDuration());
-                                // 모바일 스크린 리더 포커스 침입 차단 및 재생 버튼 영상 제목 낭독 노이즈 해결
                                 const iframe = e.target.getIframe();
                                 if (iframe) {
                                     iframe.setAttribute('tabindex', '-1');
