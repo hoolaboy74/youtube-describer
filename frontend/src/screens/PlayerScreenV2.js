@@ -1055,6 +1055,8 @@ function PlayerScreenV2() {
                         </div>
                         <YouTube
                             videoId={videoId}
+                            aria-hidden="true"
+                            tabIndex="-1"
                             opts={{
                                 width: '100%',
                                 height: '100%',
@@ -1068,6 +1070,11 @@ function PlayerScreenV2() {
                             onReady={(e) => {
                                 setPlayer(e.target);
                                 setDuration(e.target.getDuration());
+                                const iframe = e.target.getIframe();
+                                if (iframe) {
+                                    iframe.setAttribute('tabindex', '-1');
+                                    iframe.setAttribute('aria-hidden', 'true');
+                                }
                             }}
                             onStateChange={(e) => setIsPlaying(e.data === window.YT.PlayerState.PLAYING)}
                         />
