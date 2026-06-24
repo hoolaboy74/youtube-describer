@@ -183,21 +183,6 @@ function PlayerScreenV2() {
             return;
         }
 
-        // 오디오 세션 점유 해제: 비디오 및 재생 중인 모든 TTS 일시 정지
-        if (player && player.getPlayerState() === 1) {
-            player.pauseVideo();
-            setIsPlaying(false);
-        }
-        if (isTtsPlayingRef.current) {
-            isTtsPlayingRef.current = false;
-            if (audioPlayerRef.current) {
-                audioPlayerRef.current.pause();
-            }
-        }
-        if (player) {
-            player.setVolume(100);
-        }
-
         if (isListening) {
             if (recognitionRef.current) {
                 try {
@@ -242,7 +227,24 @@ function PlayerScreenV2() {
             };
 
             recognitionRef.current = rec;
+
+            // 중요: start()를 미디어 정지 작업보다 먼저 실행하여 사용자 터치 스택 선두에 둔다.
             rec.start();
+
+            // 그 다음 미디어들을 정지하여 오디오 세션 충돌을 방지한다.
+            if (player && player.getPlayerState() === 1) {
+                player.pauseVideo();
+                setIsPlaying(false);
+            }
+            if (isTtsPlayingRef.current) {
+                isTtsPlayingRef.current = false;
+                if (audioPlayerRef.current) {
+                    audioPlayerRef.current.pause();
+                }
+            }
+            if (player) {
+                player.setVolume(100);
+            }
         } catch (e) {
             console.warn("SpeechRecognition control error:", e);
             announcePolite(`음성 인식 시작 실패: ${e.message}`);
@@ -336,6 +338,10 @@ function PlayerScreenV2() {
     // Close QA Modal, stop TTS, and resume video playback
     const handleCloseQaModal = useCallback(() => {
         setIsQaModalOpen(false);
+        // iOS 동기적 모달 숨김 처리 강제
+        if (modalRef.current) {
+            modalRef.current.style.display = 'none';
+        }
 
         // 1. Stop QA TTS if playing
         if (isTtsPlayingRef.current) {
@@ -435,11 +441,14 @@ function PlayerScreenV2() {
                         player.setVolume(100);
                     }
                 }
-                setIsQaModalOpen(true);
-                // 모바일 환경 대응: 동기적으로 포커스 주입하여 키보드 활성화
+                // iOS 동기적 포커스 및 모달 표출 강제
+                if (modalRef.current) {
+                    modalRef.current.style.display = 'flex';
+                }
                 if (inputRef.current) {
                     inputRef.current.focus();
                 }
+                setIsQaModalOpen(true);
                 return;
             }
 
@@ -460,11 +469,14 @@ function PlayerScreenV2() {
                         isTtsPlayingRef.current = false;
                     }
                     setIsPlaying(false);
-                    setIsQaModalOpen(true);
-                    // 모바일 환경 대응: 동기적으로 포커스 주입하여 키보드 활성화
+                    // iOS 동기적 포커스 및 모달 표출 강제
+                    if (modalRef.current) {
+                        modalRef.current.style.display = 'flex';
+                    }
                     if (inputRef.current) {
                         inputRef.current.focus();
                     }
+                    setIsQaModalOpen(true);
                 } else {
                     // 정지 중인 경우 -> 재생 재개
                     if (isTtsPlayingRef.current) {
@@ -1152,11 +1164,14 @@ function PlayerScreenV2() {
                         <button
                             ref={qaTriggerBtnRef}
                             onClick={() => {
-                                setIsQaModalOpen(true);
-                                // 모바일 환경 대응: 사용자 클릭 이벤트 내 동기적 포커스 주입
+                                // iOS 동기적 모달 display 제어 및 포커싱 강제
+                                if (modalRef.current) {
+                                    modalRef.current.style.display = 'flex';
+                                }
                                 if (inputRef.current) {
                                     inputRef.current.focus();
                                 }
+                                setIsQaModalOpen(true);
                             }}
                             style={{
                                 padding: '10px 20px',
