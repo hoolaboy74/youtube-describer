@@ -1053,7 +1053,17 @@ function PlayerScreenV2() {
                                 <span aria-hidden="true">{isPlaying ? '❚❚' : '▶'}</span>
                             </button>
                         </div>
-                        <div style={{ display: isPlaying ? 'block' : 'none', width: '100%', height: '100%' }}>
+                        <div style={isPlaying ? {
+                            width: '100%',
+                            height: '100%'
+                        } : {
+                            width: '0px',
+                            height: '0px',
+                            opacity: 0,
+                            overflow: 'hidden',
+                            position: 'absolute',
+                            pointerEvents: 'none'
+                        }}>
                             <YouTube
                                 videoId={videoId}
                                 aria-hidden="true"
