@@ -1034,7 +1034,8 @@ function PlayerScreenV2() {
         <div ref={mainContainerRef} style={{ maxWidth: '800px', margin: '0 auto', padding: '0 20px 100px 20px' }}>
             <Header title={videoInfo.title} ref={headingRef} />
 
-            {isLoading ? (
+            <main style={{ width: '100%' }}>
+                {isLoading ? (
                 <p>영상 데이터를 불러오는 중입니다...</p>
             ) : error ? (
                 <p className="error-message" role="alert">{error}</p>
@@ -1049,7 +1050,7 @@ function PlayerScreenV2() {
                     <div className="video-container" role="none">
                         <div className={`play-overlay ${isPlaying ? 'is-playing' : ''}`} role="none">
                             <button className="big-play-button" onClick={handleTogglePlay} aria-label={isPlaying ? "일시정지" : "재생"}>
-                                {isPlaying ? '❚❚' : '▶'}
+                                <span aria-hidden="true">{isPlaying ? '❚❚' : '▶'}</span>
                             </button>
                         </div>
                         <div style={{ display: isPlaying ? 'block' : 'none', width: '100%', height: '100%' }}>
@@ -1074,7 +1075,7 @@ function PlayerScreenV2() {
                                     if (iframe) {
                                         iframe.setAttribute('tabindex', '-1');
                                         iframe.setAttribute('aria-hidden', 'true');
-                                        iframe.setAttribute('title', '유튜브 플레이어');
+                                        iframe.removeAttribute('title'); // title 속성 제거로 영상 제목 누출 방지
                                     }
                                 }}
                                 onStateChange={(e) => setIsPlaying(e.data === window.YT.PlayerState.PLAYING)}
@@ -1503,6 +1504,7 @@ function PlayerScreenV2() {
             )}
 
             <Comments videoId={videoId} mainRef={mainContainerRef} />
+            </main>
         </div>
     );
 }
