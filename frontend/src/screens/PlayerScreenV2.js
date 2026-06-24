@@ -1061,27 +1061,8 @@ function PlayerScreenV2() {
                         />
                     </div>
                     
-                    {/* Q&A Trigger Banner */}
-                    <div style={{
-                        margin: '20px 0',
-                        padding: '20px',
-                        borderRadius: '12px',
-                        backgroundColor: '#ffffff',
-                        boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
-                        border: '1px solid #eaeaea',
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        gap: '15px'
-                    }}>
-                        <div>
-                            <h3 style={{ margin: '0 0 6px 0', fontSize: '1.15rem', color: '#1a1a1a', fontWeight: '700' }}>
-                                AI 동영상 질의응답 (Q&A)
-                            </h3>
-                            <p style={{ margin: 0, fontSize: '0.85rem', color: '#666', lineHeight: '1.4' }}>
-                                단축키 <kbd style={{ padding: '2px 6px', background: '#eee', borderRadius: '4px', border: '1px solid #ccc' }}>Q</kbd>를 누르거나 버튼을 클릭하면 Q&A 대화창이 열립니다. 질문 시 영상은 자동 정지됩니다.
-                            </p>
-                        </div>
+                    {/* Q&A Trigger Button */}
+                    <div style={{ margin: '20px 0', display: 'flex', justifyContent: 'center' }}>
                         <button
                             ref={qaTriggerBtnRef}
                             onClick={() => {
@@ -1095,19 +1076,21 @@ function PlayerScreenV2() {
                                 setIsQaModalOpen(true);
                             }}
                             style={{
-                                padding: '10px 20px',
-                                borderRadius: '8px',
+                                width: '100%',
+                                padding: '14px 20px',
+                                borderRadius: '12px',
                                 backgroundColor: '#0070f3',
                                 color: '#ffffff',
                                 border: 'none',
-                                fontWeight: '600',
+                                fontWeight: '700',
                                 cursor: 'pointer',
-                                fontSize: '0.9rem',
-                                flexShrink: 0
+                                fontSize: '1.05rem',
+                                boxShadow: '0 4px 12px rgba(0,112,243,0.2)',
+                                transition: 'background-color 0.2s'
                             }}
-                            aria-label="질의응답 대화창 열기 (단축키 Q)"
+                            aria-label="AI와 대화하기"
                         >
-                            대화창 열기 (Q)
+                            AI와 대화하기
                         </button>
                     </div>
 
