@@ -143,6 +143,7 @@ function PlayerScreenV2() {
     // UI State
     const [isScriptVisible, setIsScriptVisible] = useState(false);
     const [isQaModalOpen, setIsQaModalOpen] = useState(false);
+    const [wasPlaying, setWasPlaying] = useState(false);
 
     // Q&A States & Hooks
     const [question, setQuestion] = useState('');
@@ -245,27 +246,44 @@ function PlayerScreenV2() {
         player.playVideo();
     }, [player, isInteractionDone]);
 
-    // Handle Q&A Modal State Changes
-    useEffect(() => {
-        if (isQaModalOpen) {
-            // Pause video on modal open
-            if (player && player.getPlayerState() === 1) {
-                player.pauseVideo();
-                setIsPlaying(false);
-            }
-            // Stop any playing TTS and restore volume immediately
-            if (isTtsPlayingRef.current) {
-                isTtsPlayingRef.current = false;
-                if (audioPlayerRef.current) {
-                    audioPlayerRef.current.pause();
-                }
-            }
-            if (player) {
-                player.setVolume(100);
-            }
-            announceQaPolite('질문 하세요');
+    // Open Q&A Modal while pausing playback and capturing state
+    const handleOpenQaModal = useCallback(() => {
+        if (!player) return;
+
+        const isVideoPlaying = player.getPlayerState() === 1;
+        const isAudioPlaying = audioPlayerRef.current && !audioPlayerRef.current.paused && !audioPlayerRef.current.ended;
+        const currentlyPlaying = isVideoPlaying || isAudioPlaying;
+
+        setWasPlaying(currentlyPlaying);
+
+        // Pause video on modal open
+        if (isVideoPlaying) player.pauseVideo();
+        if (isAudioPlaying) {
+            audioPlayerRef.current.pause();
         }
-    }, [isQaModalOpen, player, announceQaPolite]);
+        setIsPlaying(false);
+
+        // Stop any playing TTS and restore volume immediately
+        if (isTtsPlayingRef.current) {
+            isTtsPlayingRef.current = false;
+            if (audioPlayerRef.current) {
+                audioPlayerRef.current.pause();
+            }
+        }
+
+        player.setVolume(100);
+
+        // iOS 동기적 모달 display 제어 및 포커싱 강제
+        if (modalRef.current) {
+            modalRef.current.style.display = 'flex';
+        }
+        if (inputRef.current) {
+            inputRef.current.focus();
+        }
+        
+        setIsQaModalOpen(true);
+        announceQaPolite('질문 하세요');
+    }, [player, announceQaPolite]);
 
     // Close QA Modal, stop TTS, and resume video playback
     const handleCloseQaModal = useCallback(() => {
@@ -288,10 +306,12 @@ function PlayerScreenV2() {
             player.setVolume(100);
         }
 
-        // 2. Resume video playback
-        if (player) {
+        // 2. Resume video playback ONLY IF it was playing when modal opened
+        if (player && wasPlaying) {
             player.playVideo();
             setIsPlaying(true);
+        } else {
+            setIsPlaying(false);
         }
 
         // 3. 원래 대화창 열기 버튼으로 포커스 복원
@@ -300,7 +320,7 @@ function PlayerScreenV2() {
         }
 
         announcePolite('질의응답 닫힘');
-    }, [player, announcePolite]);
+    }, [player, announcePolite, wasPlaying]);
 
     // Keyboard shortcut logic for Q&A and video playback
     useEffect(() => {
@@ -360,27 +380,7 @@ function PlayerScreenV2() {
             // Open QA Modal via 'q' or 'Q' key - Pause everything first
             if (e.key === 'q' || e.key === 'Q') {
                 e.preventDefault();
-                if (player) {
-                    player.pauseVideo();
-                }
-                setIsPlaying(false);
-                if (isTtsPlayingRef.current) {
-                    isTtsPlayingRef.current = false;
-                    if (audioPlayerRef.current) {
-                        audioPlayerRef.current.pause();
-                    }
-                    if (player) {
-                        player.setVolume(100);
-                    }
-                }
-                // iOS 동기적 포커스 및 모달 표출 강제
-                if (modalRef.current) {
-                    modalRef.current.style.display = 'flex';
-                }
-                if (inputRef.current) {
-                    inputRef.current.focus();
-                }
-                setIsQaModalOpen(true);
+                handleOpenQaModal();
                 return;
             }
 
@@ -395,20 +395,7 @@ function PlayerScreenV2() {
 
                 // 재생 중인 경우 -> 일시 정지 및 Q&A 모달 열기
                 if (isVideoPlaying || isAudioPlaying) {
-                    if (isVideoPlaying) player.pauseVideo();
-                    if (isAudioPlaying) {
-                        audioPlayerRef.current.pause();
-                        isTtsPlayingRef.current = false;
-                    }
-                    setIsPlaying(false);
-                    // iOS 동기적 포커스 및 모달 표출 강제
-                    if (modalRef.current) {
-                        modalRef.current.style.display = 'flex';
-                    }
-                    if (inputRef.current) {
-                        inputRef.current.focus();
-                    }
-                    setIsQaModalOpen(true);
+                    handleOpenQaModal();
                 } else {
                     // 정지 중인 경우 -> 재생 재개
                     if (isTtsPlayingRef.current) {
@@ -427,7 +414,7 @@ function PlayerScreenV2() {
 
         document.addEventListener('keydown', handleKeyDown);
         return () => document.removeEventListener('keydown', handleKeyDown);
-    }, [player, announcePolite, handleTogglePlay, isQaModalOpen, handleCloseQaModal]);
+    }, [player, announcePolite, handleTogglePlay, isQaModalOpen, handleCloseQaModal, handleOpenQaModal]);
 
     // Seek to specific timestamp and resume play
     const handleSeekTo = (timestamp) => {
@@ -1084,16 +1071,7 @@ function PlayerScreenV2() {
                     <div style={{ margin: '20px 0', display: 'flex', justifyContent: 'center' }}>
                         <button
                             ref={qaTriggerBtnRef}
-                            onClick={() => {
-                                // iOS 동기적 모달 display 제어 및 포커싱 강제
-                                if (modalRef.current) {
-                                    modalRef.current.style.display = 'flex';
-                                }
-                                if (inputRef.current) {
-                                    inputRef.current.focus();
-                                }
-                                setIsQaModalOpen(true);
-                            }}
+                            onClick={handleOpenQaModal}
                             style={{
                                 width: '100%',
                                 padding: '14px 20px',
