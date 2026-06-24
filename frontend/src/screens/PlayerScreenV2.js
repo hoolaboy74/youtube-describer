@@ -1067,6 +1067,13 @@ function PlayerScreenV2() {
                             onReady={(e) => {
                                 setPlayer(e.target);
                                 setDuration(e.target.getDuration());
+                                // 모바일 스크린 리더 포커스 침입 차단 및 재생 버튼 영상 제목 낭독 노이즈 해결
+                                const iframe = e.target.getIframe();
+                                if (iframe) {
+                                    iframe.setAttribute('tabindex', '-1');
+                                    iframe.setAttribute('aria-hidden', 'true');
+                                    iframe.setAttribute('title', '유튜브 플레이어');
+                                }
                             }}
                             onStateChange={(e) => setIsPlaying(e.data === window.YT.PlayerState.PLAYING)}
                         />
