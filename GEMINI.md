@@ -7,6 +7,23 @@
 This project is a **YouTube video screen describer**. It takes a YouTube video URL, processes the video to extract keyframes, generates a descriptive script using a vision model, and creates a time-stamped Korean audio track for the visually impaired.
 
 **Service URL:** https://www.blindmom.org
+**QA Service URL:** https://qa.blindmom.org (Branch: `feature/video-qa`)
+
+## QA Environment
+
+`feature/video-qa` 브랜치를 독립적으로 검증하기 위해 구성된 QA 서버 환경 정보입니다.
+
+* **접속 정보:** `ssh chacha@mom` (GCP VM IP: `34.50.63.229`)
+* **포트 바인딩:** 백엔드 `4002` (Nginx Reverse Proxy 포워딩)
+* **디렉토리 구조:**
+  * 소스 경로: `/home/chacha/src/qa-youtube-describer`
+  * 배포 경로 (`$DST`): `/app/qa-youtube-describer` (Frontend root: `/app/qa-youtube-describer/frontend/build`)
+  * 자격 증명 경로: `/home/chacha/src/qa_cred` (`.env`, `cookies.txt`, `my-tts-service.json`)
+* **PM2 프로세스:** `qa-youtube-describer-backend` (Port 4002)
+* **Nginx 설정:** `/etc/nginx/sites-available/qa-youtube-describer` (Certbot 관리 HTTPS/SSL 적용)
+* **배포 파이프라인:**
+  * 로컬 실행: `./deploy-qa.sh` (로컬 QA 변경 사항 커밋/푸시 및 원격 SSH 배포 트리거)
+  * 원격 실행: `/home/chacha/deploy-qa-app.sh`
 
 ## Final Architecture (Post-Improvement)
 
@@ -84,6 +101,14 @@ To run the backend server, the following command-line tools must be installed on
 ---
 
 ## 개선 기록 (Improvement Log)
+
+### 89차: QA 전용 독립 검증 환경(QA Server) 구성 및 배포 파이프라인 자동화 (2026-06-24)
+- **내용:**
+    1. **DNS 및 도메인 바인딩**: Cloud DNS에 `qa.blindmom.org` A 레코드를 추가하고 Certbot을 통해 HTTPS SSL 인증서를 발급하여 Nginx 리버스 프록시(포트 `4002`)와 바인딩 완료.
+    2. **배포 스크립트 작성 및 개선**:
+        - 로컬 QA 루트에 `./deploy-qa.sh`를 작성하여 `feature/video-qa` 브랜치를 GitHub에 푸시한 후, SSH를 통해 원격 배포 스크립트를 즉시 자동 실행하도록 구현.
+        - 원격 서버에 `~/deploy-qa-app.sh` 및 자격 증명(`qa_cred`)을 구성하고 백엔드 기동 에러 방지를 위해 빌드 대상 폴더 내 데이터베이스 디렉토리(`backend/db`) 자동 생성(`mkdir -p`) 로직 추가 보강.
+    3. **동기화 자동화 개선**: 로컬 `auto-refresh-cookies.sh`에 QA 환경 복사 경로(`qa-youtube-describer`)를 추가하여 세션 갱신 동기화 범위 확장.
 
 ### 88차: 자막 미존재 비디오에 대한 Q&A 시 중복 다운로드 네트워크 지연 방지 (Negative Caching 도입) (2026-06-24)
 - **문제:**
