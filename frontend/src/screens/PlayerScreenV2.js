@@ -144,6 +144,7 @@ function PlayerScreenV2() {
     const [isScriptVisible, setIsScriptVisible] = useState(false);
     const [isQaModalOpen, setIsQaModalOpen] = useState(false);
     const [wasPlaying, setWasPlaying] = useState(false);
+    const [isTtsPlaying, setIsTtsPlaying] = useState(false);
 
     // Q&A States & Hooks
     const [question, setQuestion] = useState('');
@@ -195,6 +196,7 @@ function PlayerScreenV2() {
         if (isVideoPlaying || isAudioPlaying) {
             if (isVideoPlaying) player.pauseVideo();
             if (isAudioPlaying) audioPlayerRef.current.pause();
+            setIsPlaying(false);
             return;
         }
 
@@ -234,7 +236,7 @@ function PlayerScreenV2() {
                  // 억지로 재생하려다 큐가 꼬이는 것을 방지하기 위해,
                  // 현재 오디오 재생 상태(Ref)를 강제로 끄고 영상만 틉니다.
                  isTtsPlayingRef.current = false; 
-                 // (주의) audio.currentTime 등을 건드리면 또 로딩이 걸리므로, 그냥 놔두고 플래그만 내립니다.
+                 // (주의) audio.currentTime 등을 건드린다거나 하지 않고, 그냥 플래그만 내립니다.
              } else {
                  // PC: 정상 재생
                  audio.volume = 1;
@@ -244,6 +246,7 @@ function PlayerScreenV2() {
 
         // 3. 영상 재생
         player.playVideo();
+        setIsPlaying(true);
     }, [player, isInteractionDone]);
 
     // Open Q&A Modal while pausing playback and capturing state
@@ -539,12 +542,25 @@ function PlayerScreenV2() {
     useEffect(() => {
         const player = new Audio();
         audioPlayerRef.current = player;
+        const onPlay = () => {
+            if (player.src && !player.src.startsWith('data:audio/wav;base64')) {
+                setIsTtsPlaying(true);
+            }
+        };
+        const onPause = () => {
+            setIsTtsPlaying(false);
+        };
         const onEnded = () => {
+            setIsTtsPlaying(false);
             if (onAudioEndedRef.current) onAudioEndedRef.current();
         };
+        player.addEventListener('play', onPlay);
+        player.addEventListener('pause', onPause);
         player.addEventListener('ended', onEnded);
         player.addEventListener('error', onEnded);
         return () => {
+            player.removeEventListener('play', onPlay);
+            player.removeEventListener('pause', onPause);
             player.removeEventListener('ended', onEnded);
             player.removeEventListener('error', onEnded);
         };
@@ -1035,9 +1051,9 @@ function PlayerScreenV2() {
             ) : isPlayerReady ? (
                 <>
                     <div className="video-container">
-                        <div className={`play-overlay ${isPlaying ? 'is-playing' : ''}`}>
-                            <button className="big-play-button" onClick={handleTogglePlay} aria-label={isPlaying ? "일시정지" : "재생"}>
-                                {isPlaying ? '❚❚' : '▶'}
+                        <div className={`play-overlay ${(isPlaying || isTtsPlaying) ? 'is-playing' : ''}`}>
+                            <button className="big-play-button" onClick={handleTogglePlay} aria-label={(isPlaying || isTtsPlaying) ? "일시정지" : "재생"}>
+                                {(isPlaying || isTtsPlaying) ? '❚❚' : '▶'}
                             </button>
                         </div>
                         <YouTube
@@ -1170,7 +1186,7 @@ function PlayerScreenV2() {
                                             fontSize: '0.9rem',
                                             fontWeight: '600'
                                         }}
-                                        aria-label="대화창 닫기 (ESC)"
+                                        aria-label="대화창 닫기"
                                     >
                                         닫기
                                     </button>
