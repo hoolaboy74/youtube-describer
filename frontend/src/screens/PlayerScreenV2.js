@@ -1047,50 +1047,30 @@ function PlayerScreenV2() {
                 </div>
             ) : isPlayerReady ? (
                 <>
-                    <div className="video-container" role="none">
-                        <div className={`play-overlay ${isPlaying ? 'is-playing' : ''}`} role="none">
+                    <div className="video-container">
+                        <div className={`play-overlay ${isPlaying ? 'is-playing' : ''}`}>
                             <button className="big-play-button" onClick={handleTogglePlay} aria-label={isPlaying ? "일시정지" : "재생"}>
-                                <span aria-hidden="true">{isPlaying ? '❚❚' : '▶'}</span>
+                                {isPlaying ? '❚❚' : '▶'}
                             </button>
                         </div>
-                        <div style={isPlaying ? {
-                            width: '100%',
-                            height: '100%'
-                        } : {
-                            width: '0px',
-                            height: '0px',
-                            opacity: 0,
-                            overflow: 'hidden',
-                            position: 'absolute',
-                            pointerEvents: 'none'
-                        }}>
-                            <YouTube
-                                videoId={videoId}
-                                aria-hidden="true"
-                                tabIndex="-1"
-                                opts={{
-                                    width: '100%',
-                                    height: '100%',
-                                    playerVars: {
-                                        controls: 0,
-                                        rel: 0,
-                                        iv_load_policy: 3,
-                                        playsinline: 1
-                                    }
-                                }}
-                                onReady={(e) => {
-                                    setPlayer(e.target);
-                                    setDuration(e.target.getDuration());
-                                    const iframe = e.target.getIframe();
-                                    if (iframe) {
-                                        iframe.setAttribute('tabindex', '-1');
-                                        iframe.setAttribute('aria-hidden', 'true');
-                                        iframe.removeAttribute('title'); // title 속성 제거로 영상 제목 누출 방지
-                                    }
-                                }}
-                                onStateChange={(e) => setIsPlaying(e.data === window.YT.PlayerState.PLAYING)}
-                            />
-                        </div>
+                        <YouTube
+                            videoId={videoId}
+                            opts={{
+                                width: '100%',
+                                height: '100%',
+                                playerVars: {
+                                    controls: 0,
+                                    rel: 0,
+                                    iv_load_policy: 3,
+                                    playsinline: 1
+                                }
+                            }}
+                            onReady={(e) => {
+                                setPlayer(e.target);
+                                setDuration(e.target.getDuration());
+                            }}
+                            onStateChange={(e) => setIsPlaying(e.data === window.YT.PlayerState.PLAYING)}
+                        />
                     </div>
                     
                     {/* Q&A Trigger Button */}

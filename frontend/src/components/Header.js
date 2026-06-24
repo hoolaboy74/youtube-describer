@@ -9,7 +9,7 @@ const Header = forwardRef(({ title }, ref) => {
   const showBackButton = location.pathname !== '/';
 
   return (
-    <header className="header" role="none">
+    <header className="header">
       <div className="header-left">
         {showBackButton && (
           <button onClick={() => navigate(-1)} className="back-button-header" aria-label="뒤로 가기">
