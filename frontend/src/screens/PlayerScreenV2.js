@@ -1034,7 +1034,8 @@ function PlayerScreenV2() {
         <div ref={mainContainerRef} style={{ maxWidth: '800px', margin: '0 auto', padding: '0 20px 100px 20px' }}>
             <Header title={videoInfo.title} ref={headingRef} />
 
-            {isLoading ? (
+            <main style={{ width: '100%' }}>
+                {isLoading ? (
                 <p>영상 데이터를 불러오는 중입니다...</p>
             ) : error ? (
                 <p className="error-message" role="alert">{error}</p>
@@ -1503,6 +1504,7 @@ function PlayerScreenV2() {
             )}
 
             <Comments videoId={videoId} mainRef={mainContainerRef} />
+            </main>
         </div>
     );
 }
