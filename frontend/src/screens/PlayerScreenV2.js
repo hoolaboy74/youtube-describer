@@ -282,6 +282,13 @@ function PlayerScreenV2() {
         }
         if (inputRef.current) {
             inputRef.current.focus();
+            inputRef.current.click();
+            setTimeout(() => {
+                if (inputRef.current) {
+                    inputRef.current.focus();
+                    inputRef.current.click();
+                }
+            }, 100);
         }
         
         setIsQaModalOpen(true);
