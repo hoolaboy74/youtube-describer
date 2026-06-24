@@ -14,7 +14,7 @@ const utils = require('./utils');
 db.init();
 
 const app = express();
-const port = 4000;
+const port = process.env.PORT || 4000;
 
 // --- DIRECTORY SETUP ---
 const publicDir = path.join(__dirname, 'public');
