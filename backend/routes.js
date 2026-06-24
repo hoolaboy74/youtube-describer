@@ -297,6 +297,12 @@ const getAdjacentSubtitles = async (videoId, targetTime) => {
     }
 
     const cachedVttPath = path.join(subtitlesDir, `${videoId}.vtt`);
+    const noSubPath = path.join(subtitlesDir, `${videoId}.nosub`);
+
+    // 0. If marked as no subtitles, return early to prevent redundant download attempts
+    if (fs.existsSync(noSubPath)) {
+        return '';
+    }
 
     // 1. If not cached, download subtitles using yt-dlp
     if (!fs.existsSync(cachedVttPath)) {
@@ -349,7 +355,12 @@ const getAdjacentSubtitles = async (videoId, targetTime) => {
                 fs.copyFileSync(path.join(tempDir, selectedSubFile), cachedVttPath);
                 logger.info(`[QA-SUB-${videoId.substring(0,8)}] Subtitles saved to cache.`);
             } else {
-                logger.warn(`[QA-SUB-${videoId.substring(0,8)}] No suitable subtitles found on YouTube.`);
+                logger.warn(`[QA-SUB-${videoId.substring(0,8)}] No suitable subtitles found on YouTube. Creating negative cache flag.`);
+                try {
+                    fs.writeFileSync(noSubPath, '');
+                } catch (writeErr) {
+                    logger.error(`[QA-SUB-${videoId.substring(0,8)}] Failed to write negative cache flag:`, writeErr);
+                }
             }
         } catch (err) {
             logger.error(`[QA-SUB-${videoId.substring(0,8)}] Failed to download subtitles:`, err);

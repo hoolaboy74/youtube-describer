@@ -476,6 +476,20 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
             }
         } else {
             logger.warn(`[${requestHash}] No suitable subtitle file found (tried ko, en). Proceeding without subtitles.`);
+            // Create negative cache flag for Q&A
+            const subtitlesDir = path.join(__dirname, 'public', 'subtitles');
+            if (!fs.existsSync(subtitlesDir)) {
+                fs.mkdirSync(subtitlesDir, { recursive: true });
+            }
+            const destNoSubPath = path.join(subtitlesDir, `${videoId}.nosub`);
+            if (!fs.existsSync(destNoSubPath)) {
+                try {
+                    fs.writeFileSync(destNoSubPath, '');
+                    logger.info(`[${requestHash}] Negative cache flag created for subtitles: ${destNoSubPath}`);
+                } catch (writeErr) {
+                    logger.error(`[${requestHash}] Failed to write negative cache flag:`, writeErr);
+                }
+            }
         }
 
         timeEnd(extractionLabel);
@@ -852,6 +866,20 @@ const processVideoBatch = async (videoId, youtubeUrl, forceRecreate = false) => 
             }
         } else {
             logger.warn(`[${requestHash}] No suitable subtitle file found for batch (tried ko, en).`);
+            // Create negative cache flag for Q&A in batch mode
+            const subtitlesDir = path.join(__dirname, 'public', 'subtitles');
+            if (!fs.existsSync(subtitlesDir)) {
+                fs.mkdirSync(subtitlesDir, { recursive: true });
+            }
+            const destNoSubPath = path.join(subtitlesDir, `${videoId}.nosub`);
+            if (!fs.existsSync(destNoSubPath)) {
+                try {
+                    fs.writeFileSync(destNoSubPath, '');
+                    logger.info(`[${requestHash}] Negative cache flag created for batch subtitles: ${destNoSubPath}`);
+                } catch (writeErr) {
+                    logger.error(`[${requestHash}] Failed to write negative cache flag in batch:`, writeErr);
+                }
+            }
         }
 
         timeEnd(extractionLabel);
