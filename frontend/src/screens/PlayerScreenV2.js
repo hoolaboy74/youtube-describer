@@ -171,6 +171,17 @@ function PlayerScreenV2() {
     const headingRef = useRef(null);
     usePageFocus(headingRef);
 
+    useEffect(() => {
+        if (videoInfo && videoInfo.title && videoInfo.title !== '불러오는 중...') {
+            document.title = videoInfo.title;
+        } else {
+            document.title = '유튜브 화면 해설';
+        }
+        return () => {
+            document.title = '시각장애인맘센터';
+        };
+    }, [videoInfo]);
+
 
 
     const handleTogglePlay = useCallback(() => {
