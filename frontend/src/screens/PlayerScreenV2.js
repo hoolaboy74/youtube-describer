@@ -302,6 +302,16 @@ function PlayerScreenV2() {
                 player.pauseVideo();
                 setIsPlaying(false);
             }
+            // Stop any playing TTS and restore volume immediately
+            if (isTtsPlayingRef.current) {
+                isTtsPlayingRef.current = false;
+                if (audioPlayerRef.current) {
+                    audioPlayerRef.current.pause();
+                }
+            }
+            if (player) {
+                player.setVolume(100);
+            }
             announceQaPolite('질문 하세요');
         }
     }, [isQaModalOpen, player, announceQaPolite]);
@@ -310,15 +320,17 @@ function PlayerScreenV2() {
     const handleCloseQaModal = useCallback(() => {
         setIsQaModalOpen(false);
 
-        // 1. Stop QA TTS if playing and restore video volume
+        // 1. Stop QA TTS if playing
         if (isTtsPlayingRef.current) {
             isTtsPlayingRef.current = false;
             if (audioPlayerRef.current) {
                 audioPlayerRef.current.pause();
             }
-            if (player) {
-                player.setVolume(100);
-            }
+        }
+
+        // Restore video volume unconditionally to prevent audio ducking from sticking
+        if (player) {
+            player.setVolume(100);
         }
 
         // 2. Resume video playback
@@ -327,7 +339,7 @@ function PlayerScreenV2() {
             setIsPlaying(true);
         }
 
-        announcePolite('질의응답 대화창이 닫혔으며 영상 재생을 재개합니다.');
+        announcePolite('질의응답 닫힘');
     }, [player, announcePolite]);
 
     // Keyboard shortcut logic for Q&A and video playback

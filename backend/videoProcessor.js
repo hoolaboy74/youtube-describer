@@ -459,6 +459,21 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
         if (finalSubtitlePath && fs.existsSync(finalSubtitlePath)) {
             subtitleContent = preprocessVtt(fs.readFileSync(finalSubtitlePath, 'utf-8'));
             logger.info(`[${requestHash}] Successfully loaded and preprocessed subtitles.`);
+            
+            // Pre-cache subtitle for Q&A
+            const subtitlesDir = path.join(__dirname, 'public', 'subtitles');
+            if (!fs.existsSync(subtitlesDir)) {
+                fs.mkdirSync(subtitlesDir, { recursive: true });
+            }
+            const destSubPath = path.join(subtitlesDir, `${videoId}.vtt`);
+            if (!fs.existsSync(destSubPath)) {
+                try {
+                    fs.copyFileSync(finalSubtitlePath, destSubPath);
+                    logger.info(`[${requestHash}] Subtitles pre-cached to ${destSubPath}`);
+                } catch (copyErr) {
+                    logger.error(`[${requestHash}] Failed to pre-cache subtitles:`, copyErr);
+                }
+            }
         } else {
             logger.warn(`[${requestHash}] No suitable subtitle file found (tried ko, en). Proceeding without subtitles.`);
         }
@@ -820,6 +835,21 @@ const processVideoBatch = async (videoId, youtubeUrl, forceRecreate = false) => 
         if (finalSubtitlePath && fs.existsSync(finalSubtitlePath)) {
             subtitleContent = preprocessVtt(fs.readFileSync(finalSubtitlePath, 'utf-8'));
             logger.info(`[${requestHash}] Successfully loaded subtitles for batch.`);
+            
+            // Pre-cache subtitle for Q&A
+            const subtitlesDir = path.join(__dirname, 'public', 'subtitles');
+            if (!fs.existsSync(subtitlesDir)) {
+                fs.mkdirSync(subtitlesDir, { recursive: true });
+            }
+            const destSubPath = path.join(subtitlesDir, `${videoId}.vtt`);
+            if (!fs.existsSync(destSubPath)) {
+                try {
+                    fs.copyFileSync(finalSubtitlePath, destSubPath);
+                    logger.info(`[${requestHash}] Subtitles pre-cached to ${destSubPath} (batch)`);
+                } catch (copyErr) {
+                    logger.error(`[${requestHash}] Failed to pre-cache subtitles in batch:`, copyErr);
+                }
+            }
         } else {
             logger.warn(`[${requestHash}] No suitable subtitle file found for batch (tried ko, en).`);
         }

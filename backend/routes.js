@@ -4,7 +4,7 @@ const { TextToSpeechClient } = require('@google-cloud/text-to-speech');
 const fs = require('fs');
 const path = require('path');
 const db = require('./database');
-const { getYoutubeVideoId, getIsImpersonateAvailable } = require('./utils');
+const { getYoutubeVideoId, getIsImpersonateAvailable, preprocessVtt } = require('./utils');
 const { processVideo, processVideoBatch } = require('./videoProcessor');
 const logger = require('./logger');
 const { GoogleGenerativeAI } = require("@google/generative-ai");
@@ -289,6 +289,149 @@ const getQACookiePath = () => {
 // Cache for direct stream URLs to prevent repetitive yt-dlp calls during continuous Q&A sessions (key: videoId, value: { url, expiresAt })
 const streamUrlCache = new Map();
 
+// Q&A Helper: fetch and extract adjacent subtitles (ko/en) for dialog understanding
+const getAdjacentSubtitles = async (videoId, targetTime) => {
+    const subtitlesDir = path.join(__dirname, 'public', 'subtitles');
+    if (!fs.existsSync(subtitlesDir)) {
+        fs.mkdirSync(subtitlesDir, { recursive: true });
+    }
+
+    const cachedVttPath = path.join(subtitlesDir, `${videoId}.vtt`);
+
+    // 1. If not cached, download subtitles using yt-dlp
+    if (!fs.existsSync(cachedVttPath)) {
+        logger.info(`[QA-SUB-${videoId.substring(0,8)}] Subtitles not cached. Downloading...`);
+        const tempDir = path.join(__dirname, 'temp', `sub-${videoId}-${Date.now()}`);
+        fs.mkdirSync(tempDir, { recursive: true });
+
+        const cookiePath = getQACookiePath();
+        const useImpersonate = getIsImpersonateAvailable();
+        const proxyArgs = process.env.YTDLP_PROXY ? ['--proxy', process.env.YTDLP_PROXY] : [];
+
+        const ytdlpArgs = [
+            '--skip-download',
+            '--write-auto-sub',
+            '--write-sub',
+            '--sub-lang', 'ko,en',
+            '-o', path.join(tempDir, videoId)
+        ];
+        if (cookiePath) ytdlpArgs.push('--cookies', cookiePath);
+        if (proxyArgs.length > 0) ytdlpArgs.push(...proxyArgs);
+        if (useImpersonate) ytdlpArgs.push('--impersonate', 'safari');
+        ytdlpArgs.push(`https://www.youtube.com/watch?v=${videoId}`);
+
+        try {
+            await new Promise((resolve, reject) => {
+                const process = spawn('yt-dlp', ytdlpArgs);
+                let stderrData = '';
+                process.stderr.on('data', (d) => { stderrData += d.toString(); });
+                process.on('close', (code) => {
+                    if (code === 0) resolve();
+                    else reject(new Error(`yt-dlp exited with ${code}. Stderr: ${stderrData}`));
+                });
+                process.on('error', reject);
+            });
+
+            // Scan tempDir for downloaded vtt file
+            const files = fs.readdirSync(tempDir);
+            const koSub = files.find(f => f.includes('.ko.vtt'));
+            const enSub = files.find(f => f.includes('.en.vtt') || f.includes('.en-'));
+            
+            let selectedSubFile = null;
+            if (koSub) {
+                selectedSubFile = koSub;
+            } else if (enSub) {
+                selectedSubFile = enSub;
+                logger.info(`[QA-SUB-${videoId.substring(0,8)}] Korean subtitles not found. Using English fallback: ${enSub}`);
+            }
+
+            if (selectedSubFile) {
+                fs.copyFileSync(path.join(tempDir, selectedSubFile), cachedVttPath);
+                logger.info(`[QA-SUB-${videoId.substring(0,8)}] Subtitles saved to cache.`);
+            } else {
+                logger.warn(`[QA-SUB-${videoId.substring(0,8)}] No suitable subtitles found on YouTube.`);
+            }
+        } catch (err) {
+            logger.error(`[QA-SUB-${videoId.substring(0,8)}] Failed to download subtitles:`, err);
+        } finally {
+            if (fs.existsSync(tempDir)) {
+                try {
+                    fs.rmSync(tempDir, { recursive: true, force: true });
+                } catch (rmErr) {
+                    logger.error('Failed to cleanup temp subtitles dir:', rmErr);
+                }
+            }
+        }
+    }
+
+    // 2. Read and parse cached subtitles if available
+    if (fs.existsSync(cachedVttPath)) {
+        try {
+            const rawContent = fs.readFileSync(cachedVttPath, 'utf-8');
+            const lines = rawContent.split(/\r?\n/);
+            const dialogueLines = [];
+            let currentStart = null;
+            let currentEnd = null;
+            let currentTextParts = [];
+
+            const timeToSec = (hh, mm, ss, ms) => 
+                parseInt(hh, 10) * 3600 + parseInt(mm, 10) * 60 + parseInt(ss, 10) + parseInt(ms, 10) / 1000;
+
+            for (const line of lines) {
+                const trimmed = line.trim();
+                if (!trimmed) {
+                    if (currentStart !== null && currentEnd !== null && currentTextParts.length > 0) {
+                        const fullText = currentTextParts.join(' ');
+                        if (currentStart <= targetTime + 45 && currentEnd >= targetTime - 120) {
+                            dialogueLines.push(`[${currentStart.toFixed(1)}초~${currentEnd.toFixed(1)}초] ${fullText}`);
+                        }
+                    }
+                    currentStart = null;
+                    currentEnd = null;
+                    currentTextParts = [];
+                    continue;
+                }
+
+                const timeMatch = trimmed.match(/^(\d{2}):(\d{2}):(\d{2})\.(\d{3})\s*-->\s*(\d{2}):(\d{2}):(\d{2})\.(\d{3})/);
+                if (timeMatch) {
+                    if (currentStart !== null && currentEnd !== null && currentTextParts.length > 0) {
+                        const fullText = currentTextParts.join(' ');
+                        if (currentStart <= targetTime + 45 && currentEnd >= targetTime - 120) {
+                            dialogueLines.push(`[${currentStart.toFixed(1)}초~${currentEnd.toFixed(1)}초] ${fullText}`);
+                        }
+                    }
+                    currentStart = timeToSec(timeMatch[1], timeMatch[2], timeMatch[3], timeMatch[4]);
+                    currentEnd = timeToSec(timeMatch[5], timeMatch[6], timeMatch[7], timeMatch[8]);
+                    currentTextParts = [];
+                } else {
+                    if (trimmed === 'WEBVTT' || trimmed.startsWith('Kind:') || trimmed.startsWith('Language:')) {
+                        continue;
+                    }
+                    if (currentStart !== null) {
+                        const cleanText = trimmed.replace(/<[^>]*>/g, '');
+                        if (cleanText) {
+                            currentTextParts.push(cleanText);
+                        }
+                    }
+                }
+            }
+
+            if (currentStart !== null && currentEnd !== null && currentTextParts.length > 0) {
+                const fullText = currentTextParts.join(' ');
+                if (currentStart <= targetTime + 45 && currentEnd >= targetTime - 120) {
+                    dialogueLines.push(`[${currentStart.toFixed(1)}초~${currentEnd.toFixed(1)}초] ${fullText}`);
+                }
+            }
+
+            return dialogueLines.join('\n');
+        } catch (parseErr) {
+            logger.error(`[QA-SUB-${videoId.substring(0,8)}] Subtitle parsing failed:`, parseErr);
+        }
+    }
+
+    return '';
+};
+
 // --- VIDEO Q&A API ENDPOINT ---
 router.post('/video-qa', async (req, res) => {
     const { videoId, timestamp, question, history } = req.body;
@@ -310,14 +453,31 @@ router.post('/video-qa', async (req, res) => {
         }
         const videoTitle = videoData.title;
 
-        // 2. Fetch adjacent script context from DB (T전후 45초 분량)
+        // 2. Fetch adjacent script context and generate global outline from DB
         let scriptContext = '';
+        let globalOutline = '';
         if (videoData.script && Array.isArray(videoData.script)) {
+            // 2.1. Adjacent context (T - 120s to T + 45s asymmetric window)
             const contextLines = videoData.script.filter(line => {
-                return Math.abs(line.timestamp - targetTime) <= 45;
+                const diff = targetTime - line.timestamp;
+                return diff >= -45 && diff <= 120;
             });
             scriptContext = contextLines.map(line => `[${line.timestamp}초] ${line.text}`).join('\n');
+
+            // 2.2. Global outline (approx. 60-second intervals)
+            const outlineLines = [];
+            let lastSampledTime = -999;
+            for (const line of videoData.script) {
+                if (line.timestamp >= lastSampledTime + 60) {
+                    outlineLines.push(`[${Math.round(line.timestamp)}초] ${line.text}`);
+                    lastSampledTime = line.timestamp;
+                }
+            }
+            globalOutline = outlineLines.join('\n');
         }
+
+        // 2.3. Fetch actual dialogue (subtitles) context around this timestamp
+        const dialogueContext = await getAdjacentSubtitles(videoId, targetTime);
 
         // 3. Find adjacent cached frame files
         const framesDir = path.join(__dirname, 'public', 'frames', videoId);
@@ -531,10 +691,18 @@ Make sure your tone is polite and professional.
 3. Only answer questions directly related to this video (its title, script context, visual frames, or narrative). If the user asks something completely unrelated to the video, politely decline and state that you can only answer questions related to the current video.
 4. If you use the Google Search tool, ONLY search for information directly relevant to the video's content, context, subjects, or concepts mentioned in the video. Do NOT search for unrelated external topics.
 5. Do NOT include any source links, URLs, citations, footnotes, or website references (e.g. "[1]", "(source: www.example.com)", links like "[text](url)") in your response. The answer must be a single natural conversational text without quoting where the information came from.
+6. Use the "Actual Dialogue / Subtitles" context to answer questions about what characters/narrators said at or around the current timestamp (e.g. "방금 뭐라고 했어?", "주인공 대사가 뭐야?").
 
 Video Title: "${videoTitle}"
-Script Context around this timestamp:
+
+Video Global Outline (Brief chronological summary of the entire video):
+${globalOutline || '(No outline available)'}
+
+Script Context around the paused timestamp (T - 120s ~ T + 45s):
 ${scriptContext || '(No script context available)'}
+
+Actual Dialogue / Subtitles spoken in the video around this timestamp (T - 120s ~ T + 45s):
+${dialogueContext || '(No dialogue/subtitles available around this time)'}
 
 ${historyContext}User's Question: "${question}"`;
 
