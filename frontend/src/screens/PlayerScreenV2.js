@@ -1052,32 +1052,34 @@ function PlayerScreenV2() {
                                 {isPlaying ? '❚❚' : '▶'}
                             </button>
                         </div>
-                        <YouTube
-                            videoId={videoId}
-                            aria-hidden="true"
-                            tabIndex="-1"
-                            opts={{
-                                width: '100%',
-                                height: '100%',
-                                playerVars: {
-                                    controls: 0,
-                                    rel: 0,
-                                    iv_load_policy: 3,
-                                    playsinline: 1
-                                }
-                            }}
-                            onReady={(e) => {
-                                setPlayer(e.target);
-                                setDuration(e.target.getDuration());
-                                const iframe = e.target.getIframe();
-                                if (iframe) {
-                                    iframe.setAttribute('tabindex', '-1');
-                                    iframe.setAttribute('aria-hidden', 'true');
-                                    iframe.setAttribute('title', '유튜브 플레이어');
-                                }
-                            }}
-                            onStateChange={(e) => setIsPlaying(e.data === window.YT.PlayerState.PLAYING)}
-                        />
+                        <div style={{ display: isPlaying ? 'block' : 'none', width: '100%', height: '100%' }}>
+                            <YouTube
+                                videoId={videoId}
+                                aria-hidden="true"
+                                tabIndex="-1"
+                                opts={{
+                                    width: '100%',
+                                    height: '100%',
+                                    playerVars: {
+                                        controls: 0,
+                                        rel: 0,
+                                        iv_load_policy: 3,
+                                        playsinline: 1
+                                    }
+                                }}
+                                onReady={(e) => {
+                                    setPlayer(e.target);
+                                    setDuration(e.target.getDuration());
+                                    const iframe = e.target.getIframe();
+                                    if (iframe) {
+                                        iframe.setAttribute('tabindex', '-1');
+                                        iframe.setAttribute('aria-hidden', 'true');
+                                        iframe.setAttribute('title', '유튜브 플레이어');
+                                    }
+                                }}
+                                onStateChange={(e) => setIsPlaying(e.data === window.YT.PlayerState.PLAYING)}
+                            />
+                        </div>
                     </div>
                     
                     {/* Q&A Trigger Button */}
