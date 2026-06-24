@@ -148,8 +148,6 @@ function PlayerScreenV2() {
     const [question, setQuestion] = useState('');
     const [qaList, setQaList] = useState([]);
     const [isQaLoading, setIsQaLoading] = useState(false);
-    const [isListening, setIsListening] = useState(false);
-    const recognitionRef = useRef(null);
     const inputRef = useRef(null);
     const qaTriggerBtnRef = useRef(null);
     const [qaPoliteAnnouncement, setQaPoliteAnnouncement] = useState('');
@@ -173,84 +171,7 @@ function PlayerScreenV2() {
     const headingRef = useRef(null);
     usePageFocus(headingRef);
 
-    // Speech Recognition (STT)
-    // iOS 등 모바일에서 미디어 재생과의 오디오 세션 충돌 방지 및 안전한 시작을 위해,
-    // 기존에 한 번만 선언하던 Effect 기반 인스턴스 생성을 제거하고 toggleListening 시점에 동적 생성하는 방식으로 전환한다.
-    const toggleListening = () => {
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        if (!SpeechRecognition) {
-            announcePolite('이 브라우저는 음성 인식을 지원하지 않습니다.');
-            return;
-        }
 
-        if (isListening) {
-            if (recognitionRef.current) {
-                try {
-                    recognitionRef.current.stop();
-                } catch (e) {
-                    console.warn('SpeechRecognition stop error:', e);
-                }
-            }
-            setIsListening(false);
-            return;
-        }
-
-        try {
-            const rec = new SpeechRecognition();
-            rec.continuous = false;
-            rec.lang = 'ko-KR';
-            rec.interimResults = false;
-
-            rec.onstart = () => {
-                setIsListening(true);
-                announcePolite('질문을 말씀해주세요.');
-            };
-
-            rec.onresult = (event) => {
-                const text = event.results[0][0].transcript;
-                setQuestion(text);
-                setIsListening(false);
-                announcePolite(`음성 인식 성공: "${text}" 입력됨.`);
-                if (inputRef.current) {
-                    inputRef.current.focus();
-                }
-            };
-
-            rec.onerror = (event) => {
-                console.error('Speech recognition error:', event.error);
-                setIsListening(false);
-                announcePolite(`음성 인식 오류: ${event.error}. 다시 시도해 주세요.`);
-            };
-
-            rec.onend = () => {
-                setIsListening(false);
-            };
-
-            recognitionRef.current = rec;
-
-            // 중요: start()를 미디어 정지 작업보다 먼저 실행하여 사용자 터치 스택 선두에 둔다.
-            rec.start();
-
-            // 그 다음 미디어들을 정지하여 오디오 세션 충돌을 방지한다.
-            if (player && player.getPlayerState() === 1) {
-                player.pauseVideo();
-                setIsPlaying(false);
-            }
-            if (isTtsPlayingRef.current) {
-                isTtsPlayingRef.current = false;
-                if (audioPlayerRef.current) {
-                    audioPlayerRef.current.pause();
-                }
-            }
-            if (player) {
-                player.setVolume(100);
-            }
-        } catch (e) {
-            console.warn("SpeechRecognition control error:", e);
-            announcePolite(`음성 인식 시작 실패: ${e.message}`);
-            setIsListening(false);
-        }
-    };
 
     const handleTogglePlay = useCallback(() => {
         if (!player) return;
@@ -1401,7 +1322,6 @@ function PlayerScreenV2() {
                                         type="text"
                                         value={question}
                                         onChange={(e) => setQuestion(e.target.value)}
-                                        placeholder="질문을 입력하세요... (예: 화면 중앙에 뭐가 있어?)"
                                         onKeyDown={(e) => {
                                             if (e.key === 'Enter') handleAskQuestion();
                                         }}
@@ -1417,29 +1337,6 @@ function PlayerScreenV2() {
                                         }}
                                         aria-label="AI에게 질문할 내용을 입력하세요."
                                     />
-
-                                    <button
-                                        onClick={toggleListening}
-                                        style={{
-                                            padding: '0 18px',
-                                            height: '46px',
-                                            borderRadius: '24px',
-                                            backgroundColor: isListening ? '#ff4d4f' : '#f5f5f5',
-                                            color: isListening ? '#fff' : '#333',
-                                            border: '1.5px solid #eaeaea',
-                                            fontSize: '0.9rem',
-                                            cursor: 'pointer',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: '6px',
-                                            transition: 'all 0.2s',
-                                            flexShrink: 0
-                                        }}
-                                        aria-label={isListening ? "음성 인식 중지" : "마이크로 질문하기"}
-                                    >
-                                        <span>{isListening ? '🛑' : '🎤'}</span>
-                                        <span>{isListening ? '듣는 중' : '음성'}</span>
-                                    </button>
 
                                     <button
                                         onClick={handleAskQuestion}
