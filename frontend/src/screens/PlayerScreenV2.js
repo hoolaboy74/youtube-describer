@@ -1118,7 +1118,8 @@ function PlayerScreenV2() {
                     <div 
                         ref={modalRef}
                         role="dialog"
-                        aria-modal="true"
+                        aria-modal={isQaModalOpen ? "true" : "false"}
+                        aria-hidden={!isQaModalOpen}
                         aria-labelledby="qa-modal-title"
                         style={{
                             position: 'fixed',
