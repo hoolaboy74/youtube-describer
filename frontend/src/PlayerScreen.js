@@ -144,6 +144,10 @@ function PlayerScreen({ mainRef, announcePolite, announceAssertive }) {
                         const fundsDepletedError = '서비스 운영을 위한 후원금이 모두 소진되어 현재 새로운 영상을 생성할 수 없습니다. 여러분의 따뜻한 후원이 필요합니다.';
                         setError(fundsDepletedError);
                         announcePolite(fundsDepletedError);
+                    } else if (data.message === 'unverified_user_duration_exceeded') {
+                        const unverifiedError = '시각장애인 인증을 완료하지 않은 회원은 5분 이하의 영상만 해설을 생성할 수 있습니다. 5분을 초과하는 영상의 화면 해설을 생성하려면 마이페이지에서 시각장애인 인증을 완료해 주십시오.';
+                        setError(unverifiedError);
+                        announcePolite(unverifiedError);
                     } else if (data.message === 'duration_exceeded') {
                         const limit = data.limit || 30;
                         const durationError = `${limit}분이 넘는 영상은 비용 문제로 인해 처리할 수 없습니다. 양해 부탁드립니다.`;

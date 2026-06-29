@@ -12,6 +12,7 @@ import RegisterScreen from './screens/RegisterScreen';
 import LoginScreen from './screens/LoginScreen';
 import Admin from './screens/Admin';
 import MyPageScreen from './screens/MyPageScreen';
+import VerificationScreen from './screens/VerificationScreen';
 import { AccessibilityProvider } from './contexts/AccessibilityContext';
 import { AuthProvider } from './contexts/AuthContext';
 import './styles/main.css';
@@ -40,6 +41,7 @@ function App() {
             <Route path="/register" element={<RegisterScreen />} />
             <Route path="/login" element={<LoginScreen />} />
             <Route path="/admin" element={<Admin />} />
+            <Route path="/verify" element={<VerificationScreen />} />
           </Routes>
         </Router>
       </AuthProvider>

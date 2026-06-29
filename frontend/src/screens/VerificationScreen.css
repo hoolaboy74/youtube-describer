@@ -1,0 +1,107 @@
+.verify-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 120px);
+  padding: 40px 20px;
+  background-color: var(--color-bg-dark);
+  background: var(--gradient-bg-main);
+}
+
+.verify-card {
+  width: 100%;
+  max-width: 520px;
+  padding: 40px;
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: var(--glass-border);
+  border-radius: 20px;
+  box-shadow: var(--glass-shadow);
+  color: var(--color-text-main);
+}
+
+.verify-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+  text-align: center;
+  background: var(--gradient-accent-hover);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.verify-subtitle {
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  text-align: center;
+  margin-bottom: 25px;
+  line-height: 1.5;
+}
+
+.verify-user-info-box {
+  background: rgba(255, 255, 255, 0.03);
+  border: var(--glass-border-light);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 25px;
+}
+
+.verify-user-info-box .info-title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: var(--color-text-bright);
+}
+
+.verify-user-info-box .info-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 12px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 0.95rem;
+}
+
+.verify-user-info-box .info-list li strong {
+  color: var(--color-text-muted);
+  margin-right: 8px;
+}
+
+.verify-user-info-box .info-hint {
+  font-size: 0.8rem;
+  color: var(--color-accent-pink);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.verify-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.verify-loading {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 120px);
+  color: var(--color-text-bright);
+  font-size: 1.1rem;
+  gap: 15px;
+}
+
+.cancel-btn:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: var(--color-text-bright) !important;
+}
+
+.cancel-btn:focus-visible {
+  outline: 2px solid var(--color-accent-purple);
+}
+
+.verify-form .method-selector {
+  grid-template-columns: 1fr 1fr;
+}

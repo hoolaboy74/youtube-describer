@@ -260,10 +260,8 @@ function requireBlindAuth(req, res, next) {
             return res.status(401).json({ error: '사용자를 찾을 수 없습니다. 다시 로그인해 주십시오.' });
         }
 
-        if (user.is_blind !== 1) {
-            return res.status(403).json({ error: '시각장애인 인증이 완료된 회원만 신규 해설 생성이 가능합니다.' });
-        }
-
+        // 미인증 유저(is_blind !== 1)도 5분 이하 영상 생성은 가능하므로 통과.
+        // 비디오 프로세서 단에서 동영상 길이에 따라 인증 회원 여부를 판단하여 생성 제한함.
         req.user = user;
         next();
     } catch (e) {
@@ -1194,6 +1192,10 @@ router.post('/auth/register', async (req, res) => {
             } else {
                 return res.status(400).json({ error: '업로드된 복지카드에서 시각장애인 자격을 판독하지 못했습니다. 선명한 사진을 다시 업로드해 주세요.' });
             }
+        } else if (verificationMethod === 'none') {
+            isBlindStatus = 0; // 미인증
+            verificationStatus = 'unverified';
+            detailLogs = JSON.stringify({ method: 'none', timestamp: new Date().toISOString() });
         } else {
             return res.status(400).json({ error: '지원하지 않는 인증 방식입니다.' });
         }
@@ -1221,11 +1223,16 @@ router.post('/auth/register', async (req, res) => {
             verifiedAt: isBlindStatus === 1 ? new Date().toISOString() : null
         });
 
+        let successMsg = '시각장애인 인증 및 회원가입이 완료되었습니다.';
+        if (isBlindStatus === 9) {
+            successMsg = '회원가입이 완료되었습니다. 복지카드 수동 승인 대기 중입니다.';
+        } else if (isBlindStatus === 0) {
+            successMsg = '회원가입이 완료되었습니다. (미인증 상태)';
+        }
+
         res.status(201).json({
             success: true,
-            message: isBlindStatus === 9 
-                ? '회원가입이 완료되었습니다. 복지카드 수동 승인 대기 중입니다.' 
-                : '시각장애인 인증 및 회원가입이 완료되었습니다.',
+            message: successMsg,
             isBlind: isBlindStatus
         });
 
@@ -1554,6 +1561,98 @@ router.get('/users/me/activities', requireAuth, (req, res) => {
     } catch (error) {
         logger.error('[MyPage] Failed to fetch user activities:', error);
         res.status(500).json({ error: '활동 내역 조회 중 서버 오류가 발생했습니다.' });
+    }
+});
+
+// 11. 로그인된 사용자의 시각장애인 재인증 API
+router.post('/users/me/verify-blind', requireAuth, async (req, res) => {
+    const { verificationMethod, cardImage, mimeType } = req.body;
+    const userId = req.user.id;
+
+    if (!verificationMethod) {
+        return res.status(400).json({ error: '인증 방식이 누락되었습니다.' });
+    }
+
+    try {
+        const user = db.getUserById(userId);
+        if (!user) {
+            return res.status(400).json({ error: '사용자 정보를 찾을 수 없습니다.' });
+        }
+
+        // 이미 승인된 회원인 경우 중복 진행 차단
+        if (user.is_blind === 1) {
+            return res.status(400).json({ error: '이미 시각장애인 인증이 완료된 회원입니다.' });
+        }
+
+        let isBlindStatus = 0;
+        let verificationStatus = 'pending';
+        let detailLogs = '';
+
+        if (verificationMethod === 'siloam_api') {
+            const result = await verifySiloamMember({ 
+                name: user.name, 
+                birthDate: user.birthdate, 
+                phoneNo: user.phone 
+            });
+            if (result.isValid) {
+                isBlindStatus = 1;
+                verificationStatus = 'approved';
+                detailLogs = JSON.stringify({ verifiedAt: result.verifiedAt });
+            } else {
+                return res.status(400).json({ error: '실로암 시각장애인 회원 정보와 일치하지 않습니다. 이름, 생년월일, 연락처 정보를 복지관 등록 정보와 일치시켜 주십시오.' });
+            }
+        } else if (verificationMethod === 'card_ocr') {
+            if (!cardImage || !mimeType) {
+                return res.status(400).json({ error: '복지카드 이미지 데이터가 누락되었습니다.' });
+            }
+
+            const base64Data = cardImage.replace(/^data:image\/\w+;base64,/, "");
+            const imageBuffer = Buffer.from(base64Data, 'base64');
+
+            const ocrResult = await verifyCardOCR(imageBuffer, mimeType, user.name, user.birthdate);
+            logger.info(`[MyPage Re-verification Card OCR] Name: ${user.name}, Birthdate: ${user.birthdate}, Result: ${JSON.stringify(ocrResult)}`);
+            detailLogs = JSON.stringify(ocrResult);
+
+            if (ocrResult.isValidCard) {
+                if (ocrResult.confidenceScore >= 0.85) {
+                    isBlindStatus = 1;
+                    verificationStatus = 'approved';
+                } else {
+                    isBlindStatus = 9; // 관리자 수동 승인 대기
+                    verificationStatus = 'pending';
+                }
+            } else {
+                return res.status(400).json({ error: '업로드된 복지카드에서 시각장애인 자격을 판독하지 못했습니다. 선명한 사진을 다시 업로드해 주세요.' });
+            }
+        } else {
+            return res.status(400).json({ error: '지원하지 않는 인증 방식입니다.' });
+        }
+
+        // DB 업데이트
+        db.updateUserBlindStatus(userId, isBlindStatus);
+
+        db.createUserVerification({
+            userId,
+            verificationMethod,
+            status: verificationStatus,
+            details: detailLogs,
+            verifiedAt: isBlindStatus === 1 ? new Date().toISOString() : null
+        });
+
+        let responseMsg = '시각장애인 인증이 완료되었습니다.';
+        if (isBlindStatus === 9) {
+            responseMsg = '인증 서류가 제출되었습니다. 복지카드 수동 승인 대기 중입니다.';
+        }
+
+        res.json({
+            success: true,
+            message: responseMsg,
+            isBlind: isBlindStatus
+        });
+
+    } catch (error) {
+        logger.error('[MyPage Verification] Re-verification process failed:', error);
+        res.status(500).json({ error: '인증 처리 중 내부 서버 오류가 발생했습니다.' });
     }
 });
 

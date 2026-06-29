@@ -245,6 +245,21 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null, userId = nul
             throw new Error(`Video duration (${totalDuration}s) exceeds the limit of ${durationLimitMinutes} minutes.`);
         }
 
+        // 시각장애인 미인증 회원에 대한 5분(300초) 제한 검사
+        let isBlindUser = false;
+        if (userId) {
+            const user = db.getUserById(userId);
+            if (user && user.is_blind === 1) {
+                isBlindUser = true;
+            }
+        }
+
+        if (userId && !isBlindUser && totalDuration > 300) {
+            const reason = `unverified_user_duration_exceeded`;
+            db.updateVideoStatus(videoId, 'failed', reason);
+            throw new Error('unverified_user_duration_exceeded');
+        }
+
         db.ensureVideoRecord({ videoId, title: videoTitle, duration: Math.round(totalDuration), filesize, requested_by: userId });
         
         let subtitleContent = '';
@@ -575,7 +590,12 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null, userId = nul
             let errorPayload;
             const lowerErrorMessage = errorMessage.toLowerCase();
 
-            if (lowerErrorMessage.includes('exceeds the limit')) {
+            if (lowerErrorMessage.includes('unverified_user_duration_exceeded')) {
+                errorPayload = {
+                    message: 'unverified_user_duration_exceeded',
+                    details: '시각장애인 인증을 완료하지 않은 회원은 5분 이하의 영상만 해설을 생성할 수 있습니다.'
+                };
+            } else if (lowerErrorMessage.includes('exceeds the limit')) {
                 const limitMatch = errorMessage.match(/limit of (\d+)/);
                 errorPayload = {
                     message: 'duration_exceeded',

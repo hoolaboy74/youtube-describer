@@ -324,8 +324,25 @@ function MyPageScreen() {
                     </div>
                     <div className="form-group">
                         <span className="label-simulation">장애인 자격 인증 상태</span>
-                        <div className="status-badge" aria-live="polite">
-                            {getBlindStatusLabel(profile.isBlind)}
+                        <div className="status-badge-container" style={{ display: 'flex', alignItems: 'center', gap: '15px', marginTop: '4px' }}>
+                            <div className="status-badge" aria-live="polite" style={{ display: 'inline-block' }}>
+                                {getBlindStatusLabel(profile.isBlind)}
+                            </div>
+                            {(profile.isBlind === 0 || profile.isBlind === 2) && (
+                                <Link to="/verify" className="btn-verify-direct" style={{
+                                    padding: '8px 16px',
+                                    background: 'var(--gradient-accent)',
+                                    color: '#fff',
+                                    borderRadius: '6px',
+                                    textDecoration: 'none',
+                                    fontSize: '0.85rem',
+                                    fontWeight: 'bold',
+                                    boxShadow: 'var(--glass-shadow-light)',
+                                    display: 'inline-block'
+                                }}>
+                                    시각장애인 인증하기
+                                </Link>
+                            )}
                         </div>
                     </div>
 
