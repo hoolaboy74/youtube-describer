@@ -220,7 +220,7 @@ function PostScreen({ announcePolite, announceAssertive }) {
           
           <div className="post-actions">
               <Link to="/board" className="btn">목록으로</Link>
-              {user && user.id === post.userId && (
+              {user && String(user.id) === String(post.userId) && (
                 <>
                   <button onClick={() => setIsEditingPost(true)} className="btn">수정</button>
                   <button onClick={handlePostDelete} className="btn btn-danger">삭제</button>
@@ -256,7 +256,7 @@ function PostScreen({ announcePolite, announceAssertive }) {
                     <span>{formatDate(comment.createdAt)}</span>
                   </div>
                   <p>{comment.content}</p>
-                  {user && user.id === comment.userId && (
+                  {user && String(user.id) === String(comment.userId) && (
                     <div className="comment-actions">
                       <button onClick={() => setEditingComment(comment)}>수정</button>
                       <button onClick={() => handleCommentDelete(comment.id)}>삭제</button>

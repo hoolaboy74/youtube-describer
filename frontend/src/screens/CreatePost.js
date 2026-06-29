@@ -17,6 +17,7 @@ function CreatePost() {
   const [formData, setFormData] = useState({
     title: '',
     content: '',
+    nickname: '',
     adminPassword: ''
   });
   const [isNotice, setIsNotice] = useState(false);
@@ -30,6 +31,12 @@ function CreatePost() {
     }
   }, [user, authLoading, navigate]);
 
+  useEffect(() => {
+    if (user) {
+      setFormData(prev => ({ ...prev, nickname: prev.nickname || user.name }));
+    }
+  }, [user]);
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
@@ -38,7 +45,7 @@ function CreatePost() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    const { title, content, adminPassword } = formData;
+    const { title, content, nickname, adminPassword } = formData;
 
     if (!title.trim() || !content.trim()) {
       setError('제목과 내용은 필수입니다.');
@@ -65,6 +72,7 @@ function CreatePost() {
       const payload = {
         title: title.trim(),
         content: content.trim(),
+        nickname: nickname.trim(),
         is_notice: isNotice,
         adminPassword: isNotice ? adminPassword.trim() : undefined,
       };
@@ -122,13 +130,14 @@ function CreatePost() {
           ></textarea>
         </div>
         <div className="form-group">
-          <label htmlFor="author-name">작성자</label>
+          <label htmlFor="nickname">작성자 (닉네임)</label>
           <input
             type="text"
-            id="author-name"
-            value={user ? user.name : ''}
-            readOnly
-            disabled
+            id="nickname"
+            name="nickname"
+            value={formData.nickname}
+            onChange={handleInputChange}
+            required
           />
         </div>
 

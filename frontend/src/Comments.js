@@ -177,7 +177,7 @@ function Comments({ videoId, mainRef }) {
                                     </span>
                                 </div>
                                 <p>{comment.content}</p>
-                                {user && user.id === comment.userId && (
+                                {user && String(user.id) === String(comment.userId) && (
                                     <div className="comment-actions">
                                         <button onClick={() => handleEdit(comment)}>수정</button>
                                         <button onClick={() => handleDelete(comment.id)}>삭제</button>

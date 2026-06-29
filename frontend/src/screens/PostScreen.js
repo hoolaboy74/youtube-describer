@@ -27,6 +27,7 @@ function PostScreen() {
 
   // Comment Creation & Inline Edit State
   const [commentContent, setCommentContent] = useState('');
+  const [commentNickname, setCommentNickname] = useState('');
   const [commentError, setCommentError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -51,6 +52,12 @@ function PostScreen() {
   useEffect(() => {
     fetchPost();
   }, [fetchPost]);
+
+  useEffect(() => {
+    if (user) {
+      setCommentNickname(prev => prev || user.name);
+    }
+  }, [user]);
 
   const handleStartEditPost = () => {
     setEditTitle(post.title);
@@ -99,7 +106,8 @@ function PostScreen() {
 
     try {
       await axios.post(`/api/board/posts/${postId}/comments`, {
-        content: commentContent.trim()
+        content: commentContent.trim(),
+        nickname: commentNickname.trim()
       });
       announcePolite('댓글이 성공적으로 작성되었습니다.');
       setCommentContent('');
@@ -177,7 +185,7 @@ function PostScreen() {
     );
   }
 
-  const isPostOwner = user && post.userId === user.id;
+  const isPostOwner = user && String(post.userId) === String(user.id);
 
   return (
     <div className="post-container">
@@ -237,7 +245,7 @@ function PostScreen() {
         </h2>
         <ul className="comment-list">
           {post.comments.map(comment => {
-            const isCommentOwner = user && comment.userId === user.id;
+            const isCommentOwner = user && String(comment.userId) === String(user.id);
             const isEditingComment = editingCommentId === comment.id;
 
             return (
@@ -286,13 +294,13 @@ function PostScreen() {
             <h3>댓글 작성</h3>
             {commentError && <p className="error-message" role="alert">{commentError}</p>}
             <div className="form-group">
-              <label htmlFor="comment-author">작성자</label>
+              <label htmlFor="comment-author">작성자 (닉네임)</label>
               <input
                 type="text"
                 id="comment-author"
-                value={user.name}
-                readOnly
-                disabled
+                value={commentNickname}
+                onChange={(e) => setCommentNickname(e.target.value)}
+                required
               />
             </div>
             <div className="form-group">
