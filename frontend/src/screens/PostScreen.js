@@ -264,24 +264,32 @@ function PostScreen() {
                     </div>
                   </div>
                 ) : (
-                  <div 
-                    tabIndex="0"
-                    role="group"
-                    aria-label={`댓글. 작성자: ${comment.nickname}, 작성일: ${formatDate(comment.createdAt)}, 내용: ${comment.content}`}
-                  >
-                    <div className="comment-header" aria-hidden="true">
-                      <div>
+                  <div className="comment-body-wrapper">
+                    <div className="comment-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div tabIndex="0" aria-label={`작성자: ${comment.nickname}, 작성일: ${formatDate(comment.createdAt)}`}>
                         <strong>{comment.nickname}</strong>
-                        <span style={{ marginLeft: '10px' }}>{formatDate(comment.createdAt)}</span>
+                        <span style={{ marginLeft: '10px', fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>{formatDate(comment.createdAt)}</span>
                       </div>
                       {isCommentOwner && (
-                        <div style={{ display: 'flex', gap: '6px' }}>
-                          <button onClick={() => handleStartEditComment(comment)} style={{ background: 'none', border: 'none', color: 'var(--color-text-muted)', fontSize: '0.8rem', cursor: 'pointer', textDecoration: 'underline' }}>수정</button>
-                          <button onClick={() => handleDeleteComment(comment.id)} style={{ background: 'none', border: 'none', color: '#f87171', fontSize: '0.8rem', cursor: 'pointer', textDecoration: 'underline' }}>삭제</button>
+                        <div className="comment-actions" style={{ display: 'flex', gap: '10px' }}>
+                          <button 
+                            onClick={() => handleStartEditComment(comment)} 
+                            style={{ background: 'none', border: 'none', color: 'var(--color-text-muted)', fontSize: '0.85rem', cursor: 'pointer', textDecoration: 'underline', padding: 0 }}
+                            aria-label="댓글 수정"
+                          >
+                            수정
+                          </button>
+                          <button 
+                            onClick={() => handleDeleteComment(comment.id)} 
+                            style={{ background: 'none', border: 'none', color: '#f87171', fontSize: '0.85rem', cursor: 'pointer', textDecoration: 'underline', padding: 0 }}
+                            aria-label="댓글 삭제"
+                          >
+                            삭제
+                          </button>
                         </div>
                       )}
                     </div>
-                    <p aria-hidden="true" style={{ whiteSpace: 'pre-wrap' }}>{comment.content}</p>
+                    <p tabIndex="0" style={{ whiteSpace: 'pre-wrap', marginTop: '10px', color: 'var(--color-text-bright)' }}>{comment.content}</p>
                   </div>
                 )}
               </li>
