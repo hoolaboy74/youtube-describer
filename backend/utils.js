@@ -72,8 +72,17 @@ function verifyPassword(password, storedPassword) {
  */
 async function verifySiloamMember({ name, birthDate, phoneNo }) {
     logger.info(`[Siloam Verification] SILOAM_MOCK raw value: '${process.env.SILOAM_MOCK}' (length: ${process.env.SILOAM_MOCK ? process.env.SILOAM_MOCK.length : 0})`);
+    
+    // 입력값 전처리 (이름 공백 제거 및 생년월일 6자리 변환)
+    const trimmedName = name ? name.trim() : '';
+    let formattedBirthDate = birthDate ? birthDate.trim() : '';
+    
+    if (formattedBirthDate.length === 8) {
+        formattedBirthDate = formattedBirthDate.substring(2); // YYYYMMDD -> YYMMDD
+    }
+
     if (process.env.SILOAM_MOCK?.trim().toLowerCase() === 'true') {
-        logger.info(`[Siloam Mock API] Verifying - Name: ${name}, Phone: ${phoneNo}`);
+        logger.info(`[Siloam Mock API] Verifying - Name: ${trimmedName}, Birthdate (formatted): ${formattedBirthDate}, Phone: ${phoneNo}`);
         // 가상 테스트 데이터: 전화번호 뒷자리가 1234이면 합격
         if (phoneNo && phoneNo.endsWith('1234')) {
             return { isValid: true, verifiedAt: new Date().toISOString() };
@@ -81,44 +90,89 @@ async function verifySiloamMember({ name, birthDate, phoneNo }) {
         return { isValid: false };
     }
 
-    const url = process.env.SILOAM_API_URL;
+    const urlStr = process.env.SILOAM_API_URL;
     const apiKey = process.env.SILOAM_API_KEY;
+    const org = process.env.SILOAM_ORG || 'blindmom';
 
-    if (!url || !apiKey) {
+    if (!urlStr || !apiKey) {
         logger.warn('Siloam API configuration missing. Defaulting to verification fail.');
         return { isValid: false };
     }
 
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000); // 5초 타임아웃
-
-    try {
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: {
-                'X-API-Key': apiKey,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ name, birthDate, phoneNo }),
-            signal: controller.signal
-        });
-        clearTimeout(timeoutId);
-
-        if (response.status === 200) {
-            const result = await response.json();
-            if (result.status === 'success') {
-                return {
-                    isValid: result.data?.isValid === true,
-                    verifiedAt: result.data?.verifiedAt
-                };
-            }
-        }
-        return { isValid: false };
-    } catch (error) {
-        clearTimeout(timeoutId);
-        logger.error('Siloam API HTTP call failed:', error.message);
+    // 생년월일 유효성 검사: 숫자 6자리 검증
+    const birthDateRegex = /^\d{6}$/;
+    if (!birthDateRegex.test(formattedBirthDate)) {
+        logger.warn(`Siloam API validation failed: birthDate is invalid (${formattedBirthDate}).`);
         return { isValid: false };
     }
+
+    const https = require('https');
+
+    return new Promise((resolve) => {
+        try {
+            const parsedUrl = new URL(urlStr);
+            const postData = JSON.stringify({ name: trimmedName, birthDate: formattedBirthDate });
+            
+            const options = {
+                hostname: parsedUrl.hostname,
+                port: parsedUrl.port || 443,
+                path: parsedUrl.pathname + parsedUrl.search,
+                method: 'POST',
+                family: 4, // Force IPv4 to bypass Happy Eyeballs IPv6 timeout bugs
+                headers: {
+                    'Content-Type': 'application/json; charset=utf-8',
+                    'X-Api-Key': apiKey,
+                    'X-Org': org,
+                    'Content-Length': Buffer.byteLength(postData)
+                },
+                timeout: 5000 // 5 seconds timeout
+            };
+
+            const req = https.request(options, (res) => {
+                let body = '';
+                res.setEncoding('utf8');
+                res.on('data', (chunk) => {
+                    body += chunk;
+                });
+                res.on('end', () => {
+                    if (res.statusCode === 200) {
+                        try {
+                            const result = JSON.parse(body);
+                            if (result.status === 'success') {
+                                resolve({
+                                    isValid: result.data?.isValid === true,
+                                    verifiedAt: result.data?.verifiedAt
+                                });
+                                return;
+                            }
+                        } catch (e) {
+                            logger.error('Failed to parse Siloam API response JSON:', e.message, body);
+                        }
+                    } else {
+                        logger.error(`Siloam API returned non-200 status (${res.statusCode}):`, body);
+                    }
+                    resolve({ isValid: false });
+                });
+            });
+
+            req.on('error', (e) => {
+                logger.error('Siloam API HTTP call failed:', e.message);
+                resolve({ isValid: false });
+            });
+
+            req.on('timeout', () => {
+                logger.error('Siloam API HTTP call timed out (5s).');
+                req.destroy();
+                resolve({ isValid: false });
+            });
+
+            req.write(postData);
+            req.end();
+        } catch (error) {
+            logger.error('Siloam API request setup failed:', error.message);
+            resolve({ isValid: false });
+        }
+    });
 }
 
 /**

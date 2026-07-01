@@ -85,6 +85,19 @@ To run the backend server, the following command-line tools must be installed on
 
 ## 개선 기록 (Improvement Log)
 
+### 88차: 실물 실로암 시각장애인 회원 검증 API 명세 연동, Happy Eyeballs 버그 우회 및 자동 6자리 생년월일 파싱/유효성 검사 도입 (2026-07-01)
+- **문제:**
+    1. 기존 실로암 API 연동 시 `X-Org` 헤더 누락 및 `phoneNo`가 포함된 비표준 요청 규격으로 인해 인증 실패 가능성 상존.
+    2. Node.js 18+ 환경의 Happy Eyeballs IPv6 우선 시도 정책으로 인해 특정 환경에서 실물 실로암 API 통신 시 5초 타임아웃(Abort) 발생.
+    3. 데이터베이스 및 가입 폼에서는 8자리 생년월일(`YYYYMMDD`)을 수집하지만, 실로암 API 규격은 6자리 생년월일(`YYMMDD`)만을 허용하며 하이픈 등 특수문자가 섞일 경우 400 에러를 반환하는 제약 사항 불일치.
+- **해결:**
+    1. **실물 API 명세 준수**: [apispec_from_siloam.docx](file:///Users/chacha/src/youtube-describer-test/docs/apispec_from_siloam.docx)에 따라 `verifySiloamMember` 내 요청 헤더(`X-Api-Key`, `X-Org: blindmom`), 요청 바디(명세 외의 `phoneNo` 제외하고 `name`과 `birthDate`만 매핑)를 정확히 연동.
+    2. **Happy Eyeballs 우회**: 기존 `fetch` 통신을 Node.js 내장 `https` 모듈로 전환하고, `family: 4` 옵션을 강제 주입하여 IPv4 전용 아웃바운드 연결 보장.
+    3. **생년월일 전처리 및 유효성 검사**: 8자리 생년월일 수신 시 뒤 6자리(`YYMMDD`)로 슬라이싱 및 이름 앞뒤 공백 제거(`trim()`) 처리 자동화. 전송 전 6자리 숫자 검증 정규식(`^\d{6}$`) 필터를 추가해 예외 상황 방어.
+    4. **환경 변수 구성**: `.env` 설정에 `SILOAM_MOCK=false`, `SILOAM_API_URL`, `SILOAM_API_KEY`, `SILOAM_ORG` 주입 완료.
+    5. **실물 통신 검증 성공**: 원격 운영 서버(`chacha@mom`)에서 성명과 6자리 생년월일을 매핑하여 실시간 인증을 테스트, `isValid: true` 및 검증 성공(`SUCCESS_VERIFIED`) 결과 획득 검증 완료.
+- **상태:** 백엔드 API 명세 연동 개편, 환경변수 구성 및 원격 서버 실물 통신 검증 완료 (2026-07-01)
+
 ### 87차: 개인정보 수집 동의 도입, 미인증 회원 5분 생성 제한, 메인화면 후원 제거, 마이페이지 독립 인증 프로세스 구축, 게시판 본인 댓글 수정/삭제 권한 매핑 오류 해결 및 작성자 닉네임 입력 제어 지원 (2026-06-29)
 - **문제:**
     1. 회원 가입 시 개인정보보호법에 따른 필수 고지 및 동의 기능이 누락되어 법적 리스크 상존.
