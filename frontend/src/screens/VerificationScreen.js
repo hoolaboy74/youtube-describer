@@ -26,6 +26,7 @@ function VerificationScreen() {
     const [error, setError] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
     const [srAnnouncement, setSrAnnouncement] = useState('');
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
 
     const fileInputRef = useRef(null);
 
@@ -122,12 +123,9 @@ function VerificationScreen() {
             if (response.data.success) {
                 const msg = response.data.message || '인증 처리가 완료되었습니다.';
                 setSuccessMessage(msg);
-                setSrAnnouncement(msg + ' 마이페이지로 이동합니다.');
+                setSrAnnouncement(msg + ' 확인 단추를 누르면 마이페이지로 이동합니다.');
                 announcePolite(msg);
-                
-                setTimeout(() => {
-                    navigate('/mypage');
-                }, 3000);
+                setShowSuccessModal(true);
             }
         } catch (err) {
             const errMsg = err.response?.data?.error || '인증 처리 중 오류가 발생했습니다. 회원 정보와 일치 여부를 확인해 주십시오.';
@@ -154,6 +152,20 @@ function VerificationScreen() {
             <div className="sr-only" aria-live="assertive" role="alert">
                 {srAnnouncement}
             </div>
+
+            {/* 시각장애인 자격 인증 성공 모달 (저시력자 및 일반 사용자용) */}
+            {showSuccessModal && (
+                <div className="success-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+                    <div className="success-modal-content">
+                        <div className="success-modal-icon" aria-hidden="true">✓</div>
+                        <h2 id="modal-title" className="success-modal-title">인증 완료</h2>
+                        <p className="success-modal-body">{successMessage}</p>
+                        <button type="button" className="success-modal-btn" onClick={() => navigate('/mypage')} autoFocus>
+                            확인 (마이페이지로 이동)
+                        </button>
+                    </div>
+                </div>
+            )}
 
             <div className="verify-card">
                 <h1 className="verify-title" id="verify-form-title">시각장애인 회원 자격 인증</h1>
