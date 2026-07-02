@@ -12,6 +12,7 @@ const checkDiskSpace = require('check-disk-space').default;
 db.init();
 
 const app = express();
+app.set('trust proxy', true);
 const port = process.env.PORT || 4000;
 
 // --- DIRECTORY SETUP ---
