@@ -178,6 +178,7 @@ function init() {
       birthdate TEXT NOT NULL,
       pin TEXT, -- 비밀번호 찾기용 PIN
       is_blind INTEGER DEFAULT 0, -- 0: 미인증, 1: 인증완료, 2: 반려, 9: 관리자 대기
+      blind_auth_method TEXT, -- 'siloam_api', 'card_ocr', 'admin_manual'
       createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
       updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
     )
@@ -213,6 +214,12 @@ function init() {
   } catch (error) {
     logger.info('Adding lastLoginAt column to users table...');
     db.exec('ALTER TABLE users ADD COLUMN lastLoginAt DATETIME');
+  }
+  try {
+    db.prepare('SELECT blind_auth_method FROM users LIMIT 1').get();
+  } catch (error) {
+    logger.info('Adding blind_auth_method column to users table...');
+    db.exec('ALTER TABLE users ADD COLUMN blind_auth_method TEXT');
   }
 
 
@@ -1031,11 +1038,11 @@ function deletePostCommentByIdAdmin(id) {
 }
 
 // --- User Management Functions ---
-function createUser({ id, email, password, name, phone, birthdate, is_blind, pin }) {
+function createUser({ id, email, password, name, phone, birthdate, is_blind, pin, blind_auth_method }) {
   const result = db.prepare(`
-    INSERT INTO users (id, email, password, name, phone, birthdate, is_blind, pin)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-  `).run(id, email, password, name, phone, birthdate, is_blind || 0, pin || null);
+    INSERT INTO users (id, email, password, name, phone, birthdate, is_blind, pin, blind_auth_method)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `).run(id, email, password, name, phone, birthdate, is_blind || 0, pin || null, blind_auth_method || null);
   return result.changes > 0;
 }
 
@@ -1063,10 +1070,16 @@ function getUserByPhone(phone) {
   return db.prepare('SELECT * FROM users WHERE phone = ?').get(phone);
 }
 
-function updateUserBlindStatus(userId, isBlind) {
+function updateUserBlindStatus(userId, isBlind, blindAuthMethod = null) {
   const transaction = db.transaction(() => {
-    const userUpdate = db.prepare('UPDATE users SET is_blind = ?, updatedAt = CURRENT_TIMESTAMP WHERE id = ?')
-                         .run(isBlind, userId);
+    let userUpdate;
+    if (blindAuthMethod) {
+      userUpdate = db.prepare('UPDATE users SET is_blind = ?, blind_auth_method = ?, updatedAt = CURRENT_TIMESTAMP WHERE id = ?')
+                     .run(isBlind, blindAuthMethod, userId);
+    } else {
+      userUpdate = db.prepare('UPDATE users SET is_blind = ?, updatedAt = CURRENT_TIMESTAMP WHERE id = ?')
+                     .run(isBlind, userId);
+    }
 
     if (userUpdate.changes > 0) {
       const statusMap = { 1: 'approved', 2: 'rejected' };

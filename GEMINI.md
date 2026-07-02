@@ -85,6 +85,15 @@ To run the backend server, the following command-line tools must be installed on
 
 ## 개선 기록 (Improvement Log)
 
+### 93차: users 테이블에 blind_auth_method 컬럼 추가 및 가입/재인증/승인 수단 자동 기록 (2026-07-02)
+- **문제:** 사용자의 시각장애인 인증 방식(실로암 API 연동 vs 복지카드 OCR 판독) 기록이 `user_verifications` 이력 테이블에만 산재되어 있어, 현재 활성화된 시각장애인의 최종 인증 경로를 `users` 테이블 수준에서 직관적으로 쿼리하거나 관리자 화면에서 일괄 식별하기 곤란함.
+- **해결:**
+    1. **스키마 및 자동 마이그레이션 확장**: `database.js`의 `users` 테이블 생성 DDL에 `blind_auth_method TEXT` 컬럼을 추가하고, 기존 프로덕션 DB와의 호환성을 보장하기 위해 `init()` 실행 시 누락된 컬럼을 자동으로 `ALTER TABLE`하는 마이그레이션 예외 블록을 구축 완료.
+    2. **가입 절차 저장 연동**: `routes.js`의 `/auth/register` API에서 실로암(`siloam_api`) 또는 복지카드(`card_ocr`) 인증 통과(승인 또는 수동 대기) 시 해당 경로명을 `users` 테이블의 `blind_auth_method` 컬럼에 자동 영속화하도록 바인딩.
+    3. **마이페이지 재인증 연동**: `/users/me/verify-blind` API에서 미인증 회원이 재인증에 성공하거나 수동 대기 상태로 변경될 때도 `updateUserBlindStatus`에 인증 수단을 주입해 해당 컬럼이 갱신되도록 처리 완료.
+    4. **어드민 수동 승인 이력 매핑**: 어드민 전용 사용자 승인 API(`/admin/users/:userId/approve`) 처리 시 인증 방식을 `'admin_manual'`로 강제 업데이트되도록 매개변수를 확장 연동함.
+- **상태:** 로컬/원격 DB 자동 컬럼 마이그레이션 및 인증 API 핸들러 수정 완료, 신택스 검증 통과 (2026-07-02)
+
 ### 92차: Rust 기반 POT(Proof of Token) Provider 데몬 및 yt-dlp 원격 EJS 솔버 도입으로 유튜브 403 Forbidden 우회 성공률 극대화 (2026-07-02)
 - **문제:**
     1. 유튜브의 BotGuard 챌린지 검증 및 Throttling 강화로 인해 `yt-dlp` 구동 시 `HTTP Error 403: Forbidden` 및 `Requested format is not available` 에러가 수시로 발생하여 서비스 안정성이 저해됨.

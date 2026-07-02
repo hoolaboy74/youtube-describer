@@ -1090,7 +1090,7 @@ adminRouter.get('/pending-users', (req, res) => {
 adminRouter.post('/users/:userId/approve', (req, res) => {
     try {
         const { userId } = req.params;
-        const success = db.updateUserBlindStatus(userId, 1); // 1 = approved (blind)
+        const success = db.updateUserBlindStatus(userId, 1, 'admin_manual'); // 1 = approved (blind)
         if (success) {
             logger.info(`[Admin] User ${userId} blind status approved successfully.`);
             res.json({ success: true, message: '사용자 시각장애인 인증이 승인되었습니다.' });
@@ -1208,7 +1208,8 @@ router.post('/auth/register', async (req, res) => {
             phone,
             birthdate,
             is_blind: isBlindStatus,
-            pin
+            pin,
+            blind_auth_method: (isBlindStatus === 1 || isBlindStatus === 9) ? verificationMethod : null
         });
 
         if (!userCreated) {
@@ -1629,7 +1630,7 @@ router.post('/users/me/verify-blind', requireAuth, async (req, res) => {
         }
 
         // DB 업데이트
-        db.updateUserBlindStatus(userId, isBlindStatus);
+        db.updateUserBlindStatus(userId, isBlindStatus, verificationMethod);
 
         db.createUserVerification({
             userId,
