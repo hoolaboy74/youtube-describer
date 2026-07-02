@@ -305,6 +305,8 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null, userId = nul
                         '--force-ipv4',
                         '--legacy-server-connect',
                         '--no-check-certificate',
+                        '--plugin-dirs', path.join(__dirname, 'yt_dlp_plugins'),
+                        '--remote-components', 'ejs:github',
                         ...impersonateArgs,
                         '--newline', 
                         '--write-auto-sub',
@@ -326,9 +328,9 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null, userId = nul
                         const dataStr = data.toString();
                         stdoutBuffer += dataStr;
                         
-                        // Monitor for Deno challenge solving
-                        if (dataStr.includes('[jsc:deno]') || dataStr.includes('Solving JS challenges')) {
-                            logger.info(`[${requestHash}] YT-DLP internal solver: ${dataStr.trim()}`);
+                        // Monitor for POT Provider challenge solving
+                        if (dataStr.includes('bgutil') || dataStr.includes('PO Token') || dataStr.includes('Generating a')) {
+                            logger.info(`[${requestHash}] YT-DLP POT provider: ${dataStr.trim()}`);
                         }
 
                         let match;
@@ -360,15 +362,17 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null, userId = nul
                     downloadProcess.stderr.on('data', (data) => {
                         const dataStr = data.toString();
                         stderrData += dataStr;
-                        if (dataStr.includes('[jsc:deno]') || dataStr.includes('Solving JS challenges')) {
-                            logger.info(`[${requestHash}] YT-DLP internal solver: ${dataStr.trim()}`);
+                        if (dataStr.includes('bgutil') || dataStr.includes('PO Token') || dataStr.includes('Generating a')) {
+                            logger.info(`[${requestHash}] YT-DLP POT provider: ${dataStr.trim()}`);
                         }
                     });
 
                     downloadProcess.on('close', (code) => {
                         if (code === 0) resolve();
                         else {
-                            const isBotError = stderrData.includes('confirm you’re not a bot') || stderrData.includes('cookies are no longer valid');
+                            const isBotError = stderrData.includes('confirm you’re not a bot') || 
+                                               stderrData.includes('cookies are no longer valid') || 
+                                               stderrData.includes('HTTP Error 403');
                             if (downloadAttempt === 1 && isBotError && activeCookiePath) {
                                 const invalidPath = activeCookiePath + '.invalid';
                                 logger.warn(`[${requestHash}] Bot detected with cookie ${path.basename(activeCookiePath)}. Invalidating and retrying without cookies...`);
@@ -709,6 +713,8 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
                         '--force-ipv4',
                         '--legacy-server-connect',
                         '--no-check-certificate',
+                        '--plugin-dirs', path.join(__dirname, 'yt_dlp_plugins'),
+                        '--remote-components', 'ejs:github',
                         ...impersonateArgs,
                         '--no-progress',
                         '--write-auto-sub',
@@ -727,23 +733,25 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
 
                     downloadProcess.stdout.on('data', (data) => {
                         const dataStr = data.toString();
-                        if (dataStr.includes('[jsc:deno]') || dataStr.includes('Solving JS challenges')) {
-                            logger.info(`[${requestHash}] YT-DLP internal solver (batch): ${dataStr.trim()}`);
+                        if (dataStr.includes('bgutil') || dataStr.includes('PO Token') || dataStr.includes('Generating a')) {
+                            logger.info(`[${requestHash}] YT-DLP POT provider (batch): ${dataStr.trim()}`);
                         }
                     });
 
                     downloadProcess.stderr.on('data', (data) => {
                         const dataStr = data.toString();
                         stderrData += dataStr;
-                        if (dataStr.includes('[jsc:deno]') || dataStr.includes('Solving JS challenges')) {
-                            logger.info(`[${requestHash}] YT-DLP internal solver (batch): ${dataStr.trim()}`);
+                        if (dataStr.includes('bgutil') || dataStr.includes('PO Token') || dataStr.includes('Generating a')) {
+                            logger.info(`[${requestHash}] YT-DLP POT provider (batch): ${dataStr.trim()}`);
                         }
                     });
 
                     downloadProcess.on('close', (code) => {
                         if (code === 0) resolve();
                         else {
-                            const isBotError = stderrData.includes('confirm you’re not a bot') || stderrData.includes('cookies are no longer valid');
+                            const isBotError = stderrData.includes('confirm you’re not a bot') || 
+                                               stderrData.includes('cookies are no longer valid') || 
+                                               stderrData.includes('HTTP Error 403');
                             if (downloadAttempt === 1 && isBotError && activeCookiePath) {
                                 const invalidPath = activeCookiePath + '.invalid';
                                 logger.warn(`[${requestHash}] Bot detected in batch with cookie ${path.basename(activeCookiePath)}. Invalidating and retrying without cookies...`);

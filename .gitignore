@@ -14,4 +14,15 @@ temp_*
 *.scratch.js
 test_search.js
 
+# Backend ignore lists
+backend/db/
+backend/temp/
+backend/logs/
+backend/cookies/*.invalid
+backend/*.mp4
+backend/*.webm
+backend/*.m4a
+**/__pycache__/
+*.pyc
+
 
