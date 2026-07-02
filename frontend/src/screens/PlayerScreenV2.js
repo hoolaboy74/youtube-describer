@@ -6,6 +6,8 @@ import Comments from '../Comments';
 import { usePageFocus } from '../hooks';
 import Header from '../components/Header';
 import { useAccessibility } from '../contexts/AccessibilityContext';
+import { useAuth } from '../contexts/AuthContext';
+import './PlayerScreenV2.css';
 
 function isMobile() {
     return /Mobi|Android/i.test(navigator.userAgent);
@@ -71,8 +73,10 @@ function ShareButton() {
 
 function PlayerScreenV2() {
     const { announcePolite, announceAssertive } = useAccessibility();
+    const { user, token, API_BASE } = useAuth();
     const { videoId } = useParams();
     const navigate = useNavigate();
+    const location = useLocation();
     const mainContainerRef = useRef(null); // Create a ref for the main container
     const [videoInfo, setVideoInfo] = useState({ videoId, title: '불러오는 중...' });
     const [script, setScript] = useState([]);
@@ -88,6 +92,44 @@ function PlayerScreenV2() {
     const [hasAiProcessingStarted, setHasAiProcessingStarted] = useState(false);
 
     const [player, setPlayer] = useState(null);
+    const [isFavorite, setIsFavorite] = useState(false);
+    const [likeCount, setLikeCount] = useState(0);
+
+    // 좋아요 상태 조회 및 토글 핸들러
+    useEffect(() => {
+        const checkFavorite = async () => {
+            if (user && videoId) {
+                try {
+                    const res = await axios.get(`${API_BASE}/api/users/me/videos/favorites/${videoId}`);
+                    if (res.data.success) {
+                        setIsFavorite(res.data.isFavorite);
+                        setLikeCount(res.data.likeCount || 0);
+                    }
+                } catch (err) {
+                    console.error('Failed to check favorite status:', err);
+                }
+            }
+        };
+        checkFavorite();
+    }, [user, videoId, API_BASE]);
+
+    const handleToggleFavorite = async () => {
+        if (!user) {
+            alert('로그인이 필요한 기능입니다.');
+            return;
+        }
+        try {
+            const res = await axios.post(`${API_BASE}/api/users/me/videos/favorites/toggle`, { videoId });
+            if (res.data.success) {
+                setIsFavorite(res.data.isFavorite);
+                setLikeCount(res.data.likeCount || 0);
+                announcePolite(res.data.isFavorite ? '좋아요가 반영되었습니다.' : '좋아요가 취소되었습니다.');
+            }
+        } catch (err) {
+            console.error('Failed to toggle favorite:', err);
+            announcePolite('좋아요 상태 변경에 실패했습니다.');
+        }
+    };
     const [verbosity, setVerbosity] = useState(() => {
         const savedVerbosity = localStorage.getItem('playerVerbosity');
         return savedVerbosity !== null ? JSON.parse(savedVerbosity) : 2;
@@ -579,13 +621,19 @@ function PlayerScreenV2() {
     const messageIndexRef = useRef(0);
 
     const startNewGeneration = useCallback(() => {
+        if (!user) {
+            setError('LOGIN_REQUIRED');
+            announcePolite('신규 화면 해설을 생성하려면 로그인이 필요합니다.');
+            return;
+        }
+
         console.log('Starting new generation process...');
         setIsNewGeneration(true);
         setStatusMessage('새로운 화면 해설 대본 생성을 시작합니다...');
         announcePolite('기존 대본이 없거나 불완전하여, 새로 생성을 시작합니다.');
         
         const sseApiHost = process.env.NODE_ENV === 'production' ? '' : 'http://localhost:4000';
-        const url = `${sseApiHost}/api/process?youtubeUrl=${encodeURIComponent(`https://www.youtube.com/watch?v=${videoId}`)}`;
+        const url = `${sseApiHost}/api/process?youtubeUrl=${encodeURIComponent(`https://www.youtube.com/watch?v=${videoId}`)}&token=${token}`;
         const es = new EventSource(url);
         eventSourceRef.current = es;
         let isDuplicate = false;
@@ -602,30 +650,35 @@ function PlayerScreenV2() {
                     const data = JSON.parse(errorPayload);
                     console.error('Backend Error Event:', data);
                     
+                    let msg = '';
                     if (data.message === 'funds_depleted') {
-                        setError('서비스 운영을 위한 후원금이 모두 소진되어 현재 새로운 영상을 생성할 수 없습니다. 여러분의 따뜻한 후원이 필요합니다.');
+                        msg = '서비스 운영을 위한 후원금이 모두 소진되어 현재 새로운 영상을 생성할 수 없습니다. 여러분의 따뜻한 후원이 필요합니다.';
+                    } else if (data.message === 'unverified_user_duration_exceeded') {
+                        msg = '시각장애인 인증을 완료하지 않은 회원은 5분 이하의 영상만 해설을 생성할 수 있습니다. 5분을 초과하는 영상의 화면 해설을 생성하려면 마이페이지에서 시각장애인 인증을 완료해 주십시오.';
                     } else if (data.message === 'duration_exceeded') {
                         const limit = data.limit || 30;
-                        setError(`${limit}분이 넘는 영상은 비용 문제로 인해 처리할 수 없습니다. 양해 부탁드립니다.`);
+                        msg = `${limit}분이 넘는 영상은 비용 문제로 인해 처리할 수 없습니다. 양해 부탁드립니다.`;
                     } else if (data.message === 'service_paused') {
-                        setError('현재 관리자에 의해 신규 영상 생성이 일시 중지되었습니다. 잠시 후 다시 시도해주세요.');
+                        msg = '현재 관리자에 의해 신규 영상 생성이 일시 중지되었습니다. 잠시 후 다시 시도해주세요.';
                     } else if (data.message === 'live_stream_not_supported') {
-                        setError('라이브 스트리밍 영상은 현재 지원되지 않습니다. 영상이 종료된 후 다시 시도해주세요.');
+                        msg = '라이브 스트리밍 영상은 현재 지원되지 않습니다. 영상이 종료된 후 다시 시도해주세요.';
                     } else if (data.message === 'embed_disabled') {
-                        setError('이 영상은 소유자의 요청으로 다른 웹사이트에서의 재생이 금지되어 있어 화면 해설을 제공할 수 없습니다. 유튜브에서 직접 시청해주세요.');
+                        msg = '이 영상은 소유자의 요청으로 다른 웹사이트에서의 재생이 금지되어 있어 화면 해설을 제공할 수 없습니다. 유튜브에서 직접 시청해주세요.';
                     } else if (data.message === 'gemini_unavailable') {
-                        setError('AI 생성기가 일시적인 과부하 또는 할당량 문제로 응답하지 않습니다. 잠시 후 다시 시도해 주세요.');
+                        msg = 'AI 생성기가 일시적인 과부하 또는 할당량 문제로 응답하지 않습니다. 잠시 후 다시 시도해 주세요.';
                     } else if (data.message === 'gemini_rejection') {
-                        setError('AI가 부적절하거나 유해한 콘텐츠를 감지하여 생성을 중단했습니다.');
+                        msg = 'AI가 부적절하거나 유해한 콘텐츠를 감지하여 생성을 중단했습니다.';
                     } else if (data.message === 'Invalid or missing YouTube URL' || data.message === 'Could not extract YouTube video ID from URL') {
-                        setError('유효하지 않거나 지원되지 않는 YouTube URL입니다. 올바른 주소를 입력해주세요.');
+                        msg = '유효하지 않거나 지원되지 않는 YouTube URL입니다. 올바른 주소를 입력해주세요.';
                     } else if (data.message === 'video_processing_failed' || data.message === 'An unexpected error occurred on the server.' || data.message === 'A critical database error occurred.') {
-                        setError('죄송합니다. 서비스 처리 중 예상치 못한 서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
-                    } else if (data.message === 'auth_error') { // New condition for authentication errors
-                        setError('해당 영상은 로그인(인증)이 필요하거나 처리 시스템의 문제로 인해 화면 해설을 생성할 수 없습니다. 다른 영상을 시도해 주세요.');
+                        msg = '죄송합니다. 서비스 처리 중 예상치 못한 서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
+                    } else if (data.message === 'auth_error') {
+                        msg = '해당 영상은 로그인(인증)이 필요하거나 처리 시스템의 문제로 인해 화면 해설을 생성할 수 없습니다. 다른 영상을 시도해 주세요.';
                     } else {
-                        setError(data.details || data.message || '알 수 없는 오류가 발생했습니다.');
+                        msg = data.details || data.message || '알 수 없는 오류가 발생했습니다.';
                     }
+                    setError(msg);
+                    announceAssertive(msg);
                 } catch (parseError) {
                     console.error('Failed to parse backend error event:', parseError, errorPayload);
                     setError('서버에서 알 수 없는 오류가 발생했습니다.');
@@ -714,7 +767,7 @@ function PlayerScreenV2() {
             if (isDuplicate) return;
             handleError('network', err);
         };
-    }, [videoId, announcePolite]);
+    }, [videoId, announcePolite, announceAssertive, user, token]);
 
     useEffect(() => {
         if (!videoId) {
@@ -1041,14 +1094,38 @@ function PlayerScreenV2() {
     const newVerbosityLabels = { 0: '없음', ...verbosityLabels };
 
     return (
-        <div ref={mainContainerRef} style={{ maxWidth: '800px', margin: '0 auto', padding: '0 20px 100px 20px' }}>
+        <div ref={mainContainerRef} className="player-screen-container">
             <Header title={videoInfo.title} ref={headingRef} />
 
             <main style={{ width: '100%' }} role="none">
                 {isLoading ? (
                 <p>영상 데이터를 불러오는 중입니다...</p>
             ) : error ? (
-                <p className="error-message" role="alert">{error}</p>
+                error === 'LOGIN_REQUIRED' ? (
+                    <div className="login-required-container" role="status" aria-live="polite">
+                        <h2 className="login-required-title">화면 해설 생성 권한이 제한되었습니다</h2>
+                        <p className="login-required-message">
+                            신규 영상의 화면 해설 대본을 생성하시려면 <strong>시각장애인 인증 회원</strong>으로 로그인이 필요합니다.<br/>
+                            이미 해설 대본이 존재하는 영상은 로그인 없이 즉시 시청하실 수 있습니다.
+                        </p>
+                        <div className="login-required-actions">
+                            <button 
+                                onClick={() => navigate('/login', { state: { from: location } })}
+                                className="login-required-btn-primary"
+                            >
+                                로그인하기
+                            </button>
+                            <button 
+                                onClick={() => navigate('/register')}
+                                className="login-required-btn-secondary"
+                            >
+                                회원가입
+                            </button>
+                        </div>
+                    </div>
+                ) : (
+                    <p className="error-message" role="alert">{error}</p>
+                )
             ) : (isNewGeneration && !isPlayerReady) ? (
                 <div className="status-container">
                     <p>새로운 화면 해설을 생성하고 있습니다. 잠시만 기다려주세요...</p>
@@ -1077,15 +1154,22 @@ function PlayerScreenV2() {
                                     playsinline: 1
                                 }
                             }}
-                            onReady={(e) => {
-                                setPlayer(e.target);
-                                setDuration(e.target.getDuration());
-                                const iframe = e.target.getIframe();
-                                if (iframe) {
-                                    iframe.setAttribute('tabindex', '-1');
-                                    iframe.setAttribute('aria-hidden', 'true');
-                                }
-                            }}
+                             onReady={async (e) => {
+                                 setPlayer(e.target);
+                                 setDuration(e.target.getDuration());
+                                 const iframe = e.target.getIframe();
+                                 if (iframe) {
+                                     iframe.setAttribute('tabindex', '-1');
+                                     iframe.setAttribute('aria-hidden', 'true');
+                                 }
+                                 if (user) {
+                                     try {
+                                         await axios.post(`${API_BASE}/api/users/me/videos/history`, { videoId });
+                                     } catch (err) {
+                                         console.error('Failed to update watch history:', err);
+                                     }
+                                 }
+                             }}
                             onStateChange={(e) => setIsPlaying(e.data === window.YT.PlayerState.PLAYING)}
                         />
                     </div>
@@ -1367,15 +1451,8 @@ function PlayerScreenV2() {
                         </div>
                     
                     {/* Time & Navigation Controls - High Contrast & Simple for Accessibility */}
-                    <div className="time-control-bar" style={{ 
-                        display: 'flex', 
-                        justifyContent: 'space-between', 
-                        alignItems: 'center', 
-                        padding: '15px 0',
-                        borderBottom: '1px solid #eee',
-                        marginBottom: '15px'
-                    }}>
-                        <div className="time-display" style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#333' }}>
+                    <div className="time-bar-container">
+                        <div className="time-display">
                             {/* Screen Reader Only Text */}
                             <span style={{
                                 position: 'absolute',
@@ -1396,17 +1473,17 @@ function PlayerScreenV2() {
                                 {formatTime(currentTime)} / {formatTime(duration)}
                             </span>
                         </div>
-                        <div className="jump-buttons" style={{ display: 'flex', gap: '15px' }}>
+                        <div className="jump-buttons">
                             <button 
                                 onClick={() => handleSkip(-30)} 
-                                style={{ padding: '10px 15px', fontSize: '1.1rem', cursor: 'pointer' }}
+                                className="skip-button"
                                 aria-label="30초 뒤로 이동"
                             >
                                 ⏪ 30초 전
                             </button>
                             <button 
                                 onClick={() => handleSkip(30)} 
-                                style={{ padding: '10px 15px', fontSize: '1.1rem', cursor: 'pointer' }}
+                                className="skip-button"
                                 aria-label="30초 앞으로 이동"
                             >
                                 30초 후 ⏩
@@ -1419,13 +1496,13 @@ function PlayerScreenV2() {
             )}
 
             <div className="controls-container">
-                <div className="control-group" style={{ marginBottom: '15px' }}>
-                    <label htmlFor="verbosity-select" style={{ marginRight: '10px', fontWeight: 'bold' }}>해설정도:</label>
+                <div className="control-group">
+                    <label htmlFor="verbosity-select" className="control-label">해설정도:</label>
                     <select
                         id="verbosity-select"
                         value={verbosity}
                         onChange={(e) => handleVerbosityChange(Number(e.target.value))}
-                        style={{ padding: '5px', fontSize: '1rem' }}
+                        className="control-select"
                     >
                         <option value={0}>없음</option>
                         <option value={1}>최소</option>
@@ -1433,33 +1510,33 @@ function PlayerScreenV2() {
                         <option value={3}>최대</option>
                     </select>
 
-                    <div style={{ display: 'inline-block', marginLeft: '15px' }}>
+                    <div className="subtitle-check-container">
                         <input
                             type="checkbox"
                             id="subtitle-check"
                             checked={isReadingSubtitles}
                             onChange={handleSubtitleToggle}
-                            style={{ width: '1.2rem', height: '1.2rem', verticalAlign: 'middle' }}
+                            className="subtitle-checkbox"
                         />
-                        <label htmlFor="subtitle-check" style={{ marginLeft: '5px', verticalAlign: 'middle' }}>자막 읽기</label>
+                        <label htmlFor="subtitle-check" className="subtitle-label">자막 읽기</label>
                     </div>
                 </div>
 
-                <div className="control-group" style={{ marginBottom: '15px' }}>
-                    <label htmlFor="mode-select" style={{ marginRight: '10px', fontWeight: 'bold' }}>해설방식:</label>
+                <div className="control-group">
+                    <label htmlFor="mode-select" className="control-label">해설방식:</label>
                     <select
                         id="mode-select"
                         value={playbackMode}
                         onChange={(e) => setPlaybackMode(e.target.value)}
-                        style={{ padding: '5px', fontSize: '1rem' }}
+                        className="control-select"
                     >
                         <option value="pause">멈춘 후 해설</option>
                         <option value="together">영상과 같이</option>
                     </select>
                 </div>
 
-                <div className="control-group" style={{ marginBottom: '15px' }}>
-                    <label htmlFor="rate-select" style={{ marginRight: '10px', fontWeight: 'bold' }}>해설속도:</label>
+                <div className="control-group">
+                    <label htmlFor="rate-select" className="control-label">해설속도:</label>
                     <select
                         id="rate-select"
                         value={playbackRate}
@@ -1469,7 +1546,7 @@ function PlayerScreenV2() {
                             const label = { 1.5: '초보', 2.0: '중수', 2.5: '고수', 3.0: '초고수', 3.5: '신' }[rate];
                             announcePolite(`해설 속도가 ${label} 모드로 변경되었습니다.`);
                         }}
-                        style={{ padding: '5px', fontSize: '1rem' }}
+                        className="control-select"
                     >
                         <option value={1.5}>초보 (1.5x)</option>
                         <option value={2.0}>중수 (2.0x)</option>
@@ -1479,11 +1556,16 @@ function PlayerScreenV2() {
                     </select>
                 </div>
 
-                <div className="secondary-controls" style={{ display: 'flex', gap: '10px' }}>
-                    <button onClick={() => setIsScriptVisible(prev => !prev)} aria-expanded={isScriptVisible} style={{ flex: 1, padding: '10px' }}>
+                <div className="secondary-controls">
+                    <button onClick={() => setIsScriptVisible(prev => !prev)} aria-expanded={isScriptVisible} className="toggle-script-button">
                         {isScriptVisible ? '대본 숨기기' : '대본 보기'}
                     </button>
                     <ShareButton />
+                    {user && (
+                        <button onClick={handleToggleFavorite} className={`favorite-button ${isFavorite ? 'active' : ''}`} aria-label={isFavorite ? `좋아요 완료, 현재 좋아요 총 ${likeCount}개` : `좋아요, 현재 좋아요 총 ${likeCount}개`}>
+                            {isFavorite ? `❤️ 좋아요 ${likeCount}` : `🖤 좋아요 ${likeCount}`}
+                        </button>
+                    )}
                 </div>
             </div>
 

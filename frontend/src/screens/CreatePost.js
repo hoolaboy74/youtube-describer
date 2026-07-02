@@ -1,8 +1,9 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { usePageFocus } from '../hooks';
 import { useAccessibility } from '../contexts/AccessibilityContext';
+import { useAuth } from '../contexts/AuthContext';
 import Header from '../components/Header';
 import './CreatePost.css';
 
@@ -10,18 +11,31 @@ function CreatePost() {
   const { announcePolite, announceAssertive } = useAccessibility();
   const pageTitleRef = useRef(null);
   usePageFocus(pageTitleRef);
+  const { user, loading: authLoading } = useAuth();
+  const navigate = useNavigate();
   
   const [formData, setFormData] = useState({
     title: '',
     content: '',
     nickname: '',
-    password: '',
     adminPassword: ''
   });
   const [isNotice, setIsNotice] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      alert('로그인이 필요한 서비스입니다.');
+      navigate('/login', { replace: true });
+    }
+  }, [user, authLoading, navigate]);
+
+  useEffect(() => {
+    if (user) {
+      setFormData(prev => ({ ...prev, nickname: prev.nickname || user.name }));
+    }
+  }, [user]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -31,18 +45,10 @@ function CreatePost() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    const { title, content, nickname, password, adminPassword } = formData;
+    const { title, content, nickname, adminPassword } = formData;
 
-    if (!title.trim() || !content.trim() || !nickname.trim() || !password.trim()) {
-      setError('제목, 내용, 닉네임, 비밀번호는 필수입니다.');
-      return;
-    }
-    if (nickname.trim().length < 2) {
-      setError('닉네임은 2자 이상이어야 합니다.');
-      return;
-    }
-    if (password.trim().length < 4) {
-      setError('비밀번호는 4자 이상이어야 합니다.');
+    if (!title.trim() || !content.trim()) {
+      setError('제목과 내용은 필수입니다.');
       return;
     }
     if (title.trim().length < 2) {
@@ -67,7 +73,6 @@ function CreatePost() {
         title: title.trim(),
         content: content.trim(),
         nickname: nickname.trim(),
-        password: password.trim(),
         is_notice: isNotice,
         adminPassword: isNotice ? adminPassword.trim() : undefined,
       };
@@ -87,6 +92,15 @@ function CreatePost() {
       setLoading(false);
     }
   };
+
+  if (authLoading || !user) {
+    return (
+      <div className="create-post-container">
+        <Header title="로딩 중..." />
+        <p>사용자 권한을 확인하고 있습니다...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="create-post-container">
@@ -116,23 +130,12 @@ function CreatePost() {
           ></textarea>
         </div>
         <div className="form-group">
-          <label htmlFor="nickname">닉네임</label>
+          <label htmlFor="nickname">작성자 (닉네임)</label>
           <input
             type="text"
             id="nickname"
             name="nickname"
             value={formData.nickname}
-            onChange={handleInputChange}
-            required
-          />
-        </div>
-        <div className="form-group">
-          <label htmlFor="password">비밀번호 (수정/삭제 시 필요)</label>
-          <input
-            type="password"
-            id="password"
-            name="password"
-            value={formData.password}
             onChange={handleInputChange}
             required
           />

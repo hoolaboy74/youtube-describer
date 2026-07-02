@@ -3,11 +3,13 @@ import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { usePageFocus } from '../hooks';
 import { useAccessibility } from '../contexts/AccessibilityContext';
+import { useAuth } from '../contexts/AuthContext';
 import './BoardScreen.css';
 
 function BoardScreen() {
   const { announceAssertive } = useAccessibility();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -40,11 +42,19 @@ function BoardScreen() {
     return new Date(dateString).toLocaleString('ko-KR', options);
   };
 
+  const handleCreatePostClick = (e) => {
+    if (!user) {
+      e.preventDefault();
+      alert('로그인이 필요한 서비스입니다.');
+      navigate('/login');
+    }
+  };
+
   return (
     <div className="board-container">
       <div className="board-header">
         <h1 ref={titleRef}>와글와글 게시판</h1>
-        <Link to="/board/create" className="btn btn-primary">새 글 작성</Link>
+        <Link to="/board/create" onClick={handleCreatePostClick} className="btn btn-primary">새 글 작성</Link>
       </div>
 
       <div className="sort-options">

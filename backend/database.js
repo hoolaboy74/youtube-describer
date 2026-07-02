@@ -1,9 +1,15 @@
 const path = require('path');
+const fs = require('fs');
 const Database = require('better-sqlite3');
 const logger = require('./logger');
 const crypto = require('crypto');
 
-const dbPath = path.join(__dirname, 'db', 'cache.db');
+const dbDir = path.join(__dirname, 'db');
+if (!fs.existsSync(dbDir)) {
+  fs.mkdirSync(dbDir, { recursive: true });
+}
+
+const dbPath = path.join(dbDir, 'cache.db');
 const db = new Database(dbPath);
 
 // DB 초기화: 테이블 생성
@@ -70,11 +76,13 @@ function init() {
     CREATE TABLE IF NOT EXISTS comments (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       videoId TEXT NOT NULL,
+      userId TEXT,
       nickname TEXT NOT NULL,
       password TEXT NOT NULL,
       content TEXT NOT NULL,
       createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (videoId) REFERENCES videos (videoId) ON DELETE CASCADE
+      FOREIGN KEY (videoId) REFERENCES videos (videoId) ON DELETE CASCADE,
+      FOREIGN KEY (userId) REFERENCES users (id) ON DELETE CASCADE
     )
   `);
 
@@ -158,6 +166,127 @@ function init() {
     db.exec('ALTER TABLE posts ADD COLUMN is_notice INTEGER DEFAULT 0');
   }
 
+
+  // users 테이블: 가입 회원 정보 저장
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS users (
+      id TEXT PRIMARY KEY,
+      email TEXT UNIQUE NOT NULL,
+      password TEXT NOT NULL,
+      name TEXT NOT NULL,
+      phone TEXT NOT NULL,
+      birthdate TEXT NOT NULL,
+      pin TEXT, -- 비밀번호 찾기용 PIN
+      is_blind INTEGER DEFAULT 0, -- 0: 미인증, 1: 인증완료, 2: 반려, 9: 관리자 대기
+      createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  // 'users' 테이블 컬럼 누락 시 자동 추가 (하위 호환 마이그레이션)
+  try {
+    db.prepare('SELECT pin FROM users LIMIT 1').get();
+  } catch (error) {
+    logger.info('Adding pin column to users table...');
+    db.exec('ALTER TABLE users ADD COLUMN pin TEXT');
+  }
+  try {
+    db.prepare('SELECT is_blind FROM users LIMIT 1').get();
+  } catch (error) {
+    logger.info('Adding is_blind column to users table...');
+    db.exec('ALTER TABLE users ADD COLUMN is_blind INTEGER DEFAULT 0');
+  }
+  try {
+    db.prepare('SELECT is_active FROM users LIMIT 1').get();
+  } catch (error) {
+    logger.info('Adding is_active column to users table...');
+    db.exec('ALTER TABLE users ADD COLUMN is_active INTEGER DEFAULT 1');
+  }
+  try {
+    db.prepare('SELECT lastLoginIp FROM users LIMIT 1').get();
+  } catch (error) {
+    logger.info('Adding lastLoginIp column to users table...');
+    db.exec('ALTER TABLE users ADD COLUMN lastLoginIp TEXT');
+  }
+  try {
+    db.prepare('SELECT lastLoginAt FROM users LIMIT 1').get();
+  } catch (error) {
+    logger.info('Adding lastLoginAt column to users table...');
+    db.exec('ALTER TABLE users ADD COLUMN lastLoginAt DATETIME');
+  }
+
+
+  // user_verifications 테이블: 사용자 장애인 자격 검증 이력 저장
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS user_verifications (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      userId TEXT NOT NULL,
+      verificationMethod TEXT NOT NULL, -- 'siloam_api', 'card_ocr', 'admin_manual'
+      status TEXT DEFAULT 'pending', -- 'pending', 'approved', 'rejected'
+      details TEXT,
+      verifiedAt DATETIME,
+      createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (userId) REFERENCES users (id) ON DELETE CASCADE
+    )
+  `);
+
+  // 'videos' 테이블에 requested_by 컬럼 추가 (없을 경우)
+  try {
+    db.prepare('SELECT requested_by FROM videos LIMIT 1').get();
+  } catch (error) {
+    logger.info('Adding requested_by column to videos table...');
+    db.exec('ALTER TABLE videos ADD COLUMN requested_by TEXT');
+  }
+
+  // 'posts' 테이블에 userId 컬럼 추가 (없을 경우)
+  try {
+    db.prepare('SELECT userId FROM posts LIMIT 1').get();
+  } catch (error) {
+    logger.info('Adding userId column to posts table...');
+    db.exec('ALTER TABLE posts ADD COLUMN userId TEXT');
+  }
+
+  // 'post_comments' 테이블에 userId 컬럼 추가 (없을 경우)
+  try {
+    db.prepare('SELECT userId FROM post_comments LIMIT 1').get();
+  } catch (error) {
+    logger.info('Adding userId column to post_comments table...');
+    db.exec('ALTER TABLE post_comments ADD COLUMN userId TEXT');
+  }
+
+  // 'comments' 테이블에 userId 컬럼 추가 (없을 경우)
+  try {
+    db.prepare('SELECT userId FROM comments LIMIT 1').get();
+  } catch (error) {
+    logger.info('Adding userId column to comments table...');
+    db.exec('ALTER TABLE comments ADD COLUMN userId TEXT REFERENCES users(id) ON DELETE CASCADE');
+  }
+
+  // user_watch_histories 테이블 신설
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS user_watch_histories (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      userId TEXT NOT NULL,
+      videoId TEXT NOT NULL,
+      watchedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (userId) REFERENCES users (id) ON DELETE CASCADE,
+      FOREIGN KEY (videoId) REFERENCES videos (videoId) ON DELETE CASCADE,
+      UNIQUE(userId, videoId)
+    )
+  `);
+
+  // user_favorites 테이블 신설
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS user_favorites (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      userId TEXT NOT NULL,
+      videoId TEXT NOT NULL,
+      createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (userId) REFERENCES users (id) ON DELETE CASCADE,
+      FOREIGN KEY (videoId) REFERENCES videos (videoId) ON DELETE CASCADE,
+      UNIQUE(userId, videoId)
+    )
+  `);
 
   logger.info('Database initialized successfully.');
 }
@@ -311,17 +440,18 @@ function getFeaturedVideos() {
 }
 
 // 처리 시작 시 호출. status를 'processing'으로 설정.
-function ensureVideoRecord({ videoId, title, duration, filesize }) {
+function ensureVideoRecord({ videoId, title, duration, filesize, requested_by = null }) {
   try {
     db.prepare(`
-      INSERT INTO videos (videoId, title, duration, filesize, status)
-      VALUES (?, ?, ?, ?, 'processing')
+      INSERT INTO videos (videoId, title, duration, filesize, status, requested_by)
+      VALUES (?, ?, ?, ?, 'processing', ?)
       ON CONFLICT(videoId) DO UPDATE SET
         title = excluded.title,
         duration = excluded.duration,
         filesize = excluded.filesize,
-        status = 'processing'
-    `).run(videoId, title, Math.round(duration), filesize);
+        status = 'processing',
+        requested_by = COALESCE(excluded.requested_by, videos.requested_by)
+    `).run(videoId, title, Math.round(duration), filesize, requested_by);
   } catch (error) {
     logger.error(`[Database] Failed to ensure video record for ${videoId}:`, error);
     throw error;
@@ -390,21 +520,21 @@ function verifyPassword(storedPassword, providedPassword) {
 
 // 댓글 가져오기
 function getComments(videoId) {
-  return db.prepare("SELECT id, videoId, nickname, content, strftime('%Y-%m-%dT%H:%M:%SZ', createdAt) as createdAt FROM comments WHERE videoId = ? ORDER BY createdAt ASC").all(videoId);
+  return db.prepare("SELECT id, videoId, userId, nickname, content, strftime('%Y-%m-%dT%H:%M:%SZ', createdAt) as createdAt FROM comments WHERE videoId = ? ORDER BY createdAt ASC").all(videoId);
 }
 
 // 댓글 추가
-function addComment({ videoId, nickname, password, content }) {
+function addComment({ videoId, userId = null, nickname, password = '', content }) {
   const hashedPassword = hashPassword(password);
   const result = db.prepare(
-    'INSERT INTO comments (videoId, nickname, password, content) VALUES (?, ?, ?, ?)'
-  ).run(videoId, nickname, hashedPassword, content);
+    'INSERT INTO comments (videoId, userId, nickname, password, content) VALUES (?, ?, ?, ?, ?)'
+  ).run(videoId, userId, nickname, hashedPassword, content);
   return result.lastInsertRowid;
 }
 
 // 댓글 ID로 댓글 가져오기 (비밀번호 포함)
 function getCommentById(commentId) {
-  return db.prepare("SELECT id, videoId, nickname, password, content, strftime('%Y-%m-%dT%H:%M:%fZ', createdAt) as createdAt FROM comments WHERE id = ?").get(commentId);
+  return db.prepare("SELECT id, videoId, userId, nickname, password, content, strftime('%Y-%m-%dT%H:%M:%fZ', createdAt) as createdAt FROM comments WHERE id = ?").get(commentId);
 }
 
 
@@ -697,11 +827,11 @@ function deleteCommentByIdAdmin(commentId) {
 // --- Board (게시판) Functions ---
 
 // 새 글 작성
-function createPost({ title, content, nickname, password, is_notice = false }) {
+function createPost({ title, content, nickname, password, is_notice = false, userId = null }) {
   const hashedPassword = hashPassword(password);
   const result = db.prepare(
-    'INSERT INTO posts (title, content, nickname, password, is_notice) VALUES (?, ?, ?, ?, ?)'
-  ).run(title, content, nickname, hashedPassword, is_notice ? 1 : 0);
+    'INSERT INTO posts (title, content, nickname, password, is_notice, userId) VALUES (?, ?, ?, ?, ?, ?)'
+  ).run(title, content, nickname, hashedPassword, is_notice ? 1 : 0, userId);
   return result.lastInsertRowid;
 }
 
@@ -709,7 +839,7 @@ function createPost({ title, content, nickname, password, is_notice = false }) {
 function getPost(id) {
   const post = db.prepare(`
     SELECT 
-      p.id, p.title, p.content, p.nickname, strftime('%Y-%m-%dT%H:%M:%SZ', p.createdAt) as createdAt,
+      p.id, p.title, p.content, p.nickname, p.userId, strftime('%Y-%m-%dT%H:%M:%SZ', p.createdAt) as createdAt,
       (SELECT COUNT(*) FROM post_comments WHERE postId = p.id) as commentCount
     FROM posts p 
     WHERE p.id = ?
@@ -717,7 +847,7 @@ function getPost(id) {
   
   if (post) {
     const comments = db.prepare(`
-      SELECT id, postId, nickname, content, strftime('%Y-%m-%dT%H:%M:%SZ', createdAt) as createdAt 
+      SELECT id, postId, nickname, content, userId, strftime('%Y-%m-%dT%H:%M:%SZ', createdAt) as createdAt 
       FROM post_comments 
       WHERE postId = ? 
       ORDER BY createdAt ASC
@@ -777,11 +907,11 @@ function deletePost(id) {
 }
 
 // 새 댓글 작성 (게시판용)
-function createPostComment({ postId, nickname, password, content }) {
+function createPostComment({ postId, nickname, password, content, userId = null }) {
   const hashedPassword = hashPassword(password);
   const result = db.prepare(
-    'INSERT INTO post_comments (postId, nickname, password, content) VALUES (?, ?, ?, ?)'
-  ).run(postId, nickname, hashedPassword, content);
+    'INSERT INTO post_comments (postId, nickname, password, content, userId) VALUES (?, ?, ?, ?, ?)'
+  ).run(postId, nickname, hashedPassword, content, userId);
   return result.lastInsertRowid;
 }
 
@@ -900,8 +1030,323 @@ function deletePostCommentByIdAdmin(id) {
   return result.changes > 0;
 }
 
+// --- User Management Functions ---
+function createUser({ id, email, password, name, phone, birthdate, is_blind, pin }) {
+  const result = db.prepare(`
+    INSERT INTO users (id, email, password, name, phone, birthdate, is_blind, pin)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+  `).run(id, email, password, name, phone, birthdate, is_blind || 0, pin || null);
+  return result.changes > 0;
+}
+
+function findUserEmail(name, birthdate) {
+  return db.prepare('SELECT email FROM users WHERE name = ? AND birthdate = ?').get(name, birthdate);
+}
+
+function verifyUserResetCredentials(name, birthdate, phone, pin) {
+  return db.prepare('SELECT * FROM users WHERE name = ? AND birthdate = ? AND phone = ? AND pin = ?').get(name, birthdate, phone, pin);
+}
+
+function getUserByEmail(email) {
+  return db.prepare('SELECT * FROM users WHERE email = ?').get(email);
+}
+
+function getUserById(id) {
+  return db.prepare('SELECT * FROM users WHERE id = ?').get(id);
+}
+
+function getUserByBio(name, birthdate) {
+  return db.prepare('SELECT * FROM users WHERE name = ? AND birthdate = ?').get(name, birthdate);
+}
+
+function getUserByPhone(phone) {
+  return db.prepare('SELECT * FROM users WHERE phone = ?').get(phone);
+}
+
+function updateUserBlindStatus(userId, isBlind) {
+  const transaction = db.transaction(() => {
+    const userUpdate = db.prepare('UPDATE users SET is_blind = ?, updatedAt = CURRENT_TIMESTAMP WHERE id = ?')
+                         .run(isBlind, userId);
+
+    if (userUpdate.changes > 0) {
+      const statusMap = { 1: 'approved', 2: 'rejected' };
+      const status = statusMap[isBlind];
+      if (status) {
+        db.prepare(`
+          UPDATE user_verifications 
+          SET status = ?, verifiedAt = ? 
+          WHERE userId = ? AND status = 'pending'
+        `).run(status, status === 'approved' ? new Date().toISOString() : null, userId);
+      }
+    }
+    return userUpdate;
+  });
+
+  const result = transaction();
+  return result.changes > 0;
+}
+
+function createUserVerification({ userId, verificationMethod, status, details, verifiedAt }) {
+  const result = db.prepare(`
+    INSERT INTO user_verifications (userId, verificationMethod, status, details, verifiedAt)
+    VALUES (?, ?, ?, ?, ?)
+  `).run(userId, verificationMethod, status, details || null, verifiedAt || null);
+  return result.changes > 0;
+}
+
+function listPendingUsers() {
+  return db.prepare(`
+    SELECT u.*, uv.verificationMethod, uv.status AS verificationStatus, uv.details, uv.createdAt AS verificationCreatedAt
+    FROM users u
+    LEFT JOIN user_verifications uv ON u.id = uv.userId
+    WHERE u.is_blind = 9
+    ORDER BY u.createdAt DESC
+  `).all();
+}
+
+function updateUserLoginInfo(userId, ip) {
+  const result = db.prepare(`
+    UPDATE users
+    SET lastLoginIp = ?, lastLoginAt = CURRENT_TIMESTAMP
+    WHERE id = ?
+  `).run(ip, userId);
+  return result.changes > 0;
+}
+
+function listAllUsersForAdmin({ page = 1, limit = 20, search = null, isBlind = null, isActive = null }) {
+  const offset = (page - 1) * limit;
+  let whereClauses = [];
+  let params = [];
+
+  if (search) {
+    whereClauses.push('(name LIKE ? OR email LIKE ? OR phone LIKE ?)');
+    const searchTerm = `%${search}%`;
+    params.push(searchTerm, searchTerm, searchTerm);
+  }
+  if (isBlind !== null && isBlind !== '') {
+    whereClauses.push('is_blind = ?');
+    params.push(parseInt(isBlind, 10));
+  }
+  if (isActive !== null && isActive !== '') {
+    whereClauses.push('is_active = ?');
+    params.push(parseInt(isActive, 10));
+  }
+
+  const whereSql = whereClauses.length > 0 ? `WHERE ${whereClauses.join(' AND ')}` : '';
+
+  const countSql = `SELECT COUNT(*) AS count FROM users ${whereSql}`;
+  const total = db.prepare(countSql).get(...params).count;
+
+  const listSql = `
+    SELECT id, email, name, phone, birthdate, pin, is_blind, is_active, createdAt, updatedAt, lastLoginIp, lastLoginAt
+    FROM users
+    ${whereSql}
+    ORDER BY createdAt DESC
+    LIMIT ? OFFSET ?
+  `;
+  const users = db.prepare(listSql).all(...params, limit, offset);
+
+  return { users, totalUsers: total };
+}
+
+function updateUserStatusAdmin(userId, { isActive, isBlind }) {
+  const result = db.prepare(`
+    UPDATE users
+    SET is_active = ?, is_blind = ?, updatedAt = CURRENT_TIMESTAMP
+    WHERE id = ?
+  `).run(isActive, isBlind, userId);
+  return result.changes > 0;
+}
+
+function resetUserPasswordOrPinAdmin(userId, { type, newValue }) {
+  let query = '';
+  if (type === 'password') {
+    query = 'UPDATE users SET password = ?, updatedAt = CURRENT_TIMESTAMP WHERE id = ?';
+  } else if (type === 'pin') {
+    query = 'UPDATE users SET pin = ?, updatedAt = CURRENT_TIMESTAMP WHERE id = ?';
+  } else {
+    throw new Error('Invalid reset type');
+  }
+  const result = db.prepare(query).run(newValue, userId);
+  return result.changes > 0;
+}
+
+function deleteUserAdmin(userId) {
+  const transaction = db.transaction(() => {
+    db.prepare('UPDATE posts SET userId = NULL WHERE userId = ?').run(userId);
+    db.prepare('UPDATE post_comments SET userId = NULL WHERE userId = ?').run(userId);
+    db.prepare('UPDATE comments SET userId = NULL WHERE userId = ?').run(userId);
+    db.prepare('DELETE FROM user_verifications WHERE userId = ?').run(userId);
+    db.prepare('DELETE FROM users WHERE id = ?').run(userId);
+  });
+  
+  try {
+    transaction();
+    return true;
+  } catch (error) {
+    logger.error(`Failed to delete user ${userId} in admin transaction:`, error);
+    throw error;
+  }
+}
+
+function getUserDetailForAdmin(userId) {
+  const user = db.prepare(`
+    SELECT id, email, name, phone, birthdate, pin, is_blind, is_active, createdAt, updatedAt, lastLoginIp, lastLoginAt
+    FROM users
+    WHERE id = ?
+  `).get(userId);
+
+  if (!user) return null;
+
+  const requestedVideosCount = db.prepare(`
+    SELECT COUNT(*) AS count FROM videos WHERE requested_by = ?
+  `).get(userId).count;
+
+  const watchHistoryCount = db.prepare(`
+    SELECT COUNT(*) AS count FROM user_watch_histories WHERE userId = ?
+  `).get(userId).count;
+
+  const postsCount = db.prepare(`
+    SELECT COUNT(*) AS count FROM posts WHERE userId = ?
+  `).get(userId).count;
+
+  const videoCommentsCount = db.prepare(`
+    SELECT COUNT(*) AS count FROM comments WHERE userId = ?
+  `).get(userId).count;
+  const postCommentsCount = db.prepare(`
+    SELECT COUNT(*) AS count FROM post_comments WHERE userId = ?
+  `).get(userId).count;
+  const totalCommentsCount = videoCommentsCount + postCommentsCount;
+
+  return {
+    ...user,
+    stats: {
+      requestedVideosCount,
+      watchHistoryCount,
+      postsCount,
+      commentsCount: totalCommentsCount
+    }
+  };
+}
+
+// --- MyPage Functions ---
+
+
+function updateUser(userId, { name, phone, pin }) {
+  const result = db.prepare(`
+    UPDATE users
+    SET name = ?, phone = ?, pin = ?, updatedAt = CURRENT_TIMESTAMP
+    WHERE id = ?
+  `).run(name, phone, pin, userId);
+  return result.changes > 0;
+}
+
+function updateUserPassword(userId, newPasswordHash) {
+  const result = db.prepare(`
+    UPDATE users
+    SET password = ?, updatedAt = CURRENT_TIMESTAMP
+    WHERE id = ?
+  `).run(newPasswordHash, userId);
+  return result.changes > 0;
+}
+
+function addWatchHistory(userId, videoId) {
+  db.prepare(`
+    INSERT INTO user_watch_histories (userId, videoId, watchedAt)
+    VALUES (?, ?, CURRENT_TIMESTAMP)
+    ON CONFLICT(userId, videoId) DO UPDATE SET watchedAt = CURRENT_TIMESTAMP
+  `).run(userId, videoId);
+
+  db.prepare(`
+    DELETE FROM user_watch_histories
+    WHERE userId = ? AND id NOT IN (
+      SELECT id FROM user_watch_histories
+      WHERE userId = ?
+      ORDER BY watchedAt DESC
+      LIMIT 20
+    )
+  `).run(userId, userId);
+}
+
+function getWatchHistory(userId) {
+  return db.prepare(`
+    SELECT h.watchedAt, v.videoId, v.title, v.duration, v.status
+    FROM user_watch_histories h
+    JOIN videos v ON h.videoId = v.videoId
+    WHERE h.userId = ?
+    ORDER BY h.watchedAt DESC
+  `).all(userId);
+}
+
+function toggleFavorite(userId, videoId) {
+  const fav = db.prepare('SELECT id FROM user_favorites WHERE userId = ? AND videoId = ?').get(userId, videoId);
+  if (fav) {
+    db.prepare('DELETE FROM user_favorites WHERE userId = ? AND videoId = ?').run(userId, videoId);
+    return { isFavorite: false };
+  } else {
+    db.prepare('INSERT INTO user_favorites (userId, videoId) VALUES (?, ?)').run(userId, videoId);
+    return { isFavorite: true };
+  }
+}
+
+function getFavorites(userId) {
+  return db.prepare(`
+    SELECT f.createdAt, v.videoId, v.title, v.duration, v.status
+    FROM user_favorites f
+    JOIN videos v ON f.videoId = v.videoId
+    WHERE f.userId = ?
+    ORDER BY f.createdAt DESC
+  `).all(userId);
+}
+
+function isFavorite(userId, videoId) {
+  const row = db.prepare('SELECT id FROM user_favorites WHERE userId = ? AND videoId = ?').get(userId, videoId);
+  return !!row;
+}
+
+function getFavoriteCount(videoId) {
+  const row = db.prepare('SELECT COUNT(*) as count FROM user_favorites WHERE videoId = ?').get(videoId);
+  return row ? row.count : 0;
+}
+
+function getRequestedVideosByUserId(userId) {
+  return db.prepare(`
+    SELECT videoId, title, duration, status, createdAt
+    FROM videos
+    WHERE requested_by = ?
+    ORDER BY createdAt DESC
+  `).all(userId);
+}
+
+function getPostsByUserId(userId) {
+  return db.prepare(`
+    SELECT id, title, createdAt
+    FROM posts
+    WHERE userId = ?
+    ORDER BY createdAt DESC
+  `).all(userId);
+}
+
+function getCommentsByUserId(userId) {
+  return db.prepare(`
+    SELECT pc.id, pc.content, pc.createdAt, pc.postId, p.title AS targetTitle, 'post' AS type
+    FROM post_comments pc
+    JOIN posts p ON pc.postId = p.id
+    WHERE pc.userId = ?
+    ORDER BY pc.createdAt DESC
+  `).all(userId);
+}
+
 module.exports = {
   init,
+  createUser,
+  getUserByEmail,
+  getUserById,
+  getUserByBio,
+  getUserByPhone,
+  updateUserBlindStatus,
+  createUserVerification,
+  listPendingUsers,
   getVideo,
   saveVideo,
   ensureVideoRecord,
@@ -934,6 +1379,24 @@ module.exports = {
   getDashboardStats,
   listAllCommentsForAdmin,
   deleteCommentByIdAdmin,
+  updateUserLoginInfo,
+  listAllUsersForAdmin,
+  updateUserStatusAdmin,
+  resetUserPasswordOrPinAdmin,
+  deleteUserAdmin,
+  getUserDetailForAdmin,
+  // MyPage operations
+  updateUser,
+  updateUserPassword,
+  addWatchHistory,
+  getWatchHistory,
+  toggleFavorite,
+  getFavorites,
+  isFavorite,
+  getFavoriteCount,
+  getRequestedVideosByUserId,
+  getPostsByUserId,
+  getCommentsByUserId,
   // Board functions
   createPost,
   getPost,
@@ -950,5 +1413,7 @@ module.exports = {
   listAllPostCommentsForAdmin,
   deletePostByIdAdmin,
   deletePostCommentByIdAdmin,
+  findUserEmail,
+  verifyUserResetCredentials,
   db, // Export the db instance directly
 };

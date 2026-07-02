@@ -4,11 +4,24 @@ const { TextToSpeechClient } = require('@google-cloud/text-to-speech');
 const fs = require('fs');
 const path = require('path');
 const db = require('./database');
-const { getYoutubeVideoId, getIsImpersonateAvailable, preprocessVtt } = require('./utils');
 const { processVideo, processVideoBatch } = require('./videoProcessor');
+const { 
+    getYoutubeVideoId, 
+    hashPassword, 
+    verifyPassword, 
+    verifySiloamMember, 
+    verifyCardOCR,
+    getIsImpersonateAvailable,
+    preprocessVtt
+} = require('./utils');
 const logger = require('./logger');
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const { spawn, execFile } = require('child_process');
+
+// JWT 기반 세션 관리 설정
+const jwt = require('jsonwebtoken');
+const JWT_SECRET = process.env.JWT_SECRET || 'momcenter-jwt-secret-key-!!!';
+const JWT_EXPIRES_IN = '30d';
 
 const router = express.Router();
 // Initialize Google Cloud Text-to-Speech Client
@@ -200,8 +213,69 @@ router.post('/tts', async (req, res) => {
     }
 });
 
+// 인증 미들웨어: 로그인 완료된 회원만 허용 (시각장애인 여부 상관없음)
+function requireAuth(req, res, next) {
+    let token = null;
+    const authHeader = req.headers['authorization'];
+    
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+        token = authHeader.split(' ')[1];
+    } else if (req.query.token) {
+        token = req.query.token;
+    }
+
+    if (!token) {
+        return res.status(401).json({ error: '로그인이 필요한 서비스입니다.' });
+    }
+
+    try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        const user = db.getUserById(decoded.userId);
+        if (!user) {
+            return res.status(401).json({ error: '사용자를 찾을 수 없습니다. 다시 로그인해 주십시오.' });
+        }
+        req.user = user;
+        next();
+    } catch (e) {
+        logger.warn('[Auth] Invalid or expired JWT token:', e.message);
+        return res.status(401).json({ error: '인증 세션이 만료되었습니다. 다시 로그인해 주십시오.' });
+    }
+}
+
+// 인증 미들웨어: 로그인 완료 및 시각장애인으로 인증된 회원만 허용
+function requireBlindAuth(req, res, next) {
+    let token = null;
+    const authHeader = req.headers['authorization'];
+    
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+        token = authHeader.split(' ')[1];
+    } else if (req.query.token) {
+        token = req.query.token; // SSE(EventSource) 헤더 미지원 우회 처리
+    }
+
+    if (!token) {
+        return res.status(401).json({ error: '로그인이 필요한 서비스입니다.' });
+    }
+
+    try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        const user = db.getUserById(decoded.userId);
+        if (!user) {
+            return res.status(401).json({ error: '사용자를 찾을 수 없습니다. 다시 로그인해 주십시오.' });
+        }
+
+        // 미인증 유저(is_blind !== 1)도 5분 이하 영상 생성은 가능하므로 통과.
+        // 비디오 프로세서 단에서 동영상 길이에 따라 인증 회원 여부를 판단하여 생성 제한함.
+        req.user = user;
+        next();
+    } catch (e) {
+        logger.warn('[Auth] Invalid or expired JWT token:', e.message);
+        return res.status(401).json({ error: '인증 세션이 만료되었습니다. 다시 로그인해 주십시오.' });
+    }
+}
+
 // --- MAIN PROCESSING API ENDPOINT (SSE) ---
-router.get('/process', async (req, res) => {
+router.get('/process', requireBlindAuth, async (req, res) => {
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
@@ -241,7 +315,7 @@ router.get('/process', async (req, res) => {
         }
 
         // Use the refactored processor, which now includes the duration check
-        await processVideo(videoId, youtubeUrl, sendSse);
+        await processVideo(videoId, youtubeUrl, sendSse, req.user.id);
         res.end();
 
     } catch (error) {
@@ -761,18 +835,23 @@ router.get('/comments/:videoId', (req, res) => {
 });
 
 // POST a new comment
-router.post('/comments', (req, res) => {
+router.post('/comments', requireAuth, (req, res) => {
     try {
-        const { videoId, nickname, password, content } = req.body;
-        if (!videoId || !nickname || !password || !content) {
+        const { videoId, nickname, content } = req.body;
+        if (!videoId || !content) {
             return res.status(400).json({ error: 'Missing required fields' });
         }
-        const newCommentId = db.addComment({ videoId, nickname, password, content });
+        const authorNickname = nickname || req.user.name;
+        const userId = req.user.id;
+        const password = 'dummy_password';
+
+        const newCommentId = db.addComment({ videoId, userId, nickname: authorNickname, password, content });
         const newComment = db.getCommentById(newCommentId);
         // Return the newly created comment (without password)
         res.status(201).json({
             id: newComment.id,
             videoId: newComment.videoId,
+            userId: newComment.userId,
             nickname: newComment.nickname,
             content: newComment.content,
             createdAt: newComment.createdAt
@@ -784,13 +863,13 @@ router.post('/comments', (req, res) => {
 });
 
 // PUT (update) a comment
-router.put('/comments/:commentId', (req, res) => {
+router.put('/comments/:commentId', requireAuth, (req, res) => {
     try {
         const { commentId } = req.params;
-        const { password, content } = req.body;
+        const { content } = req.body;
 
-        if (!password || !content) {
-            return res.status(400).json({ error: 'Password and content are required' });
+        if (!content) {
+            return res.status(400).json({ error: 'Content is required' });
         }
 
         const comment = db.getCommentById(commentId);
@@ -798,9 +877,8 @@ router.put('/comments/:commentId', (req, res) => {
             return res.status(404).json({ error: 'Comment not found' });
         }
 
-        const isPasswordValid = db.verifyPassword(comment.password, password);
-        if (!isPasswordValid) {
-            return res.status(403).json({ error: 'Invalid password' });
+        if (!comment.userId || comment.userId !== req.user.id) {
+            return res.status(403).json({ error: '본인이 작성한 댓글만 수정할 수 있습니다.' });
         }
 
         const success = db.updateComment({ commentId, content });
@@ -816,23 +894,17 @@ router.put('/comments/:commentId', (req, res) => {
 });
 
 // DELETE a comment
-router.delete('/comments/:commentId', (req, res) => {
+router.delete('/comments/:commentId', requireAuth, (req, res) => {
     try {
         const { commentId } = req.params;
-        const { password } = req.body;
-
-        if (!password) {
-            return res.status(400).json({ error: 'Password is required' });
-        }
 
         const comment = db.getCommentById(commentId);
         if (!comment) {
             return res.status(404).json({ error: 'Comment not found' });
         }
 
-        const isPasswordValid = db.verifyPassword(comment.password, password);
-        if (!isPasswordValid) {
-            return res.status(403).json({ error: 'Invalid password' });
+        if (!comment.userId || comment.userId !== req.user.id) {
+            return res.status(403).json({ error: '본인이 작성한 댓글만 삭제할 수 있습니다.' });
         }
 
         const success = db.deleteComment(commentId);
@@ -883,12 +955,12 @@ boardRouter.get('/posts/:id', (req, res) => {
 });
 
 // POST a new post
-boardRouter.post('/posts', (req, res) => {
+boardRouter.post('/posts', requireAuth, (req, res) => {
     try {
-        const { title, content, nickname, password, is_notice = false, adminPassword } = req.body;
+        const { title, content, nickname, is_notice = false, adminPassword } = req.body;
         
-        if (!title || !content || !nickname || !password) {
-            return res.status(400).json({ error: '제목, 내용, 닉네임, 비밀번호는 필수입니다.' });
+        if (!title || !content) {
+            return res.status(400).json({ error: '제목과 내용은 필수입니다.' });
         }
 
         let isNoticeBool = Boolean(is_notice);
@@ -900,7 +972,11 @@ boardRouter.post('/posts', (req, res) => {
             }
         }
 
-        const newPostId = db.createPost({ title, content, nickname, password, is_notice: isNoticeBool });
+        const authorNickname = nickname || req.user.name;
+        const password = 'dummy_password'; // 더미 비밀번호 설정 (DB null constraint 대응)
+        const userId = req.user.id;
+
+        const newPostId = db.createPost({ title, content, nickname: authorNickname, password, is_notice: isNoticeBool, userId });
         const newPost = db.getPost(newPostId);
         res.status(201).json(newPost);
     } catch (error) {
@@ -910,13 +986,13 @@ boardRouter.post('/posts', (req, res) => {
 });
 
 // PUT (update) a post
-boardRouter.put('/posts/:id', (req, res) => {
+boardRouter.put('/posts/:id', requireAuth, (req, res) => {
     try {
         const { id } = req.params;
-        const { title, content, password } = req.body;
+        const { title, content } = req.body;
 
-        if (!password || !title || !content) {
-            return res.status(400).json({ error: 'Password, title, and content are required' });
+        if (!title || !content) {
+            return res.status(400).json({ error: 'Title and content are required' });
         }
 
         const post = db.getPostWithPassword(id);
@@ -924,9 +1000,8 @@ boardRouter.put('/posts/:id', (req, res) => {
             return res.status(404).json({ error: 'Post not found' });
         }
 
-        const isPasswordValid = db.verifyPassword(post.password, password);
-        if (!isPasswordValid) {
-            return res.status(403).json({ error: 'Invalid password' });
+        if (!post.userId || post.userId !== req.user.id) {
+            return res.status(403).json({ error: '본인이 작성한 글만 수정할 수 있습니다.' });
         }
 
         const success = db.updatePost({ id, title, content });
@@ -942,23 +1017,17 @@ boardRouter.put('/posts/:id', (req, res) => {
 });
 
 // DELETE a post
-boardRouter.delete('/posts/:id', (req, res) => {
+boardRouter.delete('/posts/:id', requireAuth, (req, res) => {
     try {
         const { id } = req.params;
-        const { password } = req.body;
-
-        if (!password) {
-            return res.status(400).json({ error: 'Password is required' });
-        }
 
         const post = db.getPostWithPassword(id);
         if (!post) {
             return res.status(404).json({ error: 'Post not found' });
         }
 
-        const isPasswordValid = db.verifyPassword(post.password, password);
-        if (!isPasswordValid) {
-            return res.status(403).json({ error: 'Invalid password' });
+        if (!post.userId || post.userId !== req.user.id) {
+            return res.status(403).json({ error: '본인이 작성한 글만 삭제할 수 있습니다.' });
         }
 
         const success = db.deletePost(id);
@@ -974,21 +1043,27 @@ boardRouter.delete('/posts/:id', (req, res) => {
 });
 
 // POST a new comment on a post
-boardRouter.post('/posts/:id/comments', (req, res) => {
+boardRouter.post('/posts/:id/comments', requireAuth, (req, res) => {
     try {
         const { id: postId } = req.params;
-        const { nickname, password, content } = req.body;
-        if (!nickname || !password || !content) {
-            return res.status(400).json({ error: 'Missing required fields' });
+        const { content, nickname } = req.body;
+        if (!content) {
+            return res.status(400).json({ error: '내용은 필수입니다.' });
         }
-        const newCommentId = db.createPostComment({ postId, nickname, password, content });
+
+        const authorNickname = nickname || req.user.name;
+        const password = 'dummy_password';
+        const userId = req.user.id;
+
+        const newCommentId = db.createPostComment({ postId, nickname: authorNickname, password, content, userId });
         const newComment = db.getPostCommentById(newCommentId);
         res.status(201).json({
             id: newComment.id,
             postId: newComment.postId,
             nickname: newComment.nickname,
             content: newComment.content,
-            createdAt: newComment.createdAt
+            createdAt: newComment.createdAt,
+            userId: newComment.userId
         });
     } catch (error) {
         logger.error(`[Board] Failed to add comment to post ${req.params.id}:`, error);
@@ -997,13 +1072,13 @@ boardRouter.post('/posts/:id/comments', (req, res) => {
 });
 
 // PUT (update) a comment on a post
-boardRouter.put('/comments/:commentId', (req, res) => {
+boardRouter.put('/comments/:commentId', requireAuth, (req, res) => {
     try {
         const { commentId } = req.params;
-        const { password, content } = req.body;
+        const { content } = req.body;
 
-        if (!password || !content) {
-            return res.status(400).json({ error: 'Password and content are required' });
+        if (!content) {
+            return res.status(400).json({ error: 'Content is required' });
         }
 
         const comment = db.getPostCommentById(commentId);
@@ -1011,9 +1086,8 @@ boardRouter.put('/comments/:commentId', (req, res) => {
             return res.status(404).json({ error: 'Comment not found' });
         }
 
-        const isPasswordValid = db.verifyPassword(comment.password, password);
-        if (!isPasswordValid) {
-            return res.status(403).json({ error: 'Invalid password' });
+        if (!comment.userId || comment.userId !== req.user.id) {
+            return res.status(403).json({ error: '본인이 작성한 댓글만 수정할 수 있습니다.' });
         }
 
         const success = db.updatePostComment({ commentId, content });
@@ -1029,23 +1103,17 @@ boardRouter.put('/comments/:commentId', (req, res) => {
 });
 
 // DELETE a comment on a post
-boardRouter.delete('/comments/:commentId', (req, res) => {
+boardRouter.delete('/comments/:commentId', requireAuth, (req, res) => {
     try {
         const { commentId } = req.params;
-        const { password } = req.body;
-
-        if (!password) {
-            return res.status(400).json({ error: 'Password is required' });
-        }
 
         const comment = db.getPostCommentById(commentId);
         if (!comment) {
             return res.status(404).json({ error: 'Comment not found' });
         }
 
-        const isPasswordValid = db.verifyPassword(comment.password, password);
-        if (!isPasswordValid) {
-            return res.status(403).json({ error: 'Invalid password' });
+        if (!comment.userId || comment.userId !== req.user.id) {
+            return res.status(403).json({ error: '본인이 작성한 댓글만 삭제할 수 있습니다.' });
         }
 
         const success = db.deletePostComment(commentId);
@@ -1378,15 +1446,691 @@ adminRouter.delete('/board/comments/:id', (req, res) => {
     }
 });
 
+// GET list of all users for admin
+adminRouter.get('/users', (req, res) => {
+    try {
+        const { page = 1, limit = 20, search = '', isBlind = '', isActive = '' } = req.query;
+        const result = db.listAllUsersForAdmin({
+            page: parseInt(page, 10),
+            limit: parseInt(limit, 10),
+            search: search || null,
+            isBlind: isBlind !== '' ? isBlind : null,
+            isActive: isActive !== '' ? isActive : null
+        });
+        res.json(result);
+    } catch (error) {
+        logger.error('[Admin] Failed to fetch users list:', error);
+        res.status(500).json({ error: 'Failed to fetch users list' });
+    }
+});
+
+// GET detail of a specific user
+adminRouter.get('/users/:userId', (req, res) => {
+    try {
+        const { userId } = req.params;
+        const userDetail = db.getUserDetailForAdmin(userId);
+        if (userDetail) {
+            res.json(userDetail);
+        } else {
+            res.status(404).json({ error: '사용자를 찾을 수 없습니다.' });
+        }
+    } catch (error) {
+        logger.error(`[Admin] Failed to fetch user detail for ${req.params.userId}:`, error);
+        res.status(500).json({ error: 'Failed to fetch user detail' });
+    }
+});
+
+// PUT update user status (isActive, isBlind)
+adminRouter.put('/users/:userId/status', (req, res) => {
+    try {
+        const { userId } = req.params;
+        const { isActive, isBlind } = req.body;
+        
+        if (isActive === undefined || isBlind === undefined) {
+            return res.status(400).json({ error: 'isActive와 isBlind 상태값이 필요합니다.' });
+        }
+        
+        const success = db.updateUserStatusAdmin(userId, {
+            isActive: parseInt(isActive, 10),
+            isBlind: parseInt(isBlind, 10)
+        });
+        
+        if (success) {
+            logger.info(`[Admin] User ${userId} status updated (isActive: ${isActive}, isBlind: ${isBlind}).`);
+            res.json({ success: true, message: '사용자 상태가 업데이트되었습니다.' });
+        } else {
+            res.status(404).json({ error: '사용자를 찾을 수 없습니다.' });
+        }
+    } catch (error) {
+        logger.error(`[Admin] Failed to update status for user ${req.params.userId}:`, error);
+        res.status(500).json({ error: 'Failed to update user status' });
+    }
+});
+
+// POST reset user password or PIN
+adminRouter.post('/users/:userId/reset', (req, res) => {
+    try {
+        const { userId } = req.params;
+        const { type, newValue } = req.body; // type: 'password' or 'pin'
+        
+        if (!type || !newValue) {
+            return res.status(400).json({ error: '재설정 유형(type)과 새 값(newValue)이 필요합니다.' });
+        }
+        
+        let valueToSave = newValue;
+        if (type === 'password') {
+            valueToSave = hashPassword(newValue);
+        }
+        
+        const success = db.resetUserPasswordOrPinAdmin(userId, { type, newValue: valueToSave });
+        if (success) {
+            logger.info(`[Admin] User ${userId} ${type} reset successfully.`);
+            res.json({ success: true, message: `${type === 'password' ? '비밀번호' : 'PIN'}가 정상적으로 재설정되었습니다.` });
+        } else {
+            res.status(404).json({ error: '사용자를 찾을 수 없습니다.' });
+        }
+    } catch (error) {
+        logger.error(`[Admin] Failed to reset ${req.body.type} for user ${req.params.userId}:`, error);
+        res.status(500).json({ error: `Failed to reset user ${req.body.type}` });
+    }
+});
+
+// DELETE delete/force-withdraw a user
+adminRouter.delete('/users/:userId', (req, res) => {
+    try {
+        const { userId } = req.params;
+        const success = db.deleteUserAdmin(userId);
+        if (success) {
+            logger.info(`[Admin] User ${userId} deleted/force-withdrawn successfully.`);
+            res.json({ success: true, message: '사용자가 강제 탈퇴 처리되었습니다.' });
+        } else {
+            res.status(404).json({ error: '사용자를 찾을 수 없습니다.' });
+        }
+    } catch (error) {
+        logger.error(`[Admin] Failed to delete user ${req.params.userId}:`, error);
+        res.status(500).json({ error: 'Failed to delete user' });
+    }
+});
+
+// GET list of users pending manual blind verification (is_blind = 9)
+adminRouter.get('/pending-users', (req, res) => {
+    try {
+        const users = db.listPendingUsers();
+        res.json(users);
+    } catch (error) {
+        logger.error('[Admin] Failed to fetch pending users:', error);
+        res.status(500).json({ error: 'Failed to fetch pending users' });
+    }
+});
+
+// POST approve a pending user
+adminRouter.post('/users/:userId/approve', (req, res) => {
+    try {
+        const { userId } = req.params;
+        const success = db.updateUserBlindStatus(userId, 1); // 1 = approved (blind)
+        if (success) {
+            logger.info(`[Admin] User ${userId} blind status approved successfully.`);
+            res.json({ success: true, message: '사용자 시각장애인 인증이 승인되었습니다.' });
+        } else {
+            res.status(404).json({ error: '사용자를 찾을 수 없습니다.' });
+        }
+    } catch (error) {
+        logger.error(`[Admin] Failed to approve user ${req.params.userId}:`, error);
+        res.status(500).json({ error: 'Failed to approve user' });
+    }
+});
+
+// POST reject a pending user
+adminRouter.post('/users/:userId/reject', (req, res) => {
+    try {
+        const { userId } = req.params;
+        const success = db.updateUserBlindStatus(userId, 2); // 2 = rejected
+        if (success) {
+            logger.info(`[Admin] User ${userId} blind status rejected.`);
+            res.json({ success: true, message: '사용자 시각장애인 인증이 반려되었습니다.' });
+        } else {
+            res.status(404).json({ error: '사용자를 찾을 수 없습니다.' });
+        }
+    } catch (error) {
+        logger.error(`[Admin] Failed to reject user ${req.params.userId}:`, error);
+        res.status(500).json({ error: 'Failed to reject user' });
+    }
+});
+
 // Mount the admin router
 router.use('/admin', adminRouter);
 
+
+// --- AUTHENTICATION API ROUTES ---
+
+router.post('/auth/register', async (req, res) => {
+    let { email, password, name, phone, birthdate, pin, verificationMethod = 'siloam_api', cardImage, mimeType } = req.body;
+
+    if (!email || !password || !name || !phone || !birthdate || !pin) {
+        return res.status(400).json({ error: '필수 가입 정보가 누락되었습니다.' });
+    }
+    
+    email = email.toLowerCase();
+
+    try {
+        // 1단계: 이메일(ID) 중복 확인
+        const existingUser = db.getUserByEmail(email);
+        if (existingUser) {
+            return res.status(400).json({ error: '이미 사용 중인 이메일 주소입니다.' });
+        }
+
+        // 2단계: 실명 + 생년월일 조합 중복 확인
+        const existingBio = db.getUserByBio(name, birthdate);
+        if (existingBio) {
+            return res.status(400).json({ error: '이미 해당 정보(실명 및 생년월일)로 가입된 회원이 존재합니다.' });
+        }
+
+        // 3단계: 연락처(휴대폰 번호) 중복 확인
+        const existingPhone = db.getUserByPhone(phone);
+        if (existingPhone) {
+            return res.status(400).json({ error: '이미 사용 중인 연락처(휴대폰 번호)입니다.' });
+        }
+
+        const userId = crypto.randomUUID();
+        const hashedPassword = hashPassword(password);
+        let isBlindStatus = 0; // 0: 미인증
+        let verificationStatus = 'pending';
+        let detailLogs = '';
+
+        if (verificationMethod === 'siloam_api') {
+            const result = await verifySiloamMember({ name, birthDate: birthdate, phoneNo: phone });
+            if (result.isValid) {
+                isBlindStatus = 1;
+                verificationStatus = 'approved';
+                detailLogs = JSON.stringify({ verifiedAt: result.verifiedAt });
+            } else {
+                return res.status(400).json({ error: '실로암 시각장애인 회원 정보와 일치하지 않습니다.' });
+            }
+        } else if (verificationMethod === 'card_ocr') {
+            if (!cardImage || !mimeType) {
+                return res.status(400).json({ error: '복지카드 이미지 데이터가 누락되었습니다.' });
+            }
+
+            const base64Data = cardImage.replace(/^data:image\/\w+;base64,/, "");
+            const imageBuffer = Buffer.from(base64Data, 'base64');
+
+            const ocrResult = await verifyCardOCR(imageBuffer, mimeType, name, birthdate);
+            logger.info(`[Card OCR Result] Name: ${name}, Birthdate: ${birthdate}, Result: ${JSON.stringify(ocrResult)}`);
+            detailLogs = JSON.stringify(ocrResult);
+
+            if (ocrResult.isValidCard) {
+                if (ocrResult.confidenceScore >= 0.85) {
+                    isBlindStatus = 1;
+                    verificationStatus = 'approved';
+                } else {
+                    isBlindStatus = 9; // 관리자 대기
+                    verificationStatus = 'pending';
+                }
+            } else {
+                return res.status(400).json({ error: '업로드된 복지카드에서 시각장애인 자격을 판독하지 못했습니다. 선명한 사진을 다시 업로드해 주세요.' });
+            }
+        } else if (verificationMethod === 'none') {
+            isBlindStatus = 0; // 미인증
+            verificationStatus = 'unverified';
+            detailLogs = JSON.stringify({ method: 'none', timestamp: new Date().toISOString() });
+        } else {
+            return res.status(400).json({ error: '지원하지 않는 인증 방식입니다.' });
+        }
+
+        const userCreated = db.createUser({
+            id: userId,
+            email,
+            password: hashedPassword,
+            name,
+            phone,
+            birthdate,
+            is_blind: isBlindStatus,
+            pin
+        });
+
+        if (!userCreated) {
+            throw new Error('회원 DB 저장 실패');
+        }
+
+        db.createUserVerification({
+            userId,
+            verificationMethod,
+            status: verificationStatus,
+            details: detailLogs,
+            verifiedAt: isBlindStatus === 1 ? new Date().toISOString() : null
+        });
+
+        let successMsg = '시각장애인 인증 및 회원가입이 완료되었습니다.';
+        if (isBlindStatus === 9) {
+            successMsg = '회원가입이 완료되었습니다. 복지카드 수동 승인 대기 중입니다.';
+        } else if (isBlindStatus === 0) {
+            successMsg = '회원가입이 완료되었습니다. (미인증 상태)';
+        }
+
+        res.status(201).json({
+            success: true,
+            message: successMsg,
+            isBlind: isBlindStatus
+        });
+
+    } catch (error) {
+        logger.error('Registration process failed:', error);
+        res.status(500).json({ error: '회원가입 처리 중 내부 서버 오류가 발생했습니다.' });
+    }
+});
+
+// 2. 로그인 API
+router.post('/auth/login', (req, res) => {
+    let { email, password } = req.body;
+    if (!email || !password) {
+        return res.status(400).json({ error: '이메일과 비밀번호를 입력하십시오.' });
+    }
+    
+    email = email.toLowerCase();
+
+    try {
+        const user = db.getUserByEmail(email);
+        if (!user || !verifyPassword(password, user.password)) {
+            return res.status(401).json({ error: '이메일 또는 비밀번호가 잘못되었습니다.' });
+        }
+
+        if (user.is_active === 0) {
+            return res.status(403).json({ error: '비활성화된 계정입니다. 관리자에게 문의하십시오.' });
+        }
+
+        const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+        try {
+            db.updateUserLoginInfo(user.id, ip);
+        } catch (ipError) {
+            logger.error(`Failed to update user login info for ${user.id}:`, ipError);
+        }
+
+        const token = jwt.sign(
+            { 
+                userId: user.id, 
+                email: user.email, 
+                name: user.name, 
+                isBlind: user.is_blind 
+            }, 
+            JWT_SECRET, 
+            { expiresIn: JWT_EXPIRES_IN }
+        );
+
+        res.json({
+            success: true,
+            token,
+            user: {
+                id: user.id,
+                email: user.email,
+                name: user.name,
+                isBlind: user.is_blind
+            }
+        });
+    } catch (error) {
+        logger.error('Login error:', error);
+        res.status(500).json({ error: '로그인 처리 중 오류가 발생했습니다.' });
+    }
+});
+
+// 2.1 회원 ID 찾기 API
+router.post('/auth/find-id', (req, res) => {
+    const { name, birthdate } = req.body;
+    if (!name || !birthdate) {
+        return res.status(400).json({ error: '이름과 생년월일을 입력하십시오.' });
+    }
+
+    try {
+        const user = db.findUserEmail(name, birthdate);
+        if (!user) {
+            return res.status(404).json({ error: '일치하는 회원 정보가 존재하지 않습니다.' });
+        }
+        res.json({ success: true, email: user.email });
+    } catch (error) {
+        logger.error('Find ID error:', error);
+        res.status(500).json({ error: '회원 ID 찾기 처리 중 오류가 발생했습니다.' });
+    }
+});
+
+// 2.2 비밀번호 찾기용 인증 정보 확인 API
+router.post('/auth/verify-reset-credentials', (req, res) => {
+    const { name, birthdate, phone, pin } = req.body;
+    if (!name || !birthdate || !phone || !pin) {
+        return res.status(400).json({ error: '이름, 생년월일, 전화번호, PIN을 모두 입력하십시오.' });
+    }
+
+    try {
+        const user = db.verifyUserResetCredentials(name, birthdate, phone, pin);
+        if (!user) {
+            return res.status(400).json({ error: '입력하신 정보와 일치하는 회원이 없거나 PIN 번호가 다릅니다.' });
+        }
+        res.json({ success: true, message: '인증에 성공했습니다. 새 비밀번호를 입력해주세요.' });
+    } catch (error) {
+        logger.error('Verify reset credentials error:', error);
+        res.status(500).json({ error: '인증 확인 처리 중 오류가 발생했습니다.' });
+    }
+});
+
+// 2.3 비밀번호 재설정 API
+router.post('/auth/reset-password-with-pin', (req, res) => {
+    const { name, birthdate, phone, pin, newPassword } = req.body;
+    if (!name || !birthdate || !phone || !pin || !newPassword) {
+        return res.status(400).json({ error: '모든 필수 입력 정보가 누락되었습니다.' });
+    }
+
+    try {
+        const user = db.verifyUserResetCredentials(name, birthdate, phone, pin);
+        if (!user) {
+            return res.status(400).json({ error: '인증 정보가 올바르지 않습니다.' });
+        }
+
+        const hashedPassword = hashPassword(newPassword);
+        const success = db.updateUserPassword(user.id, hashedPassword);
+        if (!success) {
+            return res.status(500).json({ error: '비밀번호 재설정에 실패했습니다.' });
+        }
+
+        res.json({ success: true, message: '비밀번호가 성공적으로 재설정되었습니다.' });
+    } catch (error) {
+        logger.error('Reset password error:', error);
+        res.status(500).json({ error: '비밀번호 재설정 처리 중 오류가 발생했습니다.' });
+    }
+});
+
+// 3. 로그인 정보 조회 API
+router.get('/auth/me', (req, res) => {
+    const authHeader = req.headers['authorization'];
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ error: '로그인이 필요합니다.' });
+    }
+
+    const token = authHeader.split(' ')[1];
+    try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        const user = db.getUserById(decoded.userId);
+        if (!user) {
+             return res.status(401).json({ error: '사용자를 찾을 수 없습니다.' });
+        }
+
+        res.json({
+            success: true,
+            user: {
+                id: user.id,
+                email: user.email,
+                name: user.name,
+                isBlind: user.is_blind
+            }
+        });
+    } catch (e) {
+        logger.warn('[Auth] Me check failed, invalid or expired JWT token:', e.message);
+        return res.status(401).json({ error: '유효하지 않거나 만료된 세션입니다.' });
+    }
+});
+
+// 4. 로그아웃 API
+router.post('/auth/logout', (req, res) => {
+    // JWT는 무상태(Stateless)이므로 서버 메모리 삭제 처리가 불필요합니다.
+    res.json({ success: true, message: '로그아웃 되었습니다.' });
+});
 
 // Log donation account copy event for statistics
 router.post('/log-donation-copy', (req, res) => {
     const { userAgent, timestamp } = req.body;
     logger.info(`[STATISTICS] Donation account copied. Time: ${timestamp}, UA: ${userAgent}`);
     res.status(200).json({ success: true });
+});
+
+// --- MY PAGE API ENDPOINTS ---
+
+// 1. 내 가입 정보 조회
+router.get('/users/me', requireAuth, (req, res) => {
+    res.json({
+        success: true,
+        user: {
+            id: req.user.id,
+            email: req.user.email,
+            name: req.user.name,
+            phone: req.user.phone,
+            birthdate: req.user.birthdate,
+            pin: req.user.pin,
+            isBlind: req.user.is_blind,
+            createdAt: req.user.createdAt
+        }
+    });
+});
+
+// 2. 내 가입 정보 수정
+router.put('/users/me', requireAuth, (req, res) => {
+    const { name, phone, pin } = req.body;
+    if (!name || !phone || !pin) {
+        return res.status(400).json({ error: '이름, 연락처 및 PIN 번호는 필수 입력 사항입니다.' });
+    }
+    if (pin.length < 4 || pin.length > 6 || /[^0-9]/.test(pin)) {
+        return res.status(400).json({ error: 'PIN 번호는 4~6자리의 숫자여야 합니다.' });
+    }
+    
+    try {
+        // 휴대폰 번호 중복 확인 (본인 제외)
+        const existingPhone = db.getUserByPhone(phone);
+        if (existingPhone && existingPhone.id !== req.user.id) {
+            return res.status(400).json({ error: '이미 사용 중인 연락처(휴대폰 번호)입니다.' });
+        }
+        
+        const success = db.updateUser(req.user.id, { name, phone, pin });
+        if (success) {
+            res.json({ success: true, message: '회원 정보가 수정되었습니다.' });
+        } else {
+            res.status(500).json({ error: '회원 정보 수정에 실패했습니다.' });
+        }
+    } catch (error) {
+        logger.error('[MyPage] Failed to update user info:', error);
+        res.status(500).json({ error: '회원 정보 수정 중 서버 오류가 발생했습니다.' });
+    }
+});
+
+// 3. 비밀번호 변경
+router.put('/users/me/password', requireAuth, (req, res) => {
+    const { currentPassword, newPassword } = req.body;
+    if (!currentPassword || !newPassword) {
+        return res.status(400).json({ error: '현재 비밀번호와 새 비밀번호를 모두 입력해주십시오.' });
+    }
+    
+    try {
+        if (!verifyPassword(currentPassword, req.user.password)) {
+            return res.status(400).json({ error: '현재 비밀번호가 일치하지 않습니다.' });
+        }
+        
+        const newPasswordHash = hashPassword(newPassword);
+        const success = db.updateUserPassword(req.user.id, newPasswordHash);
+        if (success) {
+            res.json({ success: true, message: '비밀번호가 안전하게 변경되었습니다.' });
+        } else {
+            res.status(500).json({ error: '비밀번호 변경에 실패했습니다.' });
+        }
+    } catch (error) {
+        logger.error('[MyPage] Failed to update password:', error);
+        res.status(500).json({ error: '비밀번호 변경 중 서버 오류가 발생했습니다.' });
+    }
+});
+
+// 4. 내가 요청한 영상 목록 조회
+router.get('/users/me/videos/requested', requireAuth, (req, res) => {
+    try {
+        const videos = db.getRequestedVideosByUserId(req.user.id);
+        res.json({ success: true, videos });
+    } catch (error) {
+        logger.error('[MyPage] Failed to fetch requested videos:', error);
+        res.status(500).json({ error: '요청 영상 목록 조회 중 서버 오류가 발생했습니다.' });
+    }
+});
+
+// 5. 최근 시청 영상 목록 조회
+router.get('/users/me/videos/history', requireAuth, (req, res) => {
+    try {
+        const videos = db.getWatchHistory(req.user.id);
+        res.json({ success: true, videos });
+    } catch (error) {
+        logger.error('[MyPage] Failed to fetch watch history:', error);
+        res.status(500).json({ error: '최근 시청 목록 조회 중 서버 오류가 발생했습니다.' });
+    }
+});
+
+// 6. 시청 기록 추가
+router.post('/users/me/videos/history', requireAuth, (req, res) => {
+    const { videoId } = req.body;
+    if (!videoId) {
+        return res.status(400).json({ error: '영상 ID가 누락되었습니다.' });
+    }
+    try {
+        db.addWatchHistory(req.user.id, videoId);
+        res.json({ success: true });
+    } catch (error) {
+        logger.error('[MyPage] Failed to add watch history:', error);
+        res.status(500).json({ error: '시청 기록 저장 중 서버 오류가 발생했습니다.' });
+    }
+});
+
+// 7. 즐겨찾는 영상 목록 조회
+router.get('/users/me/videos/favorites', requireAuth, (req, res) => {
+    try {
+        const videos = db.getFavorites(req.user.id);
+        res.json({ success: true, videos });
+    } catch (error) {
+        logger.error('[MyPage] Failed to fetch favorites:', error);
+        res.status(500).json({ error: '즐겨찾는 영상 목록 조회 중 서버 오류가 발생했습니다.' });
+    }
+});
+
+// 8. 즐겨찾기 토글
+router.post('/users/me/videos/favorites/toggle', requireAuth, (req, res) => {
+    const { videoId } = req.body;
+    if (!videoId) {
+        return res.status(400).json({ error: '영상 ID가 누락되었습니다.' });
+    }
+    try {
+        const result = db.toggleFavorite(req.user.id, videoId);
+        const count = db.getFavoriteCount(videoId);
+        res.json({ success: true, isFavorite: result.isFavorite, likeCount: count });
+    } catch (error) {
+        logger.error('[MyPage] Failed to toggle favorite:', error);
+        res.status(500).json({ error: '즐겨찾기 상태 변경 중 서버 오류가 발생했습니다.' });
+    }
+});
+
+// 9. 특정 영상 즐겨찾기 여부 확인
+router.get('/users/me/videos/favorites/:videoId', requireAuth, (req, res) => {
+    const { videoId } = req.params;
+    try {
+        const favorited = db.isFavorite(req.user.id, videoId);
+        const count = db.getFavoriteCount(videoId);
+        res.json({ success: true, isFavorite: favorited, likeCount: count });
+    } catch (error) {
+        logger.error('[MyPage] Failed to check favorite status:', error);
+        res.status(500).json({ error: '즐겨찾기 상태 확인 중 서버 오류가 발생했습니다.' });
+    }
+});
+
+// 10. 내가 쓴 글/댓글 모아보기
+router.get('/users/me/activities', requireAuth, (req, res) => {
+    try {
+        const posts = db.getPostsByUserId(req.user.id);
+        const comments = db.getCommentsByUserId(req.user.id);
+        res.json({ success: true, posts, comments });
+    } catch (error) {
+        logger.error('[MyPage] Failed to fetch user activities:', error);
+        res.status(500).json({ error: '활동 내역 조회 중 서버 오류가 발생했습니다.' });
+    }
+});
+
+// 11. 로그인된 사용자의 시각장애인 재인증 API
+router.post('/users/me/verify-blind', requireAuth, async (req, res) => {
+    const { verificationMethod, cardImage, mimeType } = req.body;
+    const userId = req.user.id;
+
+    if (!verificationMethod) {
+        return res.status(400).json({ error: '인증 방식이 누락되었습니다.' });
+    }
+
+    try {
+        const user = db.getUserById(userId);
+        if (!user) {
+            return res.status(400).json({ error: '사용자 정보를 찾을 수 없습니다.' });
+        }
+
+        // 이미 승인된 회원인 경우 중복 진행 차단
+        if (user.is_blind === 1) {
+            return res.status(400).json({ error: '이미 시각장애인 인증이 완료된 회원입니다.' });
+        }
+
+        let isBlindStatus = 0;
+        let verificationStatus = 'pending';
+        let detailLogs = '';
+
+        if (verificationMethod === 'siloam_api') {
+            const result = await verifySiloamMember({ 
+                name: user.name, 
+                birthDate: user.birthdate, 
+                phoneNo: user.phone 
+            });
+            if (result.isValid) {
+                isBlindStatus = 1;
+                verificationStatus = 'approved';
+                detailLogs = JSON.stringify({ verifiedAt: result.verifiedAt });
+            } else {
+                return res.status(400).json({ error: '실로암 시각장애인 회원 정보와 일치하지 않습니다. 이름, 생년월일, 연락처 정보를 복지관 등록 정보와 일치시켜 주십시오.' });
+            }
+        } else if (verificationMethod === 'card_ocr') {
+            if (!cardImage || !mimeType) {
+                return res.status(400).json({ error: '복지카드 이미지 데이터가 누락되었습니다.' });
+            }
+
+            const base64Data = cardImage.replace(/^data:image\/\w+;base64,/, "");
+            const imageBuffer = Buffer.from(base64Data, 'base64');
+
+            const ocrResult = await verifyCardOCR(imageBuffer, mimeType, user.name, user.birthdate);
+            logger.info(`[MyPage Re-verification Card OCR] Name: ${user.name}, Birthdate: ${user.birthdate}, Result: ${JSON.stringify(ocrResult)}`);
+            detailLogs = JSON.stringify(ocrResult);
+
+            if (ocrResult.isValidCard) {
+                if (ocrResult.confidenceScore >= 0.85) {
+                    isBlindStatus = 1;
+                    verificationStatus = 'approved';
+                } else {
+                    isBlindStatus = 9; // 관리자 수동 승인 대기
+                    verificationStatus = 'pending';
+                }
+            } else {
+                return res.status(400).json({ error: '업로드된 복지카드에서 시각장애인 자격을 판독하지 못했습니다. 선명한 사진을 다시 업로드해 주세요.' });
+            }
+        } else {
+            return res.status(400).json({ error: '지원하지 않는 인증 방식입니다.' });
+        }
+
+        // DB 업데이트
+        db.updateUserBlindStatus(userId, isBlindStatus);
+
+        db.createUserVerification({
+            userId,
+            verificationMethod,
+            status: verificationStatus,
+            details: detailLogs,
+            verifiedAt: isBlindStatus === 1 ? new Date().toISOString() : null
+        });
+
+        let responseMsg = '시각장애인 인증이 완료되었습니다.';
+        if (isBlindStatus === 9) {
+            responseMsg = '인증 서류가 제출되었습니다. 복지카드 수동 승인 대기 중입니다.';
+        }
+
+        res.json({
+            success: true,
+            message: responseMsg,
+            isBlind: isBlindStatus
+        });
+
+    } catch (error) {
+        logger.error('[MyPage Verification] Re-verification process failed:', error);
+        res.status(500).json({ error: '인증 처리 중 내부 서버 오류가 발생했습니다.' });
+    }
 });
 
 module.exports = router;

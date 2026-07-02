@@ -3,12 +3,43 @@ const { google } = require("googleapis");
 const fs = require('fs');
 const path = require('path');
 const util = require('util');
-const { execFile, spawn } = require('child_process');
+const { execFile, spawn, execSync } = require('child_process');
 const crypto = require('crypto');
 const db = require('./database');
 const { formatTime, preprocessVtt, isValidYoutubeUrl, getIsImpersonateAvailable } = require('./utils');
 const logger = require('./logger');
 const sharp = require('sharp');
+
+let isSafariImpersonateSupported = false;
+try {
+    const output = execSync('yt-dlp --list-impersonate-targets', { encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'] });
+    const lines = output.split('\n');
+    const safariLine = lines.find(line => line.includes('Safari') || line.includes('safari'));
+    if (safariLine && !safariLine.toLowerCase().includes('unavailable')) {
+        isSafariImpersonateSupported = true;
+    }
+} catch (e) {
+    try {
+        execSync('yt-dlp --impersonate safari -s --playlist-items 0 ""', { encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'] });
+        isSafariImpersonateSupported = true;
+    } catch (err) {
+        const stderr = err.stderr ? err.stderr.toString() : '';
+        const stdout = err.stdout ? err.stdout.toString() : '';
+        const errorMsg = stderr + stdout;
+        if (errorMsg.includes('Impersonate target') || errorMsg.includes('missing dependencies') || errorMsg.includes('curl_cffi')) {
+            isSafariImpersonateSupported = false;
+        } else {
+            isSafariImpersonateSupported = true;
+        }
+    }
+}
+
+if (isSafariImpersonateSupported) {
+    logger.info('[Impersonate] yt-dlp supports Safari impersonation.');
+} else {
+    logger.warn('[Impersonate] yt-dlp Safari impersonation is NOT supported by the environment. Bypassing impersonation.');
+}
+const impersonateArgs = isSafariImpersonateSupported ? ['--impersonate', 'safari'] : [];
 
 const API_KEY = process.env.GOOGLE_API_KEY;
 if (!API_KEY) {
@@ -141,7 +172,7 @@ const parseISO8601Duration = (duration) => {
     return hours * 3600 + minutes * 60 + seconds;
 };
 
-const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
+const processVideo = async (videoId, youtubeUrl, sseHandler = null, userId = null) => {
     const requestHash = sseHandler ? videoId.substring(0, 8) : `batch-${videoId.substring(0, 8)}`;
 
     if (processingLocks.has(videoId)) {
@@ -242,7 +273,22 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
             throw new Error(`Video duration (${totalDuration}s) exceeds the limit of ${durationLimitMinutes} minutes.`);
         }
 
-        db.ensureVideoRecord({ videoId, title: videoTitle, duration: Math.round(totalDuration), filesize });
+        // 시각장애인 미인증 회원에 대한 5분(300초) 제한 검사
+        let isBlindUser = false;
+        if (userId) {
+            const user = db.getUserById(userId);
+            if (user && user.is_blind === 1) {
+                isBlindUser = true;
+            }
+        }
+
+        if (userId && !isBlindUser && totalDuration > 300) {
+            const reason = `unverified_user_duration_exceeded`;
+            db.updateVideoStatus(videoId, 'failed', reason);
+            throw new Error('unverified_user_duration_exceeded');
+        }
+
+        db.ensureVideoRecord({ videoId, title: videoTitle, duration: Math.round(totalDuration), filesize, requested_by: userId });
         
         let subtitleContent = '';
         // Filename logic remains same, but we check existence later
@@ -609,7 +655,12 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null) => {
             let errorPayload;
             const lowerErrorMessage = errorMessage.toLowerCase();
 
-            if (lowerErrorMessage.includes('exceeds the limit')) {
+            if (lowerErrorMessage.includes('unverified_user_duration_exceeded')) {
+                errorPayload = {
+                    message: 'unverified_user_duration_exceeded',
+                    details: '시각장애인 인증을 완료하지 않은 회원은 5분 이하의 영상만 해설을 생성할 수 있습니다.'
+                };
+            } else if (lowerErrorMessage.includes('exceeds the limit')) {
                 const limitMatch = errorMessage.match(/limit of (\d+)/);
                 errorPayload = {
                     message: 'duration_exceeded',
@@ -689,6 +740,11 @@ const processVideoBatch = async (videoId, youtubeUrl, forceRecreate = false) => 
         }
 
         await fs.promises.mkdir(baseTempDir, { recursive: true });
+
+        const tempVideoFilename = `${videoId}.mp4`;
+        const tempVideoPath = path.join(baseTempDir, tempVideoFilename);
+        let filesize = 0;
+        const proxyArgs = process.env.YTDLP_PROXY ? ['--proxy', process.env.YTDLP_PROXY] : [];
 
         logger.info(`[${requestHash}] Step 1: Starting initial data extraction...`);
         const extractionLabel = `[${requestHash}] Initial Data Extraction Time`;

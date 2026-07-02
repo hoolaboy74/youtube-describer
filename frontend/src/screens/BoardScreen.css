@@ -2,9 +2,13 @@
   max-width: 800px;
   margin: 20px auto;
   padding: 20px;
-  background-color: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: var(--glass-border);
+  border-radius: 16px;
+  box-shadow: var(--glass-shadow);
+  color: var(--color-text-main);
 }
 
 .board-header {
@@ -12,30 +16,33 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
-  border-bottom: 1px solid #eee;
+  border-bottom: var(--glass-border-light);
   padding-bottom: 15px;
 }
 
 .board-header h1 {
   font-size: 2em;
-  color: #333;
+  color: var(--color-text-bright);
   margin: 0;
 }
 
 .btn-primary {
-  background-color: #007bff;
-  color: white;
-  padding: 10px 15px;
+  background: var(--gradient-accent);
+  color: var(--color-text-bright);
+  padding: 10px 20px;
   border: none;
-  border-radius: 5px;
+  border-radius: 8px;
   text-decoration: none;
   font-size: 1em;
+  font-weight: 700;
   cursor: pointer;
-  transition: background-color 0.2s;
+  box-shadow: var(--glass-shadow-light);
+  transition: all 0.3s ease;
 }
 
 .btn-primary:hover {
-  background-color: #0056b3;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
 }
 
 .sort-options {
@@ -44,23 +51,26 @@
 }
 
 .sort-options button {
-  background-color: #e9ecef;
-  border: 1px solid #ced4da;
+  background: var(--glass-bg);
+  border: var(--glass-border-input);
+  color: var(--color-text-main);
   padding: 8px 12px;
   margin-left: 5px;
-  border-radius: 5px;
+  border-radius: 8px;
   cursor: pointer;
-  transition: background-color 0.2s, border-color 0.2s;
+  transition: all 0.2s ease;
 }
 
 .sort-options button.active {
-  background-color: #007bff;
-  color: white;
-  border-color: #007bff;
+  background: var(--gradient-accent);
+  color: var(--color-text-bright);
+  border-color: var(--color-accent-purple);
 }
 
 .sort-options button:hover:not(.active) {
-  background-color: #dee2e6;
+  background: var(--glass-bg-hover);
+  border-color: var(--color-accent-purple);
+  color: var(--color-text-bright);
 }
 
 .post-list {
@@ -70,34 +80,41 @@
 }
 
 .post-list li {
-  background-color: #f8f9fa;
-  border: 1px solid #e9ecef;
-  border-radius: 8px;
-  margin-bottom: 10px;
-  transition: box-shadow 0.2s;
+  background: var(--glass-bg);
+  border: var(--glass-border-light);
+  border-radius: 12px;
+  margin-bottom: 12px;
+  transition: all 0.3s ease;
 }
 
 .post-list li:hover {
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-color: var(--color-accent-purple);
+  box-shadow: 0 4px 15px rgba(167, 139, 250, 0.15);
+  transform: translateY(-1px);
 }
 
 .post-link {
   display: block;
   padding: 15px;
   text-decoration: none;
-  color: #333;
+  color: var(--color-text-main);
 }
 
 .post-title {
   font-size: 1.2em;
   font-weight: bold;
   margin-bottom: 5px;
-  color: #007bff;
+  color: var(--color-text-bright);
+  transition: color 0.2s ease;
+}
+
+.post-link:hover .post-title {
+  color: var(--color-accent-purple);
 }
 
 .post-meta {
   font-size: 0.9em;
-  color: #6c757d;
+  color: var(--color-text-muted);
   display: flex;
   justify-content: space-between;
 }
@@ -107,7 +124,7 @@
 }
 
 .error-message {
-  color: #dc3545;
+  color: #fca5a5;
   text-align: center;
   margin-top: 20px;
 }
@@ -154,12 +171,16 @@
 
 /* Notice Post Styling */
 .post-list li.notice-post {
-  background-color: #f0f8ff; /* Alice Blue */
-  border-left: 5px solid #007bff; /* A blue border to highlight */
-  padding-left: 15px; /* Adjust padding due to border */
+  background: rgba(139, 92, 246, 0.15);
+  border-left: 5px solid var(--color-accent-purple);
+  border-color: var(--color-accent-purple) var(--glass-border-light) var(--glass-border-light) var(--color-accent-purple);
+}
+
+.post-list li.notice-post:hover {
+  box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
 }
 
 .post-list li.notice-post .post-title strong {
-  color: #007bff; /* Make the [공지] text blue */
+  color: var(--color-accent-purple);
   margin-right: 5px;
 }

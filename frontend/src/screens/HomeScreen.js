@@ -327,6 +327,7 @@ function HomeScreen() {
         );
     };
 
+    /*
     const handleCopyAccount = () => {
         const accountNumber = '우리은행 1005-980-321301 (예금주: 시각장애인MOM센터)';
         navigator.clipboard.writeText(accountNumber)
@@ -389,6 +390,7 @@ function HomeScreen() {
             </div>
         );
     };
+    */
 
     const handleCloseNotice = () => {
         if (dontShowNoticeToday) {
@@ -432,7 +434,13 @@ function HomeScreen() {
 
             {error && <p className="error-message" role="alert">{error}</p>}
 
-            {renderFinancialSummary()}
+            <div className="financial-summary-container" style={{ marginBottom: '20px' }}>
+                <div className="summary-card" style={{ padding: '20px', textAlign: 'center' }}>
+                    <p style={{ margin: 0, fontSize: '1rem', lineHeight: '1.6', color: 'var(--color-text-bright)', fontWeight: '600' }}>
+                        뷰래이터는 실로암시각장애인복지관의 지원을 받아 시각장애인MOM센터가 운영하는 유튜브 화면 해설 생성 서비스입니다.
+                    </p>
+                </div>
+            </div>
 
             <form onSubmit={handleSubmit} className="url-form">
                 <input
