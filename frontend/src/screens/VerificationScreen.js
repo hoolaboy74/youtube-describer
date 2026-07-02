@@ -155,13 +155,15 @@ function VerificationScreen() {
 
             {/* 시각장애인 자격 인증 성공 모달 (저시력자 및 일반 사용자용) */}
             {showSuccessModal && (
-                <div className="success-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+                <div className="success-modal-overlay" role="alertdialog" aria-modal="true" aria-labelledby="modal-title" aria-describedby="modal-desc">
                     <div className="success-modal-content">
                         <div className="success-modal-icon" aria-hidden="true">✓</div>
                         <h2 id="modal-title" className="success-modal-title">인증 완료</h2>
-                        <p className="success-modal-body">{successMessage}</p>
+                        <p id="modal-desc" className="success-modal-body">
+                            {successMessage}. 확인 단추를 누르면 마이페이지로 이동합니다.
+                        </p>
                         <button type="button" className="success-modal-btn" onClick={() => navigate('/mypage')} autoFocus>
-                            확인 (마이페이지로 이동)
+                            확인
                         </button>
                     </div>
                 </div>
