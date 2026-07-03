@@ -85,6 +85,13 @@ To run the backend server, the following command-line tools must be installed on
 
 ## 개선 기록 (Improvement Log)
 
+### 94차: Nginx XFF 프록시 헤더 설정 및 Express trust proxy 활성화로 클라이언트 IP 식별 정상화 (2026-07-02)
+- **문제:** 리버스 프록시(Nginx) 뒤에 위치한 ExpressJS 백엔드에서 사용자 로그인 및 인증 IP를 기록할 때, 실제 클라이언트 IP가 아닌 루프백 IP(`127.0.0.1`)로 일괄 수집되는 결함 존재.
+- **해결:**
+    1. **Nginx 프록시 헤더 추가**: `/etc/nginx/sites-available/youtube-describer` 및 `test-youtube-describer` 설정의 `/api` 프록시 경로에 `X-Real-IP`, `X-Forwarded-For`, `X-Forwarded-Proto` 헤더 전달 규칙 주입 및 Nginx 리로드 적용.
+    2. **Express trust proxy 활성화**: `backend/index.js`에 `app.set('trust proxy', true);` 설정을 적용하여 Nginx가 전달한 프록시 헤더를 신뢰하고 클라이언트 실제 IP를 정확하게 추출하도록 수정 완료.
+- **상태:** 운영/테스트 환경 소스 반영 및 Nginx 무중단 리로드 완료 (2026-07-02)
+
 ### 93차: users 테이블에 blind_auth_method 컬럼 추가 및 가입/재인증/승인 수단 자동 기록 (2026-07-02)
 - **문제:** 사용자의 시각장애인 인증 방식(실로암 API 연동 vs 복지카드 OCR 판독) 기록이 `user_verifications` 이력 테이블에만 산재되어 있어, 현재 활성화된 시각장애인의 최종 인증 경로를 `users` 테이블 수준에서 직관적으로 쿼리하거나 관리자 화면에서 일괄 식별하기 곤란함.
 - **해결:**
@@ -1181,4 +1188,55 @@ API 비용을 체계적으로 추적하고 분석하여 비용을 최적화하�
   1. 로컬 코드 수정 및 테스트
   2. `./deploy-prod.sh "커밋 메세지"` 실행 (GitHub 푸시)
   3. 운영 서버 접속 후 `~/deploy-app.sh` 실행 (최종 반영 및 서버 재시작)
+
+### 유튜브 쿠키 자동 갱신 시스템 (Headless Playwright)
+서버 단독으로 유튜브 쿠키 세션을 유효하게 유지하고, 검증 통과한 쿠키를 서비스 디렉토리들에 전파하는 시스템입니다.
+
+- **스크립트 경로**: [server-refresh-cookies.py](file:///Users/chacha/src/youtube-describer/backend/bin/server-refresh-cookies.py)
+  - *운영서버 배치 경로: `/home/chacha/bin/server-refresh-cookies.py`*
+- **가상환경 경로**: `/home/chacha/bin/venv` (Playwright & Chromium 구동용)
+- **쿠키 저장소**:
+  - 임시/검증용: `/home/chacha/bin/cookies/`
+  - 실서비스 전파처: `/app/youtube-describer/backend/cookies/`, `/app/test-youtube-describer/backend/cookies/`, `/app/qa-youtube-describer/backend/cookies/`
+- **Systemd 자동화 설정**:
+  - **서비스 유닛**: `/etc/systemd/system/youtube-cookie-refresh.service`
+    ```ini
+    [Unit]
+    Description=YouTube Cookie Auto Refresh Service
+    After=network.target
+
+    [Service]
+    Type=oneshot
+    User=chacha
+    ExecStart=/home/chacha/bin/server-refresh-cookies.py
+    StandardOutput=append:/home/chacha/bin/cookies/refresh.log
+    StandardError=append:/home/chacha/bin/cookies/refresh.log
+
+    [Install]
+    WantedBy=multi-user.target
+    ```
+  - **타이머 유닛** (30분 간격 실행): `/etc/systemd/system/youtube-cookie-refresh.timer`
+    ```ini
+    [Unit]
+    Description=Run YouTube Cookie Auto Refresh Service every 30 minutes
+
+    [Timer]
+    OnCalendar=*:0/30
+    Persistent=true
+    Unit=youtube-cookie-refresh.service
+
+    [Install]
+    WantedBy=timers.target
+    ```
+  - **상태 제어**:
+    ```bash
+    sudo systemctl daemon-reload
+    sudo systemctl enable --now youtube-cookie-refresh.timer
+    sudo systemctl start youtube-cookie-refresh.service  # 수동 즉시 실행
+    ```
+  - **로그 모니터링**:
+    ```bash
+    tail -f /home/chacha/bin/cookies/refresh.log
+    journalctl -u youtube-cookie-refresh.service -f
+    ```
 
