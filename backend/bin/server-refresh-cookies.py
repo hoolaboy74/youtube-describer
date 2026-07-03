@@ -86,7 +86,8 @@ def write_netscape_cookies(filepath, playwright_cookies):
 
 def verify_cookie(cookie_path):
     try:
-        cmd = [
+        # [1단계 검증] 가벼운 History API로 로그인 세션 유효성 체크
+        cmd1 = [
             "yt-dlp",
             "--no-check-certificate",
             "--cookies", cookie_path,
@@ -95,13 +96,27 @@ def verify_cookie(cookie_path):
             "--playlist-items", "1",
             "https://www.youtube.com/feed/history"
         ]
-        result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, timeout=30)
-        output = result.stdout.strip()
+        result1 = subprocess.run(cmd1, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, timeout=30)
+        output1 = result1.stdout.strip()
         
-        # 11자리 비디오 ID 패턴 매칭 확인
-        if re.match(r'^[a-zA-Z0-9_-]{11}$', output):
-            return True, output
-        return False, f"Output: {output} | Error: {result.stderr.strip()}"
+        if not re.match(r'^[a-zA-Z0-9_-]{11}$', output1):
+            return False, f"Login check failed. Output: {output1} | Error: {result1.stderr.strip()}"
+            
+        # [2단계 검증] 실제 비디오 스트리밍 URL 추출 여부 체크 (403 Forbidden 및 봇 감지 필터)
+        cmd2 = [
+            "yt-dlp",
+            "--no-check-certificate",
+            "--cookies", cookie_path,
+            "-f", "bestaudio",
+            "-g",
+            "https://www.youtube.com/watch?v=sgL_waepEL4"
+        ]
+        result2 = subprocess.run(cmd2, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, timeout=30)
+        
+        if result2.returncode != 0:
+            return False, f"Download verification failed. Stderr: {result2.stderr.strip()}"
+            
+        return True, output1
     except Exception as e:
         return False, str(e)
 
@@ -155,6 +170,10 @@ async def refresh_account_cookie(account):
         write_netscape_cookies(temp_cookie_path, updated_cookies)
         
         await browser.close()
+        
+    # 브라우저 종료 후 좀비 세션이 유튜브 서버에 의해 소멸되는지 판별하기 위해 30초 대기
+    print("   -> 세션 안정성 검증 대기 (30초)...")
+    await asyncio.sleep(30)
         
     # 쿠키 검증
     print("   -> 쿠키 유효성 검증 중...")

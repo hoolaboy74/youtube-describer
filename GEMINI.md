@@ -1215,13 +1215,13 @@ API 비용을 체계적으로 추적하고 분석하여 비용을 최적화하�
     [Install]
     WantedBy=multi-user.target
     ```
-  - **타이머 유닛** (30분 간격 실행): `/etc/systemd/system/youtube-cookie-refresh.timer`
+  - **타이머 유닛** (4시간 간격 실행): `/etc/systemd/system/youtube-cookie-refresh.timer`
     ```ini
     [Unit]
-    Description=Run YouTube Cookie Auto Refresh Service every 30 minutes
+    Description=Run YouTube Cookie Auto Refresh Service every 4 hours
 
     [Timer]
-    OnCalendar=*:0/30
+    OnCalendar=0/4:00:00
     Persistent=true
     Unit=youtube-cookie-refresh.service
 
