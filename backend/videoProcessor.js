@@ -276,15 +276,14 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null, userId = nul
         let downloadSuccess = false;
         let downloadAttempt = 1;
         let currentCookiePath = getRandomCookiePath();
+        const usedCookiePaths = []; // Track already attempted cookies to avoid duplicates
 
         while (!downloadSuccess && downloadAttempt <= 2) {
             const isRetry = downloadAttempt === 2;
-            const activeCookiePath = isRetry ? null : currentCookiePath;
-            const cookieArgs = activeCookiePath ? ['--cookies', activeCookiePath] : [];
             
             if (isRetry) {
-                logger.info(`[${requestHash}] Attempt 2: Cleaning up and retrying download without cookies. Relying on yt-dlp internal solver.`);
-                if (sseHandler) sseHandler('status_update', { message: '봇 감지 우회 재시도 중...' });
+                logger.info(`[${requestHash}] Attempt 2: Cleaning up and retrying download...`);
+                if (sseHandler) sseHandler('status_update', { message: '대체 자격증명으로 우회 재시도 중...' });
                 
                 // Clean up any partial files from attempt 1 to ensure a fresh session
                 try {
@@ -295,8 +294,34 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null, userId = nul
                 } catch (cleanupErr) {
                     logger.warn(`[${requestHash}] Minor error during retry cleanup: ${cleanupErr.message}`);
                 }
+
+                // Record the failed cookie
+                if (currentCookiePath) {
+                    usedCookiePaths.push(currentCookiePath);
+                }
+
+                // Select a new valid cookie excluding already attempted ones
+                const cookiesDir = path.join(__dirname, 'cookies');
+                let nextCookiePath = null;
+                if (fs.existsSync(cookiesDir)) {
+                    const cookieFiles = fs.readdirSync(cookiesDir)
+                        .filter(file => file.endsWith('_cookies.txt') && fs.statSync(path.join(cookiesDir, file)).size > 0)
+                        .map(file => path.join(cookiesDir, file))
+                        .filter(p => !usedCookiePaths.includes(p));
+                    
+                    if (cookieFiles.length > 0) {
+                        nextCookiePath = cookieFiles[Math.floor(Math.random() * cookieFiles.length)];
+                        logger.info(`[${requestHash}] Attempt 2: Selecting alternative cookie: ${path.basename(nextCookiePath)}`);
+                    } else {
+                        logger.warn(`[${requestHash}] Attempt 2: No alternative cookies available. Retrying without cookies.`);
+                    }
+                }
+                currentCookiePath = nextCookiePath;
             }
 
+            const activeCookiePath = currentCookiePath;
+            const cookieArgs = activeCookiePath ? ['--cookies', activeCookiePath] : [];
+            
             try {
                 await new Promise((resolve, reject) => {
                     const ytdlpArgs = [
@@ -375,7 +400,7 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null, userId = nul
                                                stderrData.includes('HTTP Error 403');
                             if (downloadAttempt === 1 && isBotError && activeCookiePath) {
                                 const invalidPath = activeCookiePath + '.invalid';
-                                logger.warn(`[${requestHash}] Bot detected with cookie ${path.basename(activeCookiePath)}. Invalidating and retrying without cookies...`);
+                                logger.warn(`[${requestHash}] Bot detected with cookie ${path.basename(activeCookiePath)}. Invalidating and retrying with alternative cookie...`);
                                 try { fs.renameSync(activeCookiePath, invalidPath); } catch (e) {}
                                 reject({ type: 'bot_detected', message: stderrData });
                             } else {
@@ -685,14 +710,13 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
         let downloadSuccess = false;
         let downloadAttempt = 1;
         let currentCookiePath = getRandomCookiePath();
+        const usedCookiePaths = []; // Track already attempted cookies to avoid duplicates
 
         while (!downloadSuccess && downloadAttempt <= 2) {
             const isRetry = downloadAttempt === 2;
-            const activeCookiePath = isRetry ? null : currentCookiePath;
-            const cookieArgs = activeCookiePath ? ['--cookies', activeCookiePath] : [];
-
+            
             if (isRetry) {
-                logger.info(`[${requestHash}] Attempt 2: Cleaning up and retrying batch download without cookies. Relying on yt-dlp internal solver.`);
+                logger.info(`[${requestHash}] Attempt 2: Cleaning up and retrying batch download...`);
 
                 // Clean up any partial files from attempt 1 to ensure a fresh session
                 try {
@@ -703,7 +727,33 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
                 } catch (cleanupErr) {
                     logger.warn(`[${requestHash}] Minor error during batch retry cleanup: ${cleanupErr.message}`);
                 }
+
+                // Record the failed cookie
+                if (currentCookiePath) {
+                    usedCookiePaths.push(currentCookiePath);
+                }
+
+                // Select a new valid cookie excluding already attempted ones
+                const cookiesDir = path.join(__dirname, 'cookies');
+                let nextCookiePath = null;
+                if (fs.existsSync(cookiesDir)) {
+                    const cookieFiles = fs.readdirSync(cookiesDir)
+                        .filter(file => file.endsWith('_cookies.txt') && fs.statSync(path.join(cookiesDir, file)).size > 0)
+                        .map(file => path.join(cookiesDir, file))
+                        .filter(p => !usedCookiePaths.includes(p));
+                    
+                    if (cookieFiles.length > 0) {
+                        nextCookiePath = cookieFiles[Math.floor(Math.random() * cookieFiles.length)];
+                        logger.info(`[${requestHash}] Attempt 2: Selecting alternative cookie (batch): ${path.basename(nextCookiePath)}`);
+                    } else {
+                        logger.warn(`[${requestHash}] Attempt 2: No alternative cookies available. Retrying without cookies.`);
+                    }
+                }
+                currentCookiePath = nextCookiePath;
             }
+
+            const activeCookiePath = currentCookiePath;
+            const cookieArgs = activeCookiePath ? ['--cookies', activeCookiePath] : [];
 
             try {
                 await new Promise((resolve, reject) => {
@@ -754,7 +804,7 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
                                                stderrData.includes('HTTP Error 403');
                             if (downloadAttempt === 1 && isBotError && activeCookiePath) {
                                 const invalidPath = activeCookiePath + '.invalid';
-                                logger.warn(`[${requestHash}] Bot detected in batch with cookie ${path.basename(activeCookiePath)}. Invalidating and retrying without cookies...`);
+                                logger.warn(`[${requestHash}] Bot detected in batch with cookie ${path.basename(activeCookiePath)}. Invalidating and retrying with alternative cookie...`);
                                 try { fs.renameSync(activeCookiePath, invalidPath); } catch (e) {}
                                 reject({ type: 'bot_detected', message: stderrData });
                             } else {
