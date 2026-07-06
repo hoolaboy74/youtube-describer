@@ -193,6 +193,17 @@ function PlayerScreenV2() {
     usePageFocus(headingRef);
 
     useEffect(() => {
+        if (videoInfo && videoInfo.title && videoInfo.title !== '불러오는 중...') {
+            document.title = videoInfo.title;
+        } else {
+            document.title = '유튜브 화면 해설';
+        }
+        return () => {
+            document.title = '시각장애인맘센터';
+        };
+    }, [videoInfo]);
+
+    useEffect(() => {
         const player = new Audio();
         audioPlayerRef.current = player;
         const onEnded = () => {
@@ -748,7 +759,8 @@ function PlayerScreenV2() {
         <div ref={mainContainerRef} className="player-screen-container">
             <Header title={videoInfo.title} ref={headingRef} />
 
-            {isLoading ? (
+            <main style={{ width: '100%' }} role="none">
+                {isLoading ? (
                 <p>영상 데이터를 불러오는 중입니다...</p>
             ) : error ? (
                 error === 'LOGIN_REQUIRED' ? (
@@ -792,6 +804,8 @@ function PlayerScreenV2() {
                         </div>
                         <YouTube
                             videoId={videoId}
+                            aria-hidden="true"
+                            tabIndex="-1"
                             opts={{
                                 width: '100%',
                                 height: '100%',
@@ -805,6 +819,13 @@ function PlayerScreenV2() {
                              onReady={async (e) => {
                                  setPlayer(e.target);
                                  setDuration(e.target.getDuration());
+                                 
+                                 const iframe = e.target.getIframe();
+                                 if (iframe) {
+                                     iframe.setAttribute('tabindex', '-1');
+                                     iframe.setAttribute('aria-hidden', 'true');
+                                 }
+                                 
                                  if (user) {
                                      try {
                                          await axios.post(`${API_BASE}/api/users/me/videos/history`, { videoId });
@@ -952,6 +973,7 @@ function PlayerScreenV2() {
             )}
 
             <Comments videoId={videoId} mainRef={mainContainerRef} />
+            </main>
         </div>
     );
 }
