@@ -85,6 +85,13 @@ To run the backend server, the following command-line tools must be installed on
 
 ## 개선 기록 (Improvement Log)
 
+### 98차: 관리자 화면 사용자 상세 정보 및 대기 목록 시간 필드 KST 변환 누락 수정 (2026-07-06)
+- **문제:**
+    1. 관리자 화면에서 사용자 상세 정보(가입일시, 최종 로그인 일시 등) 및 승인 대기 목록 조회 시, 시간대 오프셋(KST)이 반영되지 않고 DB 원본 UTC 기준 날짜 문자열(예: `2026-07-06 01:17:56`)이 변환 없이 그대로 노출되어 9시간의 시차가 발생하는 현상.
+- **해결:**
+    1. **SQLite 쿼리 ISO 8601 UTC 포맷화**: `database.js` 내 관리자용 사용자 조회 쿼리 3개 함수(`listPendingUsers`, `listAllUsersForAdmin`, `getUserDetailForAdmin`)의 날짜 필드(`createdAt`, `updatedAt`, `lastLoginAt`, `verificationCreatedAt`)에 `strftime('%Y-%m-%dT%H:%M:%SZ', ...)` 포맷팅 처리를 일괄 적용함. 이를 통해 브라우저가 전달받은 문자열을 명확한 UTC 기준시로 인식하여, 로컬 타임존(KST)으로 자동 변환해 렌더링하도록 수정 완료함.
+- **상태:** database.js 수정 반영 완료 (2026-07-06)
+
 ### 97차: PC 재생 화면 오디오 더킹 강도 상향 및 실로암 API 통신 타임아웃 완화 (2026-07-06)
 - **문제:**
     1. PC 재생 화면에서 오디오 더킹 시 기존 영상 볼륨이 30%로 줄어들어 TTS(해설) 대비 영상 배경 소리가 지나치게 작아 청취감이 부자연스러움.

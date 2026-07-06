@@ -1109,7 +1109,13 @@ function createUserVerification({ userId, verificationMethod, status, details, v
 
 function listPendingUsers() {
   return db.prepare(`
-    SELECT u.*, uv.verificationMethod, uv.status AS verificationStatus, uv.details, uv.createdAt AS verificationCreatedAt
+    SELECT u.id, u.email, u.name, u.phone, u.birthdate, u.pin, u.is_blind, u.is_active, u.blind_auth_method,
+           strftime('%Y-%m-%dT%H:%M:%SZ', u.createdAt) as createdAt,
+           strftime('%Y-%m-%dT%H:%M:%SZ', u.updatedAt) as updatedAt,
+           u.lastLoginIp,
+           strftime('%Y-%m-%dT%H:%M:%SZ', u.lastLoginAt) as lastLoginAt,
+           uv.verificationMethod, uv.status AS verificationStatus, uv.details,
+           strftime('%Y-%m-%dT%H:%M:%SZ', uv.createdAt) as verificationCreatedAt
     FROM users u
     LEFT JOIN user_verifications uv ON u.id = uv.userId
     WHERE u.is_blind = 9
@@ -1151,7 +1157,11 @@ function listAllUsersForAdmin({ page = 1, limit = 20, search = null, isBlind = n
   const total = db.prepare(countSql).get(...params).count;
 
   const listSql = `
-    SELECT id, email, name, phone, birthdate, pin, is_blind, is_active, createdAt, updatedAt, lastLoginIp, lastLoginAt
+    SELECT id, email, name, phone, birthdate, pin, is_blind, is_active, blind_auth_method,
+           strftime('%Y-%m-%dT%H:%M:%SZ', createdAt) as createdAt,
+           strftime('%Y-%m-%dT%H:%M:%SZ', updatedAt) as updatedAt,
+           lastLoginIp,
+           strftime('%Y-%m-%dT%H:%M:%SZ', lastLoginAt) as lastLoginAt
     FROM users
     ${whereSql}
     ORDER BY createdAt DESC
@@ -1204,7 +1214,11 @@ function deleteUserAdmin(userId) {
 
 function getUserDetailForAdmin(userId) {
   const user = db.prepare(`
-    SELECT id, email, name, phone, birthdate, pin, is_blind, is_active, createdAt, updatedAt, lastLoginIp, lastLoginAt
+    SELECT id, email, name, phone, birthdate, pin, is_blind, is_active, blind_auth_method,
+           strftime('%Y-%m-%dT%H:%M:%SZ', createdAt) as createdAt,
+           strftime('%Y-%m-%dT%H:%M:%SZ', updatedAt) as updatedAt,
+           lastLoginIp,
+           strftime('%Y-%m-%dT%H:%M:%SZ', lastLoginAt) as lastLoginAt
     FROM users
     WHERE id = ?
   `).get(userId);
