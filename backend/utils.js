@@ -125,7 +125,7 @@ async function verifySiloamMember({ name, birthDate, phoneNo }) {
                     'X-Org': org,
                     'Content-Length': Buffer.byteLength(postData)
                 },
-                timeout: 5000 // 5 seconds timeout
+                timeout: 10000 // 10 seconds timeout
             };
 
             const req = https.request(options, (res) => {
@@ -161,7 +161,7 @@ async function verifySiloamMember({ name, birthDate, phoneNo }) {
             });
 
             req.on('timeout', () => {
-                logger.error('Siloam API HTTP call timed out (5s).');
+                logger.error('Siloam API HTTP call timed out (10s).');
                 req.destroy();
                 resolve({ isValid: false });
             });

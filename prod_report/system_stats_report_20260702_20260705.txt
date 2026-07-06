@@ -1,0 +1,167 @@
+운영 서버 영상 생성 및 플랫폼 접속 통계 보고서
+
+1. 개요 및 요약
+조회 설정 기간: 2026-07-02 02:27:51 ~ 2026-07-05 23:59:59
+최초 회원가입 시점 (조회 절대 하한선): 2026-07-02 02:27:51
+총 영상 생성 요청 수: 129건
+성공 건수: 112건 (성공률 86.8%)
+실패 건수: 16건 (실패율 12.4%)
+대기 중 건수: 0건
+
+2. 생성 영상 재생 시간 통계 (성공 비디오 기준)
+총 누적 해설 영상 시간: 81840초 (약 22시간 44분 0초)
+평균 영상 길이: 730.7초 (약 12분 11초)
+최장 해설 영상: 초근접 아기고양이 꾹쭙이 + 골골송 ASMR 1시간 수면 유도 영상ㅣCat Kneading Cat Purr Cat Wool Sucking (ID: 5eyWQGgZwds, 3525초 / 약 58분 45초)
+최단 해설 영상: 화이트 슬립OPS 외부 동영상 (ID: jnAp6djSo7o, 9초)
+
+3. 영상 생성 요청자 분석 (회원 vs 비회원)
+회원 생성 요청: 123건 (95.3%)
+비회원 생성 요청: 6건 (4.7%)
+최다 요청 회원 리스트 (Top 10):
+  1위: 양*종 (ID: 8320db65..., 이메일: yh****4@naver.com, 시각장애인 인증)
+        - 요청 건수: 40건, 총 영상길이: 7,801초 (약 130분 1초), 누적 비용: $2.712
+  2위: 유*만 (ID: 9b3315a8..., 이메일: yu*********2@gmail.com, 시각장애인 인증)
+        - 요청 건수: 22건, 총 영상길이: 24,411초 (약 406분 51초), 누적 비용: $9.818
+  3위: 이*은 (ID: 9a600e15..., 이메일: la*********0@daum.net, 시각장애인 인증)
+        - 요청 건수: 12건, 총 영상길이: 27,171초 (약 452분 51초), 누적 비용: $10.503
+  4위: 임*택 (ID: 0555102b..., 이메일: a7******3@gmail.com, 시각장애인 인증)
+        - 요청 건수: 11건, 총 영상길이: 6,345초 (약 105분 45초), 누적 비용: $2.122
+  5위: 유*민 (ID: 5df84722..., 이메일: bi*****4@hanmail.net, 시각장애인 인증)
+        - 요청 건수: 9건, 총 영상길이: 3,141초 (약 52분 21초), 누적 비용: $0.799
+  6위: 차*현 (ID: e39d6ae7..., 이메일: ho*****y@gmail.com, 시각장애인 인증)
+        - 요청 건수: 7건, 총 영상길이: 2,361초 (약 39분 21초), 누적 비용: $0.662
+  7위: 이*옥 (ID: 87ec1cdc..., 이메일: js****2@naver.com, 시각장애인 인증)
+        - 요청 건수: 5건, 총 영상길이: 1,375초 (약 22분 55초), 누적 비용: $0.283
+  8위: 고*민 (ID: 794eeb2d..., 이메일: he***n@silwel.or.kr, 시각장애인 인증)
+        - 요청 건수: 3건, 총 영상길이: 1,016초 (약 16분 56초), 누적 비용: $0.289
+  9위: 윤*혁 (ID: 012c1cdd..., 이메일: yo*****p@gmail.com, 시각장애인 인증)
+        - 요청 건수: 3건, 총 영상길이: 1,221초 (약 20분 21초), 누적 비용: $0.321
+  10위: 한*진 (ID: e7f7fd54..., 이메일: hs****3@daum.net, 시각장애인 인증)
+        - 요청 건수: 2건, 총 영상길이: 1,352초 (약 22분 32초), 누적 비용: $0.336
+
+4. 기기 플랫폼 및 OS 접속 통계 (Nginx 로그 기반)
+모바일 (Mobile/Tablet): 4668건 (53.0%)
+데스크톱 (PC): 4142건 (47.0%)
+세부 플랫폼 정보:
+  모바일 디바이스:
+    Android Mobile: 380건 (8.1%)
+    iPhone: 4288건 (91.9%)
+  데스크톱 OS:
+    Windows PC: 3722건 (89.9%)
+    macOS (Mac): 420건 (10.1%)
+
+5. 사용자 서비스 활성 및 소통 지표 (회원 vs 비회원)
+해당 기간 신규 가입 회원 수: 23명
+영상 댓글 활동:
+  총 영상 댓글 수: 1건
+  회원 작성 댓글: 1건
+  비회원 작성 댓글: 0건
+커뮤니티 게시판 활동:
+  총 등록된 게시글: 0건
+  회원 작성 게시글: 0건
+  비회원 작성 게시글: 0건
+  총 등록된 게시판 댓글: 0건
+  회원 작성 게시판 댓글: 0건
+  비회원 작성 게시판 댓글: 0건
+로그인 회원 전용 인터랙션:
+  로그인 유저 총 비디오 시청 횟수: 120건
+  로그인 유저 좋아요 클릭 수: 3건
+웹 트래픽 유입 비율 (Nginx 로그 IP 연계):
+  로그인 회원 추정 트래픽: 0건 (0.0%)
+  비회원 추정 트래픽: 8810건 (100.0%)
+
+6. 고유 IP 기반 화면 방문 분석 (Nginx 로그 연계 - 비인간 트래픽 필터 적용)
+홈 화면 (/) 고유 방문자 수:
+  회원 고유 IP 수: 0개
+  비회원 고유 IP 수: 1321개
+재생 화면 (/video/:id) 고유 방문자 수:
+  회원 고유 IP 수: 0개
+  비회원 고유 IP 수: 57개
+비회원 재생 페이지 전환율 (홈 방문 대비 재생 화면 도달율):
+  전환율: 4.3%
+
+7. 실제 활성 사용자 분석 (Actual Active Users)
+* 정의: 재생 화면(/video/:id)에 도달하여 실제로 해설을 시청한 고유 회원(DB 이력 기준) 및 비회원(Nginx 고유 IP 기준)의 합산
+총 실제 활성 사용자 수: 76명
+  실제 활성 회원 수 (DB 시청 이력 검증): 19명 (25.0%)
+  추정 활성 비회원 수 (Nginx 고유 IP 기반): 57명 (75.0%)
+  활성 회원 1인당 평균 시청 횟수: 6.3회 (회원 총 시청 120건 / 활성 회원 19명)
+
+8. 일별 실제 활성 사용자(Daily AAU) 추이
+  일자: 2026-07-01 - 총 6명 (활성 회원 0명, 활성 비회원 6명)
+  일자: 2026-07-02 - 총 19명 (활성 회원 11명, 활성 비회원 8명)
+  일자: 2026-07-03 - 총 17명 (활성 회원 7명, 활성 비회원 10명)
+  일자: 2026-07-04 - 총 31명 (활성 회원 9명, 활성 비회원 22명)
+  일자: 2026-07-05 - 총 14명 (활성 회원 3명, 활성 비회원 11명)
+
+9. 콘텐츠 인기 소통 지표
+가장 많은 댓글 소통이 일어난 영상 Top 5:
+  1위: 🗽보스턴 1박2일 여행 | 뉴욕에서 보스턴으로 | 하이보스턴 호스텔 , 타테 베이커리, 찰리카드 [미국여행 18편] (ID: eO04fRnx700) - 댓글 1개
+가장 시청이 많이 이루어진 인기 영상 Top 5 (회원 시청 이력 기준):
+  1위: 한로로 - 0+0 [가사/Lyrics] (ID: xMx3R4HHrME) - 시청 2회
+  2위: 뉴 논스톱 - New Nonstop, 269회, EP269, #03 (ID: sDTEmywGAA4) - 시청 2회
+  3위: Modal Interchange | Borrowed Chords (ID: p5FSz9fifOg) - 시청 2회
+  4위: 딸이 소개한 여자와 재혼? 한가인도 기절한 사랑꾼 샤갈의 충격적 인생 (예술의 전당) (ID: jMWl81wjM7Q) - 시청 2회
+  5위: 저흰 떠납니다 잘 계세여 (ID: g601zn57qmw) - 시청 2회
+
+10. 일별 생성 요청 추이
+일자: 2026-07-02 - 총 59건 (성공 54건, 실패 5건)
+일자: 2026-07-03 - 총 37건 (성공 29건, 실패 8건)
+일자: 2026-07-04 - 총 28건 (성공 25건, 실패 3건)
+일자: 2026-07-05 - 총 5건 (성공 4건, 실패 0건)
+
+11. 요일별 및 시간대별 요청 분포
+요일별 현황:
+  일요일: 5건
+  목요일: 59건
+  금요일: 37건
+  토요일: 28건
+시간대별 현황 (요청 집중도):
+  00시: 6건
+  01시: 9건
+  02시: 7건
+  03시: 4건
+  04시: 3건
+  05시: 5건
+  06시: 5건
+  07시: 6건
+  08시: 13건
+  09시: 14건
+  10시: 18건
+  11시: 2건
+  12시: 3건
+  13시: 7건
+  14시: 12건
+  15시: 6건
+  16시: 1건
+  17시: 2건
+  18시: 2건
+  19시: 1건
+  20시: 2건
+  23시: 1건
+
+12. AI API 사용 비용 통계
+누적 API 비용: $30.098
+누적 토큰: 이미지 토큰 13,060,301 / 텍스트 토큰 352,730
+사용 모델별 비용 현황:
+  gemini-2.5-pro: 113회 호출, $30.098 (이미지 토큰 13,060,301, 텍스트 토큰 352,730)
+최고 비용 발생 영상 Top 5:
+  1위: 퇴사하고 10년만에 30억 벌 수 있었던 이유 (ID: LoGDMhk2GSE) - $1.463 (이미지 545,075, 텍스트 6,672)
+  2위: 안녕하세요 윤경호입니다. 다름이 아니라 제가 이번에 소지섭, 최대훈 배우와 문명특급에 나오게 됐는데 그때 있었던 일부터 말씀드리면ㅣ☕️맞긴해 글킨해 (w.소지섭, 윤경호, 최대훈) (ID: tt6ZWE1aGJk) - $1.451 (이미지 457,042, 텍스트 20,546)
+  3위: 바게트는 어디까지 변할 수 있을까? 한국 이색 바게트 몰아보기 / What Can You Do With a Baguette? Korean Baguette Specialties (ID: -T0Cd7P3s5U) - $1.221 (이미지 449,416, 텍스트 6,518)
+  4위: 초근접 아기고양이 꾹쭙이 + 골골송 ASMR 1시간 수면 유도 영상ㅣCat Kneading Cat Purr Cat Wool Sucking (ID: 5eyWQGgZwds) - $1.201 (이미지 473,699, 텍스트 1,092)
+  5위: 한국인은 복숭아로 이런 것까지 만든다고?! 놀라운 복숭아의 변신 / What Do Koreans Make with Peaches?! (ID: goJ8s9d6ec4) - $1.188 (이미지 437,707, 텍스트 6,230)
+
+13. 실패 사유 분석 및 빈도
+사유: [GoogleGenerativeAI Error]: Text not available. Response was blocked due to PROHIBITED_CONTENT - 4건
+사유: This video cannot be embedded and played on external sites. - 2건
+사유: yt-dlp download failed with code 1. Stderr: WARNING: [youtube] No title found in player responses; falling back to title from initial data. Other metadata may also be missing ERROR: [youtube] rmvh_VJdpTA: Sign in to confirm you’re not a bot. Use --cookies-from-browser or --cookies for the authentication. See  https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp  for how to manually pass cookies. Also see  https://github.com/yt-dlp/yt-dlp/wiki/Extractors#exporting-youtube-cookies  for tips on effectively exporting YouTube cookies  - 1건
+사유: yt-dlp download failed with code 1. Stderr: WARNING: [youtube] No title found in player responses; falling back to title from initial data. Other metadata may also be missing ERROR: [youtube] Wyjkmdoe7DY: Sign in to confirm you’re not a bot. Use --cookies-from-browser or --cookies for the authentication. See  https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp  for how to manually pass cookies. Also see  https://github.com/yt-dlp/yt-dlp/wiki/Extractors#exporting-youtube-cookies  for tips on effectively exporting YouTube cookies  - 1건
+사유: yt-dlp download failed with code 1. Stderr: WARNING: [youtube] No title found in player responses; falling back to title from initial data. Other metadata may also be missing ERROR: [youtube] R5UVV26xlzQ: Sign in to confirm you’re not a bot. Use --cookies-from-browser or --cookies for the authentication. See  https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp  for how to manually pass cookies. Also see  https://github.com/yt-dlp/yt-dlp/wiki/Extractors#exporting-youtube-cookies  for tips on effectively exporting YouTube cookies  - 1건
+사유: yt-dlp download failed with code 1. Stderr: WARNING: [youtube] No title found in player responses; falling back to title from initial data. Other metadata may also be missing ERROR: [youtube] JofOxHGi0tA: Sign in to confirm you’re not a bot. Use --cookies-from-browser or --cookies for the authentication. See  https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp  for how to manually pass cookies. Also see  https://github.com/yt-dlp/yt-dlp/wiki/Extractors#exporting-youtube-cookies  for tips on effectively exporting YouTube cookies  - 1건
+사유: yt-dlp download failed with code 1. Stderr: WARNING: [youtube] No title found in player responses; falling back to title from initial data. Other metadata may also be missing ERROR: [youtube] FO7T3-okPv0: Sign in to confirm you’re not a bot. Use --cookies-from-browser or --cookies for the authentication. See  https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp  for how to manually pass cookies. Also see  https://github.com/yt-dlp/yt-dlp/wiki/Extractors#exporting-youtube-cookies  for tips on effectively exporting YouTube cookies  - 1건
+사유: [GoogleGenerativeAI Error]: Failed to parse stream - 1건
+사유: Video duration (4574s) exceeds the limit of 60 minutes. - 1건
+사유: Video duration (3713s) exceeds the limit of 60 minutes. - 1건
+사유: Video duration (3626s) exceeds the limit of 60 minutes. - 1건
+사유: Video duration (10667s) exceeds the limit of 60 minutes. - 1건

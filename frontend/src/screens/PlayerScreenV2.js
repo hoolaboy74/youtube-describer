@@ -525,7 +525,7 @@ function PlayerScreenV2() {
         if (currentMode === 'pause') {
             if (player.getPlayerState() === 1) player.pauseVideo();
         } else if (currentMode === 'together' && !isMobile()) {
-            player.setVolume(30); // Audio ducking for PC
+            player.setVolume(60); // Audio ducking for PC
         }
     }, [player]);
 
