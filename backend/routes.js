@@ -1657,4 +1657,61 @@ router.post('/users/me/verify-blind', requireAuth, async (req, res) => {
     }
 });
 
+// Sitemap.xml 동적 생성 엔드포인트
+router.get('/sitemap', (req, res) => {
+    try {
+        const { videos, posts } = db.getSitemapData();
+        const baseUrl = 'https://www.blindmom.org';
+
+        let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
+        xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
+
+        // 1. 정적 페이지 추가
+        const staticPages = [
+            { path: '/', changefreq: 'daily', priority: '1.0' },
+            { path: '/board', changefreq: 'daily', priority: '0.8' },
+            { path: '/more', changefreq: 'weekly', priority: '0.5' },
+            { path: '/voice_sample', changefreq: 'monthly', priority: '0.5' }
+        ];
+
+        staticPages.forEach(page => {
+            xml += '  <url>\n';
+            xml += `    <loc>${baseUrl}${page.path}</loc>\n`;
+            xml += `    <changefreq>${page.changefreq}</changefreq>\n`;
+            xml += `    <priority>${page.priority}</priority>\n`;
+            xml += '  </url>\n';
+        });
+
+        // 2. 동적 비디오 페이지 추가
+        videos.forEach(video => {
+            const lastmod = video.createdAt ? video.createdAt.split('T')[0] : new Date().toISOString().split('T')[0];
+            xml += '  <url>\n';
+            xml += `    <loc>${baseUrl}/video/${video.videoId}</loc>\n`;
+            xml += `    <lastmod>${lastmod}</lastmod>\n`;
+            xml += '    <changefreq>weekly</changefreq>\n';
+            xml += '    <priority>0.7</priority>\n';
+            xml += '  </url>\n';
+        });
+
+        // 3. 동적 게시판 상세글 페이지 추가
+        posts.forEach(post => {
+            const lastmod = post.createdAt ? post.createdAt.split('T')[0] : new Date().toISOString().split('T')[0];
+            xml += '  <url>\n';
+            xml += `    <loc>${baseUrl}/board/${post.id}</loc>\n`;
+            xml += `    <lastmod>${lastmod}</lastmod>\n`;
+            xml += '    <changefreq>weekly</changefreq>\n';
+            xml += '    <priority>0.6</priority>\n';
+            xml += '  </url>\n';
+        });
+
+        xml += '</urlset>';
+
+        res.header('Content-Type', 'application/xml');
+        res.status(200).send(xml);
+    } catch (error) {
+        logger.error('Failed to generate sitemap:', error);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
 module.exports = router;

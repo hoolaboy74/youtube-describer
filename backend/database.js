@@ -1364,8 +1364,26 @@ function getCommentsByUserId(userId) {
   `).all(userId);
 }
 
+function getSitemapData() {
+  const videos = db.prepare(`
+    SELECT videoId, strftime('%Y-%m-%dT%H:%M:%SZ', createdAt) as createdAt
+    FROM videos
+    WHERE status = 'completed'
+    ORDER BY createdAt DESC
+  `).all();
+
+  const posts = db.prepare(`
+    SELECT id, strftime('%Y-%m-%dT%H:%M:%SZ', createdAt) as createdAt
+    FROM posts
+    ORDER BY createdAt DESC
+  `).all();
+
+  return { videos, posts };
+}
+
 module.exports = {
   init,
+  getSitemapData,
   createUser,
   getUserByEmail,
   getUserById,

@@ -83,6 +83,21 @@ stats.newUsers = db.prepare(\`
   SELECT COUNT(*) as count FROM users WHERE createdAt >= ? AND createdAt <= ?
 \`).get(startDate, endDate).count;
 
+// 신규 가입자 인증 경로별 통계
+stats.newUsersByAuthMethod = db.prepare(\`
+  SELECT COALESCE(blind_auth_method, 'unverified') as method, COUNT(*) as count 
+  FROM users 
+  WHERE createdAt >= ? AND createdAt <= ?
+  GROUP BY method
+\`).all(startDate, endDate);
+
+// 누적 회원 인증 경로별 통계 (전체 기간)
+stats.totalUsersByAuthMethod = db.prepare(\`
+  SELECT COALESCE(blind_auth_method, 'unverified') as method, COUNT(*) as count 
+  FROM users 
+  GROUP BY method
+\`).all();
+
 // 영상 생성 요약
 stats.summary = db.prepare(\`
   SELECT 
@@ -131,6 +146,7 @@ const topRequestorsRaw = db.prepare(\`
     u.name,
     u.email,
     u.is_blind,
+    u.blind_auth_method,
     COUNT(*) as count,
     SUM(CASE WHEN v.status = 'completed' THEN v.duration ELSE 0 END) as total_duration,
     SUM(COALESCE(c.cost, 0)) as total_cost
@@ -163,6 +179,7 @@ stats.topRequestors = topRequestorsRaw.map(r => ({
   name: maskName(r.name),
   email: maskEmail(r.email),
   is_blind: r.is_blind,
+  blind_auth_method: r.blind_auth_method,
   count: r.count,
   total_duration: r.total_duration || 0,
   total_cost: r.total_cost || 0
@@ -598,7 +615,13 @@ if (dbResult.summary.total > 0) {
 txtContent += `최다 요청 회원 리스트 (Top 10):\n`;
 if (dbResult.topRequestors && dbResult.topRequestors.length > 0) {
   dbResult.topRequestors.forEach((req, idx) => {
-    const blindStatus = req.is_blind === 1 ? '시각장애인 인증' : '미인증';
+    let blindStatus = '미인증';
+    if (req.is_blind === 1) {
+      const authMethod = req.blind_auth_method === 'siloam_api' ? '실로암 API' :
+                         req.blind_auth_method === 'card_ocr' ? '복지카드 OCR' :
+                         req.blind_auth_method === 'admin_manual' ? '관리자 수동 승인' : '기타/미지정';
+      blindStatus = `시각장애인 인증 (${authMethod})`;
+    }
     const totalMins = Math.floor(req.total_duration / 60);
     const totalSecs = req.total_duration % 60;
     txtContent += `  ${idx + 1}위: ${req.name} (ID: ${req.requested_by}, 이메일: ${req.email}, ${blindStatus})\n`;
@@ -634,6 +657,31 @@ txtContent += `\n`;
 
 txtContent += `5. 사용자 서비스 활성 및 소통 지표 (회원 vs 비회원)\n`;
 txtContent += `해당 기간 신규 가입 회원 수: ${dbResult.newUsers}명\n`;
+
+const getMethodName = (method) => {
+  switch (method) {
+    case 'siloam_api': return '실로암 API 연동';
+    case 'card_ocr': return '복지카드 OCR 판독';
+    case 'admin_manual': return '관리자 수동 승인';
+    default: return '미인증 / 기타';
+  }
+};
+
+if (dbResult.newUsers > 0 && dbResult.newUsersByAuthMethod && dbResult.newUsersByAuthMethod.length > 0) {
+  txtContent += `  * 신규 가입 인증 경로 분포:\n`;
+  dbResult.newUsersByAuthMethod.forEach(m => {
+    txtContent += `    - ${getMethodName(m.method)}: ${m.count}명\n`;
+  });
+}
+
+txtContent += `누적 회원 인증 경로 분포 (전체 기간):\n`;
+if (dbResult.totalUsersByAuthMethod && dbResult.totalUsersByAuthMethod.length > 0) {
+  dbResult.totalUsersByAuthMethod.forEach(m => {
+    txtContent += `  - ${getMethodName(m.method)}: ${m.count}명\n`;
+  });
+}
+txtContent += `\n`;
+
 txtContent += `영상 댓글 활동:\n`;
 const totalVidComm = dbResult.videoComments.member_count + dbResult.videoComments.non_member_count;
 txtContent += `  총 영상 댓글 수: ${totalVidComm}건\n`;
