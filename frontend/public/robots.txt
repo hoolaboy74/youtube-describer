@@ -1,5 +1,9 @@
 # https://www.robotstxt.org/robotstxt.html
 User-agent: *
-Disallow:
+Disallow: /admin
+Disallow: /login
+Disallow: /register
+Disallow: /verify
+Disallow: /mypage
 
 Sitemap: https://www.blindmom.org/sitemap.xml
