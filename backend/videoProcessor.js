@@ -395,11 +395,12 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null, userId = nul
                     downloadProcess.on('close', (code) => {
                         if (code === 0) resolve();
                         else {
-                            const isBotError = stderrData.includes('confirm you’re not a bot') || 
-                                               stderrData.includes('cookies are no longer valid') || 
-                                               stderrData.includes('HTTP Error 403') ||
-                                               stderrData.includes('Login Required') ||
-                                               stderrData.includes('Sign in to confirm');
+                            const stderrLower = stderrData.toLowerCase();
+                            const isBotError = stderrLower.includes('confirm you’re not a bot') || 
+                                               stderrLower.includes('cookies are no longer valid') || 
+                                               stderrLower.includes('http error 403') ||
+                                               stderrLower.includes('login required') ||
+                                               stderrLower.includes('sign in to confirm');
                             if (downloadAttempt === 1 && isBotError && activeCookiePath) {
                                 const invalidPath = activeCookiePath + '.invalid';
                                 logger.warn(`[${requestHash}] Bot detected with cookie ${path.basename(activeCookiePath)}. Invalidating and retrying with alternative cookie...`);
