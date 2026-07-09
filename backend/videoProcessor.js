@@ -45,7 +45,8 @@ if (!API_KEY) {
   throw new Error("GOOGLE_API_KEY is not defined in the environment");
 }
 const genAI = new GoogleGenerativeAI(API_KEY);
-const youtube = google.youtube({ version: 'v3', auth: API_KEY });
+const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY || API_KEY;
+const youtube = google.youtube({ version: 'v3', auth: YOUTUBE_API_KEY });
 
 const processingLocks = new Set();
 const timers = new Map();
