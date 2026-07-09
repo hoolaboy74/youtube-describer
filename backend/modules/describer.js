@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 
 async function describeSegment(genAI, analysis, videoTitle, frames, subtitles, langCode) {
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
+    const model = genAI.getGenerativeModel({ model: process.env.GEMINI_MODEL || "gemini-3.1-pro-preview" });
     const promptPath = path.join(__dirname, '../prompts/stage2_describer.txt');
     let prompt = fs.readFileSync(promptPath, 'utf-8');
     
