@@ -113,7 +113,7 @@ const run = async () => {
 
             const ffmpegArgs = [
                 '-i', '-',
-                '-vf', "select='gt(scene,0.4)',showinfo",
+                '-vf', "select='isnan(prev_selected_t)+gte(t-prev_selected_t,2)',showinfo",
                 '-vsync', 'vfr',
                 path.join(baseTempDir, 'frame-%04d.jpg') // Matching operational jpeg format
             ];
