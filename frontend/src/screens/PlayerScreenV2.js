@@ -293,6 +293,13 @@ function PlayerScreenV2() {
     const handleOpenQaModal = useCallback(() => {
         if (!player) return;
 
+        // 로그인하지 않은 사용자는 대화하기 기능 진입 불가
+        if (!user) {
+            announceQaPolite('AI와 대화하기는 로그인한 회원만 이용할 수 있습니다.');
+            alert('AI와 대화하기는 로그인한 회원만 이용할 수 있습니다.');
+            return;
+        }
+
         const isVideoPlaying = player.getPlayerState() === 1;
         const isAudioPlaying = audioPlayerRef.current && !audioPlayerRef.current.paused && !audioPlayerRef.current.ended;
         const currentlyPlaying = isVideoPlaying || isAudioPlaying;
@@ -333,7 +340,7 @@ function PlayerScreenV2() {
         
         setIsQaModalOpen(true);
         announceQaPolite('질문 하세요');
-    }, [player, announceQaPolite]);
+    }, [player, announceQaPolite, user]);
 
     // Close QA Modal, stop TTS, and resume video playback
     const handleCloseQaModal = useCallback(() => {
@@ -1179,18 +1186,18 @@ function PlayerScreenV2() {
                                 width: '100%',
                                 padding: '14px 20px',
                                 borderRadius: '12px',
-                                backgroundColor: '#0070f3',
+                                backgroundColor: user ? '#0070f3' : '#666666',
                                 color: '#ffffff',
                                 border: 'none',
                                 fontWeight: '700',
                                 cursor: 'pointer',
                                 fontSize: '1.05rem',
-                                boxShadow: '0 4px 12px rgba(0,112,243,0.2)',
+                                boxShadow: user ? '0 4px 12px rgba(0,112,243,0.2)' : 'none',
                                 transition: 'background-color 0.2s'
                             }}
-                            aria-label="AI와 대화하기"
+                            aria-label={user ? "AI와 대화하기" : "AI와 대화하기 (로그인 필요)"}
                         >
-                            AI와 대화하기
+                            {user ? "AI와 대화하기" : "AI와 대화하기 (로그인 필요)"}
                         </button>
                     </div>
 

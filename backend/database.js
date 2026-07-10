@@ -112,6 +112,23 @@ function init() {
     )
   `);
 
+  // qa_user_daily_costs 테이블: 사용자별 일일 Q&A API 비용 누적 저장
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS qa_user_daily_costs (
+      userId INTEGER NOT NULL,
+      videoId TEXT NOT NULL,
+      logDate TEXT NOT NULL,
+      queryCount INTEGER DEFAULT 1,
+      promptTokens INTEGER DEFAULT 0,
+      completionTokens INTEGER DEFAULT 0,
+      totalCost REAL NOT NULL,
+      updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+      PRIMARY KEY (userId, videoId, logDate),
+      FOREIGN KEY (userId) REFERENCES users (id) ON DELETE SET NULL,
+      FOREIGN KEY (videoId) REFERENCES videos (videoId) ON DELETE CASCADE
+    )
+  `);
+
   // settings 테이블: 서비스 전체 설정 저장
   db.exec(`
     CREATE TABLE IF NOT EXISTS settings (
@@ -617,6 +634,21 @@ function addApiCost({ videoId, model_used, image_tokens, text_tokens, cost }) {
         'INSERT INTO api_costs (videoId, model_used, image_tokens, text_tokens, cost) VALUES (?, ?, ?, ?, ?)'
     ).run(videoId, model_used, image_tokens, text_tokens, cost);
     return result.lastInsertRowid;
+}
+
+// Q&A API 비용 UPSERT
+function upsertQaCost({ userId, videoId, logDate, promptTokens, completionTokens, cost }) {
+    const result = db.prepare(`
+        INSERT INTO qa_user_daily_costs (userId, videoId, logDate, queryCount, promptTokens, completionTokens, totalCost)
+        VALUES (?, ?, ?, 1, ?, ?, ?)
+        ON CONFLICT(userId, videoId, logDate) DO UPDATE SET
+            queryCount = queryCount + 1,
+            promptTokens = promptTokens + excluded.promptTokens,
+            completionTokens = completionTokens + excluded.completionTokens,
+            totalCost = totalCost + excluded.totalCost,
+            updatedAt = CURRENT_TIMESTAMP
+    `).run(userId, videoId, logDate, promptTokens, completionTokens, cost);
+    return result.changes > 0;
 }
 
 // API 비용 목록 조회
@@ -1418,6 +1450,7 @@ module.exports = {
   listDonations,
   deleteDonation,
   addApiCost,
+  upsertQaCost,
   listApiCosts,
   getAggregatedCosts,
   listAllVideosForAdmin,

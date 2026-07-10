@@ -12,7 +12,8 @@ const {
     verifySiloamMember, 
     verifyCardOCR,
     getIsImpersonateAvailable,
-    preprocessVtt
+    preprocessVtt,
+    calculateApiCost
 } = require('./utils');
 const logger = require('./logger');
 const { GoogleGenerativeAI } = require("@google/generative-ai");
@@ -518,7 +519,7 @@ const getAdjacentSubtitles = async (videoId, targetTime) => {
 };
 
 // --- VIDEO Q&A API ENDPOINT ---
-router.post('/video-qa', async (req, res) => {
+router.post('/video-qa', requireAuth, async (req, res) => {
     const { videoId, timestamp, question, history } = req.body;
     if (!videoId || timestamp === undefined || !question) {
         return res.status(400).json({ error: 'videoId, timestamp, and question are required.' });
@@ -797,6 +798,34 @@ ${historyContext}User's Question: "${question}"`;
         });
         const result = await model.generateContent([systemPrompt, ...imageParts]);
         let answer = result.response.text().trim();
+
+        // API 비용 계산 및 일일 집계 테이블(qa_user_daily_costs)에 UPSERT
+        try {
+            const usage = result.response.usageMetadata;
+            if (usage) {
+                const promptTokens = usage.promptTokenCount || 0;
+                const completionTokens = usage.candidatesTokenCount || 0;
+                const totalTokens = usage.totalTokenCount || 0;
+                
+                const modelName = "gemini-3.1-flash-lite";
+                const calculatedCost = calculateApiCost(modelName, promptTokens, completionTokens, totalTokens);
+                
+                // 한국 시간(KST) YYYY-MM-DD 날짜 구하기
+                const logDate = new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Seoul' });
+                const userId = req.user.id;
+
+                db.upsertQaCost({
+                    userId,
+                    videoId,
+                    logDate,
+                    promptTokens,
+                    completionTokens,
+                    cost: calculatedCost
+                });
+            }
+        } catch (costErr) {
+            logger.error(`[QA-COST-ERROR] Failed to save Q&A API cost:`, costErr);
+        }
 
         // Strip any remaining markdown symbols, URLs, and citations to ensure pure plain text for screen readers
         answer = answer

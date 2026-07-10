@@ -258,6 +258,40 @@ async function verifyCardOCR(imageBuffer, mimeType, userName, birthDate) {
     }
 }
 
+function calculateApiCost(modelName, promptTokenCount, candidatesTokenCount, totalTokenCount) {
+    const modelLower = modelName.toLowerCase();
+    let inputRate = 1.25; // Default legacy pro rate (gemini-1.5-pro / gemini-2.5-pro)
+    let outputRate = 10.00;
+    let inputRateOverLimit = 2.50;
+    let outputRateOverLimit = 15.00;
+
+    if (modelLower.includes('3.1-pro')) {
+        inputRate = 2.00;
+        outputRate = 12.00;
+        inputRateOverLimit = 4.00;
+        outputRateOverLimit = 18.00;
+    } else if (modelLower.includes('3.5-flash')) {
+        inputRate = 1.50;
+        outputRate = 9.00;
+        inputRateOverLimit = 1.50;
+        outputRateOverLimit = 9.00;
+    } else if (modelLower.includes('1.5-flash')) {
+        inputRate = 0.075;
+        outputRate = 0.30;
+        inputRateOverLimit = 0.15;
+        outputRateOverLimit = 0.60;
+    } else if (modelLower.includes('3.1-flash-lite') || modelLower.includes('flash-lite')) {
+        inputRate = 0.075;
+        outputRate = 0.30;
+        inputRateOverLimit = 0.075;
+        outputRateOverLimit = 0.30;
+    }
+
+    const inputCost = (promptTokenCount / 1000000) * (totalTokenCount <= 200000 ? inputRate : inputRateOverLimit);
+    const outputCost = (candidatesTokenCount / 1000000) * (totalTokenCount <= 200000 ? outputRate : outputRateOverLimit);
+    return inputCost + outputCost;
+}
+
 module.exports = {
     formatTime,
     getYoutubeVideoId,
@@ -268,5 +302,6 @@ module.exports = {
     verifySiloamMember,
     verifyCardOCR,
     setIsImpersonateAvailable,
-    getIsImpersonateAvailable
+    getIsImpersonateAvailable,
+    calculateApiCost
 };
