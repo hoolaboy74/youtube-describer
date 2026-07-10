@@ -28,7 +28,7 @@ const exec = util.promisify(execFile);
 // --- Metadata Helper ---
 const getMetadata = async (url) => {
     try {
-        const { stdout } = await exec('python3', ['-m', 'yt_dlp', '--dump-json', '--no-playlist', '--impersonate', 'safari', url], { maxBuffer: 1024 * 1024 * 10 });
+        const { stdout } = await exec('python3', ['-m', 'yt_dlp', '--dump-json', '--no-playlist', '--plugin-dirs', path.join(__dirname, 'yt_dlp_plugins'), '--remote-components', 'ejs:github', '--no-check-certificate', '--impersonate', 'safari', url], { maxBuffer: 1024 * 1024 * 10 });
         const data = JSON.parse(stdout);
         
         const videoId = data.id;
@@ -177,6 +177,8 @@ const main = async () => {
                 '-o', fullVideoPath,
                 '--force-ipv4',
                 '--no-check-certificate',
+                '--plugin-dirs', path.join(__dirname, 'yt_dlp_plugins'),
+                '--remote-components', 'ejs:github',
                 '--impersonate', 'safari',
                 ...subArgs,
                 VIDEO_URL

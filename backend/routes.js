@@ -1567,7 +1567,7 @@ adminRouter.get('/pending-users', (req, res) => {
 adminRouter.post('/users/:userId/approve', (req, res) => {
     try {
         const { userId } = req.params;
-        const success = db.updateUserBlindStatus(userId, 1); // 1 = approved (blind)
+        const success = db.updateUserBlindStatus(userId, 1, 'admin_manual'); // 1 = approved (blind)
         if (success) {
             logger.info(`[Admin] User ${userId} blind status approved successfully.`);
             res.json({ success: true, message: '사용자 시각장애인 인증이 승인되었습니다.' });
@@ -1685,7 +1685,8 @@ router.post('/auth/register', async (req, res) => {
             phone,
             birthdate,
             is_blind: isBlindStatus,
-            pin
+            pin,
+            blind_auth_method: (isBlindStatus === 1 || isBlindStatus === 9) ? verificationMethod : null
         });
 
         if (!userCreated) {
@@ -2106,7 +2107,7 @@ router.post('/users/me/verify-blind', requireAuth, async (req, res) => {
         }
 
         // DB 업데이트
-        db.updateUserBlindStatus(userId, isBlindStatus);
+        db.updateUserBlindStatus(userId, isBlindStatus, verificationMethod);
 
         db.createUserVerification({
             userId,
@@ -2130,6 +2131,63 @@ router.post('/users/me/verify-blind', requireAuth, async (req, res) => {
     } catch (error) {
         logger.error('[MyPage Verification] Re-verification process failed:', error);
         res.status(500).json({ error: '인증 처리 중 내부 서버 오류가 발생했습니다.' });
+    }
+});
+
+// Sitemap.xml 동적 생성 엔드포인트
+router.get('/sitemap', (req, res) => {
+    try {
+        const { videos, posts } = db.getSitemapData();
+        const baseUrl = 'https://www.blindmom.org';
+
+        let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
+        xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
+
+        // 1. 정적 페이지 추가
+        const staticPages = [
+            { path: '/', changefreq: 'daily', priority: '1.0' },
+            { path: '/board', changefreq: 'daily', priority: '0.8' },
+            { path: '/more', changefreq: 'weekly', priority: '0.5' },
+            { path: '/voice_sample', changefreq: 'monthly', priority: '0.5' }
+        ];
+
+        staticPages.forEach(page => {
+            xml += '  <url>\n';
+            xml += `    <loc>${baseUrl}${page.path}</loc>\n`;
+            xml += `    <changefreq>${page.changefreq}</changefreq>\n`;
+            xml += `    <priority>${page.priority}</priority>\n`;
+            xml += '  </url>\n';
+        });
+
+        // 2. 동적 비디오 페이지 추가
+        videos.forEach(video => {
+            const lastmod = video.createdAt ? video.createdAt.split('T')[0] : new Date().toISOString().split('T')[0];
+            xml += '  <url>\n';
+            xml += `    <loc>${baseUrl}/video/${video.videoId}</loc>\n`;
+            xml += `    <lastmod>${lastmod}</lastmod>\n`;
+            xml += '    <changefreq>weekly</changefreq>\n';
+            xml += '    <priority>0.7</priority>\n';
+            xml += '  </url>\n';
+        });
+
+        // 3. 동적 게시판 상세글 페이지 추가
+        posts.forEach(post => {
+            const lastmod = post.createdAt ? post.createdAt.split('T')[0] : new Date().toISOString().split('T')[0];
+            xml += '  <url>\n';
+            xml += `    <loc>${baseUrl}/board/${post.id}</loc>\n`;
+            xml += `    <lastmod>${lastmod}</lastmod>\n`;
+            xml += '    <changefreq>weekly</changefreq>\n';
+            xml += '    <priority>0.6</priority>\n';
+            xml += '  </url>\n';
+        });
+
+        xml += '</urlset>';
+
+        res.header('Content-Type', 'application/xml');
+        res.status(200).send(xml);
+    } catch (error) {
+        logger.error('Failed to generate sitemap:', error);
+        res.status(500).send('Internal Server Error');
     }
 });
 

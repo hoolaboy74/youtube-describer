@@ -226,8 +226,6 @@ function PlayerScreenV2() {
         };
     }, [videoInfo]);
 
-
-
     const handleTogglePlay = useCallback(() => {
         if (!player) return;
 
@@ -587,7 +585,6 @@ function PlayerScreenV2() {
             }, 100);
         }
     };
-
     useEffect(() => {
         const player = new Audio();
         audioPlayerRef.current = player;
@@ -934,7 +931,7 @@ function PlayerScreenV2() {
         if (currentMode === 'pause') {
             if (player.getPlayerState() === 1) player.pauseVideo();
         } else if (currentMode === 'together' && !isMobile()) {
-            player.setVolume(30); // Audio ducking for PC
+            player.setVolume(60); // Audio ducking for PC
         }
     }, [player]);
 
@@ -1157,11 +1154,15 @@ function PlayerScreenV2() {
                              onReady={async (e) => {
                                  setPlayer(e.target);
                                  setDuration(e.target.getDuration());
+                                 
                                  const iframe = e.target.getIframe();
                                  if (iframe) {
                                      iframe.setAttribute('tabindex', '-1');
                                      iframe.setAttribute('aria-hidden', 'true');
                                  }
+=======
+                                 
+>>>>>>> main
                                  if (user) {
                                      try {
                                          await axios.post(`${API_BASE}/api/users/me/videos/history`, { videoId });

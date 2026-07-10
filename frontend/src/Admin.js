@@ -10,6 +10,28 @@ const api = axios.create({
 });
 
 const Admin = () => {
+    useEffect(() => {
+        // robots noindex meta 태그 동적 삽입
+        let meta = document.querySelector('meta[name="robots"]');
+        let created = false;
+        if (!meta) {
+            meta = document.createElement('meta');
+            meta.name = 'robots';
+            document.head.appendChild(meta);
+            created = true;
+        }
+        const originalContent = meta.content;
+        meta.content = 'noindex, nofollow';
+
+        return () => {
+            if (created) {
+                meta.remove();
+            } else {
+                meta.content = originalContent;
+            }
+        };
+    }, []);
+
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const passwordRef = useRef(null);
 

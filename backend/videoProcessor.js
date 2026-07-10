@@ -45,8 +45,39 @@ const API_KEY = process.env.GOOGLE_API_KEY;
 if (!API_KEY) {
   throw new Error("GOOGLE_API_KEY is not defined in the environment");
 }
+const MODEL_NAME = process.env.GEMINI_MODEL || "gemini-3.5-flash";
 const genAI = new GoogleGenerativeAI(API_KEY);
-const youtube = google.youtube({ version: 'v3', auth: API_KEY });
+const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY || API_KEY;
+const youtube = google.youtube({ version: 'v3', auth: YOUTUBE_API_KEY });
+
+const calculateApiCost = (modelName, promptTokenCount, candidatesTokenCount, totalTokenCount) => {
+    const modelLower = modelName.toLowerCase();
+    let inputRate = 1.25; // Default legacy pro rate (gemini-1.5-pro / gemini-2.5-pro)
+    let outputRate = 10.00;
+    let inputRateOverLimit = 2.50;
+    let outputRateOverLimit = 15.00;
+
+    if (modelLower.includes('3.1-pro')) {
+        inputRate = 2.00;
+        outputRate = 12.00;
+        inputRateOverLimit = 4.00;
+        outputRateOverLimit = 18.00;
+    } else if (modelLower.includes('3.5-flash')) {
+        inputRate = 1.50;
+        outputRate = 9.00;
+        inputRateOverLimit = 1.50;
+        outputRateOverLimit = 9.00;
+    } else if (modelLower.includes('1.5-flash')) {
+        inputRate = 0.075;
+        outputRate = 0.30;
+        inputRateOverLimit = 0.15;
+        outputRateOverLimit = 0.60;
+    }
+
+    const inputCost = (promptTokenCount / 1000000) * (totalTokenCount <= 200000 ? inputRate : inputRateOverLimit);
+    const outputCost = (candidatesTokenCount / 1000000) * (totalTokenCount <= 200000 ? outputRate : outputRateOverLimit);
+    return inputCost + outputCost;
+};
 
 const saveFrameCache = async (baseTempDir, allFrameFiles, allTimestamps, videoId) => {
     const framesOutputDir = path.join(__dirname, 'public', 'frames', videoId);
@@ -301,20 +332,19 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null, userId = nul
         const tempVideoFilename = `${videoId}.mp4`;
         const tempVideoPath = path.join(baseTempDir, tempVideoFilename);
 
-        let downloadSuccess = false;
+                let downloadSuccess = false;
         let downloadAttempt = 1;
         let currentCookiePath = getRandomCookiePath();
+        const usedCookiePaths = []; // Track already attempted cookies to avoid duplicates
         const useImpersonate = getIsImpersonateAvailable();
+        const impersonateArgs = useImpersonate ? ['--impersonate', 'safari'] : [];
 
         while (!downloadSuccess && downloadAttempt <= 2) {
             const isRetry = downloadAttempt === 2;
-            const activeCookiePath = isRetry ? null : currentCookiePath;
-            const cookieArgs = activeCookiePath ? ['--cookies', activeCookiePath] : [];
-            const impersonateArgs = useImpersonate ? ['--impersonate', 'safari'] : [];
             
             if (isRetry) {
-                logger.info(`[${requestHash}] Attempt 2: Cleaning up and retrying download without cookies. Relying on yt-dlp internal solver.`);
-                if (sseHandler) sseHandler('status_update', { message: '봇 감지 우회 재시도 중...' });
+                logger.info(`[${requestHash}] Attempt 2: Cleaning up and retrying download...`);
+                if (sseHandler) sseHandler('status_update', { message: '대체 자격증명으로 우회 재시도 중...' });
                 
                 // Clean up any partial files from attempt 1 to ensure a fresh session
                 try {
@@ -325,8 +355,34 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null, userId = nul
                 } catch (cleanupErr) {
                     logger.warn(`[${requestHash}] Minor error during retry cleanup: ${cleanupErr.message}`);
                 }
+
+                // Record the failed cookie
+                if (currentCookiePath) {
+                    usedCookiePaths.push(currentCookiePath);
+                }
+
+                // Select a new valid cookie excluding already attempted ones
+                const cookiesDir = path.join(__dirname, 'cookies');
+                let nextCookiePath = null;
+                if (fs.existsSync(cookiesDir)) {
+                    const cookieFiles = fs.readdirSync(cookiesDir)
+                        .filter(file => file.endsWith('_cookies.txt') && fs.statSync(path.join(cookiesDir, file)).size > 0)
+                        .map(file => path.join(cookiesDir, file))
+                        .filter(p => !usedCookiePaths.includes(p));
+                    
+                    if (cookieFiles.length > 0) {
+                        nextCookiePath = cookieFiles[Math.floor(Math.random() * cookieFiles.length)];
+                        logger.info(`[${requestHash}] Attempt 2: Selecting alternative cookie: ${path.basename(nextCookiePath)}`);
+                    } else {
+                        logger.warn(`[${requestHash}] Attempt 2: No alternative cookies available. Retrying without cookies.`);
+                    }
+                }
+                currentCookiePath = nextCookiePath;
             }
 
+            const activeCookiePath = currentCookiePath;
+            const cookieArgs = activeCookiePath ? ['--cookies', activeCookiePath] : [];
+            
             try {
                 await new Promise((resolve, reject) => {
                     const ytdlpArgs = [
@@ -335,6 +391,8 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null, userId = nul
                         '--force-ipv4',
                         '--legacy-server-connect',
                         '--no-check-certificate',
+                        '--plugin-dirs', path.join(__dirname, 'yt_dlp_plugins'),
+                        '--remote-components', 'ejs:github',
                         ...impersonateArgs,
                         '--newline', 
                         '--write-auto-sub',
@@ -356,9 +414,9 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null, userId = nul
                         const dataStr = data.toString();
                         stdoutBuffer += dataStr;
                         
-                        // Monitor for Deno challenge solving
-                        if (dataStr.includes('[jsc:deno]') || dataStr.includes('Solving JS challenges')) {
-                            logger.info(`[${requestHash}] YT-DLP internal solver: ${dataStr.trim()}`);
+                        // Monitor for POT Provider challenge solving
+                        if (dataStr.includes('bgutil') || dataStr.includes('PO Token') || dataStr.includes('Generating a')) {
+                            logger.info(`[${requestHash}] YT-DLP POT provider: ${dataStr.trim()}`);
                         }
 
                         let match;
@@ -390,23 +448,23 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null, userId = nul
                     downloadProcess.stderr.on('data', (data) => {
                         const dataStr = data.toString();
                         stderrData += dataStr;
-                        if (dataStr.includes('[jsc:deno]') || dataStr.includes('Solving JS challenges')) {
-                            logger.info(`[${requestHash}] YT-DLP internal solver: ${dataStr.trim()}`);
+                        if (dataStr.includes('bgutil') || dataStr.includes('PO Token') || dataStr.includes('Generating a')) {
+                            logger.info(`[${requestHash}] YT-DLP POT provider: ${dataStr.trim()}`);
                         }
                     });
 
                     downloadProcess.on('close', (code) => {
                         if (code === 0) resolve();
                         else {
-                            const isBotError = stderrData.includes('confirm you’re not a bot') || 
-                                               stderrData.includes('cookies are no longer valid') ||
-                                               stderrData.includes('Too Many Requests') ||
-                                               stderrData.includes('429') ||
-                                               stderrData.includes('403') ||
-                                               stderrData.includes('Forbidden');
+                            const stderrLower = stderrData.toLowerCase();
+                            const isBotError = stderrLower.includes('confirm you’re not a bot') || 
+                                               stderrLower.includes('cookies are no longer valid') || 
+                                               stderrLower.includes('http error 403') ||
+                                               stderrLower.includes('login required') ||
+                                               stderrLower.includes('sign in to confirm');
                             if (downloadAttempt === 1 && isBotError && activeCookiePath) {
                                 const invalidPath = activeCookiePath + '.invalid';
-                                logger.warn(`[${requestHash}] Bot detected with cookie ${path.basename(activeCookiePath)}. Invalidating and retrying without cookies...`);
+                                logger.warn(`[${requestHash}] Bot detected with cookie ${path.basename(activeCookiePath)}. Invalidating and retrying with alternative cookie...`);
                                 try { fs.renameSync(activeCookiePath, invalidPath); } catch (e) {}
                                 reject({ type: 'bot_detected', message: stderrData });
                             } else {
@@ -568,7 +626,7 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null, userId = nul
             return;
         }
 
-        const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro", generationConfig: { temperature: 0.7 } });
+        const model = genAI.getGenerativeModel({ model: MODEL_NAME, generationConfig: { temperature: 0.7 } });
         const promptTemplatePath = path.join(__dirname, 'prompt_template.txt');
         let prompt = fs.readFileSync(promptTemplatePath, 'utf-8');
         prompt = prompt.replace('{{VIDEO_TITLE}}', videoTitle).replace('{{SUBTITLES}}', subtitleContent);
@@ -635,10 +693,9 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null, userId = nul
         const usageMetadata = finalResponse.usageMetadata;
         if (usageMetadata) {
             const { promptTokenCount, candidatesTokenCount, totalTokenCount } = usageMetadata;
-            let inputCost = (promptTokenCount / 1000000) * (totalTokenCount <= 200000 ? 1.25 : 2.50);
-            let outputCost = (candidatesTokenCount / 1000000) * (totalTokenCount <= 200000 ? 10.00 : 15.00);
-            db.addApiCost({ videoId, model_used: 'gemini-2.5-pro', image_tokens: promptTokenCount, text_tokens: candidatesTokenCount, cost: inputCost + outputCost });
-            logger.info(`[${requestHash}] Logged API cost: ${(inputCost + outputCost).toFixed(6)} USD`);
+            const cost = calculateApiCost(MODEL_NAME, promptTokenCount, candidatesTokenCount, totalTokenCount);
+            db.addApiCost({ videoId, model_used: MODEL_NAME, image_tokens: promptTokenCount, text_tokens: candidatesTokenCount, cost });
+            logger.info(`[${requestHash}] Logged API cost: ${cost.toFixed(6)} USD`);
         }
 
         db.saveVideo({ videoId, title: videoTitle, duration: Math.round(totalDuration), filesize, script: fullScript });
@@ -750,19 +807,17 @@ const processVideoBatch = async (videoId, youtubeUrl, forceRecreate = false) => 
         const extractionLabel = `[${requestHash}] Initial Data Extraction Time`;
         time(extractionLabel);
 
-        let downloadSuccess = false;
+                let downloadSuccess = false;
         let downloadAttempt = 1;
         let currentCookiePath = getRandomCookiePath();
+        const usedCookiePaths = []; // Track already attempted cookies to avoid duplicates
         const useImpersonate = getIsImpersonateAvailable();
+        const impersonateArgs = useImpersonate ? ['--impersonate', 'safari'] : [];
 
         while (!downloadSuccess && downloadAttempt <= 2) {
             const isRetry = downloadAttempt === 2;
-            const activeCookiePath = isRetry ? null : currentCookiePath;
-            const cookieArgs = activeCookiePath ? ['--cookies', activeCookiePath] : [];
-            const impersonateArgs = useImpersonate ? ['--impersonate', 'safari'] : [];
-
             if (isRetry) {
-                logger.info(`[${requestHash}] Attempt 2: Cleaning up and retrying batch download without cookies. Relying on yt-dlp internal solver.`);
+                logger.info(`[${requestHash}] Attempt 2: Cleaning up and retrying batch download...`);
 
                 // Clean up any partial files from attempt 1 to ensure a fresh session
                 try {
@@ -773,7 +828,33 @@ const processVideoBatch = async (videoId, youtubeUrl, forceRecreate = false) => 
                 } catch (cleanupErr) {
                     logger.warn(`[${requestHash}] Minor error during batch retry cleanup: ${cleanupErr.message}`);
                 }
+
+                // Record the failed cookie
+                if (currentCookiePath) {
+                    usedCookiePaths.push(currentCookiePath);
+                }
+
+                // Select a new valid cookie excluding already attempted ones
+                const cookiesDir = path.join(__dirname, 'cookies');
+                let nextCookiePath = null;
+                if (fs.existsSync(cookiesDir)) {
+                    const cookieFiles = fs.readdirSync(cookiesDir)
+                        .filter(file => file.endsWith('_cookies.txt') && fs.statSync(path.join(cookiesDir, file)).size > 0)
+                        .map(file => path.join(cookiesDir, file))
+                        .filter(p => !usedCookiePaths.includes(p));
+                    
+                    if (cookieFiles.length > 0) {
+                        nextCookiePath = cookieFiles[Math.floor(Math.random() * cookieFiles.length)];
+                        logger.info(`[${requestHash}] Attempt 2: Selecting alternative cookie (batch): ${path.basename(nextCookiePath)}`);
+                    } else {
+                        logger.warn(`[${requestHash}] Attempt 2: No alternative cookies available. Retrying without cookies.`);
+                    }
+                }
+                currentCookiePath = nextCookiePath;
             }
+
+            const activeCookiePath = currentCookiePath;
+            const cookieArgs = activeCookiePath ? ['--cookies', activeCookiePath] : [];
 
             try {
                 await new Promise((resolve, reject) => {
@@ -783,6 +864,8 @@ const processVideoBatch = async (videoId, youtubeUrl, forceRecreate = false) => 
                         '--force-ipv4',
                         '--legacy-server-connect',
                         '--no-check-certificate',
+                        '--plugin-dirs', path.join(__dirname, 'yt_dlp_plugins'),
+                        '--remote-components', 'ejs:github',
                         ...impersonateArgs,
                         '--no-progress',
                         '--write-auto-sub',
@@ -801,31 +884,28 @@ const processVideoBatch = async (videoId, youtubeUrl, forceRecreate = false) => 
 
                     downloadProcess.stdout.on('data', (data) => {
                         const dataStr = data.toString();
-                        if (dataStr.includes('[jsc:deno]') || dataStr.includes('Solving JS challenges')) {
-                            logger.info(`[${requestHash}] YT-DLP internal solver (batch): ${dataStr.trim()}`);
+                        if (dataStr.includes('bgutil') || dataStr.includes('PO Token') || dataStr.includes('Generating a')) {
+                            logger.info(`[${requestHash}] YT-DLP POT provider (batch): ${dataStr.trim()}`);
                         }
                     });
 
                     downloadProcess.stderr.on('data', (data) => {
                         const dataStr = data.toString();
                         stderrData += dataStr;
-                        if (dataStr.includes('[jsc:deno]') || dataStr.includes('Solving JS challenges')) {
-                            logger.info(`[${requestHash}] YT-DLP internal solver (batch): ${dataStr.trim()}`);
+                        if (dataStr.includes('bgutil') || dataStr.includes('PO Token') || dataStr.includes('Generating a')) {
+                            logger.info(`[${requestHash}] YT-DLP POT provider (batch): ${dataStr.trim()}`);
                         }
                     });
 
                     downloadProcess.on('close', (code) => {
                         if (code === 0) resolve();
                         else {
-                            const isBotError = stderrData.includes('confirm you’re not a bot') || 
-                                               stderrData.includes('cookies are no longer valid') ||
-                                               stderrData.includes('Too Many Requests') ||
-                                               stderrData.includes('429') ||
-                                               stderrData.includes('403') ||
-                                               stderrData.includes('Forbidden');
+                                                        const isBotError = stderrData.includes('confirm you’re not a bot') || 
+                                               stderrData.includes('cookies are no longer valid') || 
+                                               stderrData.includes('HTTP Error 403');
                             if (downloadAttempt === 1 && isBotError && activeCookiePath) {
                                 const invalidPath = activeCookiePath + '.invalid';
-                                logger.warn(`[${requestHash}] Bot detected in batch with cookie ${path.basename(activeCookiePath)}. Invalidating and retrying without cookies...`);
+                                logger.warn(`[${requestHash}] Bot detected in batch with cookie ${path.basename(activeCookiePath)}. Invalidating and retrying with alternative cookie...`);
                                 try { fs.renameSync(activeCookiePath, invalidPath); } catch (e) {}
                                 reject({ type: 'bot_detected', message: stderrData });
                             } else {
@@ -970,7 +1050,7 @@ const processVideoBatch = async (videoId, youtubeUrl, forceRecreate = false) => 
             return;
         }
 
-        const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro", generationConfig: { temperature: 0.7 } });
+        const model = genAI.getGenerativeModel({ model: MODEL_NAME, generationConfig: { temperature: 0.7 } });
         const promptTemplatePath = path.join(__dirname, 'prompt_template.txt');
         let prompt = fs.readFileSync(promptTemplatePath, 'utf-8');
         prompt = prompt.replace('{{VIDEO_TITLE}}', videoTitle).replace('{{SUBTITLES}}', subtitleContent);
@@ -980,10 +1060,9 @@ const processVideoBatch = async (videoId, youtubeUrl, forceRecreate = false) => 
         const usageMetadata = result.response.usageMetadata;
         if (usageMetadata) {
             const { promptTokenCount, candidatesTokenCount, totalTokenCount } = usageMetadata;
-            let inputCost = (promptTokenCount / 1000000) * (totalTokenCount <= 200000 ? 1.25 : 2.50);
-            let outputCost = (candidatesTokenCount / 1000000) * (totalTokenCount <= 200000 ? 10.00 : 15.00);
-            db.addApiCost({ videoId, model_used: 'gemini-2.5-pro', image_tokens: promptTokenCount, text_tokens: candidatesTokenCount, cost: inputCost + outputCost });
-            logger.info(`[${requestHash}] Logged API cost for batch: ${(inputCost + outputCost).toFixed(6)} USD`);
+            const cost = calculateApiCost(MODEL_NAME, promptTokenCount, candidatesTokenCount, totalTokenCount);
+            db.addApiCost({ videoId, model_used: MODEL_NAME, image_tokens: promptTokenCount, text_tokens: candidatesTokenCount, cost });
+            logger.info(`[${requestHash}] Logged API cost for batch: ${cost.toFixed(6)} USD`);
         }
         
         if (result.response.promptFeedback && result.response.promptFeedback.blockReason) {

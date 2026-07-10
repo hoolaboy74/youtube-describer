@@ -23,6 +23,7 @@ function RegisterScreen() {
     const [successMessage, setSuccessMessage] = useState('');
     const [termsExpanded, setTermsExpanded] = useState(false);
     const [agreedToTerms, setAgreedToTerms] = useState(false);
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
     
     const fileInputRef = useRef(null);
 
@@ -110,11 +111,8 @@ function RegisterScreen() {
             if (response.data.success) {
                 const msg = response.data.message || '회원가입이 완료되었습니다.';
                 setSuccessMessage(msg);
-                setSrAnnouncement(msg + ' 로그인 페이지로 이동합니다.');
-                
-                setTimeout(() => {
-                    navigate('/login');
-                }, 3000);
+                setSrAnnouncement(msg + ' 확인 단추를 누르면 로그인 페이지로 이동합니다.');
+                setShowSuccessModal(true);
             }
         } catch (err) {
             const errMsg = err.response?.data?.error || '회원가입 처리 중 오류가 발생했습니다. 입력 정보를 확인해 주십시오.';
@@ -131,6 +129,22 @@ function RegisterScreen() {
             <div className="sr-only" aria-live="assertive" role="alert">
                 {srAnnouncement}
             </div>
+
+            {/* 시각장애인 인증 및 회원 가입 성공 모달 (저시력자 및 일반 사용자용) */}
+            {showSuccessModal && (
+                <div className="success-modal-overlay" role="alertdialog" aria-modal="true" aria-labelledby="modal-title" aria-describedby="modal-desc">
+                    <div className="success-modal-content">
+                        <div className="success-modal-icon" aria-hidden="true">✓</div>
+                        <h2 id="modal-title" className="success-modal-title">가입 및 인증 완료</h2>
+                        <p id="modal-desc" className="success-modal-body">
+                            {successMessage}. 확인 단추를 누르면 로그인 페이지로 이동합니다.
+                        </p>
+                        <button type="button" className="success-modal-btn" onClick={() => navigate('/login')} autoFocus>
+                            확인
+                        </button>
+                    </div>
+                </div>
+            )}
 
             <div className="register-card">
                 <h1 className="register-title" id="form-title">회원 가입</h1>

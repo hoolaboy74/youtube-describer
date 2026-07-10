@@ -509,7 +509,7 @@ function PlayerScreen({ mainRef, announcePolite, announceAssertive }) {
         if (!player || !scriptLine || !audioPlayerRef.current) return;
 
         isTtsPlayingRef.current = true;
-        player.setVolume(30);
+        player.setVolume(60);
         
         // Only pause if the video has actually started playing.
         // This prevents the video from pausing at timestamp 0.
@@ -614,7 +614,7 @@ function PlayerScreen({ mainRef, announcePolite, announceAssertive }) {
             if (player) {
                 // When starting the video, duck the volume if the 0-sec script was just played
                 if (isTtsPlayingRef.current) {
-                    player.setVolume(30);
+                    player.setVolume(60);
                 }
                 player.playVideo();
             }

@@ -102,7 +102,110 @@ To run the backend server, the following command-line tools must be installed on
 
 ## 개선 기록 (Improvement Log)
 
-### 93차: main 및 test 브랜치 안전 통합 및 운영 서버 무중단 배포 적용 (2026-07-02)
+### 100차: 구글 Gemini 2.5 Pro 모델 은퇴 대응 및 3.5 Flash 모델 전면 전환 배포 (2026-07-10)
+- **문제:**
+    1. 구글이 AI Studio API에서 기존에 하드코딩되어 사용되던 `gemini-2.5-pro` 모델의 지원을 완전히 중단(404 Not Found)하여 화면해설 생성 시도 시 API 오류와 함께 대본 생성이 전면 차단되는 장애 발생.
+    2. 1차 유튜브 다운로드 챌린지 차단(`Login Required`) 에러 발생 시 백엔드 봇 예외 감지식(`isBotError`) 누락 및 대소문자 불일치로 인해 예비 쿠키(Attempt 2)로의 롤오버가 작동하지 않고 즉각 실패 처리되던 결함 발견.
+    3. 실로암 신규 API 키(`AQ.Ab...`)가 AI Studio 전용 권한만 있고 YouTube Data API v3 권한을 가지고 있지 않아, 메타데이터 수집 API 호출 시 `401 Unauthorized` 에러를 뿜으며 초입에서 폭사하던 문제 확인.
+- **해결:**
+    1. **동적 모델 설정 아키텍처 개편**: 백엔드 코어(`videoProcessor.js`) 및 3대 모듈(`analyzer.js`, `describer.js`, `synchronizer.js`)의 모델 선언부를 환경변수 `GEMINI_MODEL` 및 기본 fallback `"gemini-3.5-flash"` 로 동적 매핑하도록 보완.
+    2. **API 사용 비용 연산의 동적 보강**: `calculateApiCost` 헬퍼 함수를 신설하여, 활성화된 모델 지정자(3.5-flash, 3.1-pro 등)의 구글 공식 요율(Flash의 경우 입력 $1.50 / 출력 $9.00 무할증 요율)을 추적해 SQLite `api_costs` 에 요금을 영속 적재하도록 수정.
+    3. **비용 및 품질 벤치마크 실증**: 6분 및 12분 영상(최대 42만 토큰) 대상 2초 균등 프레임 추출 조건하의 1:1 비교 벤치마크를 재수행하여, 3.5 Flash가 지연 시간을 50% 단축하고 비용을 2.6배 절감하면서도 비주얼 묘사(코브라 위협 등)의 생동감이 Pro보다 뛰어남을 확인해 기본 운영 모델로 최종 발탁.
+    4. **API 키 분리 처리 및 쿠키 롤오버 보완**: `YOUTUBE_API_KEY` 환경변수를 신설하여 YouTube API 호출 시 이전 사용자 계정 키로 격리 처리하고, `isBotError` 에 `Login Required` 대소문자 무관 감지 필터를 보강하여 쿠키 자동 복구 구조를 정상 복원 완료.
+- **상태:** 소스코드 적용, 환경변수 파일(.env) 주입, 원격 3개 백엔드 프로세스(prod/test/qa) PM2 리로드 및 서비스 정상 복구 완료 (2026-07-10)
+
+### 99차: GCP 프로젝트 결제 계정 실로암 이관 및 Google AI Studio API 키 전환 완료 (2026-07-09)
+- **문제:**
+    1. 뷰레이터 서비스 운영 비용(GCP VM, Cloud TTS API)을 기존 사용자 본인 계정에서 실로암 법인 결제 계정으로 이관해야 하는 과제.
+    2. 실로암 측에서 생성했던 1, 2차 결제 계정이 구글 보안/빌링 방화벽에 의해 강제 폐쇄(Closed, "폐쇄된 계정이므로 사용 금지")되거나 권한 매핑이 누락되어, 연동 테스트 시 GCP 실시간 감지기에 의해 VM `i-blindmom-ko-1` 이 강제 셧다운(TERMINATED)되는 인프라 장애 발생.
+    3. Google AI Studio의 Gemini API 키 역시 결제 계정 매핑 전환 시 기존 선불 크레딧 연동이 해제되어 `429 Prepayment credits depleted` 오류로 서비스가 차단되는 문제 발생.
+- **해결:**
+    1. **정상 활성 결제 계정 검증 및 매핑**: 실로암이 최종적으로 구글 승인을 마친 활성 결제 계정(`01648C-89FFE9-4BB460`, OPEN=True)을 확인하고, 뷰레이터 프로젝트(`coastal-antler-467411-p1`)에 연동을 완료함. (기존 본인 결제 계정 `010844-937E16-06DA1D` -> 실로암 결제 계정 `01648C-89FFE9-4BB460` 으로 최종 교체 완료)
+    2. **인프라 강제 정지 장애 긴급 복구**: 결제 일시 중단으로 nic0 동결 및 디스크 락이 걸린 VM 인스턴스를 GCP 싱크 타임(약 1~3분) 대기 후 강제 재부팅 완료. PM2 프로세스(0~3) 및 Nginx 웹서빙(HTTP 200 OK) 상태로 안전하게 가동 및 복구 성공.
+    3. **Gemini API 키 실로암 유료 키로 전면 이관**: 실로암이 $10 선불 충전을 마치고 발급한 신규 유료 API 키(`AQ.Ab...`)의 작동 검증(Ping-Pong 테스트 성공) 후, 로컬 개발 Worktree(main/qa/test) 3개 및 실서버의 모든 환경(운영/test/qa) 내 `GOOGLE_API_KEY` 설정을 치환하고 PM2 `--update-env` 옵션으로 데몬 갱신 적용 완료.
+- **상태:** 로컬 및 실서버 반영 및 PM2 리로드 완료 (2026-07-09)
+
+### 98차: 관리자 화면 사용자 상세 정보 및 대기 목록 시간 필드 KST 변환 누락 수정 (2026-07-06)
+- **문제:**
+    1. 관리자 화면에서 사용자 상세 정보(가입일시, 최종 로그인 일시 등) 및 승인 대기 목록 조회 시, 시간대 오프셋(KST)이 반영되지 않고 DB 원본 UTC 기준 날짜 문자열(예: `2026-07-06 01:17:56`)이 변환 없이 그대로 노출되어 9시간의 시차가 발생하는 현상.
+- **해결:**
+    1. **SQLite 쿼리 ISO 8601 UTC 포맷화**: `database.js` 내 관리자용 사용자 조회 쿼리 3개 함수(`listPendingUsers`, `listAllUsersForAdmin`, `getUserDetailForAdmin`)의 날짜 필드(`createdAt`, `updatedAt`, `lastLoginAt`, `verificationCreatedAt`)에 `strftime('%Y-%m-%dT%H:%M:%SZ', ...)` 포맷팅 처리를 일괄 적용함. 이를 통해 브라우저가 전달받은 문자열을 명확한 UTC 기준시로 인식하여, 로컬 타임존(KST)으로 자동 변환해 렌더링하도록 수정 완료함.
+- **상태:** database.js 수정 반영 완료 (2026-07-06)
+
+### 97차: PC 재생 화면 오디오 더킹 강도 상향 및 실로암 API 통신 타임아웃 완화 (2026-07-06)
+- **문제:**
+    1. PC 재생 화면에서 오디오 더킹 시 기존 영상 볼륨이 30%로 줄어들어 TTS(해설) 대비 영상 배경 소리가 지나치게 작아 청취감이 부자연스러움.
+    2. 실로암 시각장애인 회원 인증 API의 네트워크 타임아웃이 5초로 지정되어 있어, 실물 기관망 내부 지연 등으로 인해 간헐적인 타임아웃(HTTP 5s timeout & socket hang up) 에러가 발생함.
+- **해결:**
+    1. **오디오 더킹 볼륨 조정 (30% -> 60%)**: PC 재생 화면에서 TTS 동작 시 기존 비디오 볼륨 감소 임계치를 30%에서 60%로 상향하여 비디오 배경 소리와 해설 음성이 좀 더 조화롭게 들리도록 튜닝함.
+    2. **실로암 API 타임아웃 완화 (5초 -> 10초)**: API 커넥션 타임아웃 제한을 기존 5초에서 10초(`10000ms`)로 확대 적용하여 외부 기관 서버의 일시적 조회 지연 및 네트워크 진동에 대한 복구력을 제고함.
+- **상태:** PlayerScreenV2.js, PlayerScreen.js, utils.js 등 수정 반영 완료 (2026-07-06)
+
+### 96차: 운영 서버 통합 통계 및 접속 플랫폼 분석 확장 스킬(analyze_system_stats) 구축, Nginx 로그 보관 기간 90일 연장 (2026-07-05)
+- **문제:**
+    1. 운영 서버의 핵심 비즈니스 지표(성공률, 영상 시간 분포, AI 토큰 사용 비용) 및 회원/비회원 간 활성 트렌드를 한눈에 통합 확인하고 특정 기간 범위로 분석할 수 있는 체계적인 도구 부재.
+    2. 데이터베이스 스키마 내에 접속 기기(User-Agent) 정보를 관리하지 않아 시각장애인 주 사용 플랫폼(모바일 vs PC) 현황 식별 불가.
+    3. Nginx 로그 회전 설정이 14일(`rotate 14`)로 제한되어 있어 월간 보고서 집계 시 과거 로그 유실 위험 상존.
+- **해결:**
+    1. **동적 기간 분석 및 하한선 제한 구현**: 시작일/종료일 인수(YYYY-MM-DD)를 수신해 특정 월간/주간 데이터를 필터링하되, 모든 분석의 기준점을 최초 회원가입 시점(`2026-07-02 02:27:51`)으로 고정하는 보안적 날짜 하한 보정 로직을 포함한 `stats_collector.js` 구축.
+    2. **User-Agent 파싱 기기 분포 연계**: Nginx access.log 및 압축 아카이브 로그를 파싱해 접속 기기/OS 점유율을 추출 (iOS/iPhone이 모바일 유입의 92.4%를 차지하는 실제 시각장애인 VoiceOver 사용성 실증 데이터를 확보).
+    3. **텍스트 리포트 자동 서빙**: 수집 및 통합 분석한 리포트를 마크다운이 아닌 일반 텍스트 파일(`.txt`)로 가공해 `prod_report/` 디렉토리에 버전별 자동 보관하도록 설계하여 `.agents` 스킬 디렉토리에 마운트.
+    4. **Nginx 로그 보관 주기 확장**: 원격 서버의 `/etc/logrotate.d/nginx` 설정을 수정하여 보관 일수를 14일에서 90일(`rotate 90`)로 연장, 디스크 부하 없이 장기 분석 무결성 확보.
+- **상태:** stats_collector.js 및 SKILL.md 구축, Nginx logrotate 수정 및 90일 연장 적용 완료, 6월~7월 범위 검증 테스트 통과 (2026-07-05)
+
+### 95차: 유튜브 쿠키 자동 갱신 스크립트 2단계 정밀 검증(스트림 URL 추출), 30초 쿨다운 지연 및 Systemd 타이머 4시간 주기 적용 (2026-07-03)
+- **문제:**
+    1. 쿠키 자동 갱신 스크립트가 단순히 가벼운 로그인 세션 유효성(History API)만 검증하기 때문에, 유튜브에 의해 미디어 스트리밍이 차단(403 Forbidden)된 시한부/좀비 쿠키도 "성공"으로 동기화되어 백엔드 성능 저하 및 봇 감지 장애를 유발함.
+    2. Playwright 브라우저 종료 직후 즉각적인 검증을 실시할 경우, 유튜브 위협 탐지 시스템이 세션을 강제 만료시키는 레이턴시(수십 초) 이전에 검증되어 좀비 계정이 필터링되지 못함.
+    3. 기존의 30분 타이머 주기는 지나치게 잦아 서버 IP 대역 차단(IP Ban) 및 계정 영구 잠금 리스크가 극대화됨.
+    4. 쿠키가 만료되었을 때 시도하는 2차 무쿠키 우회(`Attempt 2`) 다운로드 시도가 실제로는 100% 실패하여 불필요한 레이턴시만 유발함.
+- **해결:**
+    1. **2단계 스트림 URL 추출 검증**: `server-refresh-cookies.py` 내에 `yt-dlp -g`를 활용한 다이렉트 재생 주소 추출 여부 체크(2단계)를 도입하여, 403 차단 계정을 1초 안에 안전하게 격리하고 유효한 쿠키만 백엔드로 복사되도록 방어함.
+    2. **30초 쿨다운 대기 도입**: 브라우저 인스턴스 닫기(`browser.close()`) 직후 30초 대기 시간(`asyncio.sleep(30)`)을 부여하여 유튜브 보안 엔진에 의해 즉시 소멸하는 가짜 유효 세션을 완벽히 식별함.
+    3. **Systemd 타이머 4시간 주기 연장**: `/etc/systemd/system/youtube-cookie-refresh.timer` 설정을 수정(`OnCalendar=0/4:00:00`)하여 로그인 요청을 일 6회로 대폭 최소화하고 IP 밴 리스크를 방어함.
+    4. **대체 쿠키 선택식 2차 시도 적용**: `videoProcessor.js`를 수정하여 1차 다운로드 실패 시 무쿠키로 롤오버하지 않고, 이미 시도하지 않은 다른 유효 쿠키를 무작위로 재선택하여 2차 다운로드를 수행하는 대체 쿠키 시도 로직을 정립함 (가용성 극대화).
+- **상태:** 로컬/운영 서버 스크립트 및 백엔드 다운로드 로직 적용, Systemd 타이머 리로드 및 운영 배포 무중단 완수 (2026-07-03)
+
+### 94차: Nginx XFF 프록시 헤더 설정 및 Express trust proxy 활성화로 클라이언트 IP 식별 정상화 (2026-07-02)
+- **문제:** 리버스 프록시(Nginx) 뒤에 위치한 ExpressJS 백엔드에서 사용자 로그인 및 인증 IP를 기록할 때, 실제 클라이언트 IP가 아닌 루프백 IP(`127.0.0.1`)로 일괄 수집되는 결함 존재.
+- **해결:**
+    1. **Nginx 프록시 헤더 추가**: `/etc/nginx/sites-available/youtube-describer` 및 `test-youtube-describer` 설정의 `/api` 프록시 경로에 `X-Real-IP`, `X-Forwarded-For`, `X-Forwarded-Proto` 헤더 전달 규칙 주입 및 Nginx 리로드 적용.
+    2. **Express trust proxy 활성화**: `backend/index.js`에 `app.set('trust proxy', true);` 설정을 적용하여 Nginx가 전달한 프록시 헤더를 신뢰하고 클라이언트 실제 IP를 정확하게 추출하도록 수정 완료.
+- **상태:** 운영/테스트 환경 소스 반영 및 Nginx 무중단 리로드 완료 (2026-07-02)
+
+### 93차: users 테이블에 blind_auth_method 컬럼 추가 및 가입/재인증/승인 수단 자동 기록 (2026-07-02)
+- **문제:** 사용자의 시각장애인 인증 방식(실로암 API 연동 vs 복지카드 OCR 판독) 기록이 `user_verifications` 이력 테이블에만 산재되어 있어, 현재 활성화된 시각장애인의 최종 인증 경로를 `users` 테이블 수준에서 직관적으로 쿼리하거나 관리자 화면에서 일괄 식별하기 곤란함.
+- **해결:**
+    1. **스키마 및 자동 마이그레이션 확장**: `database.js`의 `users` 테이블 생성 DDL에 `blind_auth_method TEXT` 컬럼을 추가하고, 기존 프로덕션 DB와의 호환성을 보장하기 위해 `init()` 실행 시 누락된 컬럼을 자동으로 `ALTER TABLE`하는 마이그레이션 예외 블록을 구축 완료.
+    2. **가입 절차 저장 연동**: `routes.js`의 `/auth/register` API에서 실로암(`siloam_api`) 또는 복지카드(`card_ocr`) 인증 통과(승인 또는 수동 대기) 시 해당 경로명을 `users` 테이블의 `blind_auth_method` 컬럼에 자동 영속화하도록 바인딩.
+    3. **마이페이지 재인증 연동**: `/users/me/verify-blind` API에서 미인증 회원이 재인증에 성공하거나 수동 대기 상태로 변경될 때도 `updateUserBlindStatus`에 인증 수단을 주입해 해당 컬럼이 갱신되도록 처리 완료.
+    4. **어드민 수동 승인 이력 매핑**: 어드민 전용 사용자 승인 API(`/admin/users/:userId/approve`) 처리 시 인증 방식을 `'admin_manual'`로 강제 업데이트되도록 매개변수를 확장 연동함.
+- **상태:** 로컬/원격 DB 자동 컬럼 마이그레이션 및 인증 API 핸들러 수정 완료, 신택스 검증 통과 (2026-07-02)
+
+### 92차: Rust 기반 POT(Proof of Token) Provider 데몬 및 yt-dlp 원격 EJS 솔버 도입으로 유튜브 403 Forbidden 우회 성공률 극대화 (2026-07-02)
+- **문제:**
+    1. 유튜브의 BotGuard 챌린지 검증 및 Throttling 강화로 인해 `yt-dlp` 구동 시 `HTTP Error 403: Forbidden` 및 `Requested format is not available` 에러가 수시로 발생하여 서비스 안정성이 저해됨.
+    2. 기존의 Deno solver 방식은 매 실행 시마다 자바스크립트 챌린지를 동적 연산하여 지연이 심하고 봇 탐지율이 높았음.
+    3. 2026년 최신 `yt-dlp` 규격은 Throttling을 해제하기 위해 EJS(원격 솔버)를 동적으로 로드해야 하나, 이에 대한 인자가 없어 챌린지 풀이가 비활성화되고, 방화벽 및 SSL 사설 인증서 검증 충돌로 인해 다운로드 단계에서 장애가 발생함.
+    4. 쿠키 만료(403) 발생 시 백엔드 재시도(2차 무쿠키 + POT) 폴백 로직이 연동되지 못하고 즉시 실패 처리되는 예외 검증 구멍이 존재함.
+- **해결:**
+    1. **Rust POT 데몬 도입**: 무거운 JS 런타임 의존성이 없고 메모리 캐싱 및 고속 처리가 가능한 Rust 기반 POT Provider (`bgutil-pot` v0.8.1)를 로컬 및 운영 서버의 백그라운드 서비스(PM2)에 `4416` 포트로 상시 상주 구동 완료.
+    2. **플러그인 및 EJS 바인딩**: `yt-dlp` 스폰 명령에 `--plugin-dirs` 및 `--remote-components ejs:github` 인자를 강제 주입하여, 유튜브 데이터 통신 전에 원격지 EJS 솔버와 로컬 POT 데몬을 자동으로 연동하여 403 차단 및 Throttling을 우회하도록 구성 완료.
+    3. **에러 격리 조건 확장**: `videoProcessor.js`의 `isBotError` 판단식에 `HTTP Error 403` 에러를 추가하여, 1차 쿠키 다운로드 실패 시 해당 쿠키를 `.invalid`로 즉시 무효화/격리하고, 2차 무쿠키(POT 데몬) 우회 시도로 매끄럽게 자동 롤오버되도록 복구 완료.
+    4. **전역 모듈 충돌 해소**: 원격/로컬 파이썬 패키지 풀의 중복 모듈(`v1.3.1`)을 언인스톨하여, 프로젝트에 번들링된 `0.8.1` 버전 플러그인이 데몬과 완벽하게 버전 매칭(0.8.1 == 0.8.1)되어 구동하도록 강제 완료.
+    5. **SSL 인증서 우회**: CLI용 배치 프로세서(`process_video_cli.js`)에 `--no-check-certificate` 옵션을 추가하여 사내망 터널 환경에서의 SSL 사설 CA 충돌 문제를 해결함.
+    6. **대용량 파일 업로드 차단**: 테스트용 비디오 및 로컬 캐시 DB 파일이 Git 스테이징에 포함되어 푸시 속도가 저하되던 문제를 `git reset` 및 `.gitignore` 무시 규칙 고도화를 통해 원천 해결 완료.
+- **상태:** 로컬 및 원격 운영 서버(www.blindmom.org) PM2 데몬 등록, 파이썬 패키지 정리, 무중단 배포 및 일반 비디오 대상 우회 성공률 100% 정상 가동 확인 완료 (2026-07-02)
+
+### 91차: 가입 및 인증 성공 시 3초 자동 리다이렉트 대신 수동 모달 닫기 확인으로 변경하여 저시력자 접근성 개선 (2026-07-02)
+- **문제:** 회원 가입 및 시각장애인 자격 인증 성공 시 전맹 사용자를 위한 낭독과 동시에 3초 후 강제로 로그인 또는 마이페이지 화면으로 이동하게 되어 있었으나, 저시력자나 일반 사용자의 경우 성공 메시지를 채 인지하기도 전에 리다이렉트되어 무슨 상황인지 명확히 파악하기 어려운 접근성 제약 발생.
+- **해결:**
+    1. **수동 확인 모달 설계**: 회원 가입(`RegisterScreen.js`) 및 마이페이지 인증(`VerificationScreen.js`) 화면에서 3초 후 자동 리다이렉트하는 `setTimeout` 로직을 걷어내고, 사용자가 성공 여부를 직접 읽고 닫을 수 있도록 직관적인 '확인' 버튼을 각 성공 모달 내부에 배치.
+    2. **접근성 및 포커스 낭독 신뢰성 제고**: 모달 활성화 시 포커스가 모달 내 버튼으로 강제 이동하며 페이지 영역의 기존 낭독이 생략되는 버그를 예방하기 위해, 성공 모달 전체에 **`role="alertdialog"`** 및 **`aria-describedby="modal-desc"`** 속성을 부여하여 팝업 즉시 성공 안내 메시지가 생략 없이 자연스럽게 강제 낭독되도록 보장.
+    3. **공통 스타일 구축**: `App.css`에 성공 안내 모달용 전용 버튼 스타일(`success-modal-btn`) 및 웹 표준 포커스 링을 구성하여 글래스모피즘 테마 및 고대비 가시성을 동시에 지원.
+- **상태:** 가입 및 인증 수동 모달 로직 변경 및 alertdialog 접근성 개선 완료, CSS 전역 스타일링 및 프론트엔드 빌드 검증 통과 (2026-07-02)
+
+### 90차: main 및 test 브랜치 안전 통합 및 운영 서버 무중단 배포 적용 (2026-07-02)
 - **문제:**
     1. `test` 브랜치에 대량 반영된 82~88차(회원 가입/인증, 실물 실로암 API 검증, 5분 제한, 어드민 전용 사용자 제어 등) 개선 코드와 `main` 브랜치의 독자 수정 이력(텔레그램 실시간 장애 알림 등)이 분리되어 있어, 실서비스 운영을 위한 단일 통합 및 동기화가 요구됨.
     2. 병합 시 로그인 쿠키 세션 및 `GEMINI.md` 로그 차수 중첩 등 병합 충돌 요소 제어 및 기존 운영 DB(SQLite `cache.db`)의 4,000여 건 데이터 유실 없는 무결성 마이그레이션 안전장치 확보 필요.
@@ -114,7 +217,7 @@ To run the backend server, the following command-line tools must be installed on
     5. **마이그레이션 실물 검증 성공**: 배포 직후 DB `init()`이 구동되어 기존 DB 데이터를 보존한 채 신규 컬럼 9종을 자동 추가한 것과 Nginx 프론트엔드가 `200 OK`로 서빙되는 것을 실시간 검증했습니다.
 - **상태:** DB 마이그레이션, 환경변수 구성, 원격 운영 서버(www.blindmom.org) 무중단 배포 및 실물 상태 검증 완료 (2026-07-02)
 
-### 92차: 실물 실로암 시각장애인 회원 검증 API 명세 연동, Happy Eyeballs 버그 우회 및 자동 6자리 생년월일 파싱/유효성 검사 도입 (2026-07-01)
+### 89차: 실물 실로암 시각장애인 회원 검증 API 명세 연동, Happy Eyeballs 버그 우회 및 자동 6자리 생년월일 파싱/유효성 검사 도입 (2026-07-01)
 - **문제:**
     1. 기존 실로암 API 연동 시 `X-Org` 헤더 누락 및 `phoneNo`가 포함된 비표준 요청 규격으로 인해 인증 실패 가능성 상존.
     2. Node.js 18+ 환경의 Happy Eyeballs IPv6 우선 시도 정책으로 인해 특정 환경에서 실물 실로암 API 통신 시 5초 타임아웃(Abort) 발생.
@@ -1138,4 +1241,55 @@ API 비용을 체계적으로 추적하고 분석하여 비용을 최적화하�
   1. 로컬 코드 수정 및 테스트
   2. `./deploy-prod.sh "커밋 메세지"` 실행 (GitHub 푸시)
   3. 운영 서버 접속 후 `~/deploy-app.sh` 실행 (최종 반영 및 서버 재시작)
+
+### 유튜브 쿠키 자동 갱신 시스템 (Headless Playwright)
+서버 단독으로 유튜브 쿠키 세션을 유효하게 유지하고, 검증 통과한 쿠키를 서비스 디렉토리들에 전파하는 시스템입니다.
+
+- **스크립트 경로**: [server-refresh-cookies.py](file:///Users/chacha/src/youtube-describer/backend/bin/server-refresh-cookies.py)
+  - *운영서버 배치 경로: `/home/chacha/bin/server-refresh-cookies.py`*
+- **가상환경 경로**: `/home/chacha/bin/venv` (Playwright & Chromium 구동용)
+- **쿠키 저장소**:
+  - 임시/검증용: `/home/chacha/bin/cookies/`
+  - 실서비스 전파처: `/app/youtube-describer/backend/cookies/`, `/app/test-youtube-describer/backend/cookies/`, `/app/qa-youtube-describer/backend/cookies/`
+- **Systemd 자동화 설정**:
+  - **서비스 유닛**: `/etc/systemd/system/youtube-cookie-refresh.service`
+    ```ini
+    [Unit]
+    Description=YouTube Cookie Auto Refresh Service
+    After=network.target
+
+    [Service]
+    Type=oneshot
+    User=chacha
+    ExecStart=/home/chacha/bin/server-refresh-cookies.py
+    StandardOutput=append:/home/chacha/bin/cookies/refresh.log
+    StandardError=append:/home/chacha/bin/cookies/refresh.log
+
+    [Install]
+    WantedBy=multi-user.target
+    ```
+  - **타이머 유닛** (4시간 간격 실행): `/etc/systemd/system/youtube-cookie-refresh.timer`
+    ```ini
+    [Unit]
+    Description=Run YouTube Cookie Auto Refresh Service every 4 hours
+
+    [Timer]
+    OnCalendar=0/4:00:00
+    Persistent=true
+    Unit=youtube-cookie-refresh.service
+
+    [Install]
+    WantedBy=timers.target
+    ```
+  - **상태 제어**:
+    ```bash
+    sudo systemctl daemon-reload
+    sudo systemctl enable --now youtube-cookie-refresh.timer
+    sudo systemctl start youtube-cookie-refresh.service  # 수동 즉시 실행
+    ```
+  - **로그 모니터링**:
+    ```bash
+    tail -f /home/chacha/bin/cookies/refresh.log
+    journalctl -u youtube-cookie-refresh.service -f
+    ```
 

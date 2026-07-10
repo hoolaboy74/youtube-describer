@@ -178,6 +178,7 @@ function init() {
       birthdate TEXT NOT NULL,
       pin TEXT, -- 비밀번호 찾기용 PIN
       is_blind INTEGER DEFAULT 0, -- 0: 미인증, 1: 인증완료, 2: 반려, 9: 관리자 대기
+      blind_auth_method TEXT, -- 'siloam_api', 'card_ocr', 'admin_manual'
       createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
       updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
     )
@@ -213,6 +214,12 @@ function init() {
   } catch (error) {
     logger.info('Adding lastLoginAt column to users table...');
     db.exec('ALTER TABLE users ADD COLUMN lastLoginAt DATETIME');
+  }
+  try {
+    db.prepare('SELECT blind_auth_method FROM users LIMIT 1').get();
+  } catch (error) {
+    logger.info('Adding blind_auth_method column to users table...');
+    db.exec('ALTER TABLE users ADD COLUMN blind_auth_method TEXT');
   }
 
 
@@ -1031,11 +1038,11 @@ function deletePostCommentByIdAdmin(id) {
 }
 
 // --- User Management Functions ---
-function createUser({ id, email, password, name, phone, birthdate, is_blind, pin }) {
+function createUser({ id, email, password, name, phone, birthdate, is_blind, pin, blind_auth_method }) {
   const result = db.prepare(`
-    INSERT INTO users (id, email, password, name, phone, birthdate, is_blind, pin)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-  `).run(id, email, password, name, phone, birthdate, is_blind || 0, pin || null);
+    INSERT INTO users (id, email, password, name, phone, birthdate, is_blind, pin, blind_auth_method)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `).run(id, email, password, name, phone, birthdate, is_blind || 0, pin || null, blind_auth_method || null);
   return result.changes > 0;
 }
 
@@ -1063,10 +1070,16 @@ function getUserByPhone(phone) {
   return db.prepare('SELECT * FROM users WHERE phone = ?').get(phone);
 }
 
-function updateUserBlindStatus(userId, isBlind) {
+function updateUserBlindStatus(userId, isBlind, blindAuthMethod = null) {
   const transaction = db.transaction(() => {
-    const userUpdate = db.prepare('UPDATE users SET is_blind = ?, updatedAt = CURRENT_TIMESTAMP WHERE id = ?')
-                         .run(isBlind, userId);
+    let userUpdate;
+    if (blindAuthMethod) {
+      userUpdate = db.prepare('UPDATE users SET is_blind = ?, blind_auth_method = ?, updatedAt = CURRENT_TIMESTAMP WHERE id = ?')
+                     .run(isBlind, blindAuthMethod, userId);
+    } else {
+      userUpdate = db.prepare('UPDATE users SET is_blind = ?, updatedAt = CURRENT_TIMESTAMP WHERE id = ?')
+                     .run(isBlind, userId);
+    }
 
     if (userUpdate.changes > 0) {
       const statusMap = { 1: 'approved', 2: 'rejected' };
@@ -1096,7 +1109,13 @@ function createUserVerification({ userId, verificationMethod, status, details, v
 
 function listPendingUsers() {
   return db.prepare(`
-    SELECT u.*, uv.verificationMethod, uv.status AS verificationStatus, uv.details, uv.createdAt AS verificationCreatedAt
+    SELECT u.id, u.email, u.name, u.phone, u.birthdate, u.pin, u.is_blind, u.is_active, u.blind_auth_method,
+           strftime('%Y-%m-%dT%H:%M:%SZ', u.createdAt) as createdAt,
+           strftime('%Y-%m-%dT%H:%M:%SZ', u.updatedAt) as updatedAt,
+           u.lastLoginIp,
+           strftime('%Y-%m-%dT%H:%M:%SZ', u.lastLoginAt) as lastLoginAt,
+           uv.verificationMethod, uv.status AS verificationStatus, uv.details,
+           strftime('%Y-%m-%dT%H:%M:%SZ', uv.createdAt) as verificationCreatedAt
     FROM users u
     LEFT JOIN user_verifications uv ON u.id = uv.userId
     WHERE u.is_blind = 9
@@ -1138,7 +1157,11 @@ function listAllUsersForAdmin({ page = 1, limit = 20, search = null, isBlind = n
   const total = db.prepare(countSql).get(...params).count;
 
   const listSql = `
-    SELECT id, email, name, phone, birthdate, pin, is_blind, is_active, createdAt, updatedAt, lastLoginIp, lastLoginAt
+    SELECT id, email, name, phone, birthdate, pin, is_blind, is_active, blind_auth_method,
+           strftime('%Y-%m-%dT%H:%M:%SZ', createdAt) as createdAt,
+           strftime('%Y-%m-%dT%H:%M:%SZ', updatedAt) as updatedAt,
+           lastLoginIp,
+           strftime('%Y-%m-%dT%H:%M:%SZ', lastLoginAt) as lastLoginAt
     FROM users
     ${whereSql}
     ORDER BY createdAt DESC
@@ -1191,7 +1214,11 @@ function deleteUserAdmin(userId) {
 
 function getUserDetailForAdmin(userId) {
   const user = db.prepare(`
-    SELECT id, email, name, phone, birthdate, pin, is_blind, is_active, createdAt, updatedAt, lastLoginIp, lastLoginAt
+    SELECT id, email, name, phone, birthdate, pin, is_blind, is_active, blind_auth_method,
+           strftime('%Y-%m-%dT%H:%M:%SZ', createdAt) as createdAt,
+           strftime('%Y-%m-%dT%H:%M:%SZ', updatedAt) as updatedAt,
+           lastLoginIp,
+           strftime('%Y-%m-%dT%H:%M:%SZ', lastLoginAt) as lastLoginAt
     FROM users
     WHERE id = ?
   `).get(userId);
@@ -1337,8 +1364,26 @@ function getCommentsByUserId(userId) {
   `).all(userId);
 }
 
+function getSitemapData() {
+  const videos = db.prepare(`
+    SELECT videoId, strftime('%Y-%m-%dT%H:%M:%SZ', createdAt) as createdAt
+    FROM videos
+    WHERE status = 'completed'
+    ORDER BY createdAt DESC
+  `).all();
+
+  const posts = db.prepare(`
+    SELECT id, strftime('%Y-%m-%dT%H:%M:%SZ', createdAt) as createdAt
+    FROM posts
+    ORDER BY createdAt DESC
+  `).all();
+
+  return { videos, posts };
+}
+
 module.exports = {
   init,
+  getSitemapData,
   createUser,
   getUserByEmail,
   getUserById,

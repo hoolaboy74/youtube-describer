@@ -359,7 +359,7 @@ function PlayerScreen() {
         if (!player || !scriptLine || !audioPlayerRef.current) return;
 
         isTtsPlayingRef.current = true;
-        player.setVolume(30);
+        player.setVolume(60);
         player.pauseVideo();
 
         const audioPlayer = audioPlayerRef.current;
