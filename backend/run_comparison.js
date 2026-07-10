@@ -1,4 +1,4 @@
-require('dotenv').config();
+require('dotenv').config({ path: require('path').join(__dirname, '.env') });
 const { spawn } = require('child_process');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const fs = require('fs');
