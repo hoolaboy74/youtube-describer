@@ -1160,9 +1160,6 @@ function PlayerScreenV2() {
                                      iframe.setAttribute('tabindex', '-1');
                                      iframe.setAttribute('aria-hidden', 'true');
                                  }
-=======
-                                 
->>>>>>> main
                                  if (user) {
                                      try {
                                          await axios.post(`${API_BASE}/api/users/me/videos/history`, { videoId });
