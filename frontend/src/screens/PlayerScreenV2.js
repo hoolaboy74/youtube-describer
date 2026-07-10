@@ -562,12 +562,7 @@ function PlayerScreenV2() {
                 });
             }
 
-            // Refocus input field after answer is processed
-            setTimeout(() => {
-                if (inputRef.current) {
-                    inputRef.current.focus();
-                }
-            }, 100);
+
 
         } catch (error) {
             console.error('Q&A failed:', error);
@@ -577,12 +572,7 @@ function PlayerScreenV2() {
             setIsQaLoading(false);
             announceQaPolite('장면 분석 및 답변 생성에 실패했습니다.');
 
-            // Refocus input field on error as well
-            setTimeout(() => {
-                if (inputRef.current) {
-                    inputRef.current.focus();
-                }
-            }, 100);
+
         }
     };
     useEffect(() => {
