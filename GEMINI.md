@@ -85,6 +85,18 @@ To run the backend server, the following command-line tools must be installed on
 
 ## 개선 기록 (Improvement Log)
 
+### 100차: 구글 Gemini 2.5 Pro 모델 은퇴 대응 및 3.5 Flash 모델 전면 전환 배포 (2026-07-10)
+- **문제:**
+    1. 구글이 AI Studio API에서 기존에 하드코딩되어 사용되던 `gemini-2.5-pro` 모델의 지원을 완전히 중단(404 Not Found)하여 화면해설 생성 시도 시 API 오류와 함께 대본 생성이 전면 차단되는 장애 발생.
+    2. 1차 유튜브 다운로드 챌린지 차단(`Login Required`) 에러 발생 시 백엔드 봇 예외 감지식(`isBotError`) 누락 및 대소문자 불일치로 인해 예비 쿠키(Attempt 2)로의 롤오버가 작동하지 않고 즉각 실패 처리되던 결함 발견.
+    3. 실로암 신규 API 키(`AQ.Ab...`)가 AI Studio 전용 권한만 있고 YouTube Data API v3 권한을 가지고 있지 않아, 메타데이터 수집 API 호출 시 `401 Unauthorized` 에러를 뿜으며 초입에서 폭사하던 문제 확인.
+- **해결:**
+    1. **동적 모델 설정 아키텍처 개편**: 백엔드 코어(`videoProcessor.js`) 및 3대 모듈(`analyzer.js`, `describer.js`, `synchronizer.js`)의 모델 선언부를 환경변수 `GEMINI_MODEL` 및 기본 fallback `"gemini-3.5-flash"` 로 동적 매핑하도록 보완.
+    2. **API 사용 비용 연산의 동적 보강**: `calculateApiCost` 헬퍼 함수를 신설하여, 활성화된 모델 지정자(3.5-flash, 3.1-pro 등)의 구글 공식 요율(Flash의 경우 입력 $1.50 / 출력 $9.00 무할증 요율)을 추적해 SQLite `api_costs` 에 요금을 영속 적재하도록 수정.
+    3. **비용 및 품질 벤치마크 실증**: 6분 및 12분 영상(최대 42만 토큰) 대상 2초 균등 프레임 추출 조건하의 1:1 비교 벤치마크를 재수행하여, 3.5 Flash가 지연 시간을 50% 단축하고 비용을 2.6배 절감하면서도 비주얼 묘사(코브라 위협 등)의 생동감이 Pro보다 뛰어남을 확인해 기본 운영 모델로 최종 발탁.
+    4. **API 키 분리 처리 및 쿠키 롤오버 보완**: `YOUTUBE_API_KEY` 환경변수를 신설하여 YouTube API 호출 시 이전 사용자 계정 키로 격리 처리하고, `isBotError` 에 `Login Required` 대소문자 무관 감지 필터를 보강하여 쿠키 자동 복구 구조를 정상 복원 완료.
+- **상태:** 소스코드 적용, 환경변수 파일(.env) 주입, 원격 3개 백엔드 프로세스(prod/test/qa) PM2 리로드 및 서비스 정상 복구 완료 (2026-07-10)
+
 ### 99차: GCP 프로젝트 결제 계정 실로암 이관 및 Google AI Studio API 키 전환 완료 (2026-07-09)
 - **문제:**
     1. 뷰레이터 서비스 운영 비용(GCP VM, Cloud TTS API)을 기존 사용자 본인 계정에서 실로암 법인 결제 계정으로 이관해야 하는 과제.
