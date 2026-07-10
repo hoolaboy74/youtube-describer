@@ -6,9 +6,8 @@ const util = require('util');
 const { execFile, spawn, execSync } = require('child_process');
 const crypto = require('crypto');
 const db = require('./database');
-const { formatTime, preprocessVtt, isValidYoutubeUrl, getIsImpersonateAvailable } = require('./utils');
+const { formatTime, preprocessVtt, isValidYoutubeUrl } = require('./utils');
 const logger = require('./logger');
-const sharp = require('sharp');
 
 let isSafariImpersonateSupported = false;
 try {
@@ -49,7 +48,6 @@ const MODEL_NAME = process.env.GEMINI_MODEL || "gemini-3.5-flash";
 const genAI = new GoogleGenerativeAI(API_KEY);
 const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY || API_KEY;
 const youtube = google.youtube({ version: 'v3', auth: YOUTUBE_API_KEY });
-
 const calculateApiCost = (modelName, promptTokenCount, candidatesTokenCount, totalTokenCount) => {
     const modelLower = modelName.toLowerCase();
     let inputRate = 1.25; // Default legacy pro rate (gemini-1.5-pro / gemini-2.5-pro)
@@ -78,33 +76,6 @@ const calculateApiCost = (modelName, promptTokenCount, candidatesTokenCount, tot
     const outputCost = (candidatesTokenCount / 1000000) * (totalTokenCount <= 200000 ? outputRate : outputRateOverLimit);
     return inputCost + outputCost;
 };
-
-const saveFrameCache = async (baseTempDir, allFrameFiles, allTimestamps, videoId) => {
-    const framesOutputDir = path.join(__dirname, 'public', 'frames', videoId);
-    try {
-        await fs.promises.mkdir(framesOutputDir, { recursive: true });
-        
-        for (let i = 0; i < allTimestamps.length; i++) {
-            const timestamp = allTimestamps[i];
-            const frameFile = allFrameFiles[i];
-            if (frameFile && fs.existsSync(path.join(baseTempDir, frameFile))) {
-                const srcPath = path.join(baseTempDir, frameFile);
-                const destFileName = `frame-${Math.round(timestamp)}.jpg`;
-                const destPath = path.join(framesOutputDir, destFileName);
-                
-                await sharp(srcPath)
-                    .resize({ width: 640 })
-                    .jpeg({ quality: 50, progressive: true })
-                    .toFile(destPath);
-            }
-        }
-        logger.info(`[${videoId.substring(0, 8)}] Saved ${allTimestamps.length} compressed frames to cache.`);
-    } catch (err) {
-        logger.error(`[${videoId.substring(0, 8)}] Failed to save frame cache:`, err);
-    }
-};
-
-
 
 const processingLocks = new Set();
 const timers = new Map();
@@ -563,37 +534,8 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null, userId = nul
         if (finalSubtitlePath && fs.existsSync(finalSubtitlePath)) {
             subtitleContent = preprocessVtt(fs.readFileSync(finalSubtitlePath, 'utf-8'));
             logger.info(`[${requestHash}] Successfully loaded and preprocessed subtitles.`);
-            
-            // Pre-cache subtitle for Q&A
-            const subtitlesDir = path.join(__dirname, 'public', 'subtitles');
-            if (!fs.existsSync(subtitlesDir)) {
-                fs.mkdirSync(subtitlesDir, { recursive: true });
-            }
-            const destSubPath = path.join(subtitlesDir, `${videoId}.vtt`);
-            if (!fs.existsSync(destSubPath)) {
-                try {
-                    fs.copyFileSync(finalSubtitlePath, destSubPath);
-                    logger.info(`[${requestHash}] Subtitles pre-cached to ${destSubPath}`);
-                } catch (copyErr) {
-                    logger.error(`[${requestHash}] Failed to pre-cache subtitles:`, copyErr);
-                }
-            }
         } else {
             logger.warn(`[${requestHash}] No suitable subtitle file found (tried ko, en). Proceeding without subtitles.`);
-            // Create negative cache flag for Q&A
-            const subtitlesDir = path.join(__dirname, 'public', 'subtitles');
-            if (!fs.existsSync(subtitlesDir)) {
-                fs.mkdirSync(subtitlesDir, { recursive: true });
-            }
-            const destNoSubPath = path.join(subtitlesDir, `${videoId}.nosub`);
-            if (!fs.existsSync(destNoSubPath)) {
-                try {
-                    fs.writeFileSync(destNoSubPath, '');
-                    logger.info(`[${requestHash}] Negative cache flag created for subtitles: ${destNoSubPath}`);
-                } catch (writeErr) {
-                    logger.error(`[${requestHash}] Failed to write negative cache flag:`, writeErr);
-                }
-            }
         }
 
         timeEnd(extractionLabel);
@@ -699,7 +641,6 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null, userId = nul
         }
 
         db.saveVideo({ videoId, title: videoTitle, duration: Math.round(totalDuration), filesize, script: fullScript });
-        await saveFrameCache(baseTempDir, allFrameFiles, allTimestamps, videoId);
         timeEnd(aiLabel);
         if (sseHandler) sseHandler('end', { message: 'Processing complete.' });
         
@@ -761,7 +702,7 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null, userId = nul
     }
 };
 
-const processVideoBatch = async (videoId, youtubeUrl, forceRecreate = false) => {
+const processVideoBatch = async (videoId, youtubeUrl) => {
     const requestHash = `batch-${videoId.substring(0, 8)}`;
     if (!isValidYoutubeUrl(youtubeUrl)) {
         logger.error(`[${requestHash}] Invalid YouTube URL provided: ${youtubeUrl}`);
@@ -780,20 +721,13 @@ const processVideoBatch = async (videoId, youtubeUrl, forceRecreate = false) => 
     time(totalTimeLabel);
 
     const baseTempDir = path.join(__dirname, 'temp', videoId);
-    const tempVideoFilename = `${videoId}.mp4`;
-    const tempVideoPath = path.join(baseTempDir, tempVideoFilename);
     let cookiePath = null;
-    const proxyArgs = process.env.YTDLP_PROXY ? ['--proxy', process.env.YTDLP_PROXY] : [];
-    let isAlreadyCompleted = false;
 
     try {
         const cachedData = db.getVideo(videoId);
         if (cachedData && cachedData.status === 'completed') {
-            isAlreadyCompleted = true;
-            if (!forceRecreate) {
-                logger.info(`[${requestHash}] Cache hit for videoId: ${videoId}. Batch processing not needed.`);
-                return;
-            }
+            logger.info(`[${requestHash}] Cache hit for videoId: ${videoId}. Batch processing not needed.`);
+            return;
         }
 
         await fs.promises.mkdir(baseTempDir, { recursive: true });
@@ -900,7 +834,7 @@ const processVideoBatch = async (videoId, youtubeUrl, forceRecreate = false) => 
                     downloadProcess.on('close', (code) => {
                         if (code === 0) resolve();
                         else {
-                                                        const isBotError = stderrData.includes('confirm you’re not a bot') || 
+                            const isBotError = stderrData.includes('confirm you’re not a bot') || 
                                                stderrData.includes('cookies are no longer valid') || 
                                                stderrData.includes('HTTP Error 403');
                             if (downloadAttempt === 1 && isBotError && activeCookiePath) {
@@ -985,48 +919,12 @@ const processVideoBatch = async (videoId, youtubeUrl, forceRecreate = false) => 
         if (finalSubtitlePath && fs.existsSync(finalSubtitlePath)) {
             subtitleContent = preprocessVtt(fs.readFileSync(finalSubtitlePath, 'utf-8'));
             logger.info(`[${requestHash}] Successfully loaded subtitles for batch.`);
-            
-            // Pre-cache subtitle for Q&A
-            const subtitlesDir = path.join(__dirname, 'public', 'subtitles');
-            if (!fs.existsSync(subtitlesDir)) {
-                fs.mkdirSync(subtitlesDir, { recursive: true });
-            }
-            const destSubPath = path.join(subtitlesDir, `${videoId}.vtt`);
-            if (!fs.existsSync(destSubPath)) {
-                try {
-                    fs.copyFileSync(finalSubtitlePath, destSubPath);
-                    logger.info(`[${requestHash}] Subtitles pre-cached to ${destSubPath} (batch)`);
-                } catch (copyErr) {
-                    logger.error(`[${requestHash}] Failed to pre-cache subtitles in batch:`, copyErr);
-                }
-            }
         } else {
             logger.warn(`[${requestHash}] No suitable subtitle file found for batch (tried ko, en).`);
-            // Create negative cache flag for Q&A in batch mode
-            const subtitlesDir = path.join(__dirname, 'public', 'subtitles');
-            if (!fs.existsSync(subtitlesDir)) {
-                fs.mkdirSync(subtitlesDir, { recursive: true });
-            }
-            const destNoSubPath = path.join(subtitlesDir, `${videoId}.nosub`);
-            if (!fs.existsSync(destNoSubPath)) {
-                try {
-                    fs.writeFileSync(destNoSubPath, '');
-                    logger.info(`[${requestHash}] Negative cache flag created for batch subtitles: ${destNoSubPath}`);
-                } catch (writeErr) {
-                    logger.error(`[${requestHash}] Failed to write negative cache flag in batch:`, writeErr);
-                }
-            }
         }
 
         timeEnd(extractionLabel);
         logger.info(`[${requestHash}] Initial data extraction complete. Title: ${videoTitle}, Total Frames: ${allTimestamps.length}`);
-
-        if (isAlreadyCompleted) {
-            const allFrameFiles = (await fs.promises.readdir(baseTempDir)).filter(f => f.endsWith('.jpg')).sort();
-            await saveFrameCache(baseTempDir, allFrameFiles, allTimestamps, videoId);
-            logger.info(`[${requestHash}] Frame cache restored for already completed video ${videoId}. Skipping AI generation.`);
-            return;
-        }
 
         logger.info(`[${requestHash}] Step 2: Starting AI generation...`);
         const aiLabel = `[${requestHash}] Full AI Process Time`;
@@ -1091,26 +989,16 @@ const processVideoBatch = async (videoId, youtubeUrl, forceRecreate = false) => 
 
         finalScriptData.sort((a, b) => a.timestamp - b.timestamp);
         db.saveVideo({ videoId, title: videoTitle, duration: Math.round(totalDuration), filesize, script: finalScriptData });
-        await saveFrameCache(baseTempDir, allFrameFiles, allTimestamps, videoId);
 
         timeEnd(aiLabel);
         logger.info(`[${requestHash}] Successfully generated and cached script text for batch processing.`);
         
     } catch (error) {
-        if (!isAlreadyCompleted) {
-            db.updateVideoStatus(videoId, 'failed', error.message);
-        } else {
-            logger.warn(`[${requestHash}] Batch recreate failed for completed video ${videoId}, keeping completed status. Error: ${error.message}`);
-        }
+        db.updateVideoStatus(videoId, 'failed', error.message);
         logger.error(new Error(`[${requestHash}] Error in batch processing: ${error.message}`));
         
         // Invalidate cookie on auth error
-        if (cookiePath && (
-            error.message.includes('Sign in to confirm') || 
-            error.message.includes('cookies are no longer valid') ||
-            error.message.includes('Too Many Requests') ||
-            error.message.includes('429')
-        )) {
+        if (cookiePath && (error.message.includes('Sign in to confirm') || error.message.includes('cookies are no longer valid'))) {
             const invalidPath = cookiePath + '.invalid';
             logger.warn(`[${requestHash}] Authentication error detected. Renaming cookie file to ${path.basename(invalidPath)}`);
             try {

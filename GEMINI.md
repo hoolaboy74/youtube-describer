@@ -217,6 +217,17 @@ To run the backend server, the following command-line tools must be installed on
     5. **마이그레이션 실물 검증 성공**: 배포 직후 DB `init()`이 구동되어 기존 DB 데이터를 보존한 채 신규 컬럼 9종을 자동 추가한 것과 Nginx 프론트엔드가 `200 OK`로 서빙되는 것을 실시간 검증했습니다.
 - **상태:** DB 마이그레이션, 환경변수 구성, 원격 운영 서버(www.blindmom.org) 무중단 배포 및 실물 상태 검증 완료 (2026-07-02)
 
+### 94차 (QA): main 브랜치 최신 코드 동기화 병합 및 QA 2.0 환경 충돌 해결 (2026-07-02)
+- **문제:**
+    1. 뷰레이터 2.0(Q&A 기능)을 개발 중인 `feature/video-qa` 브랜치가 이전 버전 `main`을 기반으로 분기되어 있어, 최신 `main`에 도입된 82~90차(회원 가입/인증, 실물 실로암 API 검증, 5분 생성 제한, 텔레그램 에러 알림 등) 코드와의 기술적 격차 및 누락이 발생함.
+    2. 병합 시 소스 임포트 구조분해할당, 웹 접근성 컴포넌트 겹침, Nginx 테마 통합에 따른 `HomeScreen.css` 레거시 충돌 제어 필요.
+- **해결:**
+    1. **routes.js & utils.js 임포트/함수 병합**: `routes.js` 상단 구조분해할당을 통합하고, `utils.js`에 video-qa 고유의 Safari impersonation 제어 헬퍼와 main의 실로암 API/Gemini OCR 헬퍼들을 모두 유실 없이 병합했습니다.
+    2. **재생화면 웹 접근성 요소 유지**: `PlayerScreenV2.js`에서 77차 다크 퍼플 테마 컨테이너를 수용하는 동시에, video-qa 고유의 유튜브 플레이어 포커스 강제 제거(`tabIndex="-1"`, `aria-hidden`) 속성 및 랜드마크 겹침 차단(`role="none"`)을 유지한 채 main의 유저 시청 기록 API 트리거를 안전하게 연동했습니다.
+    3. **CSS 레거시 충돌 제거**: 77차 디자인 모듈화(Player V2 CSS 분리 이관)로 인해 main에서 삭제된 `HomeScreen.css` 내의 legacy 플레이어 스타일(281~673라인) 충돌 구간을 삭제하여 CSS 리팩토링 정합성을 완료했습니다.
+    4. **GEMINI.md 로그 재구성**: Q&A 기능 관련 로그와 main의 신규 기능 로그들을 날짜 순서대로 오름차순 리넘버링하여 93차(안전 통합 이력)까지 조립 병합했습니다.
+- **상태:** 로컬 QA worktree(/Users/chacha/src/youtube-describer-qa) 내 main 브랜치 병합 및 코드 충돌 해소 완료 (2026-07-02)
+
 ### 89차: 실물 실로암 시각장애인 회원 검증 API 명세 연동, Happy Eyeballs 버그 우회 및 자동 6자리 생년월일 파싱/유효성 검사 도입 (2026-07-01)
 - **문제:**
     1. 기존 실로암 API 연동 시 `X-Org` 헤더 누락 및 `phoneNo`가 포함된 비표준 요청 규격으로 인해 인증 실패 가능성 상존.
