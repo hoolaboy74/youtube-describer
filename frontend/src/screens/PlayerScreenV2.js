@@ -487,17 +487,17 @@ function PlayerScreenV2() {
     const handleAskQuestion = async () => {
         if (!question.trim() || !player) return;
 
-        // 질문 전송 시 질문창 포커스 아웃하여 스페이스바 단축키 활성화
-        if (inputRef.current) {
-            inputRef.current.blur();
-        }
-
         player.pauseVideo();
         setIsPlaying(false);
 
         const currentTimestamp = player.getCurrentTime();
         const userQuestion = question.trim();
         setQuestion('');
+
+        // 질문 전송 후 즉시 입력창에 포커스를 복원하여 연속 질문이 가능하도록 설정
+        if (inputRef.current) {
+            inputRef.current.focus();
+        }
 
         const newQaId = (window.crypto && window.crypto.randomUUID) ? window.crypto.randomUUID() : (Math.random().toString(36).substring(2) + Date.now().toString(36));
         const newQaItem = {
