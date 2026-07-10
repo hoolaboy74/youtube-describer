@@ -49,6 +49,35 @@ const genAI = new GoogleGenerativeAI(API_KEY);
 const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY || API_KEY;
 const youtube = google.youtube({ version: 'v3', auth: YOUTUBE_API_KEY });
 
+const calculateApiCost = (modelName, promptTokenCount, candidatesTokenCount, totalTokenCount) => {
+    const modelLower = modelName.toLowerCase();
+    let inputRate = 1.25; // Default legacy pro rate (gemini-1.5-pro / gemini-2.5-pro)
+    let outputRate = 10.00;
+    let inputRateOverLimit = 2.50;
+    let outputRateOverLimit = 15.00;
+
+    if (modelLower.includes('3.1-pro')) {
+        inputRate = 2.00;
+        outputRate = 12.00;
+        inputRateOverLimit = 4.00;
+        outputRateOverLimit = 18.00;
+    } else if (modelLower.includes('3.5-flash')) {
+        inputRate = 1.50;
+        outputRate = 9.00;
+        inputRateOverLimit = 1.50;
+        outputRateOverLimit = 9.00;
+    } else if (modelLower.includes('1.5-flash')) {
+        inputRate = 0.075;
+        outputRate = 0.30;
+        inputRateOverLimit = 0.15;
+        outputRateOverLimit = 0.60;
+    }
+
+    const inputCost = (promptTokenCount / 1000000) * (totalTokenCount <= 200000 ? inputRate : inputRateOverLimit);
+    const outputCost = (candidatesTokenCount / 1000000) * (totalTokenCount <= 200000 ? outputRate : outputRateOverLimit);
+    return inputCost + outputCost;
+};
+
 const processingLocks = new Set();
 const timers = new Map();
 
@@ -605,10 +634,9 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null, userId = nul
         const usageMetadata = finalResponse.usageMetadata;
         if (usageMetadata) {
             const { promptTokenCount, candidatesTokenCount, totalTokenCount } = usageMetadata;
-            let inputCost = (promptTokenCount / 1000000) * (totalTokenCount <= 200000 ? 1.25 : 2.50);
-            let outputCost = (candidatesTokenCount / 1000000) * (totalTokenCount <= 200000 ? 10.00 : 15.00);
-            db.addApiCost({ videoId, model_used: MODEL_NAME, image_tokens: promptTokenCount, text_tokens: candidatesTokenCount, cost: inputCost + outputCost });
-            logger.info(`[${requestHash}] Logged API cost: ${(inputCost + outputCost).toFixed(6)} USD`);
+            const cost = calculateApiCost(MODEL_NAME, promptTokenCount, candidatesTokenCount, totalTokenCount);
+            db.addApiCost({ videoId, model_used: MODEL_NAME, image_tokens: promptTokenCount, text_tokens: candidatesTokenCount, cost });
+            logger.info(`[${requestHash}] Logged API cost: ${cost.toFixed(6)} USD`);
         }
 
         db.saveVideo({ videoId, title: videoTitle, duration: Math.round(totalDuration), filesize, script: fullScript });
@@ -928,10 +956,9 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
         const usageMetadata = result.response.usageMetadata;
         if (usageMetadata) {
             const { promptTokenCount, candidatesTokenCount, totalTokenCount } = usageMetadata;
-            let inputCost = (promptTokenCount / 1000000) * (totalTokenCount <= 200000 ? 1.25 : 2.50);
-            let outputCost = (candidatesTokenCount / 1000000) * (totalTokenCount <= 200000 ? 10.00 : 15.00);
-            db.addApiCost({ videoId, model_used: MODEL_NAME, image_tokens: promptTokenCount, text_tokens: candidatesTokenCount, cost: inputCost + outputCost });
-            logger.info(`[${requestHash}] Logged API cost for batch: ${(inputCost + outputCost).toFixed(6)} USD`);
+            const cost = calculateApiCost(MODEL_NAME, promptTokenCount, candidatesTokenCount, totalTokenCount);
+            db.addApiCost({ videoId, model_used: MODEL_NAME, image_tokens: promptTokenCount, text_tokens: candidatesTokenCount, cost });
+            logger.info(`[${requestHash}] Logged API cost for batch: ${cost.toFixed(6)} USD`);
         }
         
         if (result.response.promptFeedback && result.response.promptFeedback.blockReason) {
