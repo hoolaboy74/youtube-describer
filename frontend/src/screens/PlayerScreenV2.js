@@ -931,6 +931,11 @@ function PlayerScreenV2() {
         
         const currentMode = playbackModeRef.current;
 
+        // Q&A 모달이 열려 있으면 영상 재생을 재개하지 않음 (레이스 컨디션 방지)
+        if (isQaModalOpen) {
+            return;
+        }
+
         // 1. 'pause' 모드인 경우 -> 무조건 다시 재생
         // 2. 'together' 모드인데 자막 대기를 위해 강제로 멈춰있던 경우 -> 다시 재생
         // (playerState !== 1 은 일시정지 등을 의미)
@@ -941,7 +946,7 @@ function PlayerScreenV2() {
         if (currentMode === 'together' && !isMobile()) {
             player.setVolume(100); // Restore volume for PC
         }
-    }, [player]);
+    }, [player, isQaModalOpen]);
 
     const playDescription = useCallback(async (scriptLine) => {
         if (!player || !scriptLine || !audioPlayerRef.current) return;
@@ -955,12 +960,15 @@ function PlayerScreenV2() {
         };
 
         const playAudioFromUrl = (url) => {
+            // 비동기 통신 중 Q&A 모달이 열렸다면 오디오를 재생하지 않고 중단
+            if (!isTtsPlayingRef.current) return;
+
             audioPlayer.src = url;
             audioPlayer.playbackRate = playbackRateRef.current;
             audioPlayer.volume = 1;
             audioPlayer.play().catch(e => {
                 console.error("Audio play failed:", e);
-                if (onAudioEndedRef.current) onAudioEndedRef.current();
+                if (isTtsPlayingRef.current && onAudioEndedRef.current) onAudioEndedRef.current();
             });
         };
 
@@ -976,7 +984,7 @@ function PlayerScreenV2() {
             playAudioFromUrl(audioUrl);
         } catch (error) {
             console.error('Failed to fetch audio:', error);
-            if (onAudioEndedRef.current) onAudioEndedRef.current();
+            if (isTtsPlayingRef.current && onAudioEndedRef.current) onAudioEndedRef.current();
         }
     }, [player, handleTtsStart, handleTtsEnd]);
 
