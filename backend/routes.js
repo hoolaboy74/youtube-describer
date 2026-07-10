@@ -792,7 +792,7 @@ ${dialogueContext || '(No dialogue/subtitles available around this time)'}
 ${historyContext}User's Question: "${question}"`;
 
         const model = genAI.getGenerativeModel({ 
-            model: process.env.GEMINI_MODEL || "gemini-3.5-flash",
+            model: "gemini-3.1-flash-lite",
             tools: [{ googleSearch: {} }]
         });
         const result = await model.generateContent([systemPrompt, ...imageParts]);
