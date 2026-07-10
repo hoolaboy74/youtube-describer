@@ -5,7 +5,7 @@ async function synchronizeScript(genAI, rawDraft, originalSubtitles) {
     // Stage 3 uses text-only processing, so it's much cheaper.
     // We can use Gemini 1.5 Flash for speed and cost, or Pro for precision.
     // Let's use Pro for better JSON adherence.
-    const model = genAI.getGenerativeModel({ model: process.env.GEMINI_MODEL || "gemini-3.1-pro-preview", generationConfig: { responseMimeType: "application/json" } });
+    const model = genAI.getGenerativeModel({ model: process.env.GEMINI_MODEL || "gemini-3.5-flash", generationConfig: { responseMimeType: "application/json" } });
     
     const promptPath = path.join(__dirname, '../prompts/stage3_synchronizer.txt');
     let prompt = fs.readFileSync(promptPath, 'utf-8');
