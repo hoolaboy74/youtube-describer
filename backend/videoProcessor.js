@@ -44,7 +44,7 @@ const API_KEY = process.env.GOOGLE_API_KEY;
 if (!API_KEY) {
   throw new Error("GOOGLE_API_KEY is not defined in the environment");
 }
-const MODEL_NAME = process.env.GEMINI_MODEL || "gemini-3.5-flash";
+const MODEL_NAME = process.env.GEMINI_MODEL || "gemini-3.1-pro-preview";
 const genAI = new GoogleGenerativeAI(API_KEY);
 const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY || API_KEY;
 const youtube = google.youtube({ version: 'v3', auth: YOUTUBE_API_KEY });
@@ -568,7 +568,7 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null, userId = nul
             return;
         }
 
-        const model = genAI.getGenerativeModel({ model: MODEL_NAME, generationConfig: { temperature: 0.7 } });
+        const model = genAI.getGenerativeModel({ model: MODEL_NAME, generationConfig: { temperature: 0.7, mediaResolution: "MEDIA_RESOLUTION_LOW" } });
         const promptTemplatePath = path.join(__dirname, 'prompt_template.txt');
         let prompt = fs.readFileSync(promptTemplatePath, 'utf-8');
         prompt = prompt.replace('{{VIDEO_TITLE}}', videoTitle).replace('{{SUBTITLES}}', subtitleContent);
@@ -948,7 +948,7 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
             return;
         }
 
-        const model = genAI.getGenerativeModel({ model: MODEL_NAME, generationConfig: { temperature: 0.7 } });
+        const model = genAI.getGenerativeModel({ model: MODEL_NAME, generationConfig: { temperature: 0.7, mediaResolution: "MEDIA_RESOLUTION_LOW" } });
         const promptTemplatePath = path.join(__dirname, 'prompt_template.txt');
         let prompt = fs.readFileSync(promptTemplatePath, 'utf-8');
         prompt = prompt.replace('{{VIDEO_TITLE}}', videoTitle).replace('{{SUBTITLES}}', subtitleContent);
