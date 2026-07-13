@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 
 async function analyzeVideo(genAI, videoTitle, sampleFrames) {
-    const model = genAI.getGenerativeModel({ model: process.env.GEMINI_MODEL || "gemini-3.5-flash" });
+    const model = genAI.getGenerativeModel({ model: process.env.GEMINI_MODEL || "gemini-3.1-pro-preview" });
     const promptPath = path.join(__dirname, '../prompts/stage1_analyzer.txt');
     let prompt = fs.readFileSync(promptPath, 'utf-8');
     
