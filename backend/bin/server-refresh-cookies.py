@@ -100,6 +100,8 @@ def verify_cookie(cookie_path):
         output1 = result1.stdout.strip()
         
         if not re.match(r'^[a-zA-Z0-9_-]{11}$', output1):
+            if not output1 and not result1.stderr.strip():
+                return False, "Login check failed (Empty response). The source cookies have likely expired, causing a guest session."
             return False, f"Login check failed. Output: {output1} | Error: {result1.stderr.strip()}"
             
         # [2단계 검증] 실제 비디오 스트리밍 URL 추출 여부 체크 (403 Forbidden 및 봇 감지 필터)

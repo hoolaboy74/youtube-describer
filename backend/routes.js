@@ -33,6 +33,48 @@ const audioCacheDir = path.join(__dirname, 'public', 'audio');
 
 const YouTube = require('youtube-sr').default;
 
+// 전역 API 추적 미들웨어: 회원/비회원 식별 및 DB 적재
+function trackApiRequest(req, res, next) {
+    let userId = null;
+    let guestId = req.headers['x-guest-id'] || req.query.guestId || null;
+    let token = null;
+
+    const authHeader = req.headers['authorization'];
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+        token = authHeader.split(' ')[1];
+    } else if (req.query.token) {
+        token = req.query.token;
+    }
+
+    if (token) {
+        try {
+            const decoded = jwt.verify(token, JWT_SECRET);
+            userId = decoded.userId;
+        } catch (e) {
+            // 토큰 파싱 실패 시 예외 처리 없이 무시 (비회원으로 집계)
+        }
+    }
+
+    const ip = req.headers['x-forwarded-for'] || req.ip || req.socket.remoteAddress || '127.0.0.1';
+    
+    // DB 비동기 저장
+    try {
+        db.saveApiRequest({
+            userId,
+            guestId,
+            ip,
+            apiPath: req.path
+        });
+    } catch (err) {
+        logger.error('[Tracker] Failed to record API request:', err.message);
+    }
+
+    next();
+}
+
+// 모든 엔드포인트 전면에 API 추적 미들웨어 적용
+router.use(trackApiRequest);
+
 // Endpoint for unified search
 router.get('/search', async (req, res) => {
     const { query } = req.query;

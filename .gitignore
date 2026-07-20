@@ -32,3 +32,7 @@ backend/*.nosub
 *.webm
 *.mp4
 *.mp3
+
+# Audit & Stats reports
+user_audit/
+prod_report/
