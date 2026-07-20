@@ -85,6 +85,15 @@ To run the backend server, the following command-line tools must be installed on
 
 ## 개선 기록 (Improvement Log)
 
+### 102차: API 실시간 로깅 테이블(api_requests) 신설 및 전역 트래커 미들웨어 탑재를 통한 정밀 회원/비회원 추적 파이프라인 배포 (2026-07-20)
+- **문제:**
+    1. 무상태(Stateless) API 요청(예: `/api/tts`)의 특성상 세션 추적이 어렵고, 사용자의 동적 IP 변경 또는 공인 IP 공유로 인해 단순 Nginx 로그 분석에 의존한 회원/비회원 구분(AAU 집계) 시 데이터 오염 및 비회원 과다 산출 오류가 지속됨.
+- **해결:**
+    1. **API 요청 데이터베이스 스키마 설계**: `database.js` 내에 `api_requests` 테이블(id, userId, guestId, ip, apiPath, createdAt)을 신설하고, 데이터 비동기 적재를 위한 `saveApiRequest` 헬퍼 함수를 구현함.
+    2. **전역 API 추적 미들웨어 탑재**: `routes.js` 최상단(search 라우터 직전)에 `trackApiRequest` 미들웨어를 도입하여, 헤더의 `Authorization: Bearer <jwt_token>` 및 `X-Guest-Id`를 파싱해 실시간으로 유저 식별자(회원 ID 또는 guest UUID)와 IP를 DB에 즉시 적재하도록 구조를 개편함.
+    3. **정합성 2단계 교차 검증**: 로컬 mock 요청(curl)을 통해 회원/비회원 매핑 상태 및 SQLite DB 기록 유무를 정상 확인하고, 배포 스크립트(`deploy-prod.sh` 프록시 우회 push) 및 원격 빌드 파이프라인(`deploy-app.sh`)을 가동하여 운영(mom), 테스트(test), QA(qa) 서버 3개 환경 전체에 무중단 PM2 리로드 배포를 완수함.
+- **상태:** 소스코드 적용 및 원격 3개 백엔드 프로세스(prod/test/qa) PM2 리로드 배포 완료 및 실시간 적재 실물 확인 완료 (2026-07-20)
+
 ### 101차: 장기 비디오 토큰 오버플로우 방지를 위한 gemini-3.1-pro-preview 모델 및 LOW-res 프레임 모드 전환 배포 (2026-07-13)
 - **문제:**
     1. 30분(1,800초) 이상의 장기 영상 화면 해설 빌드 시, 기본 고해상도(High-res) 모드로 인해 이미지 프레임(900장 이상)의 토큰 소모량이 100만(1M)을 상쇄하고 전체 API Context limit 및 HTTP 단일 Payload 크기 제한(Payload Too Large)에 걸려 프로세스가 강제 실패/에러가 나던 프로덕션 결함 발생.

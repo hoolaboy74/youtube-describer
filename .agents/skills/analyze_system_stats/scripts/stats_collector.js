@@ -380,6 +380,17 @@ results.db.watchLogs = db.prepare(\`
   ORDER BY watchedAt ASC
 \`).all(startDate, endDate);
 
+// DB 실시간 API 로깅 적재 내역 및 최초 시각 조회
+const firstLogTimeRaw = db.prepare("SELECT MIN(createdAt) as firstLogTime FROM api_requests").get();
+results.db.firstLogTime = firstLogTimeRaw ? firstLogTimeRaw.firstLogTime : null;
+
+results.db.apiRequests = db.prepare(\`
+  SELECT userId, guestId, ip, apiPath, strftime('%Y-%m-%dT%H:%M:%SZ', createdAt) as createdAt 
+  FROM api_requests
+  WHERE createdAt >= ? AND createdAt <= ?
+  ORDER BY createdAt ASC
+\`).all(startDate, endDate);
+
 // 회원들의 lastLoginIp 목록 (Nginx 분석 보강용)
 const loginIpsRaw = db.prepare("SELECT DISTINCT lastLoginIp FROM users WHERE lastLoginIp IS NOT NULL").all();
 const loginIps = loginIpsRaw.map(r => r.lastLoginIp);
@@ -491,6 +502,16 @@ const watchLogs = results.db.watchLogs.map(log => ({
   userId: log.userId,
   videoId: log.videoId,
   time: new Date(log.watchedAt.replace(' ', 'T') + 'Z') // UTC 명시 파싱
+}));
+
+// API 요청 로그 데이터 로드 및 시각 파싱
+const firstLogTime = results.db.firstLogTime ? new Date(results.db.firstLogTime.replace(' ', 'T') + 'Z') : null;
+const apiRequests = results.db.apiRequests.map(req => ({
+  userId: req.userId,
+  guestId: req.guestId,
+  ip: req.ip,
+  apiPath: req.apiPath,
+  time: new Date(req.createdAt.replace(' ', 'T') + 'Z')
 }));
 
 const nginxFiles = fs.readdirSync(nginxLogDir)
@@ -683,14 +704,27 @@ function parseLogLine(line) {
   const isHome = method === 'GET' && (rawUrl === '/' || rawUrl === '/index.html');
   const isVideo = method === 'GET' && rawUrl.startsWith('/video/');
 
+  // 하이브리드 회원 식별 (로깅 테이블 도입 이후는 api_requests 직접 매핑 / 도입 이전은 Nginx 교차 상관 보정)
+  if (firstLogTime && logDate >= firstLogTime) {
+    const logTimeUtc = logDate.getTime();
+    const isRegisteredInDb = apiRequests.some(req => 
+      req.ip === ip && 
+      req.userId !== null && 
+      Math.abs(logTimeUtc - req.time.getTime()) <= 5000 // 5초 오차 범위 매치
+    );
+    if (isRegisteredInDb && !memberIps.has(ip)) {
+      memberIps.add(ip); // DB 로그 증거 기반으로 회원 IP 승격
+    }
+  }
+
   if (isHome) {
     if (memberIps.has(ip)) homeMemberIps.add(ip);
     else homeNonMemberIps.add(ip);
   }
   if (isVideo) {
     const targetVideoId = rawUrl.substring(7);
-    // 교차 상관 검증 (대안 3): 비회원 IP 진입 시점과 DB 시청 이력 시점을 비교하여 동적 회원 IP 판정
-    if (!memberIps.has(ip)) {
+    // 교차 상관 검증 (대안 3): 비회원 IP 진입 시점과 DB 시청 이력 시점을 비교하여 동적 회원 IP 판정 (로깅 테이블 도입 이전만 수행)
+    if (!memberIps.has(ip) && (!firstLogTime || logDate < firstLogTime)) {
       const logTimeUtc = logDate.getTime();
       const match = watchLogs.find(w => 
         w.videoId === targetVideoId && 
