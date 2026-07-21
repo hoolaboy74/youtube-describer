@@ -85,6 +85,14 @@ To run the backend server, the following command-line tools must be installed on
 
 ## 개선 기록 (Improvement Log)
 
+### 104차: 장기 비디오 대본 생성 시 Nginx/SSE 타임아웃 방지를 위한 15초 SSE Heartbeat (Ping) 및 버퍼링 해제 적용 (2026-07-21)
+- **문제:**
+    1. 40분 이상의 장기 영상(예: PD수첩 46분) 처리 시, Step 2(AI 스트리밍 대본 생성) 구간이 3분 이상 지속됨에 따라 Nginx 및 브라우저의 기본 읽기 타임아웃(60초)을 초과하여 프론트엔드에 `네트워크 에러`가 노출되는 현상 발생. (새로고침 시 백그라운드에서 완료된 DB 기록을 가져와 정상 표시됨)
+- **해결:**
+    1. **15초 SSE Heartbeat (Ping) 타이머 주입**: `routes.js` 내 `/api/process` SSE 연결 생성 시 15초 주기의 `: heartbeat ping\n\n` 주석 패킷을 지속 송신하도록 개선하여, Nginx `proxy_read_timeout` 및 브라우저 커넥션 유휴 타임아웃을 완전 방지함.
+    2. **Nginx 프록시 버퍼링 즉시 해제**: `X-Accel-Buffering: no` Response Header를 추가하여 Nginx가 SSE 패킷을 큐에 묶지 않고 클라이언트에 즉각 스트리밍하도록 보완.
+- **상태:** `routes.js` 소스코드 반영 및 구문 검증 완료 (2026-07-21)
+
 ### 103차: FFmpeg 멀티 코어 시간 분할(Time-Chunking) 병렬 키프레임 추출 모듈 구현 및 1:1 무결성 실증 (2026-07-21)
 - **문제:**
     1. 비디오 화면 해설 생성 시 `ffmpeg`을 단일 프로세스로 가동하여 파일 시작부터 끝까지 전체 프레임을 순차 디코딩함으로써, 다중 CPU 코어 환경에서도 단 1개 코어만 100% 사용해 키프레임 추출 단계에서 극심한 성능 병목이 발생함.
