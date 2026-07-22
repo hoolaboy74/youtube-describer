@@ -744,6 +744,31 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null, userId = nul
         }
 
         db.saveVideo({ videoId, title: videoTitle, duration: Math.round(totalDuration), filesize, script: fullScript });
+
+        // QA 용 프레임 영구 보존 로직 복구
+        const targetFramesDir = path.join(__dirname, 'public', 'frames', videoId);
+        try {
+            if (!fs.existsSync(targetFramesDir)) {
+                fs.mkdirSync(targetFramesDir, { recursive: true });
+            }
+            const allFrameFiles = (await fs.promises.readdir(baseTempDir)).filter(f => f.startsWith('frame-') && f.endsWith('.jpg')).sort();
+            for (let i = 0; i < allTimestamps.length; i++) {
+                const timestamp = allTimestamps[i];
+                const frameFile = allFrameFiles[i];
+                if (frameFile) {
+                    const srcPath = path.join(baseTempDir, frameFile);
+                    const cacheFileName = `frame-${timestamp}.jpg`;
+                    const cacheFilePath = path.join(targetFramesDir, cacheFileName);
+                    if (fs.existsSync(srcPath)) {
+                        fs.copyFileSync(srcPath, cacheFilePath);
+                    }
+                }
+            }
+            logger.info(`[${requestHash}] Saved ${allTimestamps.length} frames to public/frames for QA cache.`);
+        } catch (qaFrameErr) {
+            logger.error(`[${requestHash}] Failed to save frames to QA cache: ${qaFrameErr.message}`);
+        }
+
         timeEnd(aiLabel);
         if (sseHandler) sseHandler('end', { message: 'Processing complete.' });
         
@@ -1069,6 +1094,30 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
 
         finalScriptData.sort((a, b) => a.timestamp - b.timestamp);
         db.saveVideo({ videoId, title: videoTitle, duration: Math.round(totalDuration), filesize, script: finalScriptData });
+
+        // QA 용 프레임 영구 보존 로직 복구 (Batch)
+        const targetFramesDir = path.join(__dirname, 'public', 'frames', videoId);
+        try {
+            if (!fs.existsSync(targetFramesDir)) {
+                fs.mkdirSync(targetFramesDir, { recursive: true });
+            }
+            const allFrameFiles = (await fs.promises.readdir(baseTempDir)).filter(f => f.startsWith('frame-') && f.endsWith('.jpg')).sort();
+            for (let i = 0; i < allTimestamps.length; i++) {
+                const timestamp = allTimestamps[i];
+                const frameFile = allFrameFiles[i];
+                if (frameFile) {
+                    const srcPath = path.join(baseTempDir, frameFile);
+                    const cacheFileName = `frame-${timestamp}.jpg`;
+                    const cacheFilePath = path.join(targetFramesDir, cacheFileName);
+                    if (fs.existsSync(srcPath)) {
+                        fs.copyFileSync(srcPath, cacheFilePath);
+                    }
+                }
+            }
+            logger.info(`[${requestHash}] Saved ${allTimestamps.length} frames to public/frames for QA cache (batch).`);
+        } catch (qaFrameErr) {
+            logger.error(`[${requestHash}] Failed to save frames to QA cache (batch): ${qaFrameErr.message}`);
+        }
 
         timeEnd(aiLabel);
         logger.info(`[${requestHash}] Successfully generated and cached script text for batch processing.`);
