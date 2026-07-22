@@ -177,7 +177,7 @@ async function extractKeyframesHybrid({ tempVideoPath, tempVideoFilename, baseTe
     logger.info(`[${requestHash}] Starting hybrid keyframe extraction (duration: ${totalDuration}s)`);
 
     // Step 1: Fast I-frame extraction with showinfo
-    if (sseHandler) sseHandler('status_update', { message: '키프레임 고속 추출 중...' });
+    // sse status update omitted for high-speed extraction
     const rawTimestamps = await new Promise((resolve, reject) => {
         const extractedTimestamps = [];
         let chunkStderr = '';
@@ -206,12 +206,7 @@ async function extractKeyframesHybrid({ tempVideoPath, tempVideoFilename, baseTe
                 extractedTimestamps.push(parseFloat(match[1]));
             }
 
-            // progress report (rough estimation based on timestamps parsed)
-            if (sseHandler && totalDuration > 0 && extractedTimestamps.length > 0) {
-                const latestTime = extractedTimestamps[extractedTimestamps.length - 1];
-                const progress = Math.min(95, Math.round((latestTime / totalDuration) * 95));
-                sseHandler('status_update', { message: `추출 진행률: ${progress}%` });
-            }
+            // progress report omitted since extraction takes < 1.5 seconds
         });
 
         ffmpegProcess.on('error', (err) => reject(new Error(`ffmpeg spawn error: ${err.message}`)));
@@ -237,7 +232,7 @@ async function extractKeyframesHybrid({ tempVideoPath, tempVideoFilename, baseTe
     // Step 3: Backfill Execution
     if (gapTargetTimes.length > 0) {
         logger.info(`[${requestHash}] Found ${gapTargetTimes.length} missing frame slots: ${gapTargetTimes.join(', ')}. Starting backfill...`);
-        if (sseHandler) sseHandler('status_update', { message: `누락된 프레임 복원 중 (${gapTargetTimes.length}장)...` });
+        // sse status update omitted for fast backfill
 
         const backfillPromises = gapTargetTimes.map((time, idx) => {
             return new Promise((resolveBackfill, rejectBackfill) => {
@@ -308,7 +303,7 @@ async function extractKeyframesHybrid({ tempVideoPath, tempVideoFilename, baseTe
     }
 
     logger.info(`[${requestHash}] Hybrid extraction complete. Total frames unified: ${finalTimestamps.length}`);
-    if (sseHandler) sseHandler('status_update', { message: '프레임 추출 완료.' });
+    // sse status update omitted for high-speed extraction
 
     return finalTimestamps;
 }
@@ -609,7 +604,7 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null, userId = nul
             logger.info(`[${requestHash}] Downloaded video size: ${(filesize / 1024 / 1024).toFixed(2)} MB`);
         }
 
-        if (sseHandler) sseHandler('status_update', { message: '프레임 및 자막 추출 중...' });
+        // sse status update omitted for high-speed extraction
 
         // FFmpeg: Process the downloaded local file using hybrid extraction
         const allTimestamps = await extractKeyframesHybrid({
