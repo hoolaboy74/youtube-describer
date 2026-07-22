@@ -18,7 +18,7 @@ test_search.js
 backend/db/
 backend/temp/
 backend/logs/
-backend/cookies/*.invalid
+backend/cookies/
 backend/*.mp4
 backend/*.webm
 backend/*.m4a
