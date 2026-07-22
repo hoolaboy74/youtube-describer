@@ -11,6 +11,7 @@ if (!fs.existsSync(dbDir)) {
 
 const dbPath = path.join(dbDir, 'cache.db');
 const db = new Database(dbPath);
+db.pragma('journal_mode = WAL');
 
 // DB 초기화: 테이블 생성
 function init() {
@@ -294,6 +295,22 @@ function init() {
       UNIQUE(userId, videoId)
     )
   `);
+
+  // api_requests 테이블 신설
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS api_requests (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      userId TEXT NULL,
+      guestId TEXT NULL,
+      ip TEXT NOT NULL,
+      apiPath TEXT NOT NULL,
+      createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  // api_requests 인덱스 신설 (성능 최적화)
+  db.exec(`CREATE INDEX IF NOT EXISTS idx_api_requests_created_at ON api_requests(createdAt)`);
+  db.exec(`CREATE INDEX IF NOT EXISTS idx_api_requests_ip ON api_requests(ip)`);
 
   logger.info('Database initialized successfully.');
 }
@@ -1381,8 +1398,19 @@ function getSitemapData() {
   return { videos, posts };
 }
 
+function saveApiRequest({ userId, guestId, ip, apiPath }) {
+  try {
+    db.prepare(
+      'INSERT INTO api_requests (userId, guestId, ip, apiPath) VALUES (?, ?, ?, ?)'
+    ).run(userId, guestId, ip, apiPath);
+  } catch (err) {
+    logger.error('Failed to save API request log to DB:', err);
+  }
+}
+
 module.exports = {
   init,
+  saveApiRequest,
   getSitemapData,
   createUser,
   getUserByEmail,

@@ -28,6 +28,48 @@ const audioCacheDir = path.join(__dirname, 'public', 'audio');
 
 const YouTube = require('youtube-sr').default;
 
+// 전역 API 추적 미들웨어: 회원/비회원 식별 및 DB 적재
+function trackApiRequest(req, res, next) {
+    let userId = null;
+    let guestId = req.headers['x-guest-id'] || req.query.guestId || null;
+    let token = null;
+
+    const authHeader = req.headers['authorization'];
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+        token = authHeader.split(' ')[1];
+    } else if (req.query.token) {
+        token = req.query.token;
+    }
+
+    if (token) {
+        try {
+            const decoded = jwt.verify(token, JWT_SECRET);
+            userId = decoded.userId;
+        } catch (e) {
+            // 토큰 파싱 실패 시 예외 처리 없이 무시 (비회원으로 집계)
+        }
+    }
+
+    const ip = req.headers['x-forwarded-for'] || req.ip || req.socket.remoteAddress || '127.0.0.1';
+    
+    // DB 비동기 저장
+    try {
+        db.saveApiRequest({
+            userId,
+            guestId,
+            ip,
+            apiPath: req.path
+        });
+    } catch (err) {
+        logger.error('[Tracker] Failed to record API request:', err.message);
+    }
+
+    next();
+}
+
+// 모든 엔드포인트 전면에 API 추적 미들웨어 적용
+router.use(trackApiRequest);
+
 // Endpoint for unified search
 router.get('/search', async (req, res) => {
     const { query } = req.query;
@@ -275,11 +317,25 @@ router.get('/process', requireBlindAuth, async (req, res) => {
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
+    res.setHeader('X-Accel-Buffering', 'no');
     res.flushHeaders();
 
     const sendSse = (eventName, data) => {
         res.write(`event: ${eventName}\ndata: ${JSON.stringify(data)}\n\n`);
     };
+
+    // Prevent Nginx and browser timeouts by sending SSE Heartbeat every 15 seconds
+    const heartbeatTimer = setInterval(() => {
+        try {
+            res.write(': heartbeat ping\n\n');
+        } catch (e) {
+            clearInterval(heartbeatTimer);
+        }
+    }, 15000);
+
+    req.on('close', () => {
+        clearInterval(heartbeatTimer);
+    });
 
     try {
         // --- Check Service Settings First ---
@@ -312,13 +368,13 @@ router.get('/process', requireBlindAuth, async (req, res) => {
 
         // Use the refactored processor, which now includes the duration check
         await processVideo(videoId, youtubeUrl, sendSse, req.user.id);
-        res.end();
-
     } catch (error) {
         // Catch errors from initial checks (e.g., DB error)
         logger.error('[Process Endpoint] Initial check failed:', error);
         sendSse('backend_error', { message: 'An unexpected error occurred on the server.' });
-        return res.end();
+    } finally {
+        clearInterval(heartbeatTimer);
+        res.end();
     }
 });
 

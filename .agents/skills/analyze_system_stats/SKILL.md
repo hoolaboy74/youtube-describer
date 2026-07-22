@@ -8,13 +8,20 @@ description: 운영 서버(mom)의 SQLite DB 및 Nginx access.log를 SSH 연계 
 
 ## 구성 요소
 
-- **scripts/stats_collector.js**: 원격 운영 서버(`mom`)의 DB 및 Nginx 로그 파일을 조회하여 기기 및 API 데이터, 사용자 활동량(댓글, 게시글, 트래픽), 그리고 **실제 활성 사용자(Actual Active Users)의 회원/비회원별 진입 분포와 전환율**을 수집하고 `prod_report/system_stats_report_[시작일]_[종료일].txt` 일반 텍스트 파일로 작성하는 Node.js 유틸리티입니다.
+- **scripts/stats_collector.js**: 원격 운영 서버(`mom`)의 SQLite DB, Nginx access.log, 백엔드 logs/*.log, 그리고 TTS 캐시 디렉토리를 종합 연계 분석하여 다음 지표들을 도출하고 `prod_report/system_stats_report_[시작일]_[종료일].txt` 일반 텍스트 파일로 작성하는 Node.js 유틸리티입니다:
+  1. 회원 가입 추이 및 인증 경로별(실로암 API, 복지카드 OCR, 관리자 승인) 가용 현황
+  2. 비디오 해설 빌드 성공률, 영상 길이 분포 및 평균/최단/최장 영상 빌드 소요 시간(Latency)
+  3. 회원 그룹 세그먼트별(시각장애인 인증 회원, 대기 회원, 일반 회원 등) 비디오 생성 요청 수, 작성 댓글 수, 게시글 수, 시청 이력 점유율 분석
+  4. Nginx 트래픽 분석(총 아웃바운드 데이터(GB), HTTP 응답 상태 코드 분포, 최다 요청 IP Top 10)
+  5. 검색어 트렌드 분석(GET /api/search의 검색 키워드 분석 및 Top 10 랭킹)
+  6. 하이브리드 TTS 캐시 시스템 분석(누적 캐시 개수/용량, 신규 생성 캐시 파일 수 및 Nginx 요청 대비 TTS 캐시 히트율(Cache Hit Rate))
+  7. 백엔드 시스템 logs/*.log 예외 분석(INFO/WARN/ERROR 총 건수 및 다발적 에러 패턴 Top 5)
 
 ## 작동 방식
 
 1. 로컬 환경에서 `stats_collector.js`를 실행하면 SSH 커넥션을 이용해 원격 서버 `mom`으로 내장 통계 쿼리를 표준 입력으로 보냅니다.
-2. 원격 서버에서 데이터를 집계(SQLite cache.db 조회 및 `/var/log/nginx/access.log*` 파싱)한 뒤 JSON 문자열로 로컬에 리턴합니다.
-3. 로컬에서 수신된 데이터를 바탕으로 플랫폼 분포, 일별 추이, API 사용 비용, 에러 로그와 **회원/비회원의 소통 및 소비 활동 비율, 실제 재생 화면에 도달한 고유 IP(Actual Active Users) 방문자 수 및 전환율** 등의 통합 일반 텍스트 리포트(`.txt`)를 `prod_report/` 디렉토리에 자동 생성합니다.
+2. 원격 서버에서 데이터를 집계(SQLite cache.db 조회, Nginx 로그 및 백엔드 로그 파싱, TTS 캐시 파일 추적)한 뒤 JSON 문자열로 로컬에 리턴합니다.
+3. 로컬에서 수신된 데이터를 바탕으로 통합 일반 텍스트 리포트(`.txt`)를 `prod_report/` 디렉토리에 자동 생성합니다.
 4. 모든 조사는 사용자가 날짜 인자를 어떻게 입력하든 관계없이 무조건 **최초 회원가입 시점(2026-07-02 02:27:51)** 이후의 데이터만을 강제 한계선(하한선)으로 설정하여 필터링합니다. (그 이전의 개발/테스트 데이터는 제외됨)
 
 ## 실행 방법
