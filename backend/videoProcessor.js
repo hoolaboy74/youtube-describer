@@ -7,7 +7,7 @@ const os = require('os');
 const { execFile, spawn, execSync } = require('child_process');
 const crypto = require('crypto');
 const db = require('./database');
-const { formatTime, preprocessVtt, isValidYoutubeUrl } = require('./utils');
+const { formatTime, preprocessVtt, isValidYoutubeUrl, getIsImpersonateAvailable } = require('./utils');
 const logger = require('./logger');
 
 let isSafariImpersonateSupported = false;
