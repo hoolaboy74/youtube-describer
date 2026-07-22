@@ -19,6 +19,9 @@ backend/db/
 backend/temp/
 backend/logs/
 backend/cookies/
+backend/public/frames/
+backend/public/subtitles/
+backend/public/audio/
 backend/*.mp4
 backend/*.webm
 backend/*.m4a
