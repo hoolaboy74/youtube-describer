@@ -637,8 +637,38 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null, userId = nul
         if (finalSubtitlePath && fs.existsSync(finalSubtitlePath)) {
             subtitleContent = preprocessVtt(fs.readFileSync(finalSubtitlePath, 'utf-8'));
             logger.info(`[${requestHash}] Successfully loaded and preprocessed subtitles.`);
+
+            // QA 캐시용 자막 영구 보존 로직 추가
+            const targetSubtitlesDir = path.join(__dirname, 'public', 'subtitles');
+            try {
+                if (!fs.existsSync(targetSubtitlesDir)) {
+                    fs.mkdirSync(targetSubtitlesDir, { recursive: true });
+                }
+                const cachedSubPath = path.join(targetSubtitlesDir, `${videoId}.vtt`);
+                if (!fs.existsSync(cachedSubPath)) {
+                    fs.copyFileSync(finalSubtitlePath, cachedSubPath);
+                    logger.info(`[${requestHash}] Saved subtitles to public/subtitles for QA cache.`);
+                }
+            } catch (subSaveErr) {
+                logger.error(`[${requestHash}] Failed to save subtitles to QA cache: ${subSaveErr.message}`);
+            }
         } else {
             logger.warn(`[${requestHash}] No suitable subtitle file found (tried ko, en). Proceeding without subtitles.`);
+
+            // QA용 자막 없음 플래그(nosub) 적재
+            const targetSubtitlesDir = path.join(__dirname, 'public', 'subtitles');
+            try {
+                if (!fs.existsSync(targetSubtitlesDir)) {
+                    fs.mkdirSync(targetSubtitlesDir, { recursive: true });
+                }
+                const noSubPath = path.join(targetSubtitlesDir, `${videoId}.nosub`);
+                if (!fs.existsSync(noSubPath)) {
+                    fs.writeFileSync(noSubPath, '');
+                    logger.info(`[${requestHash}] Saved nosub flag to public/subtitles for QA cache.`);
+                }
+            } catch (noSubErr) {
+                logger.error(`[${requestHash}] Failed to save nosub flag: ${noSubErr.message}`);
+            }
         }
 
         timeEnd(extractionLabel);
@@ -1024,8 +1054,38 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
         if (finalSubtitlePath && fs.existsSync(finalSubtitlePath)) {
             subtitleContent = preprocessVtt(fs.readFileSync(finalSubtitlePath, 'utf-8'));
             logger.info(`[${requestHash}] Successfully loaded subtitles for batch.`);
+
+            // QA 캐시용 자막 영구 보존 로직 추가 (Batch)
+            const targetSubtitlesDir = path.join(__dirname, 'public', 'subtitles');
+            try {
+                if (!fs.existsSync(targetSubtitlesDir)) {
+                    fs.mkdirSync(targetSubtitlesDir, { recursive: true });
+                }
+                const cachedSubPath = path.join(targetSubtitlesDir, `${videoId}.vtt`);
+                if (!fs.existsSync(cachedSubPath)) {
+                    fs.copyFileSync(finalSubtitlePath, cachedSubPath);
+                    logger.info(`[${requestHash}] Saved subtitles to public/subtitles for QA cache (batch).`);
+                }
+            } catch (subSaveErr) {
+                logger.error(`[${requestHash}] Failed to save subtitles to QA cache (batch): ${subSaveErr.message}`);
+            }
         } else {
             logger.warn(`[${requestHash}] No suitable subtitle file found for batch (tried ko, en).`);
+
+            // QA용 자막 없음 플래그(nosub) 적재 (Batch)
+            const targetSubtitlesDir = path.join(__dirname, 'public', 'subtitles');
+            try {
+                if (!fs.existsSync(targetSubtitlesDir)) {
+                    fs.mkdirSync(targetSubtitlesDir, { recursive: true });
+                }
+                const noSubPath = path.join(targetSubtitlesDir, `${videoId}.nosub`);
+                if (!fs.existsSync(noSubPath)) {
+                    fs.writeFileSync(noSubPath, '');
+                    logger.info(`[${requestHash}] Saved nosub flag to public/subtitles for QA cache (batch).`);
+                }
+            } catch (noSubErr) {
+                logger.error(`[${requestHash}] Failed to save nosub flag (batch): ${noSubErr.message}`);
+            }
         }
 
         timeEnd(extractionLabel);
