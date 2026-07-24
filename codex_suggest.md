@@ -144,10 +144,10 @@ yt-dlp로 360p 이하의 **음성 포함 단일 파일**을 한 번 다운로드
 ```text
 yt-dlp (video + audio, one temporary file) -> source.<ext>
 ├─ ffmpeg -> keyframes
-└─ ffmpeg -ss <sample-start> -t 30 -ar 16000 -ac 1 -> sample.wav -> whisper.cpp
+└─ ffmpeg -ss <sample-start> -t 10 -ar 16000 -ac 1 -> sample_A/B/C.wav -> whisper.cpp
 ```
 
-초기 샘플 위치는 인트로 음악을 피하기 위해 전체 길이의 15~35% 구간을 권장한다. 결과가 불확실할 때는 55~75% 구간을 추가한다.
+오디오 샘플은 혼합 언어(`mixed`) 오판 방지를 위해 단일 지점 추출 대신, 영상의 3개 지점(예: 전체 길이의 20%, 50%, 80% 부근)에서 각 10초씩의 짧은 샘플을 분산 슬라이싱하여 판별한다.
 
 ### 단계 2: `whisper.cpp` 언어 판별 모듈 추가
 
@@ -198,11 +198,11 @@ function runWhisper({ audioPath, outputBase, whisperBin, modelPath }) {
 언어 판별은 모델 결과 1개에 무조건 의존하지 않는다.
 
 ```text
-샘플 1개가 명확하게 ko -> korean
-샘플 1개가 명확하게 non-ko -> foreign
-샘플 간 결과가 ko와 non-ko로 섞임 -> mixed 또는 unknown
-무음, 음악, 낮은 신뢰도, 결과 없음 -> second sample
-second sample도 불명확 -> unknown
+분산 추출된 3개 샘플(A, B, C)의 언어 판별 결과에 따른 판정 규칙:
+1. 3개 샘플 모두 ko 감지 -> korean
+2. 3개 샘플 모두 non-ko 감지 -> foreign
+3. 샘플 중 ko와 non-ko가 교차 검출됨 -> mixed (혼합 언어)
+4. 무음, 음악, 낮은 신뢰도 등으로 판별 불능 -> unknown 폴백
 ```
 
 `unknown`은 오류가 아니라 안전한 결과다. 이 경우 자동 번역을 강제하지 않고 OCR·화면 해설만 생성한다. 필요하다면 UI에서 사용자에게 원음 언어를 선택하게 할 수 있으나, 이 문서의 기본 구현 범위에는 선택값의 영속 저장을 포함하지 않는다.
@@ -309,6 +309,7 @@ second sample도 불명확 -> unknown
 4. 제목·대사 트랙·프레임의 문장을 자동으로 다시 읽지 마십시오. 특히 프레임 이미지에서 추출되는 화면 내 글자(OCR)가 제공된 대사 트랙(DIALOGUE_TRACK)의 한국어 문장과 의미상 거의 동일하거나 매우 유사한 경우, 중복 낭독 방지를 위해 해당 자막은 절대 [txt]로 출력하지 마십시오.
 5. 한 문장은 TTS로 약 3초 안에 읽을 수 있을 정도로 짧고 자연스러운 한국어로 작성하십시오.
 6. 같은 종류의 화면 해설은 원칙적으로 4초 이내에 중복하지 마십시오.
+7. 제공된 원음 언어 분류(AUDIO_CLASSIFICATION)가 korean이라 하더라도, 실제 대사 트랙(DIALOGUE_TRACK) 전체에 외국어가 다수 혼용되어 있거나 프레임 내에 외국인이 말하면서 한글 번역 자막 CG가 노출되는 구간이 식별되는 경우, 스스로 mixed 정책(외국어 구간만 [trans] 번역)을 강제 적용하여 대본을 빌드하십시오.
 
 # 원음 언어별 정책
 
