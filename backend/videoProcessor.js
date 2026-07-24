@@ -499,7 +499,7 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null, userId = nul
             try {
                 await new Promise((resolve, reject) => {
                     const ytdlpArgs = [
-                        '-f', 'bestvideo[height<=480][ext=mp4]/best[height<=480][ext=mp4]',
+                        '-f', 'bestvideo[height<=360][acodec=none][ext=mp4]/bestvideo[height<=360][acodec=none]/bestvideo[height<=360]/best[height<=360]',
                         '-o', tempVideoFilename,
                         '--force-ipv4',
                         '--legacy-server-connect',
@@ -894,7 +894,7 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
             try {
                 await new Promise((resolve, reject) => {
                     const ytdlpArgs = [
-                        '-f', 'bestvideo[height<=480][ext=mp4]/best[height<=480][ext=mp4]',
+                        '-f', 'bestvideo[height<=360][acodec=none][ext=mp4]/bestvideo[height<=360][acodec=none]/bestvideo[height<=360]/best[height<=360]',
                         '-o', tempVideoFilename,
                         '--force-ipv4',
                         '--legacy-server-connect',
