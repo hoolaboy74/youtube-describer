@@ -1,29 +1,27 @@
 #!/usr/bin/env node
 
 /**
- * 로컬 Whisper 기반 원음 언어 판별 PoC 스크립트
+ * 로컬 Whisper 기반 원음 언어 판별 PoC 스크립트 (방어/우회 로직 일치 + bs=1, fa 최적화)
  * 
  * 사용법:
- * node poc_whisper.js <youtube_url> [offset_percent]
- * (예: node poc_whisper.js "https://www.youtube.com/watch?v=xxxx" 20)
+ * node poc_whisper.js <youtube_url> [offset_percent] [threads]
  */
 
 const { spawn, execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
-const os = require('os');
 
-// 1. 설정값 및 경로 로드
 const whisperBin = process.env.WHISPER_BIN || '/home/chacha/whisper.cpp/build/bin/whisper-cli';
 const whisperModel = process.env.WHISPER_MODEL || '/home/chacha/whisper.cpp/models/ggml-base.bin';
 const ytdlpPath = 'yt-dlp';
 
 const youtubeUrl = process.argv[2];
 const offsetPercent = parseFloat(process.argv[3] || '20');
+const threads = process.argv[4] || '2';
 
 if (!youtubeUrl) {
     console.error('오류: YouTube URL을 인자로 전달하십시오.');
-    console.error('사용법: node poc_whisper.js <youtube_url> [offset_percent]');
+    console.error('사용법: node poc_whisper.js <youtube_url> [offset_percent] [threads]');
     process.exit(1);
 }
 
@@ -47,20 +45,29 @@ const timings = {
     whisperEnd: 0
 };
 
-// 쿠키 디렉터리에서 랜덤 쿠키 파싱
-const getRandomCookiePath = () => {
+// 쿠키 로테이션용 헬퍼
+const getRandomCookiePath = (excludePaths = []) => {
     const cookiesDir = path.join(__dirname, 'cookies');
     if (!fs.existsSync(cookiesDir)) {
         const defaultCookiePath = path.join(__dirname, 'cookies.txt');
-        return fs.existsSync(defaultCookiePath) ? defaultCookiePath : null;
+        if (fs.existsSync(defaultCookiePath) && !excludePaths.includes(defaultCookiePath)) {
+            return defaultCookiePath;
+        }
+        return null;
     }
     const cookieFiles = fs.readdirSync(cookiesDir)
-        .filter(file => file.endsWith('_cookies.txt') && fs.statSync(path.join(cookiesDir, file)).size > 0);
+        .filter(file => file.endsWith('_cookies.txt') && fs.statSync(path.join(cookiesDir, file)).size > 0)
+        .map(file => path.join(cookiesDir, file))
+        .filter(p => !excludePaths.includes(p));
+
     if (cookieFiles.length === 0) {
         const defaultCookiePath = path.join(__dirname, 'cookies.txt');
-        return fs.existsSync(defaultCookiePath) ? defaultCookiePath : null;
+        if (fs.existsSync(defaultCookiePath) && !excludePaths.includes(defaultCookiePath)) {
+            return defaultCookiePath;
+        }
+        return null;
     }
-    return path.join(cookiesDir, cookieFiles[Math.floor(Math.random() * cookieFiles.length)]);
+    return cookieFiles[Math.floor(Math.random() * cookieFiles.length)];
 };
 
 // Safari 임퍼스네이트 지원 여부 확인
@@ -72,8 +79,6 @@ try {
 
 const impersonateArgs = isSafariImpersonateSupported ? ['--impersonate', 'safari'] : [];
 const proxyArgs = process.env.YTDLP_PROXY ? ['--proxy', process.env.YTDLP_PROXY] : [];
-const cookiePath = getRandomCookiePath();
-const cookieArgs = cookiePath ? ['--cookies', cookiePath] : [];
 
 async function main() {
     try {
@@ -82,6 +87,7 @@ async function main() {
         console.log(`추출 시작 지점: 영상의 ${offsetPercent}% 지점`);
         console.log(`바이너리 경로: ${whisperBin}`);
         console.log(`모델 경로: ${whisperModel}`);
+        console.log(`스레드 옵션: ${threads} 스레드 (Beam Size: 1, Flash Attention 가속 적용)`);
 
         if (!fs.existsSync(whisperBin)) {
             throw new Error(`Whisper CLI 바이너리가 존재하지 않습니다: ${whisperBin}`);
@@ -90,34 +96,64 @@ async function main() {
             throw new Error(`Whisper 모델 파일이 존재하지 않습니다: ${whisperModel}`);
         }
 
-        // --- Step 1: 음성 포함 단일 360p 비디오 다운로드 (1회) ---
-        console.log('\n[Step 1] yt-dlp 통합 영상 파일 다운로드 중...');
+        // --- Step 1: 음성 포함 단일 360p 비디오 다운로드 (2회 재시도 루프) ---
+        console.log('\n[Step 1] yt-dlp 통합 영상 파일 다운로드 시작...');
         const downloadStart = Date.now();
         
-        const ytdlpArgs = [
-            '-f', 'best[height<=360][vcodec!=none][acodec!=none]/best[height<=360]/best',
-            '-o', tempVideoPath,
-            '--force-ipv4',
-            '--legacy-server-connect',
-            '--no-check-certificate',
-            ...impersonateArgs,
-            ...cookieArgs,
-            ...proxyArgs,
-            youtubeUrl
-        ];
+        let downloadSuccess = false;
+        let downloadAttempt = 1;
+        const usedCookiePaths = [];
+        let currentCookiePath = getRandomCookiePath();
 
-        await new Promise((resolve, reject) => {
-            const child = spawn(ytdlpPath, ytdlpArgs);
-            let stderr = '';
-            child.stderr.on('data', data => { stderr += data.toString(); });
-            child.on('close', code => {
-                if (code === 0) resolve();
-                else reject(new Error(`yt-dlp 실행 실패 (코드: ${code}). Stderr: ${stderr}`));
-            });
-        });
+        while (!downloadSuccess && downloadAttempt <= 2) {
+            const isRetry = downloadAttempt === 2;
+            if (isRetry) {
+                console.log(`-> 1차 시도 실패. 대체 자격증명으로 우회 재시도 중... (Attempt ${downloadAttempt})`);
+                if (currentCookiePath) {
+                    usedCookiePaths.push(currentCookiePath);
+                }
+                currentCookiePath = getRandomCookiePath(usedCookiePaths);
+            }
+
+            const cookieArgs = currentCookiePath ? ['--cookies', currentCookiePath] : [];
+            const ytdlpArgs = [
+                '-f', 'best[height<=360][vcodec!=none][acodec!=none]/best[height<=360]/best',
+                '-o', tempVideoPath,
+                '--force-ipv4',
+                '--legacy-server-connect',
+                '--no-check-certificate',
+                '--plugin-dirs', path.join(__dirname, 'yt_dlp_plugins'),
+                '--remote-components', 'ejs:github',
+                ...impersonateArgs,
+                ...cookieArgs,
+                ...proxyArgs,
+                youtubeUrl
+            ];
+
+            console.log(`-> 실행 명령어: yt-dlp ${ytdlpArgs.filter(a => !a.includes('cookies')).join(' ')} (쿠키: ${currentCookiePath ? path.basename(currentCookiePath) : '없음'})`);
+
+            try {
+                await new Promise((resolve, reject) => {
+                    const child = spawn(ytdlpPath, ytdlpArgs);
+                    let stderr = '';
+                    child.stderr.on('data', data => { stderr += data.toString(); });
+                    child.on('close', code => {
+                        if (code === 0) resolve();
+                        else reject(new Error(`yt-dlp 실행 실패 (코드: ${code}). Stderr: ${stderr.substring(0, 500)}`));
+                    });
+                });
+                downloadSuccess = true;
+            } catch (err) {
+                console.warn(`-> Attempt ${downloadAttempt} 다운로드 실패: ${err.message}`);
+                downloadAttempt++;
+                if (downloadAttempt > 2) {
+                    throw new Error('모든 다운로드 시도가 실패했습니다.');
+                }
+            }
+        }
 
         timings.downloadEnd = Date.now();
-        console.log(`-> 다운로드 완료. (소요 시간: ${((timings.downloadEnd - downloadStart) / 1000).toFixed(2)}초)`);
+        console.log(`-> 다운로드 성공. (소요 시간: ${((timings.downloadEnd - downloadStart) / 1000).toFixed(2)}초)`);
         console.log(`다운로드 파일 크기: ${(fs.statSync(tempVideoPath).size / (1024 * 1024)).toFixed(2)} MB`);
 
         // --- Step 2: ffmpeg을 이용하여 영상 총 길이 획득 및 30초 오디오 슬라이싱 ---
@@ -169,7 +205,9 @@ async function main() {
         const whisperArgs = [
             '-m', whisperModel,
             '-f', tempSampleWavPath,
-            '-t', '2',
+            '-t', threads,
+            '-bs', '1',
+            '-fa',
             '--language', 'auto',
             '--output-json',
             '--output-file', outputJsonBase,
@@ -198,10 +236,7 @@ async function main() {
         const rawJson = fs.readFileSync(outputJsonPath, 'utf8');
         const parsed = JSON.parse(rawJson);
 
-        // whisper.cpp 출력 구조에 맞춰 감지된 언어 확인
-        // 보통 output-json은 { "system": {...}, "params": {...}, "result": { "language": "ko" }, "transcription": [...] }
         const detectedLanguage = parsed.result?.language || 'unknown';
-        
         console.log(`[+] 최종 감지 언어 코드: ${detectedLanguage}`);
         
         let transcriptionText = '';
