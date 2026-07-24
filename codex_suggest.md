@@ -117,13 +117,13 @@ Node.js에서 무거운 모델을 직접 로드하지 말고 `whisper.cpp` CLI�
 
 1. `ffmpeg` 설치: 오디오 구간 변환에 사용한다.
 2. `whisper.cpp` 빌드 또는 검증된 바이너리 배치.
-3. 다국어 `base` 모델 파일 다운로드 후 서버의 읽기 전용 모델 디렉터리에 배치.
-4. Node 백엔드 설정에 아래 값을 추가.
+3. 검증 완료된 다국어 `tiny` 모델 파일(`ggml-tiny.bin`)을 서버의 읽기 전용 모델 디렉터리에 배치.
+4. Node 백엔드 설정에 아래 값을 추가. (운영 서버 `mom`에서 검증 완료된 절대 경로 적용)
 
 ```env
 WHISPER_ENABLED=true
-WHISPER_BIN=/opt/whisper.cpp/build/bin/whisper-cli
-WHISPER_MODEL=/opt/whisper.cpp/models/ggml-tiny.bin
+WHISPER_BIN=/home/chacha/whisper.cpp/build/bin/whisper-cli
+WHISPER_MODEL=/home/chacha/whisper.cpp/models/ggml-tiny.bin
 WHISPER_TIMEOUT_MS=15000
 WHISPER_MAX_CONCURRENCY=1
 WHISPER_THREADS=4
