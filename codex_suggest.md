@@ -105,7 +105,7 @@ Node.js에서 무거운 모델을 직접 로드하지 말고 `whisper.cpp` CLI�
 | CPU | 2 코어 | 4 vCPU 이상 |
 | 메모리 | 4GB | 8GB 이상 |
 | GPU | 불필요 | 선택 사항; Apple Silicon Metal/Core ML 또는 NVIDIA CUDA |
-| 모델 | 다국어 `tiny` 또는 `base` | 다국어 `base` |
+| 모델 | 다국어 `tiny` | 다국어 `tiny` (50% 이상 레이턴시 단축) |
 | 디스크 | 모델·임시 파일용 1GB 이상 | 10GB 이상 여유 |
 | 운영 방식 | 단일 실행 | 작업 큐 및 동시 실행 제한 |
 
@@ -121,14 +121,14 @@ Node.js에서 무거운 모델을 직접 로드하지 말고 `whisper.cpp` CLI�
 ```env
 WHISPER_ENABLED=true
 WHISPER_BIN=/opt/whisper.cpp/build/bin/whisper-cli
-WHISPER_MODEL=/opt/whisper.cpp/models/ggml-base.bin
+WHISPER_MODEL=/opt/whisper.cpp/models/ggml-tiny.bin
 WHISPER_TIMEOUT_MS=15000
 WHISPER_MAX_CONCURRENCY=1
-WHISPER_THREADS=2
+WHISPER_THREADS=4
 FRAME_BACKFILL_CONCURRENCY=3
 ```
 
-5. 모델 실행은 요청 핸들러가 아니라 제한된 작업 큐에서 수행한다. Whisper 작업 동시 실행 수는 기본 1로 시작하고, CLI 스레드는 `-t 2`로 제한한다.
+5. 모델 실행은 요청 핸들러가 아니라 제한된 작업 큐에서 수행한다. Whisper 작업 동시 실행 수는 기본 1로 시작하고, CLI 실행 시 `tiny` 모델을 기반으로 스레드는 `-t 4`, 빔 크기는 `-bs 1`, 플래시 어텐션 `-fa` 가속 옵션을 명시 적용한다.
 6. `extractKeyframesHybrid`의 백필 작업은 `p-limit` 또는 동등한 큐로 감싸고 FFmpeg 동시 실행 수를 기본 3개로 제한한다. 서버 CPU 여유와 실측 결과에 따라 3~4개 범위에서만 조정한다.
 
 ## 7. 구현 단계
@@ -169,7 +169,9 @@ function runWhisper({ audioPath, outputBase, whisperBin, modelPath }) {
     const child = spawn(whisperBin, [
       '-m', modelPath,
       '-f', audioPath,
-      '-t', '2',
+      '-t', '4',
+      '-bs', '1',
+      '-fa',
       '--language', 'auto',
       '--output-json',
       '--output-file', outputBase,
@@ -393,7 +395,7 @@ second sample도 불명확 -> unknown
 5. `videos` 테이블에 `audio_language` 컬럼만 추가하여 판별된 원음성 종류를 저장하도록 마이그레이션을 구성하고, 그 외 상세 Whisper 결과 및 대사 원문은 DB에 저장하지 않는다.
 6. 출력 태그 `[trans]` 및 DB `translation` 타입을 백엔드 파서와 프런트 재생 로직에 일관되게 추가한다.
 7. 이 문서의 Gemini 프롬프트를 실제 운영 프롬프트에 반영하되, 자리표시자(`{{AUDIO_CLASSIFICATION}}` 등)가 모두 실제 데이터로 치환되는지 검증한다.
-8. `extractKeyframesHybrid`의 백필 `Promise.all`을 동시성 3개 제한 큐로 교체하고, Whisper CLI에는 `-t 2`를 적용한다.
+8. `extractKeyframesHybrid`의 백필 `Promise.all`을 동시성 3개 제한 큐로 교체하고, Whisper CLI에는 `tiny` 모델 기반 `-t 4`, `-bs 1`, `-fa` 옵션을 적용한다.
 9. 프런트엔드에서 `dialogueTrack`을 받되, 실제 TTS 일시정지·재개·볼륨 제어는 `PlayerScreenV2.js`가 담당하도록 한다. 백엔드는 재생 제어를 수행하지 않는다.
 10. 외국어 원음의 기본 재생 모드는 `[trans]` 시작 시 YouTube 플레이어를 일시정지하고, 번역 TTS 종료 후 재생을 재개하는 Pause-and-Resume 방식으로 구현한다. 번역문 길이를 원문 길이에 억지로 맞추거나 고속 TTS로 처리하지 않는다.
 11. `unknown`은 실행 중인 대본을 비동기로 갱신하지 않는다. 원음 언어 수동 선택 UI를 추가하더라도 선택값의 DB 저장은 이 범위에 포함하지 않는다.
