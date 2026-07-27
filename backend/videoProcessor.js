@@ -51,7 +51,11 @@ const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY || API_KEY;
 const youtube = google.youtube({ version: 'v3', auth: YOUTUBE_API_KEY });
 
 const calculateApiCost = (modelName, promptTokenCount, candidatesTokenCount, totalTokenCount) => {
-    const modelLower = modelName.toLowerCase();
+    const promptTokens = promptTokenCount || 0;
+    const candidatesTokens = candidatesTokenCount || 0;
+    const totalTokens = totalTokenCount || (promptTokens + candidatesTokens);
+    
+    const modelLower = modelName ? modelName.toLowerCase() : "";
     let inputRate = 1.25; // Default legacy pro rate (gemini-1.5-pro / gemini-2.5-pro)
     let outputRate = 10.00;
     let inputRateOverLimit = 2.50;
@@ -74,9 +78,10 @@ const calculateApiCost = (modelName, promptTokenCount, candidatesTokenCount, tot
         outputRateOverLimit = 0.60;
     }
 
-    const inputCost = (promptTokenCount / 1000000) * (totalTokenCount <= 200000 ? inputRate : inputRateOverLimit);
-    const outputCost = (candidatesTokenCount / 1000000) * (totalTokenCount <= 200000 ? outputRate : outputRateOverLimit);
-    return inputCost + outputCost;
+    const inputCost = (promptTokens / 1000000) * (totalTokens <= 200000 ? inputRate : inputRateOverLimit);
+    const outputCost = (candidatesTokens / 1000000) * (totalTokens <= 200000 ? outputRate : outputRateOverLimit);
+    const totalCost = inputCost + outputCost;
+    return isNaN(totalCost) ? 0 : totalCost;
 };
 
 const processingLocks = new Set();
@@ -743,10 +748,12 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null, userId = nul
         const finalResponse = await result.response;
         const usageMetadata = finalResponse.usageMetadata;
         if (usageMetadata) {
-            const { promptTokenCount, candidatesTokenCount, totalTokenCount } = usageMetadata;
+            const promptTokenCount = usageMetadata.promptTokenCount || 0;
+            const candidatesTokenCount = usageMetadata.candidatesTokenCount || 0;
+            const totalTokenCount = usageMetadata.totalTokenCount || (promptTokenCount + candidatesTokenCount);
             const cost = calculateApiCost(MODEL_NAME, promptTokenCount, candidatesTokenCount, totalTokenCount);
-            db.addApiCost({ videoId, model_used: MODEL_NAME, image_tokens: promptTokenCount, text_tokens: candidatesTokenCount, cost });
-            logger.info(`[${requestHash}] Logged API cost: ${cost.toFixed(6)} USD`);
+            db.addApiCost({ videoId, model_used: MODEL_NAME, image_tokens: promptTokenCount, text_tokens: candidatesTokenCount, cost: isNaN(cost) ? 0 : cost });
+            logger.info(`[${requestHash}] Logged API cost: ${(isNaN(cost) ? 0 : cost).toFixed(6)} USD`);
         }
 
         db.saveVideo({ videoId, title: videoTitle, duration: Math.round(totalDuration), filesize, script: fullScript });
@@ -1042,10 +1049,12 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
 
         const usageMetadata = result.response.usageMetadata;
         if (usageMetadata) {
-            const { promptTokenCount, candidatesTokenCount, totalTokenCount } = usageMetadata;
+            const promptTokenCount = usageMetadata.promptTokenCount || 0;
+            const candidatesTokenCount = usageMetadata.candidatesTokenCount || 0;
+            const totalTokenCount = usageMetadata.totalTokenCount || (promptTokenCount + candidatesTokenCount);
             const cost = calculateApiCost(MODEL_NAME, promptTokenCount, candidatesTokenCount, totalTokenCount);
-            db.addApiCost({ videoId, model_used: MODEL_NAME, image_tokens: promptTokenCount, text_tokens: candidatesTokenCount, cost });
-            logger.info(`[${requestHash}] Logged API cost for batch: ${cost.toFixed(6)} USD`);
+            db.addApiCost({ videoId, model_used: MODEL_NAME, image_tokens: promptTokenCount, text_tokens: candidatesTokenCount, cost: isNaN(cost) ? 0 : cost });
+            logger.info(`[${requestHash}] Logged API cost for batch: ${(isNaN(cost) ? 0 : cost).toFixed(6)} USD`);
         }
         
         if (result.response.promptFeedback && result.response.promptFeedback.blockReason) {
