@@ -235,7 +235,7 @@ async function extractKeyframesHybrid({ tempVideoPath, tempVideoFilename, baseTe
         // sse status update omitted for fast backfill
 
         const backfillPromises = gapTargetTimes.map((time, idx) => {
-            return new Promise((resolveBackfill, rejectBackfill) => {
+            return new Promise((resolveBackfill) => {
                 const ffmpegArgs = [
                     '-loglevel', 'quiet',
                     '-ss', time.toFixed(3), // Fast Seeking
@@ -247,10 +247,17 @@ async function extractKeyframesHybrid({ tempVideoPath, tempVideoFilename, baseTe
                 ];
 
                 const ffmpegProcess = spawn('ffmpeg', ffmpegArgs, { cwd: baseTempDir });
-                ffmpegProcess.on('error', (err) => rejectBackfill(err));
+                ffmpegProcess.on('error', (err) => {
+                    logger.warn(`[${requestHash}] Backfill spawn error for ${time}s (ignored): ${err.message}`);
+                    resolveBackfill(null);
+                });
                 ffmpegProcess.on('close', (code) => {
-                    if (code === 0) resolveBackfill({ time, idx });
-                    else rejectBackfill(new Error(`Backfill failed for ${time}s`));
+                    if (code === 0) {
+                        resolveBackfill({ time, idx });
+                    } else {
+                        logger.warn(`[${requestHash}] Backfill failed for ${time}s (ignored) with code ${code}`);
+                        resolveBackfill(null);
+                    }
                 });
             });
         });
