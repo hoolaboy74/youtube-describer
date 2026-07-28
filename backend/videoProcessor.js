@@ -815,7 +815,6 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null, userId = nul
             logger.info(`[${requestHash}] Logged API cost: ${(isNaN(cost) ? 0 : cost).toFixed(6)} USD`);
         }
 
-        db.saveVideo({ videoId, title: videoTitle, duration: Math.round(totalDuration), filesize, script: fullScript });
         timeEnd(aiLabel);
         if (sseHandler) sseHandler('end', { message: 'Processing complete.' });
         
