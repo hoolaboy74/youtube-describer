@@ -980,7 +980,7 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
             try {
                 await new Promise((resolve, reject) => {
                     const ytdlpArgs = [
-                        '-f', 'bestvideo[height<=360][acodec=none][ext=mp4]/bestvideo[height<=360][acodec=none]/bestvideo[height<=360]/best[height<=360]',
+                        '-f', 'best[height<=360][vcodec!=none][acodec!=none]/best[height<=360]',
                         '-o', tempVideoFilename,
                         '--force-ipv4',
                         '--legacy-server-connect',
