@@ -906,6 +906,20 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
 
         await fs.promises.mkdir(baseTempDir, { recursive: true });
 
+        const videoResponse = await youtube.videos.list({
+            part: 'snippet,contentDetails,status',
+            id: videoId
+        });
+
+        if (!videoResponse.data.items || videoResponse.data.items.length === 0) {
+            throw new Error('Invalid or missing YouTube URL for batch');
+        }
+
+        const videoItem = videoResponse.data.items[0];
+        const videoTitle = videoItem.snippet.title;
+        const durationIso = videoItem.contentDetails.duration;
+        const totalDuration = parseISO8601Duration(durationIso);
+
         const tempVideoFilename = `${videoId}.mp4`;
         const tempVideoPath = path.join(baseTempDir, tempVideoFilename);
         let filesize = 0;
