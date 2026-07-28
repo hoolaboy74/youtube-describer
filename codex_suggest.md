@@ -118,19 +118,19 @@ Node.js에서 무거운 모델을 직접 로드하지 말고 `whisper.cpp` CLI�
 1. `ffmpeg` 설치: 오디오 구간 변환에 사용한다.
 2. `whisper.cpp` 빌드 또는 검증된 바이너리 배치.
 3. 검증 완료된 다국어 `tiny` 모델 파일(`ggml-tiny.bin`)을 서버의 읽기 전용 모델 디렉터리에 배치.
-4. Node 백엔드 설정에 아래 값을 추가. (운영 서버 `mom`에서 검증 완료된 절대 경로 적용)
+4. Node 백엔드 설정에 아래 값을 추가. (운영 서버 `mom`에서 실측 검증 완료된 최적 설정 적용)
 
 ```env
 WHISPER_ENABLED=true
 WHISPER_BIN=/home/chacha/whisper.cpp/build/bin/whisper-cli
 WHISPER_MODEL=/home/chacha/whisper.cpp/models/ggml-tiny.bin
 WHISPER_TIMEOUT_MS=15000
-WHISPER_MAX_CONCURRENCY=1
-WHISPER_THREADS=4
+WHISPER_MAX_CONCURRENCY=3
+WHISPER_THREADS=2
 FRAME_BACKFILL_CONCURRENCY=3
 ```
 
-5. 모델 실행은 요청 핸들러가 아니라 제한된 작업 큐에서 수행한다. Whisper 작업 동시 실행 수는 기본 1로 시작하고, CLI 실행 시 `tiny` 모델을 기반으로 스레드는 `-t 4`, 빔 크기는 `-bs 1`, 플래시 어텐션 `-fa` 가속 옵션을 명시 적용한다.
+5. 모델 실행은 요청 핸들러가 아니라 제한된 작업 큐에서 수행한다. 3개 분산 샘플을 동시에 실행하여 감지 성공률과 Mixed 판정률을 극대화하되, CPU 경합 완화와 메모리 최적화를 위해 동시 실행 수는 최대 3(`WHISPER_MAX_CONCURRENCY=3`), 개별 프로세스 스레드는 `-t 2`로 명시 제한한다. (실측 결과: 3개 동시 구동 시 `-t 2` 설정이 4.34초로 가장 우수하였으며, `-t 4` 적용 시의 5.05초나 직렬 실행 대비 우수한 성능을 나타냄) 빔 크기는 `-bs 1`, 플래시 어텐션 `-fa` 가속 옵션을 명시 적용한다.
 6. `extractKeyframesHybrid`의 백필 작업은 `p-limit` 또는 동등한 큐로 감싸고 FFmpeg 동시 실행 수를 기본 3개로 제한한다. 서버 CPU 여유와 실측 결과에 따라 3~4개 범위에서만 조정한다.
 
 ## 7. 구현 단계
@@ -205,7 +205,7 @@ function runWhisper({ audioPath, outputBase, whisperBin, modelPath }) {
 4. 무음, 음악, 낮은 신뢰도 등으로 판별 불능 -> unknown 폴백
 ```
 
-`unknown`은 오류가 아니라 안전한 결과다. 이 경우 자동 번역을 강제하지 않고 OCR·화면 해설만 생성한다. 필요하다면 UI에서 사용자에게 원음 언어를 선택하게 할 수 있으나, 이 문서의 기본 구현 범위에는 선택값의 영속 저장을 포함하지 않는다.
+`unknown`은 오류가 아니라 안전한 결과다. 이 경우 자동 번역을 강제하지 않고 OCR·화면 해설만 생성한다. 시각장애인 접근성 단순화를 위해 별도의 수동 언어 선택 UI는 일절 제공하지 않고 백엔드 및 플레이어의 완전 자동 처리를 지향한다.
 
 `unknown` 결과 뒤에 Whisper/전사 결과가 늦게 도착하더라도 실행 중인 클라이언트 대본을 SSE로 교체하지 않는다. 이는 재생 위치, TTS 큐, 접근성 안내 상태를 복잡하게 만들기 때문이다.
 
@@ -233,7 +233,7 @@ function runWhisper({ audioPath, outputBase, whisperBin, modelPath }) {
 ]
 ```
 
-외국어 영상에서는 이 트랙을 Gemini에 전달해 한국어 번역 `[trans]`를 생성한다. 한국어 영상에서는 원음 대사를 TTS로 중복하지 않도록 하는 판단 근거로만 사용한다.
+외국어 영상에서는 이 트랙을 Gemini에 전달해 한국어 번역 `[trans]`를 생성한다. 한국어 영상에서는 원음 대사를 TTS로 중복하지 않도록 하는 판단 근거로만 사용한다. **특히 `mixed` 판정 영상에서는 이중 낭독을 유발하는 한국어 해설 VTT 자막 트랙은 백엔드 파싱 단계에서 전면 제외(소거)하고, 외국어 자막 트랙만 대사 트랙(`DIALOGUE_TRACK`)으로 정제하여 Gemini에 전송함으로써 영어/외국어 대사만 정밀 번역되도록 유도한다.**
 
 ### 단계 5: DB와 스크립트 타입 확장
 
@@ -265,7 +265,7 @@ function runWhisper({ audioPath, outputBase, whisperBin, modelPath }) {
 4. 단일 파일을 입력으로 병렬 작업을 시작한다.
    A. 키프레임 추출
    B. FFmpeg 오디오 샘플 추출 -> Whisper 언어 판별
-5. B가 foreign/mixed이면 원문 대사 트랙을 확정한다.
+5. B가 foreign/mixed이면 원문 대사 트랙을 확정한다. (mixed인 경우 한국어 자막은 파싱에서 완전히 제외하고 외국어 자막 트랙만 대사 트랙으로 정제 확정한다.)
 6. A 완료 후 Gemini에 제목, 키프레임, 언어 판정, 대사 트랙을 전달한다.
 7. Gemini 출력을 v1/v2/v3/text/translation으로 저장한다.
 8. 임시 영상·오디오·Whisper JSON을 정리한다.
@@ -400,8 +400,8 @@ function runWhisper({ audioPath, outputBase, whisperBin, modelPath }) {
 7. 이 문서의 Gemini 프롬프트를 실제 운영 프롬프트에 반영하되, 자리표시자(`{{AUDIO_CLASSIFICATION}}` 등)가 모두 실제 데이터로 치환되는지 검증한다.
 8. `extractKeyframesHybrid`의 백필 `Promise.all`을 동시성 3개 제한 큐로 교체하고, Whisper CLI에는 `tiny` 모델 기반 `-t 4`, `-bs 1`, `-fa` 옵션을 적용한다.
 9. 프런트엔드에서 `dialogueTrack`을 받되, 실제 TTS 일시정지·재개·볼륨 제어는 `PlayerScreenV2.js`가 담당하도록 한다. 백엔드는 재생 제어를 수행하지 않는다.
-10. 외국어 원음의 기본 재생 모드는 `[trans]` 시작 시 YouTube 플레이어를 일시정지하고, 번역 TTS 종료 후 재생을 재개하는 Pause-and-Resume 방식으로 구현한다. 단, 대화 밀도가 극도로 높아 일시정지가 잦을 경우(예: 1.5초 이내 연속 발생 시), 플레이어 단에서 일시정지를 생략하고 TTS 속도를 자동으로 1.2~1.5배속으로 다이내믹 가속화하여 원본 재생 흐름(Pacing)을 유지하는 병합 알고리즘을 도입한다.
-11. `unknown`은 실행 중인 대본을 비동기로 갱신하지 않는다. 원음 언어 수동 선택 UI를 추가하더라도 선택값의 DB 저장은 이 범위에 포함하지 않는다.
+10. 외국어 원음의 기본 재생 모드는 `[trans]` 시작 시 YouTube 플레이어를 일시정지하고, 번역 TTS 종료 후 재생을 재개하는 Pause-and-Resume 방식으로 구현한다. 이때 복잡한 다이내믹 가속화 알고리즘을 추가하지 않고, 시각장애인 사용자가 미리 지정해 둔 고속 TTS 설정을 100% 준수하여 기존의 단순 일시정지 조건식(자막 `text` 도래 시 정지)에 `translation` 타입을 통합하는 형태(`text` 또는 `translation` 도래 시 정지)로 제어를 단순화한다.
+11. `unknown`은 실행 중인 대본을 비동기로 갱신하지 않는다. 시각장애인 편의를 위해 UI에 수동 원음 언어 선택 컨트롤은 배치하지 않으며, 모든 재생 및 필터링 처리는 백엔드의 자막 정제 조건 분기를 통해 완전히 자동화 처리한다.
 12. 한국어·외국어·혼합·무음 영상에 대한 자동 또는 수동 테스트를 추가한다.
 13. Whisper가 없거나 실패한 환경에서도 기존 화면 해설이 실패하지 않고 `unknown` 정책으로 진행되는지 확인한다.
 14. 실제 배포 전에는 30초 샘플로 Whisper p50/p95, 처리 시간·CPU·메모리·출력 품질을 측정하고, 타임아웃과 동시성 값을 근거와 함께 문서화한다.

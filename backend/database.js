@@ -59,6 +59,12 @@ function init() {
     logger.info('Adding is_featured column to videos table with default value 0...');
     db.exec('ALTER TABLE videos ADD COLUMN is_featured INTEGER DEFAULT 0');
   }
+  try {
+    db.prepare('SELECT audio_language FROM videos LIMIT 1').get();
+  } catch (error) {
+    logger.info('Adding audio_language column to videos table...');
+    db.exec('ALTER TABLE videos ADD COLUMN audio_language TEXT');
+  }
 
   // scripts 테이블: 각 영상에 속한 화면 해설 스크립트 정보 저장
   db.exec(`
@@ -338,7 +344,7 @@ function updateSetting({ key, value }) {
 
 // 특정 영상 정보와 스크립트 전체를 가져오는 함수
 function getVideo(videoId) {
-  const videoRow = db.prepare('SELECT videoId, title, duration, filesize, status FROM videos WHERE videoId = ?').get(videoId);
+  const videoRow = db.prepare('SELECT videoId, title, duration, filesize, status, audio_language FROM videos WHERE videoId = ?').get(videoId);
   if (!videoRow) {
     return null;
   }
@@ -351,6 +357,7 @@ function getVideo(videoId) {
     duration: videoRow.duration,
     filesize: videoRow.filesize,
     status: videoRow.status,
+    audioLanguage: videoRow.audio_language,
     script: scriptRows.map(row => ({
       ...row,
       // Ensure timestamp is a number
@@ -359,19 +366,19 @@ function getVideo(videoId) {
   };
 }
 
-// 영상과 스크립트 정보를 DB에 저장하는 함수 (트랜잭션 사용, 배치 처리용)
-function saveVideo({ videoId, title, duration, filesize, script }) {
+function saveVideo({ videoId, title, duration, filesize, script, audioLanguage = null }) {
   const transaction = db.transaction(() => {
     // Step 1: Insert or update the video record, setting status to completed.
     db.prepare(`
-      INSERT INTO videos (videoId, title, duration, filesize, status)
-      VALUES (?, ?, ?, ?, 'completed')
+      INSERT INTO videos (videoId, title, duration, filesize, status, audio_language)
+      VALUES (?, ?, ?, ?, 'completed', ?)
       ON CONFLICT(videoId) DO UPDATE SET
         title = excluded.title,
         duration = excluded.duration,
         filesize = excluded.filesize,
-        status = 'completed'
-    `).run(videoId, title, duration, filesize);
+        status = 'completed',
+        audio_language = excluded.audio_language
+    `).run(videoId, title, duration, filesize, audioLanguage);
 
     // Step 2: Delete all old scripts for this video to ensure a clean slate.
     db.prepare('DELETE FROM scripts WHERE videoId = ?').run(videoId);

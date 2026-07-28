@@ -9,6 +9,7 @@ const crypto = require('crypto');
 const db = require('./database');
 const { formatTime, preprocessVtt, isValidYoutubeUrl } = require('./utils');
 const logger = require('./logger');
+const audioLanguageDetector = require('./modules/audioLanguageDetector');
 
 let isSafariImpersonateSupported = false;
 try {
@@ -236,38 +237,41 @@ async function extractKeyframesHybrid({ tempVideoPath, tempVideoFilename, baseTe
 
     // Step 3: Backfill Execution
     if (gapTargetTimes.length > 0) {
-        logger.info(`[${requestHash}] Found ${gapTargetTimes.length} missing frame slots: ${gapTargetTimes.join(', ')}. Starting backfill...`);
-        // sse status update omitted for fast backfill
+        logger.info(`[${requestHash}] Found ${gapTargetTimes.length} missing frame slots. Starting backfill (concurrency limit: 3)...`);
+        
+        const chunkLimit = 3;
+        for (let i = 0; i < gapTargetTimes.length; i += chunkLimit) {
+            const chunk = gapTargetTimes.slice(i, i + chunkLimit);
+            const chunkPromises = chunk.map((time, idx) => {
+                const globalIdx = i + idx;
+                return new Promise((resolveBackfill) => {
+                    const ffmpegArgs = [
+                        '-loglevel', 'quiet',
+                        '-ss', time.toFixed(3), // Fast Seeking
+                        '-i', tempVideoFilename,
+                        '-vf', "scale=640:-1",
+                        '-vframes', '1',
+                        '-q:v', '5',
+                        `frame_backfill_${globalIdx}_%04d.jpg`
+                    ];
 
-        const backfillPromises = gapTargetTimes.map((time, idx) => {
-            return new Promise((resolveBackfill) => {
-                const ffmpegArgs = [
-                    '-loglevel', 'quiet',
-                    '-ss', time.toFixed(3), // Fast Seeking
-                    '-i', tempVideoFilename,
-                    '-vf', "scale=640:-1",
-                    '-vframes', '1',
-                    '-q:v', '5',
-                    `frame_backfill_${idx}_%04d.jpg`
-                ];
-
-                const ffmpegProcess = spawn('ffmpeg', ffmpegArgs, { cwd: baseTempDir });
-                ffmpegProcess.on('error', (err) => {
-                    logger.warn(`[${requestHash}] Backfill spawn error for ${time}s (ignored): ${err.message}`);
-                    resolveBackfill(null);
-                });
-                ffmpegProcess.on('close', (code) => {
-                    if (code === 0) {
-                        resolveBackfill({ time, idx });
-                    } else {
-                        logger.warn(`[${requestHash}] Backfill failed for ${time}s (ignored) with code ${code}`);
+                    const ffmpegProcess = spawn('ffmpeg', ffmpegArgs, { cwd: baseTempDir });
+                    ffmpegProcess.on('error', (err) => {
+                        logger.warn(`[${requestHash}] Backfill spawn error for ${time}s (ignored): ${err.message}`);
                         resolveBackfill(null);
-                    }
+                    });
+                    ffmpegProcess.on('close', (code) => {
+                        if (code === 0) {
+                            resolveBackfill({ time, idx: globalIdx });
+                        } else {
+                            logger.warn(`[${requestHash}] Backfill failed for ${time}s (ignored) with code ${code}`);
+                            resolveBackfill(null);
+                        }
+                    });
                 });
             });
-        });
-
-        await Promise.all(backfillPromises);
+            await Promise.all(chunkPromises);
+        }
     }
 
     // Step 4: Re-index unified frames sequentially to frame-%04d.jpg & prepare return timestamps
@@ -511,7 +515,7 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null, userId = nul
             try {
                 await new Promise((resolve, reject) => {
                     const ytdlpArgs = [
-                        '-f', 'bestvideo[height<=360][acodec=none][ext=mp4]/bestvideo[height<=360][acodec=none]/bestvideo[height<=360]/best[height<=360]',
+                        '-f', 'best[height<=360][vcodec!=none][acodec!=none]/best[height<=360]',
                         '-o', tempVideoFilename,
                         '--force-ipv4',
                         '--legacy-server-connect',
@@ -579,8 +583,10 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null, userId = nul
                     });
 
                     downloadProcess.on('close', (code) => {
-                        if (code === 0) resolve();
-                        else {
+                        const hasVideo = fs.existsSync(tempVideoPath) && fs.statSync(tempVideoPath).size > 0;
+                        if (code === 0 || (hasVideo && stderrData.includes('subtitle'))) {
+                            resolve();
+                        } else {
                             const stderrLower = stderrData.toLowerCase();
                             const isBotError = stderrLower.includes('confirm you’re not a bot') || 
                                                stderrLower.includes('cookies are no longer valid') || 
@@ -618,44 +624,62 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null, userId = nul
 
         // sse status update omitted for high-speed extraction
 
-        // FFmpeg: Process the downloaded local file using hybrid extraction
-        const allTimestamps = await extractKeyframesHybrid({
-            tempVideoPath,
-            tempVideoFilename,
-            baseTempDir,
-            totalDuration,
-            requestHash,
-            sseHandler
-        });
+        // FFmpeg & Whisper: Process keyframe extraction and audio language detection in parallel
+        logger.info(`[${requestHash}] Starting hybrid keyframe extraction and audio language detection in parallel...`);
+        const [allTimestamps, audioLanguage] = await Promise.all([
+            extractKeyframesHybrid({
+                tempVideoPath,
+                tempVideoFilename,
+                baseTempDir,
+                totalDuration,
+                requestHash,
+                sseHandler
+            }),
+            audioLanguageDetector.detectLanguage(tempVideoPath, totalDuration, requestHash)
+        ]);
         
-        // Load subtitle: Prioritize Korean, fallback to English
-        let finalSubtitlePath = null;
+        // Load subtitle and format dialogue track based on audioLanguage
+        let dialogueTrack = [];
         const potentialSubtitles = fs.readdirSync(baseTempDir).filter(f => f.endsWith('.vtt'));
         
-        const koSub = potentialSubtitles.find(f => f.includes('.ko.'));
-        if (koSub) {
-            finalSubtitlePath = path.join(baseTempDir, koSub);
-            logger.info(`[${requestHash}] Found Korean subtitles: ${koSub}`);
-        } else {
-            // Support en, en-US, en-en, etc.
-            const enSub = potentialSubtitles.find(f => f.includes('.en.') || f.includes('.en-'));
+        if (audioLanguage === 'mixed') {
+            const enSub = potentialSubtitles.find(f => (f.includes('.en.') || f.includes('.en-')) && !f.includes('.ko.'));
             if (enSub) {
-                finalSubtitlePath = path.join(baseTempDir, enSub);
-                logger.info(`[${requestHash}] Korean subtitles not found. Using English fallback: ${enSub}`);
+                dialogueTrack = parseVttToDialogueTrack(path.join(baseTempDir, enSub), 'en');
+                logger.info(`[${requestHash}] mixed video: loaded English subtitles and filtered out Korean ones.`);
+            } else {
+                logger.info(`[${requestHash}] mixed video: English subtitles not found. Dialogue track is empty.`);
+            }
+        } else if (audioLanguage === 'korean') {
+            const koSub = potentialSubtitles.find(f => f.includes('.ko.'));
+            if (koSub) {
+                dialogueTrack = parseVttToDialogueTrack(path.join(baseTempDir, koSub), 'ko');
+                logger.info(`[${requestHash}] korean video: loaded Korean subtitles.`);
+            } else {
+                const enSub = potentialSubtitles.find(f => f.includes('.en.') || f.includes('.en-'));
+                if (enSub) {
+                    dialogueTrack = parseVttToDialogueTrack(path.join(baseTempDir, enSub), 'en');
+                    logger.info(`[${requestHash}] korean video: Korean subtitles not found. Using English: ${enSub}`);
+                }
+            }
+        } else {
+            const koSub = potentialSubtitles.find(f => f.includes('.ko.'));
+            if (koSub) {
+                dialogueTrack = parseVttToDialogueTrack(path.join(baseTempDir, koSub), 'ko');
+                logger.info(`[${requestHash}] foreign/unknown video: loaded Korean subtitles.`);
+            } else {
+                const enSub = potentialSubtitles.find(f => f.includes('.en.') || f.includes('.en-'));
+                if (enSub) {
+                    dialogueTrack = parseVttToDialogueTrack(path.join(baseTempDir, enSub), 'en');
+                    logger.info(`[${requestHash}] foreign/unknown video: loaded English subtitles.`);
+                }
             }
         }
 
-        if (finalSubtitlePath && fs.existsSync(finalSubtitlePath)) {
-            subtitleContent = preprocessVtt(fs.readFileSync(finalSubtitlePath, 'utf-8'));
-            logger.info(`[${requestHash}] Successfully loaded and preprocessed subtitles.`);
-        } else {
-            logger.warn(`[${requestHash}] No suitable subtitle file found (tried ko, en). Proceeding without subtitles.`);
-        }
-
         timeEnd(extractionLabel);
-        logger.info(`[${requestHash}] Initial data extraction complete. Title: ${videoTitle}, Total Frames: ${allTimestamps.length}`);
+        logger.info(`[${requestHash}] Initial data extraction complete. Title: ${videoTitle}, Total Frames: ${allTimestamps.length}, Dialogue Count: ${dialogueTrack.length}`);
         
-        if (sseHandler) sseHandler('start', { videoId, title: videoTitle });
+        if (sseHandler) sseHandler('start', { videoId, title: videoTitle, audioLanguage });
 
         logger.info(`[${requestHash}] Step 2: Starting AI generation...`);
         const aiLabel = `[${requestHash}] Full AI Process Time`;
@@ -685,7 +709,13 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null, userId = nul
         const model = genAI.getGenerativeModel({ model: MODEL_NAME, generationConfig: { temperature: 0.7, mediaResolution: "MEDIA_RESOLUTION_LOW" } });
         const promptTemplatePath = path.join(__dirname, 'prompt_template.txt');
         let prompt = fs.readFileSync(promptTemplatePath, 'utf-8');
-        prompt = prompt.replace('{{VIDEO_TITLE}}', videoTitle).replace('{{SUBTITLES}}', subtitleContent);
+        
+        const dialogueTrackStr = JSON.stringify(dialogueTrack, null, 2);
+        prompt = prompt
+            .replace('{{VIDEO_TITLE}}', videoTitle)
+            .replace('{{AUDIO_CLASSIFICATION}}', audioLanguage)
+            .replace('{{AUDIO_LANGUAGE}}', audioLanguage)
+            .replace('{{DIALOGUE_TRACK}}', dialogueTrackStr);
 
         const result = await model.generateContentStream([prompt, ...imageParts]);
         const fullScript = [];
@@ -700,14 +730,18 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null, userId = nul
                     const completeLines = scriptBuffer.substring(0, lastNewline).split('\n');
                     scriptBuffer = scriptBuffer.substring(lastNewline + 1);
                     const newScriptData = completeLines.map(line => {
-                        // More flexible regex to handle AI's numeric-ish timestamps like [7...]
-                        const match = line.match(/^\s*\[(\d+)[^\]]*\]\s*\[(v\d|txt)\]\s*(.*)\s*$/);
+                        const match = line.match(/^\s*\[(\d+)[^\]]*\]\s*\[(v\d|txt|trans)\]\s*(.*)\s*$/);
                         if (!match) return null;
                         let timestamp = parseInt(match[1], 10);
                         if (timestamp === 0) timestamp = 1;
                         if (timestamp > totalDuration + 2) return null;
                         timestamp = Math.min(timestamp, Math.floor(totalDuration));
-                        return { id: crypto.createHash('sha256').update(line).digest('hex'), timestamp, text: match[3].trim(), verbosity: match[2] === 'txt' ? 'text' : match[2] };
+                        
+                        let verbosity = match[2];
+                        if (verbosity === 'txt') verbosity = 'text';
+                        else if (verbosity === 'trans') verbosity = 'translation';
+                        
+                        return { id: crypto.createHash('sha256').update(line).digest('hex'), timestamp, text: match[3].trim(), verbosity };
                     }).filter(Boolean);
 
                     if (newScriptData.length > 0) {
@@ -725,14 +759,18 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null, userId = nul
         
         if (scriptBuffer.trim()) {
             const finalLines = scriptBuffer.split('\n').map(line => {
-                // More flexible regex to handle AI's numeric-ish timestamps like [7...]
-                const match = line.match(/^\s*\[(\d+)[^\]]*\]\s*\[(v\d|txt)\]\s*(.*)\s*$/);
+                const match = line.match(/^\s*\[(\d+)[^\]]*\]\s*\[(v\d|txt|trans)\]\s*(.*)\s*$/);
                 if (!match) return null;
                 let timestamp = parseInt(match[1], 10);
                 if (timestamp === 0) timestamp = 1;
                 if (timestamp > totalDuration + 2) return null;
                 timestamp = Math.min(timestamp, Math.floor(totalDuration));
-                return { id: crypto.createHash('sha256').update(line).digest('hex'), timestamp, text: match[3].trim(), verbosity: match[2] === 'txt' ? 'text' : match[2] };
+                
+                let verbosity = match[2];
+                if (verbosity === 'txt') verbosity = 'text';
+                else if (verbosity === 'trans') verbosity = 'translation';
+                
+                return { id: crypto.createHash('sha256').update(line).digest('hex'), timestamp, text: match[3].trim(), verbosity };
             }).filter(Boolean);
             if (finalLines.length > 0) {
                 if (sseHandler) sseHandler('script_chunk', finalLines);
@@ -744,6 +782,27 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null, userId = nul
         if (dbChunkBuffer.length > 0) {
             db.saveVideoChunk({ videoId, scriptChunk: dbChunkBuffer });
         }
+
+        // Apply Levenshtein 70% OCR duplicate filter
+        const dialogues = fullScript.filter(item => item.verbosity === 'translation');
+        const filteredScript = fullScript.filter(item => {
+            if (item.verbosity !== 'text') return true;
+            const duplicate = dialogues.some(dlg => {
+                if (Math.abs(dlg.timestamp - item.timestamp) <= 3) {
+                    const sim = getSimilarity(dlg.text, item.text);
+                    return sim >= 0.70;
+                }
+                return false;
+            });
+            if (duplicate) {
+                logger.info(`[${requestHash}] Dropping duplicate OCR [txt] at ${item.timestamp}s: "${item.text}"`);
+                return false;
+            }
+            return true;
+        });
+
+        filteredScript.sort((a, b) => a.timestamp - b.timestamp);
+        db.saveVideo({ videoId, title: videoTitle, duration: Math.round(totalDuration), filesize, script: filteredScript, audioLanguage });
         
         const finalResponse = await result.response;
         const usageMetadata = finalResponse.usageMetadata;
@@ -947,8 +1006,10 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
                     });
 
                     downloadProcess.on('close', (code) => {
-                        if (code === 0) resolve();
-                        else {
+                        const hasVideo = fs.existsSync(tempVideoPath) && fs.statSync(tempVideoPath).size > 0;
+                        if (code === 0 || (hasVideo && stderrData.includes('subtitle'))) {
+                            resolve();
+                        } else {
                             const isBotError = stderrData.includes('confirm you’re not a bot') || 
                                                stderrData.includes('cookies are no longer valid') || 
                                                stderrData.includes('HTTP Error 403');
@@ -981,44 +1042,62 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
             logger.info(`[${requestHash}] Downloaded video size: ${(filesize / 1024 / 1024).toFixed(2)} MB`);
         }
 
-        // FFmpeg: Process the downloaded local file using hybrid extraction
-        const allTimestamps = await extractKeyframesHybrid({
-            tempVideoPath,
-            tempVideoFilename,
-            baseTempDir,
-            totalDuration,
-            requestHash,
-            sseHandler: null
-        });
+        // FFmpeg & Whisper: Process keyframe extraction and audio language detection in parallel
+        logger.info(`[${requestHash}] Starting hybrid keyframe extraction and audio language detection in parallel (batch)...`);
+        const [allTimestamps, audioLanguage] = await Promise.all([
+            extractKeyframesHybrid({
+                tempVideoPath,
+                tempVideoFilename,
+                baseTempDir,
+                totalDuration,
+                requestHash,
+                sseHandler: null
+            }),
+            audioLanguageDetector.detectLanguage(tempVideoPath, totalDuration, requestHash)
+        ]);
 
-        // Load subtitle for batch: Prioritize Korean, fallback to English
-        let finalSubtitlePath = null;
+        // Load subtitle and format dialogue track based on audioLanguage
+        let dialogueTrack = [];
         const potentialSubtitles = fs.readdirSync(baseTempDir).filter(f => f.endsWith('.vtt'));
         
-        const koSub = potentialSubtitles.find(f => f.includes('.ko.'));
-        if (koSub) {
-            finalSubtitlePath = path.join(baseTempDir, koSub);
-            logger.info(`[${requestHash}] Found Korean subtitles (batch): ${koSub}`);
-        } else {
-            // Support en, en-US, en-en, etc.
-            const enSub = potentialSubtitles.find(f => f.includes('.en.') || f.includes('.en-'));
+        if (audioLanguage === 'mixed') {
+            const enSub = potentialSubtitles.find(f => (f.includes('.en.') || f.includes('.en-')) && !f.includes('.ko.'));
             if (enSub) {
-                finalSubtitlePath = path.join(baseTempDir, enSub);
-                logger.info(`[${requestHash}] Korean subtitles not found in batch. Using English fallback: ${enSub}`);
+                dialogueTrack = parseVttToDialogueTrack(path.join(baseTempDir, enSub), 'en');
+                logger.info(`[${requestHash}] mixed video (batch): loaded English subtitles and filtered out Korean ones.`);
+            } else {
+                logger.info(`[${requestHash}] mixed video (batch): English subtitles not found. Dialogue track is empty.`);
+            }
+        } else if (audioLanguage === 'korean') {
+            const koSub = potentialSubtitles.find(f => f.includes('.ko.'));
+            if (koSub) {
+                dialogueTrack = parseVttToDialogueTrack(path.join(baseTempDir, koSub), 'ko');
+                logger.info(`[${requestHash}] korean video (batch): loaded Korean subtitles.`);
+            } else {
+                const enSub = potentialSubtitles.find(f => f.includes('.en.') || f.includes('.en-'));
+                if (enSub) {
+                    dialogueTrack = parseVttToDialogueTrack(path.join(baseTempDir, enSub), 'en');
+                    logger.info(`[${requestHash}] korean video (batch): Korean subtitles not found. Using English: ${enSub}`);
+                }
+            }
+        } else {
+            const koSub = potentialSubtitles.find(f => f.includes('.ko.'));
+            if (koSub) {
+                dialogueTrack = parseVttToDialogueTrack(path.join(baseTempDir, koSub), 'ko');
+                logger.info(`[${requestHash}] foreign/unknown video (batch): loaded Korean subtitles.`);
+            } else {
+                const enSub = potentialSubtitles.find(f => f.includes('.en.') || f.includes('.en-'));
+                if (enSub) {
+                    dialogueTrack = parseVttToDialogueTrack(path.join(baseTempDir, enSub), 'en');
+                    logger.info(`[${requestHash}] foreign/unknown video (batch): loaded English subtitles.`);
+                }
             }
         }
 
-        if (finalSubtitlePath && fs.existsSync(finalSubtitlePath)) {
-            subtitleContent = preprocessVtt(fs.readFileSync(finalSubtitlePath, 'utf-8'));
-            logger.info(`[${requestHash}] Successfully loaded subtitles for batch.`);
-        } else {
-            logger.warn(`[${requestHash}] No suitable subtitle file found for batch (tried ko, en).`);
-        }
-
         timeEnd(extractionLabel);
-        logger.info(`[${requestHash}] Initial data extraction complete. Title: ${videoTitle}, Total Frames: ${allTimestamps.length}`);
+        logger.info(`[${requestHash}] Initial data extraction complete. Title: ${videoTitle}, Total Frames: ${allTimestamps.length}, Dialogue Count: ${dialogueTrack.length}`);
 
-        logger.info(`[${requestHash}] Step 2: Starting AI generation...`);
+        logger.info(`[${requestHash}] Step 2: Starting AI generation (batch)...`);
         const aiLabel = `[${requestHash}] Full AI Process Time`;
         time(aiLabel);
 
@@ -1036,14 +1115,20 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
 
         if (imageParts.length === 0) {
             logger.warn(`[${requestHash}] No frames to process. Marking as complete with empty script.`);
-            db.saveVideo({ videoId, title: videoTitle, duration: Math.round(totalDuration), script: [] });
+            db.saveVideo({ videoId, title: videoTitle, duration: Math.round(totalDuration), script: [], audioLanguage });
             return;
         }
 
         const model = genAI.getGenerativeModel({ model: MODEL_NAME, generationConfig: { temperature: 0.7, mediaResolution: "MEDIA_RESOLUTION_LOW" } });
         const promptTemplatePath = path.join(__dirname, 'prompt_template.txt');
         let prompt = fs.readFileSync(promptTemplatePath, 'utf-8');
-        prompt = prompt.replace('{{VIDEO_TITLE}}', videoTitle).replace('{{SUBTITLES}}', subtitleContent);
+        
+        const dialogueTrackStr = JSON.stringify(dialogueTrack, null, 2);
+        prompt = prompt
+            .replace('{{VIDEO_TITLE}}', videoTitle)
+            .replace('{{AUDIO_CLASSIFICATION}}', audioLanguage)
+            .replace('{{AUDIO_LANGUAGE}}', audioLanguage)
+            .replace('{{DIALOGUE_TRACK}}', dialogueTrackStr);
 
         const result = await model.generateContent([prompt, ...imageParts]);
 
@@ -1064,25 +1149,45 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
         const scriptText = result.response.text();
         const scriptLines = scriptText.split('\n');
 
-        const finalScriptData = scriptLines.map((line) => {
-            // More flexible regex to handle AI's numeric-ish timestamps like [7...]
-            const match = line.match(/^\s*\[(\d+)[^\]]*\]\s*\[(v\d|txt)\]\s*(.*)\s*$/);
+        const rawScriptData = scriptLines.map((line) => {
+            const match = line.match(/^\s*\[(\d+)[^\]]*\]\s*\[(v\d|txt|trans)\]\s*(.*)\s*$/);
             if (!match) return null;
             let timestamp = parseInt(match[1], 10);
             if (timestamp === 0) timestamp = 1;
             
-            // Safety check: ignore timestamps that exceed total video duration significantly
             if (timestamp > totalDuration + 2) {
                 logger.warn(`[${requestHash}] Ignoring out-of-bounds timestamp: ${timestamp} (Max: ${totalDuration})`);
                 return null;
             }
             timestamp = Math.min(timestamp, Math.floor(totalDuration));
             
-            return { id: crypto.createHash('sha256').update(line).digest('hex'), timestamp, text: match[3].trim(), verbosity: match[2] === 'txt' ? 'text' : match[2] };
+            let verbosity = match[2];
+            if (verbosity === 'txt') verbosity = 'text';
+            else if (verbosity === 'trans') verbosity = 'translation';
+            
+            return { id: crypto.createHash('sha256').update(line).digest('hex'), timestamp, text: match[3].trim(), verbosity };
         }).filter(Boolean);
 
+        // Apply Levenshtein 70% OCR duplicate filter for batch
+        const dialogues = rawScriptData.filter(item => item.verbosity === 'translation');
+        const finalScriptData = rawScriptData.filter(item => {
+            if (item.verbosity !== 'text') return true;
+            const duplicate = dialogues.some(dlg => {
+                if (Math.abs(dlg.timestamp - item.timestamp) <= 3) {
+                    const sim = getSimilarity(dlg.text, item.text);
+                    return sim >= 0.70;
+                }
+                return false;
+            });
+            if (duplicate) {
+                logger.info(`[${requestHash}] Batch: Dropping duplicate OCR [txt] at ${item.timestamp}s: "${item.text}"`);
+                return false;
+            }
+            return true;
+        });
+
         finalScriptData.sort((a, b) => a.timestamp - b.timestamp);
-        db.saveVideo({ videoId, title: videoTitle, duration: Math.round(totalDuration), filesize, script: finalScriptData });
+        db.saveVideo({ videoId, title: videoTitle, duration: Math.round(totalDuration), filesize, script: finalScriptData, audioLanguage });
 
         timeEnd(aiLabel);
         logger.info(`[${requestHash}] Successfully generated and cached script text for batch processing.`);
@@ -1109,4 +1214,77 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
     }
 };
 
-module.exports = { processVideo, processVideoBatch, extractKeyframesHybrid };
+function parseVttToDialogueTrack(vttPath, sourceLang) {
+    if (!fs.existsSync(vttPath)) return [];
+    const content = fs.readFileSync(vttPath, 'utf8');
+    const lines = content.split(/\r?\n/);
+    const track = [];
+    let currentItem = null;
+
+    for (const line of lines) {
+        if (line.includes('-->')) {
+            const parts = line.split('-->');
+            const start = parseTimestamp(parts[0].trim());
+            const end = parseTimestamp(parts[1].trim());
+            currentItem = { start, end, sourceLanguage: sourceLang, sourceText: '', source: 'youtube_caption' };
+        } else if (currentItem && line.trim() && !line.startsWith('NOTE') && !line.startsWith('STYLE')) {
+            const cleanText = line.replace(/<[^>]*>/g, '').trim();
+            if (cleanText) {
+                currentItem.sourceText = currentItem.sourceText ? currentItem.sourceText + ' ' + cleanText : cleanText;
+            }
+        } else if (currentItem && !line.trim()) {
+            if (currentItem.sourceText) {
+                track.push(currentItem);
+            }
+            currentItem = null;
+        }
+    }
+    if (currentItem && currentItem.sourceText) {
+        track.push(currentItem);
+    }
+    return track;
+}
+
+function parseTimestamp(timeStr) {
+    const parts = timeStr.split(':');
+    let secs = 0;
+    if (parts.length === 3) {
+        secs = parseFloat(parts[0]) * 3600 + parseFloat(parts[1]) * 60 + parseFloat(parts[2]);
+    } else if (parts.length === 2) {
+        secs = parseFloat(parts[0]) * 60 + parseFloat(parts[1]);
+    }
+    return parseFloat(secs.toFixed(2));
+}
+
+function getLevenshteinDistance(a, b) {
+    const matrix = [];
+    for (let i = 0; i <= b.length; i++) {
+        matrix[i] = [i];
+    }
+    for (let j = 0; j <= a.length; j++) {
+        matrix[0][j] = j;
+    }
+    for (let i = 1; i <= b.length; i++) {
+        for (let j = 1; j <= a.length; j++) {
+            if (b.charAt(i - 1) === a.charAt(j - 1)) {
+                matrix[i][j] = matrix[i - 1][j - 1];
+            } else {
+                matrix[i][j] = Math.min(
+                    matrix[i - 1][j - 1] + 1, // substitution
+                    matrix[i][j - 1] + 1,     // insertion
+                    matrix[i - 1][j] + 1      // deletion
+                );
+            }
+        }
+    }
+    return matrix[b.length][a.length];
+}
+
+function getSimilarity(a, b) {
+    const dist = getLevenshteinDistance(a, b);
+    const maxLen = Math.max(a.length, b.length);
+    if (maxLen === 0) return 1.0;
+    return 1.0 - (dist / maxLen);
+}
+
+module.exports = { processVideo, processVideoBatch, extractKeyframesHybrid, parseVttToDialogueTrack, getSimilarity };
