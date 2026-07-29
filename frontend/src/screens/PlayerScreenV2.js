@@ -82,6 +82,7 @@ function PlayerScreenV2() {
     const [script, setScript] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
+    const [audioLanguage, setAudioLanguage] = useState(null);
     const eventSourceRef = useRef(null);
 
     const [statusMessage, setStatusMessage] = useState('영상 정보를 확인 중입니다...');
@@ -692,6 +693,7 @@ function PlayerScreenV2() {
         es.addEventListener('start', (event) => {
             const data = JSON.parse(event.data);
             setVideoInfo({ videoId: data.videoId, title: data.title });
+            setAudioLanguage(data.audioLanguage || null);
         });
 
         es.addEventListener('status_update', (event) => {
@@ -793,6 +795,7 @@ function PlayerScreenV2() {
                 const video = response.data;
                 if (video) {
                     setVideoInfo({ videoId: video.videoId, title: video.title });
+                    setAudioLanguage(video.audioLanguage || null);
                     if (video.status === 'completed') {
                         setScript(video.script || []);
                         setIsPlayerReady(true);
@@ -856,8 +859,10 @@ function PlayerScreenV2() {
         const textLines = [];
 
         for (const line of script) {
-            if (line.verbosity === 'text') {
-                if (isReadingSubtitles) {
+            if (line.verbosity === 'text' || line.verbosity === 'translation') {
+                const shouldReadTranslation = line.verbosity === 'translation' && (audioLanguage === 'foreign' || audioLanguage === 'mixed' || isReadingSubtitles);
+                const shouldReadOcr = line.verbosity === 'text' && isReadingSubtitles;
+                if (shouldReadOcr || shouldReadTranslation) {
                     textLines.push(line);
                 }
             } else {
@@ -872,7 +877,7 @@ function PlayerScreenV2() {
             }
         }
         return [...vLinesMap.values(), ...textLines].sort((a, b) => a.timestamp - b.timestamp);
-    }, [script, verbosity, isReadingSubtitles]);
+    }, [script, verbosity, isReadingSubtitles, audioLanguage]);
 
     const playableScript = useMemo(() => {
         if (filteredScript.length === 0) return [];
@@ -880,7 +885,7 @@ function PlayerScreenV2() {
         const finalScript = [];
         const COLLISION_THRESHOLD_SECONDS = 3.5;
 
-        const getPriority = (v) => v === 'text' ? 4 : parseInt(v.replace('v', ''));
+        const getPriority = (v) => (v === 'text' || v === 'translation') ? 4 : parseInt(v.replace('v', ''));
 
         for (const currentLine of filteredScript) {
             if (finalScript.length === 0) {
@@ -890,9 +895,8 @@ function PlayerScreenV2() {
 
             const lastAcceptedLine = finalScript[finalScript.length - 1];
 
-            // 자막(text) 타입은 충돌 검사를 하지 않고 무조건 포함시킵니다.
-            // 또한 이전 라인이 자막인 경우에도, 이번 라인이 자막이면 충돌 무시하고 포함 (자막 연쇄 허용)
-            if (currentLine.verbosity === 'text') {
+            // 자막(text) 및 번역 대사(translation) 타입은 충돌 검사를 하지 않고 무조건 포함시킵니다.
+            if (currentLine.verbosity === 'text' || currentLine.verbosity === 'translation') {
                 finalScript.push(currentLine);
                 continue;
             }
@@ -1026,9 +1030,9 @@ function PlayerScreenV2() {
 
                         // [중요] 이미 TTS가 재생 중인 경우의 처리
                         if (isTtsPlayingRef.current) {
-                            // 다음 읽을 것이 자막(text)이고 영상이 재생 중이라면
+                            // 다음 읽을 것이 자막(text) 또는 번역 대사(translation)이고 영상이 재생 중이라면
                             // -> "잠깐 멈춰, 앞의 설명 다 듣고 이거 읽고 가자"
-                            if (nextLine.verbosity === 'text' && player.getPlayerState() === 1) {
+                            if ((nextLine.verbosity === 'text' || nextLine.verbosity === 'translation') && player.getPlayerState() === 1) {
                                 player.pauseVideo();
                             }
                             // 오디오 끝날 때까지 대기
