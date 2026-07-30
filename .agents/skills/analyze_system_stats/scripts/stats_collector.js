@@ -20,7 +20,7 @@ const ttsCacheDir = '/app/youtube-describer/backend/public/audio/tts_cache';
 function runRemoteNode(scriptContent) {
   const command = `ssh ${sshHost} "node"`;
   try {
-    return execSync(command, { input: scriptContent, encoding: 'utf8' });
+    return execSync(command, { input: scriptContent, encoding: 'utf8', maxBuffer: 1024 * 1024 * 128 });
   } catch (error) {
     console.error('Remote execution failed:', error.message);
     process.exit(1);
@@ -50,11 +50,8 @@ try {
   absoluteMinDate = '2026-07-02 02:27:51';
 }
 
-// 시작일 결정 및 하한선 제한 (입력값이 최초 회원가입 이전일 경우 최초 가입일로 강제 보정)
-let tempStart = inputStart && isValidDate(inputStart) ? `${inputStart} 00:00:00` : absoluteMinDate;
-if (Date.parse(tempStart) < Date.parse(absoluteMinDate)) {
-  tempStart = absoluteMinDate;
-}
+// 시작일 결정 (DB 내 모든 데이터를 집계하기 위해 1970-01-01로 설정)
+let tempStart = inputStart && isValidDate(inputStart) ? `${inputStart} 00:00:00` : '1970-01-01 00:00:00';
 const startDate = tempStart;
 
 // 종료일 결정
