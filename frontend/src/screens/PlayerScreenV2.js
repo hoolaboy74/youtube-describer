@@ -143,7 +143,7 @@ function PlayerScreenV2() {
 
     const [playbackRate, setPlaybackRate] = useState(() => {
         const saved = localStorage.getItem('playerPlaybackRate');
-        return saved !== null ? JSON.parse(saved) : 1.5;
+        return saved !== null ? JSON.parse(saved) : 1.2;
     });
 
     useEffect(() => {
@@ -935,16 +935,15 @@ function PlayerScreenV2() {
                         onChange={(e) => {
                             const rate = Number(e.target.value);
                             setPlaybackRate(rate);
-                            const label = { 1.5: '초보', 2.0: '중수', 2.5: '고수', 3.0: '초고수', 3.5: '신' }[rate];
+                            const label = { 1.2: '초보', 1.5: '중수', 2.0: '고수', 2.5: '신' }[rate];
                             announcePolite(`해설 속도가 ${label} 모드로 변경되었습니다.`);
                         }}
                         className="control-select"
                     >
-                        <option value={1.5}>초보 (1.5x)</option>
-                        <option value={2.0}>중수 (2.0x)</option>
-                        <option value={2.5}>고수 (2.5x)</option>
-                        <option value={3.0}>초고수 (3.0x)</option>
-                        <option value={3.5}>신 (3.5x)</option>
+                        <option value={1.2}>초보 (1.2x)</option>
+                        <option value={1.5}>중수 (1.5x)</option>
+                        <option value={2.0}>고수 (2.0x)</option>
+                        <option value={2.5}>신 (2.5x)</option>
                     </select>
                 </div>
 

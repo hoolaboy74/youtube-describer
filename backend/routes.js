@@ -217,7 +217,8 @@ router.post('/tts', async (req, res) => {
             return res.status(400).json({ error: 'Text is required' });
         }
 
-        const hash = crypto.createHash('sha256').update(text).digest('hex');
+        const voiceName = 'ko-KR-Chirp3-HD-Sulafat';
+        const hash = crypto.createHash('sha256').update(`${voiceName}:${text}`).digest('hex');
         const prefix1 = hash.substring(0, 2);
         const prefix2 = hash.substring(2, 4);
         const ttsCacheDir = path.join(audioCacheDir, 'tts_cache');
@@ -235,7 +236,7 @@ router.post('/tts', async (req, res) => {
 
         const [ttsResponse] = await ttsClient.synthesizeSpeech({
             input: { text },
-            voice: { languageCode: 'ko-KR', name: 'ko-KR-Wavenet-A' },
+            voice: { languageCode: 'ko-KR', name: voiceName },
             audioConfig: { audioEncoding: 'MP3' },
         });
 
