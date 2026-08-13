@@ -23,7 +23,7 @@ async function testTTS() {
     // 3. Define the request
     const request = {
         input: { text: '안녕하세요. TTS API 테스트입니다.' },
-        voice: { languageCode: 'ko-KR', ssmlGender: 'FEMALE', name: 'ko-KR-Wavenet-A' },
+        voice: { languageCode: 'ko-KR', ssmlGender: 'FEMALE', name: 'ko-KR-Chirp3-HD-Sulafat' },
         audioConfig: { audioEncoding: 'MP3' },
     };
     console.log('Sending request to TTS API:', JSON.stringify(request, null, 2));
