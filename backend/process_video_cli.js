@@ -28,7 +28,19 @@ const exec = util.promisify(execFile);
 // --- Metadata Helper ---
 const getMetadata = async (url) => {
     try {
-        const { stdout } = await exec('python3', ['-m', 'yt_dlp', '--dump-json', '--no-playlist', '--plugin-dirs', path.join(__dirname, 'yt_dlp_plugins'), '--remote-components', 'ejs:github', '--no-check-certificate', '--impersonate', 'safari', url], { maxBuffer: 1024 * 1024 * 10 });
+        const cookiePath = path.join(__dirname, 'cookies.txt');
+        const cookieArgs = fs.existsSync(cookiePath) ? ['--cookies', cookiePath] : [];
+        const { stdout } = await exec('python3', [
+            '-m', 'yt_dlp', 
+            '--dump-json', 
+            '--no-playlist', 
+            '--plugin-dirs', path.join(__dirname, 'yt_dlp_plugins'), 
+            '--remote-components', 'ejs:github', 
+            '--no-check-certificate', 
+            '--impersonate', 'safari', 
+            ...cookieArgs, 
+            url
+        ], { maxBuffer: 1024 * 1024 * 10 });
         const data = JSON.parse(stdout);
         
         const videoId = data.id;
@@ -171,6 +183,8 @@ const main = async () => {
     if (!fs.existsSync(fullVideoPath)) {
         console.log(`[CLI] Step 1: Downloading full video & ${isKoreanVideo ? 'Korean' : 'Source'} subtitles...`);
         try {
+            const cookiePath = path.join(__dirname, 'cookies.txt');
+            const cookieArgs = fs.existsSync(cookiePath) ? ['--cookies', cookiePath] : [];
             const ytdlpArgs = [
                 '-m', 'yt_dlp',
                 '-f', 'bestvideo[height<=480][ext=mp4]+bestaudio[ext=m4a]/best[height<=480][ext=mp4]', 
@@ -180,6 +194,7 @@ const main = async () => {
                 '--plugin-dirs', path.join(__dirname, 'yt_dlp_plugins'),
                 '--remote-components', 'ejs:github',
                 '--impersonate', 'safari',
+                ...cookieArgs,
                 ...subArgs,
                 VIDEO_URL
             ];
