@@ -469,7 +469,7 @@ function PlayerScreenV2() {
         for (const line of script) {
             if (line.verbosity === 'text' || line.verbosity === 'translation') {
                 const shouldReadTranslation = line.verbosity === 'translation' && (audioLanguage === 'foreign' || audioLanguage === 'mixed' || isReadingSubtitles);
-                const shouldReadOcr = line.verbosity === 'text' && isReadingSubtitles;
+                const shouldReadOcr = line.verbosity === 'text' && (audioLanguage === 'foreign' || audioLanguage === 'mixed' || isReadingSubtitles);
                 if (shouldReadOcr || shouldReadTranslation) {
                     textLines.push(line);
                 }
