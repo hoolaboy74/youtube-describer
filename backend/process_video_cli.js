@@ -28,8 +28,24 @@ const exec = util.promisify(execFile);
 // --- Metadata Helper ---
 const getMetadata = async (url) => {
     try {
-        const cookiePath = path.join(__dirname, 'cookies.txt');
-        const cookieArgs = fs.existsSync(cookiePath) ? ['--cookies', cookiePath] : [];
+        const cookiesDir = path.join(__dirname, 'cookies');
+        let cookiePath = null;
+        if (fs.existsSync(cookiesDir)) {
+            const cookieFiles = fs.readdirSync(cookiesDir).filter(file => file.endsWith('_cookies.txt') && fs.statSync(path.join(cookiesDir, file)).size > 0);
+            if (cookieFiles.length > 0) {
+                const randomCookieFile = cookieFiles[Math.floor(Math.random() * cookieFiles.length)];
+                cookiePath = path.join(cookiesDir, randomCookieFile);
+                console.log(`[CLI] Metadata using cookie file: ${randomCookieFile}`);
+            }
+        }
+        if (!cookiePath) {
+            const defaultCookiePath = path.join(__dirname, 'cookies.txt');
+            if (fs.existsSync(defaultCookiePath)) {
+                cookiePath = defaultCookiePath;
+                console.log('[CLI] Metadata using default cookies.txt');
+            }
+        }
+        const cookieArgs = cookiePath ? ['--cookies', cookiePath] : [];
         const { stdout } = await exec('python3', [
             '-m', 'yt_dlp', 
             '--dump-json', 
@@ -183,8 +199,24 @@ const main = async () => {
     if (!fs.existsSync(fullVideoPath)) {
         console.log(`[CLI] Step 1: Downloading full video & ${isKoreanVideo ? 'Korean' : 'Source'} subtitles...`);
         try {
-            const cookiePath = path.join(__dirname, 'cookies.txt');
-            const cookieArgs = fs.existsSync(cookiePath) ? ['--cookies', cookiePath] : [];
+            const cookiesDir = path.join(__dirname, 'cookies');
+            let cookiePath = null;
+            if (fs.existsSync(cookiesDir)) {
+                const cookieFiles = fs.readdirSync(cookiesDir).filter(file => file.endsWith('_cookies.txt') && fs.statSync(path.join(cookiesDir, file)).size > 0);
+                if (cookieFiles.length > 0) {
+                    const randomCookieFile = cookieFiles[Math.floor(Math.random() * cookieFiles.length)];
+                    cookiePath = path.join(cookiesDir, randomCookieFile);
+                    console.log(`[CLI] Download using cookie file: ${randomCookieFile}`);
+                }
+            }
+            if (!cookiePath) {
+                const defaultCookiePath = path.join(__dirname, 'cookies.txt');
+                if (fs.existsSync(defaultCookiePath)) {
+                    cookiePath = defaultCookiePath;
+                    console.log('[CLI] Download using default cookies.txt');
+                }
+            }
+            const cookieArgs = cookiePath ? ['--cookies', cookiePath] : [];
             const ytdlpArgs = [
                 '-m', 'yt_dlp',
                 '-f', 'bestvideo[height<=480][ext=mp4]+bestaudio[ext=m4a]/best[height<=480][ext=mp4]', 
