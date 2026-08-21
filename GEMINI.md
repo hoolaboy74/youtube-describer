@@ -81,9 +81,28 @@ To run the backend server, the following command-line tools must be installed on
 - **YouTube Player**: `react-youtube`
 - **Audio Playback**: Native HTML5 Audio (via `new Audio()`).
 
+### Prompt Configuration
+- The active Gemini video-description prompt is selected through `backend/.env` using `PROMPT_FILE`.
+- Example: `PROMPT_FILE=prompt_template_codex_v2.txt`
+- The configured path is resolved relative to `backend/`; when unset, the backend falls back to `prompt_template.txt`.
+- Both the SSE processing path and batch processing path use the same configured prompt loader.
+
 ---
 
 ## 개선 기록 (Improvement Log)
+
+### 111차: 화면 해설 프롬프트 v2 및 환경변수 기반 프롬프트 선택 도입 (2026-08-21)
+- **문제:**
+    1. 화면 해설 프롬프트가 `videoProcessor.js`에 `prompt_template.txt`로 하드코딩되어 있어 프롬프트 버전 비교와 운영 전환이 불편했음.
+    2. `AUDIO_CLASSIFICATION`, 대사 트랙의 `sourceLanguage`, 화면에 실제로 보이는 한글 자막을 명확히 구분하지 않으면 외국어 영상의 `[trans]` 누락 또는 원음·자막 중복 낭독이 발생할 수 있었음.
+    3. 언어 감지 실패(`unknown`) 영상의 번역 여부와 타임스탬프·출력 형식 제약이 프롬프트에 충분히 명시되지 않았음.
+- **해결:**
+    1. `prompt_template_codex_v2.txt`를 추가하여 입력 신뢰도 우선순위, `sourceLanguage` 해석, 한국어 제목의 보조 판단, 외국어 번역 자막 `[trans]`, 독립 화면 글자 `[txt]`, OCR·감정 추측 제한을 명시함.
+    2. `backend/.env`의 `PROMPT_FILE`로 활성 프롬프트를 선택하도록 변경함. 예: `PROMPT_FILE=prompt_template_codex_v2.txt`.
+    3. 일반 SSE 처리와 batch 처리 모두 동일한 프롬프트 로더를 사용하며, 설정이 없으면 기존 `prompt_template.txt`로 fallback하도록 구현함.
+    4. 프롬프트 파일 로딩을 비동기화하고, 선택된 프롬프트 파일과 누락 오류를 로그에 기록하도록 보완함.
+- **진단 참고:** 로컬 영상 `dO7Q0e1przY` 처리 중 `WHISPER_MODEL`에 지정된 `ggml-tiny-q5_1.bin` 파일이 로컬에 없어 `unknown`으로 판정된 사실을 확인함. 이는 프롬프트 변경과 별개의 환경 설정 문제이며, 모델 파일 복구가 필요함.
+- **상태:** `videoProcessor.js`, `prompt_template_codex_v2.txt`, 로컬 `.env` 반영 및 문법 검증 완료 (2026-08-21)
 
 ### 110차: 구글 차세대 생성형 TTS 모델(Chirp3-HD-Sulafat) 업그레이드 및 플레이어 해설 속도 세분화 (2026-08-13)
 - **문제:**
@@ -1442,4 +1461,3 @@ API 비용을 체계적으로 추적하고 분석하여 비용을 최적화하�
     tail -f /home/chacha/bin/cookies/refresh.log
     journalctl -u youtube-cookie-refresh.service -f
     ```
-

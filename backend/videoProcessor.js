@@ -50,6 +50,26 @@ const MODEL_NAME = process.env.GEMINI_MODEL || "gemini-3.1-pro-preview";
 const genAI = new GoogleGenerativeAI(API_KEY);
 const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY || API_KEY;
 const youtube = google.youtube({ version: 'v3', auth: YOUTUBE_API_KEY });
+const DEFAULT_PROMPT_FILE = 'prompt_template.txt';
+
+function getPromptTemplatePath() {
+    const configuredPromptFile = (process.env.PROMPT_FILE || DEFAULT_PROMPT_FILE).trim() || DEFAULT_PROMPT_FILE;
+    return path.resolve(__dirname, configuredPromptFile);
+}
+
+async function loadPromptTemplate() {
+    const promptTemplatePath = getPromptTemplatePath();
+    try {
+        const prompt = await fs.promises.readFile(promptTemplatePath, 'utf-8');
+        logger.info(`[Prompt] Using prompt template: ${path.relative(__dirname, promptTemplatePath) || path.basename(promptTemplatePath)}`);
+        return prompt;
+    } catch (error) {
+        if (error.code === 'ENOENT') {
+            throw new Error(`Prompt template file not found: ${promptTemplatePath}`);
+        }
+        throw error;
+    }
+}
 
 const calculateApiCost = (modelName, promptTokenCount, candidatesTokenCount, totalTokenCount) => {
     const promptTokens = promptTokenCount || 0;
@@ -522,6 +542,7 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null, userId = nul
                         '--no-check-certificate',
                         '--plugin-dirs', path.join(__dirname, 'yt_dlp_plugins'),
                         '--remote-components', 'ejs:github',
+                        '--js-runtimes', 'node',
                         ...impersonateArgs,
                         '--newline', 
                         '--write-auto-sub',
@@ -707,8 +728,7 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null, userId = nul
         }
 
         const model = genAI.getGenerativeModel({ model: MODEL_NAME, generationConfig: { temperature: 0.7, mediaResolution: "MEDIA_RESOLUTION_LOW" } });
-        const promptTemplatePath = path.join(__dirname, 'prompt_template.txt');
-        let prompt = fs.readFileSync(promptTemplatePath, 'utf-8');
+        let prompt = await loadPromptTemplate();
         
         const dialogueTrackStr = JSON.stringify(dialogueTrack, null, 2);
         prompt = prompt
@@ -987,6 +1007,7 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
                         '--no-check-certificate',
                         '--plugin-dirs', path.join(__dirname, 'yt_dlp_plugins'),
                         '--remote-components', 'ejs:github',
+                        '--js-runtimes', 'node',
                         ...impersonateArgs,
                         '--no-progress',
                         '--write-auto-sub',
@@ -1133,8 +1154,7 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
         }
 
         const model = genAI.getGenerativeModel({ model: MODEL_NAME, generationConfig: { temperature: 0.7, mediaResolution: "MEDIA_RESOLUTION_LOW" } });
-        const promptTemplatePath = path.join(__dirname, 'prompt_template.txt');
-        let prompt = fs.readFileSync(promptTemplatePath, 'utf-8');
+        let prompt = await loadPromptTemplate();
         
         const dialogueTrackStr = JSON.stringify(dialogueTrack, null, 2);
         prompt = prompt
