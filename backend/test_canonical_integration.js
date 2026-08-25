@@ -139,6 +139,30 @@ test('existing legacy scripts gain additive canonical columns without data loss'
   }
 });
 
+test('legacy saveVideoChunk input fails closed instead of creating playable rows', () => {
+  const database = disposableDatabase();
+  try {
+    const result = runDatabaseScript(database.path, `
+      const Database = require('better-sqlite3');
+      const db = require('./database');
+      db.init();
+      db.ensurePreliminaryRecord('legacy-write-video');
+      db.saveVideoChunk({
+        videoId: 'legacy-write-video',
+        scriptChunk: [{ id: 'legacy-row', timestamp: 12, text: '검증되지 않은 레거시 행', verbosity: 'v2' }]
+      });
+      const readDb = new Database(process.env.YOUTUBE_DESCRIBER_DB_PATH, { readonly: true });
+      console.log('__RESULT__' + JSON.stringify({
+        rows: readDb.prepare('SELECT id FROM scripts WHERE videoId = ?').all('legacy-write-video')
+      }));
+      readDb.close();
+    `);
+    assert.deepEqual(result.rows, []);
+  } finally {
+    fs.rmSync(database.directory, { recursive: true, force: true });
+  }
+});
+
 test('interactive-style and batch-style canonical publication have identical accepted output', () => {
   const database = disposableDatabase();
   try {

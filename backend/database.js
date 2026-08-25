@@ -436,13 +436,15 @@ const LEGACY_TAGS = Object.freeze({
 function canonicalEventForPersistence(event) {
   const candidate = event && typeof event === 'object' ? event : {};
   const tag = candidate.tag || LEGACY_TAGS[candidate.verbosity];
-  const validationStatus = candidate.validationStatus || 'accepted';
+  const hasCanonicalStatus = Object.prototype.hasOwnProperty.call(candidate, 'validationStatus');
+  const hasCanonicalProvenance = candidate.provenance && typeof candidate.provenance === 'object';
+  const validationStatus = hasCanonicalStatus && hasCanonicalProvenance
+    ? candidate.validationStatus
+    : 'rejected';
   const validationReasons = Array.isArray(candidate.validationReasons)
     ? candidate.validationReasons.slice(0, 12).map(String)
-    : [];
-  const provenance = candidate.provenance && typeof candidate.provenance === 'object'
-    ? candidate.provenance
-    : null;
+    : ['MISSING_CANONICAL_METADATA'];
+  const provenance = hasCanonicalProvenance ? candidate.provenance : null;
 
   return {
     id: String(candidate.id || ''),
@@ -453,7 +455,7 @@ function canonicalEventForPersistence(event) {
     provenance,
     validationStatus,
     validationReasons,
-    ttsEligible: candidate.ttsEligible !== false,
+    ttsEligible: validationStatus === 'accepted' && candidate.ttsEligible === true,
     policyVersion: candidate.policyVersion || null
   };
 }

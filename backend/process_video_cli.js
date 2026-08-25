@@ -5,13 +5,16 @@ const fs = require('fs');
 const path = require('path');
 const util = require('util');
 const { execFile, spawn } = require('child_process');
-const crypto = require('crypto');
 const db = require('./database'); // Require the whole module
 require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 const analyzer = require('./modules/analyzer');
 const describer = require('./modules/describer');
 const synchronizer = require('./modules/synchronizer');
+const {
+    audioClassificationFor,
+    canonicalizeCliOutput
+} = require('./modules/cliCanonicalOutput');
 
 const CHUNK_DURATION_MIN = 15;
 const CHUNK_DURATION_SEC = CHUNK_DURATION_MIN * 60;
@@ -159,6 +162,7 @@ const main = async () => {
     const VIDEO_TITLE = meta.title;
     const totalDuration = meta.duration;
     const isKoreanVideo = meta.audioLanguage === 'ko';
+    const audioClassification = audioClassificationFor(meta.audioLanguage);
 
     const TEMP_DIR = path.join(__dirname, 'temp', `proc_${VIDEO_ID}`);
     if (!fs.existsSync(TEMP_DIR)) fs.mkdirSync(TEMP_DIR, { recursive: true });
@@ -167,6 +171,7 @@ const main = async () => {
     if (!TARGET_PART) {
         try {
             db.db.prepare('DELETE FROM scripts WHERE videoId = ?').run(VIDEO_ID);
+            db.db.prepare('DELETE FROM script_quarantine WHERE videoId = ?').run(VIDEO_ID);
             db.db.prepare('DELETE FROM videos WHERE videoId = ?').run(VIDEO_ID);
         } catch(e) {}
         
@@ -287,6 +292,7 @@ const main = async () => {
     }
 
     let analysisResult = null;
+    let acceptedEventCount = 0;
     const chunks = Math.ceil(totalDuration / CHUNK_DURATION_SEC);
 
     for (let i = 0; i < chunks; i++) {
@@ -297,6 +303,7 @@ const main = async () => {
         
         try {
              db.db.prepare('DELETE FROM scripts WHERE videoId = ? AND timestamp >= ? AND timestamp < ?').run(VIDEO_ID, startTime, endTime);
+             db.db.prepare("DELETE FROM script_quarantine WHERE videoId = ? AND json_extract(candidate_json, '$.timestamp') >= ? AND json_extract(candidate_json, '$.timestamp') < ?").run(VIDEO_ID, startTime, endTime);
              if (TARGET_PART) console.log(`[CLI] Cleared previous DB records for range ${startTime}s - ${endTime}s`);
         } catch (e) { console.warn('[CLI] DB clear warning:', e.message); }
 
@@ -316,6 +323,22 @@ const main = async () => {
 
         const chunkSubtitles = allSubtitles.filter(s => s.seconds >= startTime && s.seconds < endTime);
         const subText = chunkSubtitles.map(s => `[${s.seconds}] ${s.text}`).join('\n');
+        const dialogueTrack = chunkSubtitles.map((subtitle, index) => {
+            const next = chunkSubtitles[index + 1];
+            const end = Math.min(
+                endTime,
+                next && next.seconds > subtitle.seconds ? next.seconds : subtitle.seconds + 3
+            );
+            return {
+                id: `${VIDEO_ID}-${subtitle.seconds}-${index}`,
+                start: subtitle.seconds,
+                end,
+                sourceLanguage: detectedLang,
+                sourceText: subtitle.text,
+                confirmed: true,
+                foreign: audioClassification === 'foreign' || audioClassification === 'mixed'
+            };
+        });
 
         const frameDir = path.join(TEMP_DIR, `frames_${chunkName}`);
         if (!fs.existsSync(frameDir)) fs.mkdirSync(frameDir);
@@ -353,20 +376,30 @@ const main = async () => {
         const rawDraft = await describer.describeSegment(genAI, analysisResult, VIDEO_TITLE, extractedFrames, subText, meta.audioLanguage);
         
         console.log('\n[Chain] Step 3: Synchronizing & Editing...');
-        const finalJson = await synchronizer.synchronizeScript(genAI, rawDraft, subText);
-
-        const finalScriptData = finalJson.map((item) => {
-            return { 
-                id: crypto.createHash('sha256').update(item.text + item.timestamp).digest('hex'), 
-                timestamp: item.timestamp, 
-                text: item.text, 
-                verbosity: item.type === 'text' ? 'text' : 'v2' 
-            };
+        const finalJson = await synchronizer.synchronizeScript(genAI, rawDraft, subText, {
+            videoTitle: VIDEO_TITLE,
+            audioClassification,
+            audioLanguage: meta.audioLanguage,
+            dialogueTrack: JSON.stringify(dialogueTrack)
         });
+        const canonical = canonicalizeCliOutput(finalJson, {
+            duration: totalDuration,
+            audioClassification,
+            audioLanguage: meta.audioLanguage,
+            frames: extractedFrames,
+            dialogueTrack
+        });
+        const diagnostics = [...canonical.quarantined, ...canonical.rejected];
+        db.saveCanonicalScriptChunk({ videoId: VIDEO_ID, events: canonical.accepted });
+        if (diagnostics.length > 0) {
+            db.saveQuarantinedScriptEvents({ videoId: VIDEO_ID, candidates: diagnostics });
+        }
+        acceptedEventCount += canonical.accepted.length;
 
-        if (finalScriptData.length > 0) {
-            db.saveVideoChunk({ videoId: VIDEO_ID, scriptChunk: finalScriptData });
-            console.log(`[CLI] Saved ${finalScriptData.length} lines for Part ${i+1}.`);
+        if (canonical.accepted.length > 0) {
+            console.log(`[CLI] Saved ${canonical.accepted.length} accepted lines for Part ${i+1}.`);
+        } else {
+            console.warn(`[CLI] No accepted canonical lines for Part ${i+1}; diagnostics were quarantined.`);
         }
         
         fs.unlinkSync(chunkPath);
@@ -374,7 +407,11 @@ const main = async () => {
     }
 
     console.log(`\n[CLI] All processing complete for ${VIDEO_ID}`);
-    db.updateVideoStatus(VIDEO_ID, 'completed');
+    db.updateVideoStatus(
+        VIDEO_ID,
+        acceptedEventCount > 0 ? 'completed' : 'failed',
+        acceptedEventCount > 0 ? null : 'canonical_output_unavailable'
+    );
 };
 
 main();

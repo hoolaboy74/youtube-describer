@@ -13,6 +13,7 @@ const {
   assertV2PolicyPrompt,
   loadPolicyPrompt
 } = require('./modules/promptPolicy');
+const { buildSynchronizerPrompt } = require('./modules/synchronizer');
 
 test('default prompt resolution uses the v2 baseline and resolves all placeholders', async () => {
   const previous = process.env.PROMPT_FILE;
@@ -73,4 +74,23 @@ test('legacy and unsupported prompt paths fail closed before generation', async 
   } finally {
     fs.rmSync(directory, { recursive: true, force: true });
   }
+});
+
+test('offline synchronizer composes stage work over the v2 baseline', async () => {
+  const prompt = await buildSynchronizerPrompt(
+    '[12][v2] 문 옆에 사람이 서 있습니다.',
+    '[12] Open the door.',
+    {
+      videoTitle: '테스트 영상',
+      audioClassification: 'foreign',
+      audioLanguage: 'en',
+      dialogueTrack: '[{"start":12,"end":15,"sourceLanguage":"en","confirmed":true}]'
+    }
+  );
+
+  assert.equal(prompt.includes('[desc]'), false);
+  assert.equal(prompt.includes('[ocr]'), false);
+  assert.equal(prompt.includes('tag(v1|v2|v3|txt|trans)'), true);
+  assert.equal(prompt.includes('codex-v2'), true);
+  assert.equal(/{{[^{}]+}}/.test(prompt), false);
 });
