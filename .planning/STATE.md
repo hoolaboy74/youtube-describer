@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: planning
-stopped_at: Phase 1 planned
-last_updated: "2026-08-24T08:23:21.327Z"
-last_activity: 2026-08-24 — Created the six-phase v1 roadmap and validated 26/26 requirement mappings.
+status: executing
+stopped_at: Completed 01-01-PLAN.md
+last_updated: "2026-08-25T01:44:09.535Z"
+last_activity: 2026-08-25
 progress:
   total_phases: 6
   completed_phases: 0
   total_plans: 2
-  completed_plans: 0
-  percent: 0
+  completed_plans: 1
+  percent: 50
 ---
 
 # Project State
@@ -21,32 +21,33 @@ progress:
 See: .planning/PROJECT.md (updated 2026-08-24)
 
 **Core value:** 원음과 중복되지 않으면서 영상 이해에 꼭 필요한 시각 정보를 정확하고 자연스러운 한국어 음성 해설로 전달하는 것.
-**Current focus:** Phase 1 — Canonical Output, Provenance & v2 Policy
+**Current focus:** Phase 01 — canonical-output-provenance-v2-policy
 
 ## Current Position
 
-Phase: 1 of 6 (Canonical Output, Provenance & v2 Policy)
-Plan: 0 of TBD in current phase
-Status: Ready to plan
-Last activity: 2026-08-24 — Created the six-phase v1 roadmap and validated 26/26 requirement mappings.
+Phase: 01 (canonical-output-provenance-v2-policy) — EXECUTING
+Plan: 2 of 2
+Status: Ready to execute
+Last activity: 2026-08-25
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [█████░░░░░] 50%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 0
-- Average duration: —
-- Total execution time: 0.0 hours
+- Total plans completed: 1
+- Average duration: 12m
+- Total execution time: 0.2 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 1–6 | 0 | TBD | — |
+| 1 | 1 | 12m | 12m |
+| 2–6 | 0 | TBD | — |
 
-**Recent Trend:** No plans executed yet.
+**Recent Trend:** Phase 01 Plan 01 completed in 12m.
 
 ## Accumulated Context
 
@@ -57,6 +58,9 @@ Progress: [░░░░░░░░░░] 0%
 - **Durable ownership:** Interactive and batch requests converge on one SQLite-backed job state and one shared pipeline owner before parallel work expands.
 - **Safe routing:** Five genre groups are allowed; low-confidence or conflicting classification uses a conservative fallback and never weakens v2 policy.
 - **Ordered publication:** Chunk drafts may be bounded-parallel, but continuity, deduplication, and canonical publication advance in timestamp order.
+- Canonical IDs normalize model whitespace and punctuation spacing while retaining tag, timestamp, provenance kind, and dialogue interval identity.
+- Hard-invalid candidates are rejected; ambiguous evidence, duplicates, uncertain mixed intervals, and dialogue overlap are quarantined and never TTS eligible.
+- Foreign audio permits confirmed dialogue tracks containing Korean translation text; mixed audio requires confirmed non-Korean intervals; unknown audio never translates.
 
 ### Pending Todos
 
@@ -76,8 +80,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-08-24T08:23:21.323Z
-Stopped at: Phase 1 planned
-Resume file: .planning/phases/01-canonical-output-provenance-v2-policy/01-01-PLAN.md
+Last session: 2026-08-25T01:44:09.531Z
+Stopped at: Completed 01-01-PLAN.md
+Resume file: None
 
 **Planned Phase:** 1 (Canonical Output, Provenance & v2 Policy) — 2 plans — 2026-08-24T08:22:45.054Z

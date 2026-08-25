@@ -118,7 +118,7 @@ Every v1 requirement is mapped to exactly one phase:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Canonical Output, Provenance & v2 Policy | 0/TBD | Not started | - |
+| 1. Canonical Output, Provenance & v2 Policy | 1/2 | In progress | 2026-08-25 |
 | 2. Durable Jobs & Shared Pipeline Ownership | 0/TBD | Not started | - |
 | 3. Five-Group Genre Classification & Safe Prompt Routing | 0/TBD | Not started | - |
 | 4. Universal 15-Minute Chunking & Ordered Continuity | 0/TBD | Not started | - |

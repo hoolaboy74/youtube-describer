@@ -7,10 +7,10 @@
 
 ### Description Policy and Language
 
-- [ ] **POLICY-01**: 서비스는 `prompt_template_codex_v2.txt`의 시각적 근거 우선, 추측 금지, 짧은 한국어 존댓말, 태그, 타임스탬프, 반복 억제 규칙을 모든 장르 프롬프트에 적용한다.
-- [ ] **POLICY-02**: 서비스는 한국어·외국어·혼합·unknown 원음 상태를 구분하고, 확인된 외국어만 필요한 경우 한국어 `[trans]`로 번역한다.
-- [ ] **POLICY-03**: 한국어 원음 대사와 의미가 같은 자막·OCR·번역을 `[txt]`나 `[trans]`로 생성하거나 TTS로 중복 낭독하지 않는다.
-- [ ] **POLICY-04**: 서비스는 생성 결과를 재생 전에 태그, 타임스탬프 범위, 언어 정책, 중복, 문장 길이, 대사와의 겹침, TTS 적격성 기준으로 검증한다.
+- [x] **POLICY-01**: 서비스는 `prompt_template_codex_v2.txt`의 시각적 근거 우선, 추측 금지, 짧은 한국어 존댓말, 태그, 타임스탬프, 반복 억제 규칙을 모든 장르 프롬프트에 적용한다.
+- [x] **POLICY-02**: 서비스는 한국어·외국어·혼합·unknown 원음 상태를 구분하고, 확인된 외국어만 필요한 경우 한국어 `[trans]`로 번역한다.
+- [x] **POLICY-03**: 한국어 원음 대사와 의미가 같은 자막·OCR·번역을 `[txt]`나 `[trans]`로 생성하거나 TTS로 중복 낭독하지 않는다.
+- [x] **POLICY-04**: 서비스는 생성 결과를 재생 전에 태그, 타임스탬프 범위, 언어 정책, 중복, 문장 길이, 대사와의 겹침, TTS 적격성 기준으로 검증한다.
 
 ### Genre Routing
 
@@ -75,10 +75,10 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| POLICY-01 | Phase 1 | Pending |
-| POLICY-02 | Phase 1 | Pending |
-| POLICY-03 | Phase 1 | Pending |
-| POLICY-04 | Phase 1 | Pending |
+| POLICY-01 | Phase 1 | Complete |
+| POLICY-02 | Phase 1 | Complete |
+| POLICY-03 | Phase 1 | Complete |
+| POLICY-04 | Phase 1 | Complete |
 | GENRE-01 | Phase 3 | Pending |
 | GENRE-02 | Phase 3 | Pending |
 | GENRE-03 | Phase 3 | Pending |
