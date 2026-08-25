@@ -84,6 +84,7 @@ function normalizeDialogueInterval(interval) {
         start,
         end,
         ...(typeof sourceLanguage === 'string' ? { sourceLanguage: sourceLanguage.toLowerCase() } : {}),
+        ...(boundedString(interval.sourceText, 240) ? { sourceText: boundedString(interval.sourceText, 240) } : {}),
         confirmed: interval.confirmed === true || interval.languageConfirmed === true,
         ...(interval.needed === false || interval.isNeeded === false ? { needed: false } : {}),
         ...(interval.foreign === true || interval.isForeign === true ? { foreign: true } : {})
@@ -121,6 +122,19 @@ function normalizeProvenance(provenance) {
             ? { source: boundedString(provenance.source, 80) }
             : {})
     };
+}
+
+function effectiveProvenance(candidate, context) {
+    const provenance = candidate && candidate.provenance && typeof candidate.provenance === 'object'
+        ? candidate.provenance
+        : null;
+    const interval = firstDefined(
+        provenance && provenance.dialogueInterval,
+        candidate && candidate.dialogueInterval,
+        context.dialogueInterval
+    );
+    if (!provenance || !interval || provenance.dialogueInterval) return provenance;
+    return { ...provenance, dialogueInterval: interval };
 }
 
 function createCanonicalEventId(event) {
@@ -187,7 +201,7 @@ function hasVisibleTextEvidence(provenance) {
 }
 
 function makeBaseEvent(candidate, context, fallbackReasons = []) {
-    const provenance = normalizeProvenance(candidate && candidate.provenance);
+    const provenance = normalizeProvenance(effectiveProvenance(candidate, context));
     const event = {
         id: '',
         timestamp: candidate && candidate.timestamp,
@@ -257,7 +271,7 @@ function validateCandidate(candidate, context = {}) {
         else if (language === 'mixed' && sourceInterval && !isConfirmedForeignInterval(sourceInterval)) {
             addReason(reasons, 'UNCERTAIN_MIXED_INTERVAL');
         }
-        if (sourceInterval && !isConfirmedForeignInterval(sourceInterval) && language === 'foreign') {
+        if (sourceInterval && !sourceInterval.confirmed && language === 'foreign') {
             addReason(reasons, 'UNCONFIRMED_FOREIGN_INTERVAL');
         }
     }
@@ -272,6 +286,14 @@ function validateCandidate(candidate, context = {}) {
     }
 
     const dialogues = contextDialogueIntervals(context);
+    if ((input.tag === 'txt' || input.tag === 'trans') && dialogues.some(interval => (
+        interval.sourceText &&
+        normalizeText(interval.sourceText) === event.text &&
+        intervalOverlaps(timestamp, interval)
+    )) && !(input.tag === 'trans' && provenance && provenance.kind === 'foreign_dialogue' &&
+        sourceInterval && isOwnForeignInterval(event, sourceInterval))) {
+        addReason(reasons, 'DIALOGUE_DUPLICATE');
+    }
     const guardBand = finiteNumber(Number(context.dialogueGuardBand))
         ? Math.max(0, Number(context.dialogueGuardBand))
         : 0;
@@ -294,7 +316,6 @@ function validateCandidate(candidate, context = {}) {
             'UNCONFIRMED_FOREIGN_INTERVAL',
             'UNCONFIRMED_DIALOGUE',
             'TRANSLATION_NOT_NEEDED',
-            'DIALOGUE_LANGUAGE_UNKNOWN'
         ]);
         event.validationStatus = reasons.some(reason => quarantineReasons.has(reason))
             ? 'quarantined'
@@ -308,7 +329,8 @@ function isConfirmedForeignInterval(interval) {
     if (!interval || !interval.confirmed) return false;
     if (interval.foreign === true) return true;
     const language = interval.sourceLanguage;
-    return typeof language === 'string' && language !== 'ko' && language !== 'korean';
+    return typeof language === 'string' &&
+        !['ko', 'korean', 'unknown', 'undetermined'].includes(language);
 }
 
 function validateEvents(candidates, context = {}) {
