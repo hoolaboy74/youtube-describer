@@ -5,12 +5,16 @@ const path = require('path');
 const util = require('util');
 const os = require('os');
 const { execFile, spawn, execSync } = require('child_process');
-const crypto = require('crypto');
 const db = require('./database');
 const { formatTime, preprocessVtt, isValidYoutubeUrl } = require('./utils');
 const logger = require('./logger');
 const audioLanguageDetector = require('./modules/audioLanguageDetector');
 const { loadPolicyPrompt, POLICY_VERSION } = require('./modules/promptPolicy');
+const {
+    parseLegacyLine,
+    validateEvents,
+    toLegacyScriptEvent
+} = require('./modules/canonicalOutput');
 
 let isSafariImpersonateSupported = false;
 try {
@@ -333,6 +337,123 @@ const parseISO8601Duration = (duration) => {
     const seconds = (parseInt(match[3], 10) || 0);
     return hours * 3600 + minutes * 60 + seconds;
 };
+
+function nearestFrameEvidence(timestamp, context) {
+    const frames = Array.isArray(context.frameEvidence)
+        ? context.frameEvidence
+        : (Array.isArray(context.frames) ? context.frames : []);
+    if (frames.length === 0) return [];
+    const usable = frames.filter(frame => frame && Number.isFinite(Number(frame.timestamp)));
+    if (usable.length === 0) return [];
+    const nearest = usable.reduce((best, frame) => (
+        Math.abs(Number(frame.timestamp) - Number(timestamp)) < Math.abs(Number(best.timestamp) - Number(timestamp))
+            ? frame
+            : best
+    ));
+    return [{
+        id: String(nearest.id || nearest.frameId || `frame-${Math.round(nearest.timestamp)}`),
+        timestamp: Number(nearest.timestamp),
+        ...(nearest.visibleText ? { visibleText: nearest.visibleText } : {})
+    }];
+}
+
+function provenanceForModelCandidate(candidate, context) {
+    const timestamp = Number(candidate.timestamp);
+    const frameEvidence = nearestFrameEvidence(timestamp, context);
+    if (candidate.tag === 'v1' || candidate.tag === 'v2' || candidate.tag === 'v3') {
+        return { kind: 'visual', frameEvidence };
+    }
+    if (candidate.tag === 'txt') {
+        const screenText = Array.isArray(context.screenTextEvidence)
+            ? context.screenTextEvidence.find(item => Number(item.timestamp) === timestamp)
+            : null;
+        return {
+            kind: 'screen_text',
+            frameEvidence,
+            ...(screenText && screenText.text ? { visibleTextEvidence: screenText.text } : {})
+        };
+    }
+    if (candidate.tag === 'trans') {
+        const dialogueTrack = Array.isArray(context.dialogueTrack) ? context.dialogueTrack : [];
+        const interval = dialogueTrack.find(item => Number(item.start) === timestamp);
+        if (!interval) return null;
+        const audioLanguage = String(context.audioLanguage || context.audioClassification || 'unknown').toLowerCase();
+        return {
+            kind: 'foreign_dialogue',
+            dialogueInterval: {
+                ...interval,
+                start: Number(interval.start),
+                end: Number(interval.end),
+                confirmed: interval.confirmed !== false,
+                foreign: interval.foreign === true || ['foreign', 'mixed'].includes(audioLanguage)
+            }
+        };
+    }
+    return null;
+}
+
+function canonicalizeModelOutput(rawText, context = {}) {
+    const lines = String(rawText || '').split(/\r?\n/);
+    const candidates = lines.map(rawLine => {
+        const parsed = parseLegacyLine(rawLine, {
+            duration: context.duration,
+            audioLanguage: context.audioLanguage,
+            audioClassification: context.audioClassification,
+            dialogueTrack: context.dialogueTrack
+        });
+        return {
+            timestamp: parsed.timestamp,
+            text: parsed.text,
+            tag: parsed.tag,
+            provenance: provenanceForModelCandidate(parsed, context),
+            audioLanguage: context.audioLanguage || context.audioClassification,
+            rawLine: rawLine.slice(0, 1000)
+        };
+    });
+    const validation = validateEvents(candidates, {
+        ...context,
+        policyVersion: POLICY_VERSION,
+        duration: context.duration,
+        audioLanguage: context.audioLanguage || context.audioClassification,
+        dialogueTrack: context.dialogueTrack
+    });
+    validation.events.forEach((event, index) => {
+        event.rawLine = candidates[index].rawLine;
+    });
+    return {
+        ...validation,
+        accepted: validation.accepted.slice().sort((a, b) => a.timestamp - b.timestamp),
+        policyVersion: POLICY_VERSION
+    };
+}
+
+function publishCanonicalOutput({ videoId, canonical: providedCanonical, rawText, context, sseHandler, requestHash, video }) {
+    const canonical = providedCanonical || canonicalizeModelOutput(rawText, context);
+    const diagnostics = [...canonical.quarantined, ...canonical.rejected];
+    db.saveCanonicalScriptChunk({ videoId, events: canonical.accepted });
+    if (diagnostics.length > 0) {
+        db.saveQuarantinedScriptEvents({ videoId, candidates: diagnostics });
+    }
+    const legacyEvents = canonical.accepted.map(toLegacyScriptEvent);
+    if (sseHandler && legacyEvents.length > 0) {
+        sseHandler('script_chunk', legacyEvents);
+    }
+    if (canonical.accepted.length > 0) {
+        if (video) {
+            db.saveVideo({
+                ...video,
+                videoId,
+                script: canonical.accepted,
+                audioLanguage: video.audioLanguage || context.audioLanguage || context.audioClassification
+            });
+        }
+        db.updateVideoStatus(videoId, 'completed');
+    } else {
+        db.updateVideoStatus(videoId, 'failed', 'canonical_output_unavailable');
+        logger.warn(`[${requestHash}] No accepted canonical events; output remains unplayable.`);
+    }
+    return { ...canonical, legacyEvents };
+}
 
 const processVideo = async (videoId, youtubeUrl, sseHandler = null, userId = null) => {
     const requestHash = sseHandler ? videoId.substring(0, 8) : `batch-${videoId.substring(0, 8)}`;
@@ -719,91 +840,30 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null, userId = nul
         const model = genAI.getGenerativeModel({ model: MODEL_NAME, generationConfig: { temperature: 0.7, mediaResolution: "MEDIA_RESOLUTION_LOW" } });
 
         const result = await model.generateContentStream([prompt, ...imageParts]);
-        const fullScript = [];
-        let scriptBuffer = '';
-        let dbChunkBuffer = [];
-
+        let rawModelText = '';
         for await (const chunk of result.stream) {
             if (chunk.text) {
-                scriptBuffer += chunk.text();
-                let lastNewline = scriptBuffer.lastIndexOf('\n');
-                if (lastNewline !== -1) {
-                    const completeLines = scriptBuffer.substring(0, lastNewline).split('\n');
-                    scriptBuffer = scriptBuffer.substring(lastNewline + 1);
-                    const newScriptData = completeLines.map(line => {
-                        const match = line.match(/^\s*\[(\d+)[^\]]*\]\s*\[(v\d|txt|trans)\]\s*(.*)\s*$/);
-                        if (!match) return null;
-                        let timestamp = parseInt(match[1], 10);
-                        if (timestamp === 0) timestamp = 1;
-                        if (timestamp > totalDuration + 2) return null;
-                        timestamp = Math.min(timestamp, Math.floor(totalDuration));
-                        
-                        let verbosity = match[2];
-                        if (verbosity === 'txt') verbosity = 'text';
-                        else if (verbosity === 'trans') verbosity = 'translation';
-                        
-                        return { id: crypto.createHash('sha256').update(line).digest('hex'), timestamp, text: match[3].trim(), verbosity };
-                    }).filter(Boolean);
-
-                    if (newScriptData.length > 0) {
-                        if (sseHandler) sseHandler('script_chunk', newScriptData);
-                        dbChunkBuffer.push(...newScriptData);
-                        fullScript.push(...newScriptData);
-                        if (dbChunkBuffer.length >= 10) {
-                            db.saveVideoChunk({ videoId, scriptChunk: dbChunkBuffer });
-                            dbChunkBuffer = [];
-                        }
-                    }
-                }
+                rawModelText += chunk.text();
             }
         }
-        
-        if (scriptBuffer.trim()) {
-            const finalLines = scriptBuffer.split('\n').map(line => {
-                const match = line.match(/^\s*\[(\d+)[^\]]*\]\s*\[(v\d|txt|trans)\]\s*(.*)\s*$/);
-                if (!match) return null;
-                let timestamp = parseInt(match[1], 10);
-                if (timestamp === 0) timestamp = 1;
-                if (timestamp > totalDuration + 2) return null;
-                timestamp = Math.min(timestamp, Math.floor(totalDuration));
-                
-                let verbosity = match[2];
-                if (verbosity === 'txt') verbosity = 'text';
-                else if (verbosity === 'trans') verbosity = 'translation';
-                
-                return { id: crypto.createHash('sha256').update(line).digest('hex'), timestamp, text: match[3].trim(), verbosity };
-            }).filter(Boolean);
-            if (finalLines.length > 0) {
-                if (sseHandler) sseHandler('script_chunk', finalLines);
-                dbChunkBuffer.push(...finalLines);
-                fullScript.push(...finalLines);
-            }
-        }
-
-        if (dbChunkBuffer.length > 0) {
-            db.saveVideoChunk({ videoId, scriptChunk: dbChunkBuffer });
-        }
-
-        // Apply Levenshtein 70% OCR duplicate filter
-        const dialogues = fullScript.filter(item => item.verbosity === 'translation');
-        const filteredScript = fullScript.filter(item => {
-            if (item.verbosity !== 'text') return true;
-            const duplicate = dialogues.some(dlg => {
-                if (Math.abs(dlg.timestamp - item.timestamp) <= 3) {
-                    const sim = getSimilarity(dlg.text, item.text);
-                    return sim >= 0.70;
-                }
-                return false;
-            });
-            if (duplicate) {
-                logger.info(`[${requestHash}] Dropping duplicate OCR [txt] at ${item.timestamp}s: "${item.text}"`);
-                return false;
-            }
-            return true;
+        const canonical = canonicalizeModelOutput(rawModelText, {
+            duration: Math.floor(totalDuration),
+            audioLanguage,
+            dialogueTrack,
+            frameEvidence: allTimestamps.map(timestamp => ({ timestamp }))
         });
-
-        filteredScript.sort((a, b) => a.timestamp - b.timestamp);
-        db.saveVideo({ videoId, title: videoTitle, duration: Math.round(totalDuration), filesize, script: filteredScript, audioLanguage });
+        const canonicalOutput = publishCanonicalOutput({
+            videoId,
+            canonical,
+            sseHandler,
+            requestHash,
+            video: {
+                title: videoTitle,
+                duration: Math.round(totalDuration),
+                filesize,
+                audioLanguage
+            }
+        });
         
         const finalResponse = await result.response;
         const usageMetadata = finalResponse.usageMetadata;
@@ -1162,50 +1222,26 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
         }
 
         const scriptText = result.response.text();
-        const scriptLines = scriptText.split('\n');
-
-        const rawScriptData = scriptLines.map((line) => {
-            const match = line.match(/^\s*\[(\d+)[^\]]*\]\s*\[(v\d|txt|trans)\]\s*(.*)\s*$/);
-            if (!match) return null;
-            let timestamp = parseInt(match[1], 10);
-            if (timestamp === 0) timestamp = 1;
-            
-            if (timestamp > totalDuration + 2) {
-                logger.warn(`[${requestHash}] Ignoring out-of-bounds timestamp: ${timestamp} (Max: ${totalDuration})`);
-                return null;
+        const canonical = canonicalizeModelOutput(scriptText, {
+            duration: Math.floor(totalDuration),
+            audioLanguage,
+            dialogueTrack,
+            frameEvidence: allTimestamps.map(timestamp => ({ timestamp }))
+        });
+        const canonicalOutput = publishCanonicalOutput({
+            videoId,
+            canonical,
+            requestHash,
+            video: {
+                title: videoTitle,
+                duration: Math.round(totalDuration),
+                filesize,
+                audioLanguage
             }
-            timestamp = Math.min(timestamp, Math.floor(totalDuration));
-            
-            let verbosity = match[2];
-            if (verbosity === 'txt') verbosity = 'text';
-            else if (verbosity === 'trans') verbosity = 'translation';
-            
-            return { id: crypto.createHash('sha256').update(line).digest('hex'), timestamp, text: match[3].trim(), verbosity };
-        }).filter(Boolean);
-
-        // Apply Levenshtein 70% OCR duplicate filter for batch
-        const dialogues = rawScriptData.filter(item => item.verbosity === 'translation');
-        const finalScriptData = rawScriptData.filter(item => {
-            if (item.verbosity !== 'text') return true;
-            const duplicate = dialogues.some(dlg => {
-                if (Math.abs(dlg.timestamp - item.timestamp) <= 3) {
-                    const sim = getSimilarity(dlg.text, item.text);
-                    return sim >= 0.70;
-                }
-                return false;
-            });
-            if (duplicate) {
-                logger.info(`[${requestHash}] Batch: Dropping duplicate OCR [txt] at ${item.timestamp}s: "${item.text}"`);
-                return false;
-            }
-            return true;
         });
 
-        finalScriptData.sort((a, b) => a.timestamp - b.timestamp);
-        db.saveVideo({ videoId, title: videoTitle, duration: Math.round(totalDuration), filesize, script: finalScriptData, audioLanguage });
-
         timeEnd(aiLabel);
-        logger.info(`[${requestHash}] Successfully generated and cached script text for batch processing.`);
+        logger.info(`[${requestHash}] Successfully generated and cached ${canonicalOutput.accepted.length} canonical events for batch processing.`);
         
     } catch (error) {
         db.updateVideoStatus(videoId, 'failed', error.message);
@@ -1302,4 +1338,12 @@ function getSimilarity(a, b) {
     return 1.0 - (dist / maxLen);
 }
 
-module.exports = { processVideo, processVideoBatch, extractKeyframesHybrid, parseVttToDialogueTrack, getSimilarity };
+module.exports = {
+    processVideo,
+    processVideoBatch,
+    extractKeyframesHybrid,
+    parseVttToDialogueTrack,
+    getSimilarity,
+    canonicalizeModelOutput,
+    publishCanonicalOutput
+};

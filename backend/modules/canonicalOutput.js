@@ -359,7 +359,7 @@ function validateEvents(candidates, context = {}) {
     const quarantined = events.filter(event => event.validationStatus === 'quarantined');
     const rejected = events.filter(event => event.validationStatus === 'rejected');
     const reasons = events.flatMap(event => event.validationReasons.map(code => ({ id: event.id, code })));
-    return { accepted, quarantined, rejected, reasons };
+    return { events, accepted, quarantined, rejected, reasons };
 }
 
 function parseLegacyLine(line, context = {}) {

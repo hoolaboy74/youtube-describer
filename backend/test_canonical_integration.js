@@ -138,3 +138,61 @@ test('existing legacy scripts gain additive canonical columns without data loss'
     fs.rmSync(database.directory, { recursive: true, force: true });
   }
 });
+
+test('interactive-style and batch-style canonical publication have identical accepted output', () => {
+  const database = disposableDatabase();
+  try {
+    const result = runDatabaseScript(database.path, `
+      process.env.GOOGLE_API_KEY = 'test-key';
+      const Database = require('better-sqlite3');
+      const db = require('./database');
+      const { canonicalizeModelOutput, publishCanonicalOutput } = require('./videoProcessor');
+      db.init();
+      db.ensurePreliminaryRecord('parity-video');
+      const raw = [
+        '[12][v2] 한 사람이 문 옆에 서 있습니다.',
+        '[14][v2] 한 사람이 문 옆에 서 있습니다.',
+        '[20][trans] 문을 열어 주세요.',
+        '[22][txt] 안녕하세요.',
+        '[99][v1] 영상 밖의 문장입니다.'
+      ].join('\\n');
+      const context = {
+        duration: 30,
+        audioLanguage: 'foreign',
+        frameEvidence: [{ id: 'frame-12', timestamp: 12 }, { id: 'frame-14', timestamp: 14 }, { id: 'frame-22', timestamp: 22 }],
+        dialogueTrack: [
+          { start: 20, end: 24, sourceLanguage: 'en', sourceText: 'Please open the door.', confirmed: true, foreign: true },
+          { start: 22, end: 25, sourceLanguage: 'ko', sourceText: '안녕하세요.', confirmed: true, foreign: true }
+        ]
+      };
+      const interactive = canonicalizeModelOutput(raw, context);
+      const batch = canonicalizeModelOutput(raw, context);
+      publishCanonicalOutput({
+        videoId: 'parity-video',
+        canonical: interactive,
+        sseHandler: (name, payload) => console.log('__SSE__' + JSON.stringify({ name, payload })),
+        requestHash: 'test'
+      });
+      const readDb = new Database(process.env.YOUTUBE_DESCRIBER_DB_PATH, { readonly: true });
+      console.log('__RESULT__' + JSON.stringify({
+        same: JSON.stringify(interactive) === JSON.stringify(batch),
+        acceptedIds: interactive.accepted.map(event => event.id),
+        acceptedLegacy: interactive.accepted.map(event => ({ id: event.id, timestamp: event.timestamp, text: event.text, verbosity: event.legacyVerbosity })),
+        stored: readDb.prepare('SELECT id, validation_status FROM scripts WHERE videoId = ? ORDER BY timestamp').all('parity-video'),
+        quarantine: readDb.prepare('SELECT reason_code FROM script_quarantine WHERE videoId = ? ORDER BY reason_code').all('parity-video'),
+        status: db.getVideo('parity-video').status
+      }));
+      readDb.close();
+    `);
+    assert.equal(result.same, true);
+    assert.equal(result.acceptedIds.length, 2);
+    assert.deepEqual(result.stored, result.acceptedIds.map(id => ({ id, validation_status: 'accepted' })));
+    assert.deepEqual(result.acceptedLegacy.map(event => event.verbosity), ['v2', 'translation']);
+    assert.ok(result.quarantine.some(row => row.reason_code === 'DUPLICATE_EVENT'));
+    assert.ok(result.quarantine.some(row => row.reason_code === 'DIALOGUE_DUPLICATE'));
+    assert.ok(result.quarantine.some(row => row.reason_code === 'TIMESTAMP_OUT_OF_RANGE'));
+    assert.equal(result.status, 'completed');
+  } finally {
+    fs.rmSync(database.directory, { recursive: true, force: true });
+  }
+});
