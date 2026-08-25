@@ -10,6 +10,7 @@ const db = require('./database');
 const { formatTime, preprocessVtt, isValidYoutubeUrl } = require('./utils');
 const logger = require('./logger');
 const audioLanguageDetector = require('./modules/audioLanguageDetector');
+const { loadPolicyPrompt, POLICY_VERSION } = require('./modules/promptPolicy');
 
 let isSafariImpersonateSupported = false;
 try {
@@ -50,27 +51,6 @@ const MODEL_NAME = process.env.GEMINI_MODEL || "gemini-3.1-pro-preview";
 const genAI = new GoogleGenerativeAI(API_KEY);
 const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY || API_KEY;
 const youtube = google.youtube({ version: 'v3', auth: YOUTUBE_API_KEY });
-const DEFAULT_PROMPT_FILE = 'prompt_template.txt';
-
-function getPromptTemplatePath() {
-    const configuredPromptFile = (process.env.PROMPT_FILE || DEFAULT_PROMPT_FILE).trim() || DEFAULT_PROMPT_FILE;
-    return path.resolve(__dirname, configuredPromptFile);
-}
-
-async function loadPromptTemplate() {
-    const promptTemplatePath = getPromptTemplatePath();
-    try {
-        const prompt = await fs.promises.readFile(promptTemplatePath, 'utf-8');
-        logger.info(`[Prompt] Using prompt template: ${path.relative(__dirname, promptTemplatePath) || path.basename(promptTemplatePath)}`);
-        return prompt;
-    } catch (error) {
-        if (error.code === 'ENOENT') {
-            throw new Error(`Prompt template file not found: ${promptTemplatePath}`);
-        }
-        throw error;
-    }
-}
-
 const calculateApiCost = (modelName, promptTokenCount, candidatesTokenCount, totalTokenCount) => {
     const promptTokens = promptTokenCount || 0;
     const candidatesTokens = candidatesTokenCount || 0;
@@ -727,15 +707,16 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null, userId = nul
             return;
         }
 
+        const policy = await loadPolicyPrompt({
+            replacements: {
+                VIDEO_TITLE: videoTitle,
+                AUDIO_CLASSIFICATION: audioLanguage,
+                AUDIO_LANGUAGE: audioLanguage,
+                DIALOGUE_TRACK: JSON.stringify(dialogueTrack, null, 2)
+            }
+        });
+        const prompt = policy.prompt;
         const model = genAI.getGenerativeModel({ model: MODEL_NAME, generationConfig: { temperature: 0.7, mediaResolution: "MEDIA_RESOLUTION_LOW" } });
-        let prompt = await loadPromptTemplate();
-        
-        const dialogueTrackStr = JSON.stringify(dialogueTrack, null, 2);
-        prompt = prompt
-            .replace('{{VIDEO_TITLE}}', videoTitle)
-            .replace('{{AUDIO_CLASSIFICATION}}', audioLanguage)
-            .replace('{{AUDIO_LANGUAGE}}', audioLanguage)
-            .replace('{{DIALOGUE_TRACK}}', dialogueTrackStr);
 
         const result = await model.generateContentStream([prompt, ...imageParts]);
         const fullScript = [];
@@ -1153,15 +1134,16 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
             return;
         }
 
+        const policy = await loadPolicyPrompt({
+            replacements: {
+                VIDEO_TITLE: videoTitle,
+                AUDIO_CLASSIFICATION: audioLanguage,
+                AUDIO_LANGUAGE: audioLanguage,
+                DIALOGUE_TRACK: JSON.stringify(dialogueTrack, null, 2)
+            }
+        });
+        const prompt = policy.prompt;
         const model = genAI.getGenerativeModel({ model: MODEL_NAME, generationConfig: { temperature: 0.7, mediaResolution: "MEDIA_RESOLUTION_LOW" } });
-        let prompt = await loadPromptTemplate();
-        
-        const dialogueTrackStr = JSON.stringify(dialogueTrack, null, 2);
-        prompt = prompt
-            .replace('{{VIDEO_TITLE}}', videoTitle)
-            .replace('{{AUDIO_CLASSIFICATION}}', audioLanguage)
-            .replace('{{AUDIO_LANGUAGE}}', audioLanguage)
-            .replace('{{DIALOGUE_TRACK}}', dialogueTrackStr);
 
         const result = await model.generateContent([prompt, ...imageParts]);
 
