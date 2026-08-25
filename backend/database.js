@@ -9,7 +9,9 @@ if (!fs.existsSync(dbDir)) {
   fs.mkdirSync(dbDir, { recursive: true });
 }
 
-const dbPath = path.join(dbDir, 'cache.db');
+const dbPath = process.env.YOUTUBE_DESCRIBER_DB_PATH
+  ? path.resolve(process.env.YOUTUBE_DESCRIBER_DB_PATH)
+  : path.join(dbDir, 'cache.db');
 const db = new Database(dbPath);
 db.pragma('journal_mode = WAL');
 
@@ -74,7 +76,44 @@ function init() {
       timestamp INTEGER NOT NULL,
       text TEXT NOT NULL,
       verbosity TEXT NOT NULL,
+      tag TEXT,
+      provenance_json TEXT,
+      validation_status TEXT NOT NULL DEFAULT 'accepted',
+      validation_reasons_json TEXT NOT NULL DEFAULT '[]',
+      tts_eligible INTEGER NOT NULL DEFAULT 1,
+      policy_version TEXT,
       FOREIGN KEY (videoId) REFERENCES videos (videoId) ON DELETE CASCADE
+    )
+  `);
+
+  // Add canonical output columns without rewriting or dropping legacy script data.
+  const scriptColumns = [
+    ['tag', 'TEXT'],
+    ['provenance_json', 'TEXT'],
+    ['validation_status', "TEXT NOT NULL DEFAULT 'accepted'"],
+    ['validation_reasons_json', "TEXT NOT NULL DEFAULT '[]'"],
+    ['tts_eligible', 'INTEGER NOT NULL DEFAULT 1'],
+    ['policy_version', 'TEXT']
+  ];
+  for (const [column, definition] of scriptColumns) {
+    try {
+      db.prepare(`SELECT ${column} FROM scripts LIMIT 1`).get();
+    } catch (error) {
+      logger.info(`Adding ${column} column to scripts table...`);
+      db.exec(`ALTER TABLE scripts ADD COLUMN ${column} ${definition}`);
+    }
+  }
+
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS script_quarantine (
+      id TEXT PRIMARY KEY,
+      videoId TEXT NOT NULL,
+      raw_line TEXT,
+      candidate_json TEXT NOT NULL,
+      reason_code TEXT NOT NULL,
+      reason_detail TEXT,
+      createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (videoId) REFERENCES videos(videoId) ON DELETE CASCADE
     )
   `);
 
@@ -349,7 +388,20 @@ function getVideo(videoId) {
     return null;
   }
 
-  const scriptRows = db.prepare('SELECT id, timestamp, text, verbosity FROM scripts WHERE videoId = ? ORDER BY timestamp').all(videoId);
+  const scriptRows = db.prepare(`
+    SELECT id, timestamp, text, verbosity, tag, provenance_json,
+      validation_status, validation_reasons_json, tts_eligible, policy_version
+    FROM scripts WHERE videoId = ? ORDER BY timestamp, id
+  `).all(videoId);
+
+  const parseJson = (value, fallback) => {
+    if (typeof value !== 'string') return fallback;
+    try {
+      return JSON.parse(value);
+    } catch (error) {
+      return fallback;
+    }
+  };
   
   return {
     videoId: videoRow.videoId,
@@ -359,11 +411,138 @@ function getVideo(videoId) {
     status: videoRow.status,
     audioLanguage: videoRow.audio_language,
     script: scriptRows.map(row => ({
-      ...row,
-      // Ensure timestamp is a number
-      timestamp: Number(row.timestamp)
+      id: row.id,
+      timestamp: Number(row.timestamp),
+      text: row.text,
+      verbosity: row.verbosity,
+      tag: row.tag || undefined,
+      provenance: parseJson(row.provenance_json, null),
+      validationStatus: row.validation_status || 'accepted',
+      validationReasons: parseJson(row.validation_reasons_json, []),
+      ttsEligible: row.tts_eligible === 1,
+      policyVersion: row.policy_version || undefined
     }))
   };
+}
+
+const LEGACY_TAGS = Object.freeze({
+  v1: 'v1',
+  v2: 'v2',
+  v3: 'v3',
+  text: 'txt',
+  translation: 'trans'
+});
+
+function canonicalEventForPersistence(event) {
+  const candidate = event && typeof event === 'object' ? event : {};
+  const tag = candidate.tag || LEGACY_TAGS[candidate.verbosity];
+  const validationStatus = candidate.validationStatus || 'accepted';
+  const validationReasons = Array.isArray(candidate.validationReasons)
+    ? candidate.validationReasons.slice(0, 12).map(String)
+    : [];
+  const provenance = candidate.provenance && typeof candidate.provenance === 'object'
+    ? candidate.provenance
+    : null;
+
+  return {
+    id: String(candidate.id || ''),
+    timestamp: Number(candidate.timestamp),
+    text: String(candidate.text || ''),
+    verbosity: candidate.verbosity || (tag === 'txt' ? 'text' : tag === 'trans' ? 'translation' : tag),
+    tag,
+    provenance,
+    validationStatus,
+    validationReasons,
+    ttsEligible: candidate.ttsEligible !== false,
+    policyVersion: candidate.policyVersion || null
+  };
+}
+
+function insertCanonicalScriptEvents(videoId, events) {
+  const insertScript = db.prepare(`
+    INSERT OR IGNORE INTO scripts (
+      id, videoId, timestamp, text, verbosity, tag, provenance_json,
+      validation_status, validation_reasons_json, tts_eligible, policy_version
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `);
+  for (const event of events) {
+    const canonical = canonicalEventForPersistence(event);
+    if (canonical.validationStatus !== 'accepted') continue;
+    if (!canonical.id || !Number.isFinite(canonical.timestamp) || !canonical.text) continue;
+    insertScript.run(
+      canonical.id,
+      videoId,
+      canonical.timestamp,
+      canonical.text,
+      canonical.verbosity,
+      canonical.tag || null,
+      canonical.provenance ? JSON.stringify(canonical.provenance) : null,
+      canonical.validationStatus,
+      JSON.stringify(canonical.validationReasons),
+      canonical.ttsEligible ? 1 : 0,
+      canonical.policyVersion
+    );
+  }
+}
+
+function saveCanonicalScriptChunk({ videoId, events = [] }) {
+  const transaction = db.transaction(() => insertCanonicalScriptEvents(videoId, events));
+  try {
+    transaction();
+  } catch (error) {
+    logger.error(`[Database] Failed to save canonical chunk for video ${videoId}:`, error);
+    throw error;
+  }
+}
+
+function boundedQuarantineCandidate(event) {
+  const canonical = canonicalEventForPersistence(event);
+  return {
+    id: canonical.id || undefined,
+    timestamp: Number.isFinite(canonical.timestamp) ? canonical.timestamp : undefined,
+    text: canonical.text.slice(0, 500),
+    tag: canonical.tag || undefined,
+    provenance: canonical.provenance,
+    validationStatus: canonical.validationStatus,
+    validationReasons: canonical.validationReasons,
+    policyVersion: canonical.policyVersion
+  };
+}
+
+function saveQuarantinedScriptEvents({ videoId, candidates = [] }) {
+  const insertQuarantine = db.prepare(`
+    INSERT OR IGNORE INTO script_quarantine
+      (id, videoId, raw_line, candidate_json, reason_code, reason_detail)
+    VALUES (?, ?, ?, ?, ?, ?)
+  `);
+  const transaction = db.transaction(() => {
+    for (const candidate of candidates) {
+      const canonical = canonicalEventForPersistence(candidate);
+      const reasons = canonical.validationReasons.length > 0 ? canonical.validationReasons : ['UNSPECIFIED'];
+      const candidateJson = JSON.stringify(boundedQuarantineCandidate(candidate)).slice(0, 8000);
+      const rawLine = typeof candidate.rawLine === 'string' ? candidate.rawLine.slice(0, 1000) : null;
+      for (const reason of reasons) {
+        const reasonCode = String(reason).slice(0, 80);
+        const quarantineId = crypto.createHash('sha256')
+          .update(`${videoId}|${canonical.id}|${reasonCode}`)
+          .digest('hex');
+        insertQuarantine.run(
+          quarantineId,
+          videoId,
+          rawLine,
+          candidateJson,
+          reasonCode,
+          typeof candidate.reasonDetail === 'string' ? candidate.reasonDetail.slice(0, 500) : null
+        );
+      }
+    }
+  });
+  try {
+    transaction();
+  } catch (error) {
+    logger.error(`[Database] Failed to save quarantined events for video ${videoId}:`, error);
+    throw error;
+  }
 }
 
 function saveVideo({ videoId, title, duration, filesize, script, audioLanguage = null }) {
@@ -384,12 +563,7 @@ function saveVideo({ videoId, title, duration, filesize, script, audioLanguage =
     db.prepare('DELETE FROM scripts WHERE videoId = ?').run(videoId);
 
     // Step 3: Insert all the new script lines.
-    if (script && script.length > 0) {
-      const insertScript = db.prepare('INSERT OR IGNORE INTO scripts (id, videoId, timestamp, text, verbosity) VALUES (?, ?, ?, ?, ?)');
-      for (const line of script) {
-        insertScript.run(line.id, videoId, line.timestamp, line.text, line.verbosity);
-      }
-    }
+    insertCanonicalScriptEvents(videoId, script || []);
   });
 
   try {
@@ -515,20 +689,7 @@ function ensurePreliminaryRecord(videoId) {
 
 // Saves only the script lines for a given chunk.
 function saveVideoChunk({ videoId, scriptChunk }) {
-  const transaction = db.transaction(() => {
-    // The caller is now responsible for ensuring the parent video row exists.
-    const insertScript = db.prepare('INSERT OR IGNORE INTO scripts (id, videoId, timestamp, text, verbosity) VALUES (?, ?, ?, ?, ?)');
-    for (const line of scriptChunk) {
-      insertScript.run(line.id, videoId, line.timestamp, line.text, line.verbosity);
-    }
-  });
-
-  try {
-    transaction();
-  } catch (error) {
-    logger.error(`[Database] Failed to save chunk for video ${videoId}:`, error);
-    throw error;
-  }
+  return saveCanonicalScriptChunk({ videoId, events: scriptChunk });
 }
 
 
@@ -1432,6 +1593,8 @@ module.exports = {
   ensureVideoRecord,
   updateVideoStatus,
   ensurePreliminaryRecord,
+  saveCanonicalScriptChunk,
+  saveQuarantinedScriptEvents,
   saveVideoChunk,
   listVideos,
   searchVideosByTitle,
