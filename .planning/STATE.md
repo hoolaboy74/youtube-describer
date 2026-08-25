@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: executing
-stopped_at: Completed 01-01-PLAN.md
-last_updated: "2026-08-25T01:44:09.535Z"
+status: verifying
+stopped_at: Completed 01-02-PLAN.md
+last_updated: "2026-08-25T02:08:29.604Z"
 last_activity: 2026-08-25
 progress:
   total_phases: 6
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 2
-  completed_plans: 1
-  percent: 50
+  completed_plans: 2
+  percent: 100
 ---
 
 # Project State
@@ -27,10 +27,10 @@ See: .planning/PROJECT.md (updated 2026-08-24)
 
 Phase: 01 (canonical-output-provenance-v2-policy) — EXECUTING
 Plan: 2 of 2
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-08-25
 
-Progress: [█████░░░░░] 50%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
@@ -48,6 +48,7 @@ Progress: [█████░░░░░] 50%
 | 2–6 | 0 | TBD | — |
 
 **Recent Trend:** Phase 01 Plan 01 completed in 12m.
+| Phase 01 P02 | 23m | 4 tasks | 11 files |
 
 ## Accumulated Context
 
@@ -61,6 +62,9 @@ Progress: [█████░░░░░] 50%
 - Canonical IDs normalize model whitespace and punctuation spacing while retaining tag, timestamp, provenance kind, and dialogue interval identity.
 - Hard-invalid candidates are rejected; ambiguous evidence, duplicates, uncertain mixed intervals, and dialogue overlap are quarantined and never TTS eligible.
 - Foreign audio permits confirmed dialogue tracks containing Korean translation text; mixed audio requires confirmed non-Korean intervals; unknown audio never translates.
+- Canonical script rows are additive and accepted-only; rejected and quarantined candidates remain in bounded internal diagnostics rather than playable storage.
+- All Gemini generation paths load and assert the codex-v2 baseline before provider calls, with stage-specific context composed as data.
+- TTS accepts only an accepted event fetched by videoId and eventId, and cache keys include event identity and synthesis parameters.
 
 ### Pending Todos
 
@@ -80,8 +84,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-08-25T01:44:09.531Z
-Stopped at: Completed 01-01-PLAN.md
+Last session: 2026-08-25T02:08:29.600Z
+Stopped at: Completed 01-02-PLAN.md
 Resume file: None
 
 **Planned Phase:** 1 (Canonical Output, Provenance & v2 Policy) — 2 plans — 2026-08-24T08:22:45.054Z

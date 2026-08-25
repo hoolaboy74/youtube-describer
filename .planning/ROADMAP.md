@@ -10,7 +10,7 @@ This v1 milestone hardens 뷰래이터 around its core value: delivering accurat
 
 ## Phases
 
-- [ ] **Phase 1: Canonical Output, Provenance & v2 Policy** - Establish the evidence, language, tagging, validation, and non-duplication contract that every generated result must satisfy.
+- [x] **Phase 1: Canonical Output, Provenance & v2 Policy** - Establish the evidence, language, tagging, validation, and non-duplication contract that every generated result must satisfy.
 - [ ] **Phase 2: Durable Jobs & Shared Pipeline Ownership** - Move processing into restartable, idempotent jobs with one durable owner for interactive and batch requests.
 - [ ] **Phase 3: Five-Group Genre Classification & Safe Prompt Routing** - Classify videos conservatively and apply bounded genre overlays without weakening v2 safety rules.
 - [ ] **Phase 4: Universal 15-Minute Chunking & Ordered Continuity** - Process every video in approximately 15-minute chunks with memory, bounded drafts, continuity, and deterministic merge.
@@ -28,7 +28,7 @@ This v1 milestone hardens 뷰래이터 around its core value: delivering accurat
   2. Korean, foreign, mixed, and unknown original-audio cases produce distinct language/provenance outcomes; only confirmed foreign speech can become a needed Korean `[trans]` event.
   3. Korean original dialogue and subtitles that duplicate it are excluded from `[txt]`/`[trans]` generation and TTS, while independently evidenced screen text remains distinguishable from translated dialogue.
   4. Malformed or unsafe events are rejected or quarantined before persistence to the playable canonical script, including invalid tags, out-of-range timestamps, unsupported language decisions, duplicates, overlong sentences, dialogue overlap, and ineligible TTS content.
-**Plans**: TBD
+**Plans**: 2
 **Research flags**: Existing parser/player compatibility, prompt/config default drift, canonical provenance fields, and Korean audio-description wording need repository-specific design and fixtures.
 
 ### Phase 2: Durable Jobs & Shared Pipeline Ownership
@@ -118,7 +118,7 @@ Every v1 requirement is mapped to exactly one phase:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Canonical Output, Provenance & v2 Policy | 1/2 | In progress | 2026-08-25 |
+| 1. Canonical Output, Provenance & v2 Policy | 2/2 | Complete | 2026-08-25 |
 | 2. Durable Jobs & Shared Pipeline Ownership | 0/TBD | Not started | - |
 | 3. Five-Group Genre Classification & Safe Prompt Routing | 0/TBD | Not started | - |
 | 4. Universal 15-Minute Chunking & Ordered Continuity | 0/TBD | Not started | - |
