@@ -80,7 +80,7 @@ Each task was committed atomically:
 3. **Task 3: Route interactive and batch generation through accepted-only canonical publication** - `12139c2` (feat)
 4. **Task 4: Enforce canonical eligibility in API and Player V2 TTS selection** - `00e79c8` (feat)
 
-**Plan metadata:** pending final docs commit.
+**Plan metadata:** `315cb4e` (docs: complete canonical policy integration plan).
 
 ## Files Created/Modified
 
