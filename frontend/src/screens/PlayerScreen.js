@@ -344,6 +344,7 @@ function PlayerScreen() {
 
         const linesByTimestamp = new Map();
         for (const line of script) {
+            if (line.validationStatus !== 'accepted' || line.ttsEligible !== true) continue;
             const lineVerbosity = parseInt(line.verbosity.replace('v', ''));
             if (lineVerbosity <= verbosity) {
                 const existingLine = linesByTimestamp.get(line.timestamp);
@@ -356,7 +357,7 @@ function PlayerScreen() {
     }, [script, verbosity]);
 
     const playDescription = useCallback(async (scriptLine) => {
-        if (!player || !scriptLine || !audioPlayerRef.current) return;
+        if (!player || !scriptLine || scriptLine.validationStatus !== 'accepted' || scriptLine.ttsEligible !== true || !scriptLine.id || !videoId || !audioPlayerRef.current) return;
 
         isTtsPlayingRef.current = true;
         player.setVolume(60);
@@ -382,21 +383,22 @@ function PlayerScreen() {
             });
         };
 
-        if (audioCache.current.has(scriptLine.id)) {
-            playAudioFromUrl(audioCache.current.get(scriptLine.id));
+        const cacheKey = `${videoId}:${scriptLine.id}:ko-KR-Chirp3-HD-Sulafat:MP3`;
+        if (audioCache.current.has(cacheKey)) {
+            playAudioFromUrl(audioCache.current.get(cacheKey));
             return;
         }
 
         try {
-            const response = await axios.post(`/api/tts`, { text: scriptLine.text }, { responseType: 'blob' });
+            const response = await axios.post(`/api/tts`, { videoId, eventId: scriptLine.id }, { responseType: 'blob' });
             const audioUrl = URL.createObjectURL(response.data);
-            audioCache.current.set(scriptLine.id, audioUrl);
+            audioCache.current.set(cacheKey, audioUrl);
             playAudioFromUrl(audioUrl);
         } catch (error) {
             console.error('Failed to fetch audio:', error);
             if (onAudioEndedRef.current) onAudioEndedRef.current();
         }
-    }, [player]);
+    }, [player, videoId]);
 
     useEffect(() => {
         if (!isPlaying || !player) return;

@@ -344,6 +344,7 @@ function PlayerScreen({ mainRef, announcePolite, announceAssertive }) {
 
         const linesByTimestamp = new Map();
         for (const line of script) {
+            if (line.validationStatus !== 'accepted' || line.ttsEligible !== true) continue;
             const lineVerbosity = parseInt(line.verbosity.replace('v', ''));
             if (lineVerbosity <= verbosity) {
                 const existingLine = linesByTimestamp.get(line.timestamp);
@@ -356,7 +357,7 @@ function PlayerScreen({ mainRef, announcePolite, announceAssertive }) {
     }, [script, verbosity]);
 
     const playDescription = useCallback(async (scriptLine) => {
-        if (!player || !scriptLine || !audioPlayerRef.current) return;
+        if (!player || !scriptLine || scriptLine.validationStatus !== 'accepted' || scriptLine.ttsEligible !== true || !scriptLine.id || !videoId || !audioPlayerRef.current) return;
 
         isTtsPlayingRef.current = true;
         player.setVolume(60);
@@ -387,21 +388,22 @@ function PlayerScreen({ mainRef, announcePolite, announceAssertive }) {
             });
         };
 
-        if (audioCache.current.has(scriptLine.id)) {
-            playAudioFromUrl(audioCache.current.get(scriptLine.id));
+        const cacheKey = `${videoId}:${scriptLine.id}:ko-KR-Chirp3-HD-Sulafat:MP3`;
+        if (audioCache.current.has(cacheKey)) {
+            playAudioFromUrl(audioCache.current.get(cacheKey));
             return;
         }
 
         try {
-            const response = await axios.post(`/api/tts`, { text: scriptLine.text }, { responseType: 'blob' });
+            const response = await axios.post(`/api/tts`, { videoId, eventId: scriptLine.id }, { responseType: 'blob' });
             const audioUrl = URL.createObjectURL(response.data);
-            audioCache.current.set(scriptLine.id, audioUrl);
+            audioCache.current.set(cacheKey, audioUrl);
             playAudioFromUrl(audioUrl);
         } catch (error) {
             console.error('Failed to fetch audio:', error);
             if (onAudioEndedRef.current) onAudioEndedRef.current();
         }
-    }, [player]);
+    }, [player, videoId]);
 
     useEffect(() => {
         if (!isPlaying || !player) return;
@@ -494,16 +496,17 @@ function PlayerScreen({ mainRef, announcePolite, announceAssertive }) {
                 });
             };
 
-            if (audioCache.current.has(scriptAtZero.id)) {
+            const cacheKey = `${videoId}:${scriptAtZero.id}:ko-KR-Chirp3-HD-Sulafat:MP3`;
+            if (audioCache.current.has(cacheKey)) {
                 console.log("playAndUnlockAudio: 스크립트가 캐시에 있습니다.");
-                playFromUrl(audioCache.current.get(scriptAtZero.id));
+                playFromUrl(audioCache.current.get(cacheKey));
             } else {
                 console.log("playAndUnlockAudio: 스크립트가 캐시에 없습니다. TTS API를 호출합니다.");
-                axios.post(`/api/tts`, { text: scriptAtZero.text }, { responseType: 'blob' })
+                axios.post(`/api/tts`, { videoId, eventId: scriptAtZero.id }, { responseType: 'blob' })
                     .then(response => {
                         console.log("playAndUnlockAudio: TTS API 호출 성공.");
                         const audioUrl = URL.createObjectURL(response.data);
-                        audioCache.current.set(scriptAtZero.id, audioUrl);
+                        audioCache.current.set(cacheKey, audioUrl);
                         playFromUrl(audioUrl);
                     })
                     .catch(err => {

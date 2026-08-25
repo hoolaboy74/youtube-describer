@@ -467,6 +467,7 @@ function PlayerScreenV2() {
         const textLines = [];
 
         for (const line of script) {
+            if (line.validationStatus !== 'accepted' || line.ttsEligible !== true) continue;
             if (line.verbosity === 'text' || line.verbosity === 'translation') {
                 const shouldReadTranslation = line.verbosity === 'translation' && (audioLanguage === 'foreign' || audioLanguage === 'mixed' || isReadingSubtitles);
                 const shouldReadOcr = line.verbosity === 'text' && (audioLanguage === 'foreign' || audioLanguage === 'mixed' || isReadingSubtitles);
@@ -496,6 +497,7 @@ function PlayerScreenV2() {
         const getPriority = (v) => (v === 'text' || v === 'translation') ? 4 : parseInt(v.replace('v', ''));
 
         for (const currentLine of filteredScript) {
+            if (currentLine.validationStatus !== 'accepted' || currentLine.ttsEligible !== true) continue;
             if (finalScript.length === 0) {
                 finalScript.push(currentLine);
                 continue;
@@ -563,7 +565,7 @@ function PlayerScreenV2() {
     }, [player]);
 
     const playDescription = useCallback(async (scriptLine) => {
-        if (!player || !scriptLine || !audioPlayerRef.current) return;
+        if (!player || !scriptLine || scriptLine.validationStatus !== 'accepted' || scriptLine.ttsEligible !== true || !scriptLine.id || !videoId || !audioPlayerRef.current) return;
 
         handleTtsStart();
 
@@ -583,21 +585,22 @@ function PlayerScreenV2() {
             });
         };
 
-        if (audioCache.current.has(scriptLine.id)) {
-            playAudioFromUrl(audioCache.current.get(scriptLine.id));
+        const cacheKey = `${videoId}:${scriptLine.id}:ko-KR-Chirp3-HD-Sulafat:MP3`;
+        if (audioCache.current.has(cacheKey)) {
+            playAudioFromUrl(audioCache.current.get(cacheKey));
             return;
         }
 
         try {
-            const response = await axios.post(`/api/tts`, { text: scriptLine.text }, { responseType: 'blob' });
+            const response = await axios.post(`/api/tts`, { videoId, eventId: scriptLine.id }, { responseType: 'blob' });
             const audioUrl = URL.createObjectURL(response.data);
-            audioCache.current.set(scriptLine.id, audioUrl);
+            audioCache.current.set(cacheKey, audioUrl);
             playAudioFromUrl(audioUrl);
         } catch (error) {
             console.error('Failed to fetch audio:', error);
             if (onAudioEndedRef.current) onAudioEndedRef.current();
         }
-    }, [player, handleTtsStart, handleTtsEnd]);
+    }, [player, videoId, handleTtsStart, handleTtsEnd]);
 
     useEffect(() => {
         // 기존 interval 로직에 시간 업데이트 추가

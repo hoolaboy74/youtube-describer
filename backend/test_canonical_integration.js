@@ -196,3 +196,95 @@ test('interactive-style and batch-style canonical publication have identical acc
     fs.rmSync(database.directory, { recursive: true, force: true });
   }
 });
+
+test('TTS handler requires accepted canonical identity and never synthesizes rejected events', () => {
+  const database = disposableDatabase();
+  try {
+    const result = runDatabaseScript(database.path, `
+      process.env.GOOGLE_API_KEY = 'test-key';
+      const fs = require('fs');
+      const Database = require('better-sqlite3');
+      const db = require('./database');
+      const routes = require('./routes');
+      const { validateCandidate } = require('./modules/canonicalOutput');
+      db.init();
+      db.ensurePreliminaryRecord('tts-video');
+      const accepted = validateCandidate({
+        timestamp: 8,
+        tag: 'v1',
+        text: '화면 왼쪽에 문이 있습니다.',
+        provenance: { kind: 'visual', frameEvidence: [{ id: 'frame-8', timestamp: 8 }] }
+      }, { duration: 30, audioLanguage: 'korean' });
+      const foreignTranslation = validateCandidate({
+        timestamp: 20,
+        tag: 'trans',
+        text: '문을 열어 주세요.',
+        provenance: {
+          kind: 'foreign_dialogue',
+          dialogueInterval: { id: 'dialogue-20', start: 20, end: 24, sourceLanguage: 'en', sourceText: 'Please open the door.', confirmed: true, foreign: true }
+        }
+      }, { duration: 30, audioLanguage: 'foreign' });
+      const ttsIneligible = { ...accepted, id: 'ineligible-event', ttsEligible: false };
+      const duplicate = validateCandidate({
+        timestamp: 12,
+        tag: 'txt',
+        text: '안녕하세요.',
+        provenance: { kind: 'screen_text', frameEvidence: [{ id: 'frame-12', timestamp: 12 }], visibleTextEvidence: '안녕하세요.' }
+      }, {
+        duration: 30,
+        audioLanguage: 'korean',
+        dialogueTrack: [{ start: 12, end: 15, sourceLanguage: 'ko', sourceText: '안녕하세요.', confirmed: true }]
+      });
+      db.saveCanonicalScriptChunk({ videoId: 'tts-video', events: [accepted, foreignTranslation, ttsIneligible] });
+      db.saveQuarantinedScriptEvents({ videoId: 'tts-video', candidates: [duplicate] });
+      const direct = new Database(process.env.YOUTUBE_DESCRIBER_DB_PATH);
+      direct.prepare(\`INSERT INTO scripts (id, videoId, timestamp, text, verbosity, tag, validation_status, validation_reasons_json, tts_eligible, policy_version) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)\`).run('rejected-event', 'tts-video', 18, '거부된 문장', 'v1', 'v1', 'rejected', '["UNSUPPORTED_TAG"]', 0, 'codex-v2');
+      direct.close();
+      const cacheRoot = fs.mkdtempSync('/tmp/youtube-describer-tts-');
+      let providerCalls = 0;
+      const fakeClient = {
+        async synthesizeSpeech(request) {
+          providerCalls += 1;
+          if (![accepted.text, foreignTranslation.text].includes(request.input.text)) throw new Error('unexpected raw text');
+          return [{ audioContent: Buffer.from('fake-mp3') }];
+        }
+      };
+      const handler = routes.createTtsHandler({ database: db, client: fakeClient, cacheRoot });
+      const response = () => ({
+        statusCode: 200,
+        body: null,
+        status(code) { this.statusCode = code; return this; },
+        json(body) { this.body = body; return this; },
+        set() { return this; },
+        send(body) { this.body = body.toString(); return this; },
+        sendFile(file) { this.file = file; return this; }
+      });
+      const invoke = async eventId => {
+        const res = response();
+        await handler({ body: { videoId: 'tts-video', eventId } }, res);
+        return { statusCode: res.statusCode, body: res.body, file: res.file };
+      };
+      (async () => {
+        const unknown = await invoke('unknown-event');
+        const rejected = await invoke('rejected-event');
+        const ineligible = await invoke('ineligible-event');
+        const koreanDuplicate = await invoke(duplicate.id);
+        const acceptedFirst = await invoke(accepted.id);
+        const foreignTranslationAccepted = await invoke(foreignTranslation.id);
+        const acceptedCacheHit = await invoke(accepted.id);
+        console.log('__RESULT__' + JSON.stringify({ unknown, rejected, ineligible, koreanDuplicate, acceptedFirst, foreignTranslationAccepted, acceptedCacheHit, providerCalls }));
+        fs.rmSync(cacheRoot, { recursive: true, force: true });
+      })().catch(error => { console.error(error); process.exitCode = 1; });
+    `);
+    assert.equal(result.unknown.statusCode, 422);
+    assert.equal(result.rejected.statusCode, 422);
+    assert.equal(result.ineligible.statusCode, 422);
+    assert.equal(result.koreanDuplicate.statusCode, 422);
+    assert.equal(result.acceptedFirst.statusCode, 200);
+    assert.equal(result.foreignTranslationAccepted.statusCode, 200);
+    assert.equal(result.acceptedCacheHit.statusCode, 200);
+    assert.equal(result.providerCalls, 2);
+  } finally {
+    fs.rmSync(database.directory, { recursive: true, force: true });
+  }
+});

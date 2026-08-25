@@ -415,12 +415,12 @@ function getVideo(videoId) {
       timestamp: Number(row.timestamp),
       text: row.text,
       verbosity: row.verbosity,
-      tag: row.tag || undefined,
+      tag: row.tag || null,
       provenance: parseJson(row.provenance_json, null),
       validationStatus: row.validation_status || 'accepted',
       validationReasons: parseJson(row.validation_reasons_json, []),
       ttsEligible: row.tts_eligible === 1,
-      policyVersion: row.policy_version || undefined
+      policyVersion: row.policy_version || null
     }))
   };
 }

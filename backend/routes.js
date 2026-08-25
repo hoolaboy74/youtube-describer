@@ -13,6 +13,7 @@ const {
     verifyCardOCR 
 } = require('./utils');
 const logger = require('./logger');
+const { findAcceptedTtsEvent } = require('./modules/ttsPolicy');
 
 // JWT 기반 세션 관리 설정
 const jwt = require('jsonwebtoken');
@@ -210,47 +211,49 @@ router.get('/video-exists/:videoId', (req, res) => {
 });
 
 // Endpoint for On-Demand Hybrid TTS Caching
-router.post('/tts', async (req, res) => {
-    try {
-        const { text } = req.body;
-        if (!text) {
-            return res.status(400).json({ error: 'Text is required' });
+function createTtsHandler({ database = db, client = ttsClient, cacheRoot = audioCacheDir } = {}) {
+    return async (req, res) => {
+        try {
+            const { videoId, eventId } = req.body || {};
+            const event = findAcceptedTtsEvent(database, videoId, eventId);
+            if (!event) {
+                return res.status(422).json({ error: 'Accepted TTS event is required' });
+            }
+
+            const voiceName = 'ko-KR-Chirp3-HD-Sulafat';
+            const hash = crypto.createHash('sha256')
+                .update(`${videoId}:${eventId}:${voiceName}:ko-KR:MP3:${event.text}`)
+                .digest('hex');
+            const prefix1 = hash.substring(0, 2);
+            const prefix2 = hash.substring(2, 4);
+            const ttsCacheDir = path.join(cacheRoot, 'tts_cache');
+            const cacheDirPath = path.join(ttsCacheDir, prefix1, prefix2);
+            const audioFilename = `${hash}.mp3`;
+            const audioFilePath = path.join(cacheDirPath, audioFilename);
+
+            if (fs.existsSync(audioFilePath)) {
+                return res.sendFile(audioFilePath);
+            }
+
+            await fs.promises.mkdir(cacheDirPath, { recursive: true });
+
+            const [ttsResponse] = await client.synthesizeSpeech({
+                input: { text: event.text },
+                voice: { languageCode: 'ko-KR', name: voiceName },
+                audioConfig: { audioEncoding: 'MP3' },
+            });
+
+            await fs.promises.writeFile(audioFilePath, ttsResponse.audioContent, 'binary');
+            res.set('Content-Type', 'audio/mpeg');
+            res.send(ttsResponse.audioContent);
+        } catch (error) {
+            logger.error('TTS API Error:', error);
+            res.status(500).json({ error: 'Failed to synthesize speech' });
         }
+    };
+}
 
-        const voiceName = 'ko-KR-Chirp3-HD-Sulafat';
-        const hash = crypto.createHash('sha256').update(`${voiceName}:${text}`).digest('hex');
-        const prefix1 = hash.substring(0, 2);
-        const prefix2 = hash.substring(2, 4);
-        const ttsCacheDir = path.join(audioCacheDir, 'tts_cache');
-        const cacheDirPath = path.join(ttsCacheDir, prefix1, prefix2);
-        const audioFilename = `${hash}.mp3`;
-        const audioFilePath = path.join(cacheDirPath, audioFilename);
-
-        if (fs.existsSync(audioFilePath)) {
-
-            return res.sendFile(audioFilePath);
-        }
-
-
-        await fs.promises.mkdir(cacheDirPath, { recursive: true });
-
-        const [ttsResponse] = await ttsClient.synthesizeSpeech({
-            input: { text },
-            voice: { languageCode: 'ko-KR', name: voiceName },
-            audioConfig: { audioEncoding: 'MP3' },
-        });
-
-        await fs.promises.writeFile(audioFilePath, ttsResponse.audioContent, 'binary');
-
-
-        res.set('Content-Type', 'audio/mpeg');
-        res.send(ttsResponse.audioContent);
-
-    } catch (error) {
-        logger.error('TTS API Error:', error);
-        res.status(500).json({ error: 'Failed to synthesize speech' });
-    }
-});
+router.post('/tts', createTtsHandler());
 
 // 인증 미들웨어: 로그인 완료된 회원만 허용 (시각장애인 여부 상관없음)
 function requireAuth(req, res, next) {
@@ -1772,3 +1775,4 @@ router.get('/sitemap', (req, res) => {
 });
 
 module.exports = router;
+module.exports.createTtsHandler = createTtsHandler;

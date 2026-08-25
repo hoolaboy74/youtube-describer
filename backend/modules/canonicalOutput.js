@@ -394,6 +394,7 @@ function toLegacyScriptEvent(event) {
         id: safeEvent.id,
         timestamp: Number(safeEvent.timestamp),
         text: safeEvent.text,
+        tag,
         verbosity: LEGACY_VERBOSITY[tag] || safeEvent.legacyVerbosity,
         validationStatus: safeEvent.validationStatus,
         validationReasons: Array.isArray(safeEvent.validationReasons)
