@@ -390,7 +390,11 @@ function provenanceForModelCandidate(candidate, context) {
                 start: Number(interval.start),
                 end: Number(interval.end),
                 confirmed: interval.confirmed !== false,
-                foreign: interval.foreign === true || ['foreign', 'mixed'].includes(audioLanguage)
+                // `mixed` is ko-primary in this product. A Korean source VTT
+                // must not become foreign evidence merely because another
+                // sampled segment contained a non-Korean language.
+                foreign: interval.foreign === true ||
+                    (audioLanguage === 'foreign' && interval.sourceLanguage !== 'ko')
             }
         };
     }
@@ -1289,13 +1293,16 @@ function selectDialogueSubtitle(potentialSubtitles, audioLanguage) {
     const find = language => subtitles.find(file => subtitleMatchesLanguage(file, language));
     const normalizedAudio = String(audioLanguage || 'unknown').toLowerCase();
 
-    if (normalizedAudio === 'korean') {
+    if (normalizedAudio === 'korean' || normalizedAudio === 'mixed') {
         const file = find('ko') || find('en');
+        if (normalizedAudio === 'mixed' && !find('ko')) return null;
         return file ? {
             file,
             sourceLanguage: subtitleMatchesLanguage(file, 'ko') ? 'ko' : 'en',
             sourceRole: 'original_dialogue',
-            logLabel: 'korean video: loaded source subtitles'
+            logLabel: normalizedAudio === 'mixed'
+                ? 'mixed video: loaded Korean primary source subtitles'
+                : 'korean video: loaded source subtitles'
         } : null;
     }
 
