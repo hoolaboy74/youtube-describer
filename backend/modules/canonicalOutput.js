@@ -15,6 +15,10 @@ const AUDIO_LANGUAGES = new Set(['korean', 'foreign', 'mixed', 'unknown']);
 const PROVENANCE_KINDS = new Set(['visual', 'screen_text', 'foreign_dialogue']);
 const DEFAULT_MAX_TEXT_LENGTH = 120;
 const DEFAULT_DUPLICATE_WINDOW = 4;
+// The canonical contract is strict by default. The model-generation path
+// opts into a one-second tolerance because its timestamps are integers while
+// WebVTT cue starts commonly contain milliseconds.
+const DEFAULT_DIALOGUE_TIMESTAMP_TOLERANCE = 0;
 const MAX_REASON_COUNT = 12;
 
 function normalizeText(text) {
@@ -173,6 +177,38 @@ function intervalOverlaps(timestamp, interval, guardBand = 0) {
     return timestamp >= interval.start - guardBand && timestamp < interval.end + guardBand;
 }
 
+function dialogueTimestampMatches(timestamp, interval, tolerance = DEFAULT_DIALOGUE_TIMESTAMP_TOLERANCE) {
+    if (!interval || !finiteNumber(Number(timestamp))) return false;
+    const start = Number(interval.start);
+    const end = Number(interval.end);
+    if (!finiteNumber(start) || !finiteNumber(end) || end <= start) return false;
+    const numericTolerance = Number(tolerance);
+    const boundedTolerance = finiteNumber(numericTolerance)
+        ? Math.min(1, Math.max(0, numericTolerance))
+        : DEFAULT_DIALOGUE_TIMESTAMP_TOLERANCE;
+    return intervalOverlaps(Number(timestamp), { start, end }) ||
+        Math.abs(Number(timestamp) - start) <= boundedTolerance;
+}
+
+function findDialogueInterval(timestamp, intervals, tolerance = DEFAULT_DIALOGUE_TIMESTAMP_TOLERANCE) {
+    if (!Array.isArray(intervals)) return null;
+    return intervals
+        .filter(interval => dialogueTimestampMatches(timestamp, interval, tolerance))
+        .sort((left, right) => {
+            const leftInside = intervalOverlaps(Number(timestamp), {
+                start: Number(left.start),
+                end: Number(left.end)
+            });
+            const rightInside = intervalOverlaps(Number(timestamp), {
+                start: Number(right.start),
+                end: Number(right.end)
+            });
+            if (leftInside !== rightInside) return leftInside ? -1 : 1;
+            return Math.abs(Number(left.start) - Number(timestamp)) -
+                Math.abs(Number(right.start) - Number(timestamp));
+        })[0] || null;
+}
+
 function contextDialogueIntervals(context) {
     const intervals = firstDefined(
         context.dialogueTrack,
@@ -254,7 +290,13 @@ function validateCandidate(candidate, context = {}) {
         else {
             if (!sourceInterval.confirmed) addReason(reasons, 'UNCONFIRMED_DIALOGUE');
             if (sourceInterval.needed === false) addReason(reasons, 'TRANSLATION_NOT_NEEDED');
-            if (sourceInterval.start !== timestamp) addReason(reasons, 'DIALOGUE_TIMESTAMP_MISMATCH');
+            // Model timestamps are integer seconds while VTT cue starts are
+            // often fractional. The translation may start anywhere inside
+            // the confirmed cue; requiring exact equality would discard
+            // otherwise valid foreign translations.
+            if (!dialogueTimestampMatches(timestamp, sourceInterval, context.dialogueTimestampTolerance)) {
+                addReason(reasons, 'DIALOGUE_TIMESTAMP_MISMATCH');
+            }
         }
     }
 
@@ -414,5 +456,7 @@ module.exports = {
     validateEvents,
     toLegacyScriptEvent,
     normalizeText,
-    createCanonicalEventId
+    createCanonicalEventId,
+    dialogueTimestampMatches,
+    findDialogueInterval
 };

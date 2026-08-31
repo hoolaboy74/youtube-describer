@@ -13,7 +13,8 @@ const { loadPolicyPrompt, POLICY_VERSION } = require('./modules/promptPolicy');
 const {
     parseLegacyLine,
     validateEvents,
-    toLegacyScriptEvent
+    toLegacyScriptEvent,
+    findDialogueInterval
 } = require('./modules/canonicalOutput');
 
 let isSafariImpersonateSupported = false;
@@ -375,7 +376,11 @@ function provenanceForModelCandidate(candidate, context) {
     }
     if (candidate.tag === 'trans') {
         const dialogueTrack = Array.isArray(context.dialogueTrack) ? context.dialogueTrack : [];
-        const interval = dialogueTrack.find(item => Number(item.start) === timestamp);
+        const interval = findDialogueInterval(
+            timestamp,
+            dialogueTrack,
+            context.dialogueTimestampTolerance
+        );
         if (!interval) return null;
         const audioLanguage = String(context.audioLanguage || context.audioClassification || 'unknown').toLowerCase();
         return {
@@ -760,42 +765,23 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null, userId = nul
             audioLanguageDetector.detectLanguage(tempVideoPath, totalDuration, requestHash)
         ]);
         
-        // Load subtitle and format dialogue track based on audioLanguage
+        // Load only a source-language dialogue track. For foreign/unknown audio,
+        // a Korean VTT is commonly YouTube's translated caption track, not
+        // evidence of Korean speech, so it must never win over the original VTT.
+        const subtitleSelection = selectDialogueSubtitle(
+            fs.readdirSync(baseTempDir).filter(f => f.endsWith('.vtt')),
+            audioLanguage
+        );
         let dialogueTrack = [];
-        const potentialSubtitles = fs.readdirSync(baseTempDir).filter(f => f.endsWith('.vtt'));
-        
-        if (audioLanguage === 'mixed') {
-            const enSub = potentialSubtitles.find(f => (f.includes('.en.') || f.includes('.en-')) && !f.includes('.ko.'));
-            if (enSub) {
-                dialogueTrack = parseVttToDialogueTrack(path.join(baseTempDir, enSub), 'en');
-                logger.info(`[${requestHash}] mixed video: loaded English subtitles and filtered out Korean ones.`);
-            } else {
-                logger.info(`[${requestHash}] mixed video: English subtitles not found. Dialogue track is empty.`);
-            }
-        } else if (audioLanguage === 'korean') {
-            const koSub = potentialSubtitles.find(f => f.includes('.ko.'));
-            if (koSub) {
-                dialogueTrack = parseVttToDialogueTrack(path.join(baseTempDir, koSub), 'ko');
-                logger.info(`[${requestHash}] korean video: loaded Korean subtitles.`);
-            } else {
-                const enSub = potentialSubtitles.find(f => f.includes('.en.') || f.includes('.en-'));
-                if (enSub) {
-                    dialogueTrack = parseVttToDialogueTrack(path.join(baseTempDir, enSub), 'en');
-                    logger.info(`[${requestHash}] korean video: Korean subtitles not found. Using English: ${enSub}`);
-                }
-            }
+        if (subtitleSelection) {
+            dialogueTrack = parseVttToDialogueTrack(
+                path.join(baseTempDir, subtitleSelection.file),
+                subtitleSelection.sourceLanguage,
+                subtitleSelection
+            );
+            logger.info(`[${requestHash}] ${subtitleSelection.logLabel}: ${subtitleSelection.file}`);
         } else {
-            const koSub = potentialSubtitles.find(f => f.includes('.ko.'));
-            if (koSub) {
-                dialogueTrack = parseVttToDialogueTrack(path.join(baseTempDir, koSub), 'ko');
-                logger.info(`[${requestHash}] foreign/unknown video: loaded Korean subtitles.`);
-            } else {
-                const enSub = potentialSubtitles.find(f => f.includes('.en.') || f.includes('.en-'));
-                if (enSub) {
-                    dialogueTrack = parseVttToDialogueTrack(path.join(baseTempDir, enSub), 'en');
-                    logger.info(`[${requestHash}] foreign/unknown video: loaded English subtitles.`);
-                }
-            }
+            logger.info(`[${requestHash}] No usable original-language subtitles found for ${audioLanguage}; dialogue track is empty.`);
         }
 
         timeEnd(extractionLabel);
@@ -850,6 +836,7 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null, userId = nul
             duration: Math.floor(totalDuration),
             audioLanguage,
             dialogueTrack,
+            dialogueTimestampTolerance: 1,
             frameEvidence: allTimestamps.map(timestamp => ({ timestamp }))
         });
         const canonicalOutput = publishCanonicalOutput({
@@ -1131,42 +1118,21 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
             audioLanguageDetector.detectLanguage(tempVideoPath, totalDuration, requestHash)
         ]);
 
-        // Load subtitle and format dialogue track based on audioLanguage
+        // Keep batch subtitle selection identical to the interactive path.
+        const subtitleSelection = selectDialogueSubtitle(
+            fs.readdirSync(baseTempDir).filter(f => f.endsWith('.vtt')),
+            audioLanguage
+        );
         let dialogueTrack = [];
-        const potentialSubtitles = fs.readdirSync(baseTempDir).filter(f => f.endsWith('.vtt'));
-        
-        if (audioLanguage === 'mixed') {
-            const enSub = potentialSubtitles.find(f => (f.includes('.en.') || f.includes('.en-')) && !f.includes('.ko.'));
-            if (enSub) {
-                dialogueTrack = parseVttToDialogueTrack(path.join(baseTempDir, enSub), 'en');
-                logger.info(`[${requestHash}] mixed video (batch): loaded English subtitles and filtered out Korean ones.`);
-            } else {
-                logger.info(`[${requestHash}] mixed video (batch): English subtitles not found. Dialogue track is empty.`);
-            }
-        } else if (audioLanguage === 'korean') {
-            const koSub = potentialSubtitles.find(f => f.includes('.ko.'));
-            if (koSub) {
-                dialogueTrack = parseVttToDialogueTrack(path.join(baseTempDir, koSub), 'ko');
-                logger.info(`[${requestHash}] korean video (batch): loaded Korean subtitles.`);
-            } else {
-                const enSub = potentialSubtitles.find(f => f.includes('.en.') || f.includes('.en-'));
-                if (enSub) {
-                    dialogueTrack = parseVttToDialogueTrack(path.join(baseTempDir, enSub), 'en');
-                    logger.info(`[${requestHash}] korean video (batch): Korean subtitles not found. Using English: ${enSub}`);
-                }
-            }
+        if (subtitleSelection) {
+            dialogueTrack = parseVttToDialogueTrack(
+                path.join(baseTempDir, subtitleSelection.file),
+                subtitleSelection.sourceLanguage,
+                subtitleSelection
+            );
+            logger.info(`[${requestHash}] ${subtitleSelection.logLabel} (batch): ${subtitleSelection.file}`);
         } else {
-            const koSub = potentialSubtitles.find(f => f.includes('.ko.'));
-            if (koSub) {
-                dialogueTrack = parseVttToDialogueTrack(path.join(baseTempDir, koSub), 'ko');
-                logger.info(`[${requestHash}] foreign/unknown video (batch): loaded Korean subtitles.`);
-            } else {
-                const enSub = potentialSubtitles.find(f => f.includes('.en.') || f.includes('.en-'));
-                if (enSub) {
-                    dialogueTrack = parseVttToDialogueTrack(path.join(baseTempDir, enSub), 'en');
-                    logger.info(`[${requestHash}] foreign/unknown video (batch): loaded English subtitles.`);
-                }
-            }
+            logger.info(`[${requestHash}] No usable original-language subtitles found for ${audioLanguage} (batch); dialogue track is empty.`);
         }
 
         timeEnd(extractionLabel);
@@ -1226,6 +1192,7 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
             duration: Math.floor(totalDuration),
             audioLanguage,
             dialogueTrack,
+            dialogueTimestampTolerance: 1,
             frameEvidence: allTimestamps.map(timestamp => ({ timestamp }))
         });
         const canonicalOutput = publishCanonicalOutput({
@@ -1265,7 +1232,7 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
     }
 };
 
-function parseVttToDialogueTrack(vttPath, sourceLang) {
+function parseVttToDialogueTrack(vttPath, sourceLang, options = {}) {
     if (!fs.existsSync(vttPath)) return [];
     const content = fs.readFileSync(vttPath, 'utf8');
     const lines = content.split(/\r?\n/);
@@ -1277,7 +1244,16 @@ function parseVttToDialogueTrack(vttPath, sourceLang) {
             const parts = line.split('-->');
             const start = parseTimestamp(parts[0].trim());
             const end = parseTimestamp(parts[1].trim());
-            currentItem = { start, end, sourceLanguage: sourceLang, sourceText: '', source: 'youtube_caption' };
+            currentItem = {
+                start,
+                end,
+                sourceLanguage: sourceLang,
+                sourceText: '',
+                source: 'youtube_caption',
+                confirmed: options.confirmed !== false,
+                ...(options.foreign === true || sourceLang !== 'ko' ? { foreign: true } : {}),
+                ...(options.sourceRole ? { sourceRole: options.sourceRole } : {})
+            };
         } else if (currentItem && line.trim() && !line.startsWith('NOTE') && !line.startsWith('STYLE')) {
             const cleanText = line.replace(/<[^>]*>/g, '').trim();
             if (cleanText) {
@@ -1294,6 +1270,49 @@ function parseVttToDialogueTrack(vttPath, sourceLang) {
         track.push(currentItem);
     }
     return track;
+}
+
+function subtitleMatchesLanguage(filename, language) {
+    const normalized = String(filename || '').toLowerCase();
+    const languageCode = String(language || '').toLowerCase();
+    return new RegExp(`\\.${languageCode}(?:[-_.]|\\.vtt$)`, 'i').test(normalized);
+}
+
+/**
+ * Select the VTT that represents the audio source, not a translated display
+ * track. yt-dlp can download both `en` and `ko`; for foreign/unknown audio,
+ * choosing `ko.vtt` first turns YouTube's Korean translation into misleading
+ * dialogue evidence and prevents safe [trans] provenance.
+ */
+function selectDialogueSubtitle(potentialSubtitles, audioLanguage) {
+    const subtitles = Array.isArray(potentialSubtitles)
+        ? potentialSubtitles.filter(file => typeof file === 'string' && file.toLowerCase().endsWith('.vtt'))
+        : [];
+    const find = language => subtitles.find(file => subtitleMatchesLanguage(file, language));
+    const normalizedAudio = String(audioLanguage || 'unknown').toLowerCase();
+
+    if (normalizedAudio === 'korean') {
+        const file = find('ko') || find('en');
+        return file ? {
+            file,
+            sourceLanguage: subtitleMatchesLanguage(file, 'ko') ? 'ko' : 'en',
+            sourceRole: 'original_dialogue',
+            logLabel: 'korean video: loaded source subtitles'
+        } : null;
+    }
+
+    // English is the current supported foreign source language. A Korean VTT
+    // is intentionally not a fallback here because it may be auto-translated.
+    const file = find('en');
+    return file ? {
+        file,
+        sourceLanguage: 'en',
+        foreign: true,
+        sourceRole: 'original_dialogue',
+        logLabel: normalizedAudio === 'mixed'
+            ? 'mixed video: loaded English source subtitles'
+            : 'foreign/unknown video: loaded English source subtitles'
+    } : null;
 }
 
 function parseTimestamp(timeStr) {
@@ -1343,6 +1362,7 @@ module.exports = {
     processVideoBatch,
     extractKeyframesHybrid,
     parseVttToDialogueTrack,
+    selectDialogueSubtitle,
     getSimilarity,
     canonicalizeModelOutput,
     publishCanonicalOutput

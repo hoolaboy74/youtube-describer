@@ -26,7 +26,10 @@ function nearestFrameEvidence(timestamp, frames = []) {
 }
 
 function dialogueIntervalAt(timestamp, dialogueTrack = []) {
-  return dialogueTrack.find(interval => Number(interval.start) === timestamp) || null;
+  return dialogueTrack.find(interval => (
+    Number(interval.start) === timestamp ||
+    (Number(interval.start) <= timestamp && timestamp < Number(interval.end))
+  )) || null;
 }
 
 function tagForItem(item, context) {
