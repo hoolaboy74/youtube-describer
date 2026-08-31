@@ -27,7 +27,7 @@ This v1 milestone hardens 뷰래이터 around its core value: delivering accurat
   1. Every generated event preserves the v2 visual-evidence, no-speculation, short Korean honorific, tag, timestamp, and repetition rules across all prompt paths, while remaining serializable to the existing `[v1]`, `[v2]`, `[v3]`, `[txt]`, and `[trans]` formats.
   2. Korean, foreign, mixed, and unknown original-audio cases produce distinct language/provenance outcomes; only confirmed foreign speech can become a needed Korean `[trans]` event.
   3. Korean original dialogue and subtitles that duplicate it are excluded from `[txt]`/`[trans]` generation and TTS, while independently evidenced screen text remains distinguishable from translated dialogue.
-  4. Malformed or unsafe events are rejected or quarantined before persistence to the playable canonical script, including invalid tags, out-of-range timestamps, unsupported language decisions, duplicates, overlong sentences, dialogue overlap, and ineligible TTS content.
+  4. Malformed or unsafe events are rejected or quarantined before persistence to the playable canonical script, including invalid tags, out-of-range timestamps, unsupported language decisions, Korean dialogue duplicates, overlong sentences, and ineligible TTS content. Visual descriptions may overlap dialogue in time when their content is independent.
 **Plans**: 2
 **Research flags**: Existing parser/player compatibility, prompt/config default drift, canonical provenance fields, and Korean audio-description wording need repository-specific design and fixtures.
 
@@ -77,7 +77,7 @@ This v1 milestone hardens 뷰래이터 around its core value: delivering accurat
   1. The player offers only validated, audio-ready time ranges for partial playback; newly validated chunks extend the ready-through boundary without unnecessarily restarting or duplicating current playback.
   2. TTS speaks only policy-eligible visual descriptions, independent screen text, and needed foreign translations; Korean original speech and duplicate dialogue are never synthesized, including after seek, retry, cache hit, or SSE reconnect.
   3. Keyboard and screen-reader users can discover and operate generation status, errors, retries, play/pause, seeking, verbosity, subtitle reading, and description audio, with meaningful announcements for queued, partial, resumed, and failed states.
-  4. Actual synthesized audio duration and occupied dialogue/translation intervals determine scheduling, so descriptions are rejected, deferred, or placed in safe pauses instead of unexpectedly masking important original audio.
+  4. Actual synthesized audio follows the event timestamp and may overlap continuously spoken original audio; scheduling must still prevent duplicate Korean dialogue narration and keep confirmed foreign translations tied to their source intervals.
 **Plans**: TBD
 **UI hint**: yes
 **Research flags**: Korean TTS voice/prosody, returned-audio duration, pause guard bands, mixed-language behavior, partial-playback reconciliation, SSE replay/resync, stream-ticket security, and the target screen-reader/browser matrix require integration and user testing.

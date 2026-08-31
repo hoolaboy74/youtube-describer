@@ -18,8 +18,8 @@ You are a Video Editor and Synchronizer.
 
 2.  **Description Placement ([desc]):**
     *   `[desc]` items are Visual Descriptions.
-    *   **NO OVERLAP:** They must NOT overlap with `Original Subtitles` or `[trans]` items.
-    *   **Conflict:** If a `[desc]` overlaps with dialogue, **condense it** (e.g., "Nods", "Shock") or **delete it** if there is absolutely no space.
+    *   **TIMING:** They may overlap with `Original Subtitles` or `[trans]` items when the video has continuous speech.
+    *   **Content conflict:** If a `[desc]` repeats or paraphrases dialogue, condense it to an independently visible fact or delete it.
     *   Output type: `"v2"`
 
 3.  **On-Screen Text ([ocr]):**

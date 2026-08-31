@@ -143,7 +143,7 @@ test('normalizes whitespace and punctuation for deterministic IDs and duplicate 
     assert.equal(result.quarantined[0].ttsEligible, false);
 });
 
-test('quarantines visual descriptions occupying dialogue and preserves an eligible own translation interval', () => {
+test('keeps visual descriptions eligible when dialogue occupies the same timestamp', () => {
     const result = canonical.validateEvents([
         { timestamp: 12, tag: 'v2', text: '대사 중에 겹친 설명입니다.', provenance: visual(12) },
         {
@@ -158,13 +158,10 @@ test('quarantines visual descriptions occupying dialogue and preserves an eligib
         audioLanguage: 'foreign',
         dialogueTrack: [{ start: 12, end: 16, sourceLanguage: 'en', confirmed: true }]
     });
-    assert.equal(result.quarantined.length, 1);
-    assert.equal(result.quarantined[0].tag, 'v2');
-    assert.ok(result.quarantined[0].validationReasons.includes('DIALOGUE_OVERLAP'));
-    assert.equal(result.quarantined[0].ttsEligible, false);
-    assert.equal(result.accepted.length, 1);
-    assert.equal(result.accepted[0].tag, 'trans');
-    assert.equal(result.accepted[0].ttsEligible, true);
+    assert.equal(result.quarantined.length, 0);
+    assert.equal(result.accepted.length, 2);
+    assert.equal(result.accepted.find(event => event.tag === 'v2').ttsEligible, true);
+    assert.equal(result.accepted.find(event => event.tag === 'trans').ttsEligible, true);
 });
 
 test('returns exact accepted, quarantined, and rejected reason buckets', () => {

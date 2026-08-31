@@ -43,7 +43,7 @@ test('canonical persistence migrates schema, stores accepted events, and quarant
         text: '한 사람이 문 옆에 서 있습니다.',
         provenance: { kind: 'visual', frameEvidence: [{ id: 'frame-12', timestamp: 12 }] }
       }, { duration: 120, audioLanguage: 'korean' });
-      const quarantined = validateCandidate({
+      const overlapping = validateCandidate({
         timestamp: 12,
         tag: 'v2',
         text: '대화 중인 장면입니다.',
@@ -59,8 +59,8 @@ test('canonical persistence migrates schema, stores accepted events, and quarant
         text: '허용되지 않은 태그입니다.',
         provenance: { kind: 'visual', frameEvidence: [{ id: 'frame-20', timestamp: 20 }] }
       }, { duration: 120, audioLanguage: 'korean' });
-      db.saveCanonicalScriptChunk({ videoId: 'video-1', events: [accepted, quarantined, rejected, accepted] });
-      db.saveQuarantinedScriptEvents({ videoId: 'video-1', candidates: [quarantined, rejected] });
+      db.saveCanonicalScriptChunk({ videoId: 'video-1', events: [accepted, overlapping, rejected, accepted] });
+      db.saveQuarantinedScriptEvents({ videoId: 'video-1', candidates: [rejected] });
       const readDb = new Database(process.env.YOUTUBE_DESCRIBER_DB_PATH, { readonly: true });
       const columns = readDb.prepare('PRAGMA table_info(scripts)').all().map(row => row.name);
       const quarantineTable = readDb.prepare("SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'script_quarantine'").get();
@@ -83,12 +83,12 @@ test('canonical persistence migrates schema, stores accepted events, and quarant
     assert.ok(result.columns.includes('tts_eligible'));
     assert.ok(result.columns.includes('policy_version'));
     assert.equal(result.hasQuarantineTable, true);
-    assert.equal(result.stored.length, 1);
+    assert.equal(result.stored.length, 2);
     assert.equal(result.stored[0].tag, 'v2');
     assert.equal(result.stored[0].validation_status, 'accepted');
     assert.equal(result.stored[0].tts_eligible, 1);
     assert.equal(result.stored[0].policy_version, 'codex-v2');
-    assert.deepEqual(result.quarantine.map(row => row.reason_code), ['DIALOGUE_OVERLAP', 'UNSUPPORTED_TAG']);
+    assert.deepEqual(result.quarantine.map(row => row.reason_code), ['UNSUPPORTED_TAG']);
     assert.deepEqual(result.video.script[0], {
       id: result.stored[0].id,
       timestamp: 12,

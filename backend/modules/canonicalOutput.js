@@ -336,15 +336,6 @@ function validateCandidate(candidate, context = {}) {
         sourceInterval && isOwnForeignInterval(event, sourceInterval))) {
         addReason(reasons, 'DIALOGUE_DUPLICATE');
     }
-    const guardBand = finiteNumber(Number(context.dialogueGuardBand))
-        ? Math.max(0, Number(context.dialogueGuardBand))
-        : 0;
-    if (reasons.length === 0 && (input.tag === 'v1' || input.tag === 'v2' || input.tag === 'v3')) {
-        if (dialogues.some(interval => intervalOverlaps(timestamp, interval, guardBand))) {
-            addReason(reasons, 'DIALOGUE_OVERLAP');
-        }
-    }
-
     event.validationReasons = reasons;
     event.id = createCanonicalEventId(event);
     if (reasons.length === 0) {
@@ -352,7 +343,6 @@ function validateCandidate(candidate, context = {}) {
         event.ttsEligible = true;
     } else {
         const quarantineReasons = new Set([
-            'DIALOGUE_OVERLAP',
             'DIALOGUE_DUPLICATE',
             'UNCERTAIN_MIXED_INTERVAL',
             'UNCONFIRMED_FOREIGN_INTERVAL',

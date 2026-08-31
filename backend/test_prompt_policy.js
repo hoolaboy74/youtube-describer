@@ -92,5 +92,6 @@ test('offline synchronizer composes stage work over the v2 baseline', async () =
   assert.equal(prompt.includes('[ocr]'), false);
   assert.equal(prompt.includes('tag(v1|v2|v3|txt|trans)'), true);
   assert.equal(prompt.includes('codex-v2'), true);
+  assert.equal(prompt.includes('시간상 겹쳐도 허용'), true);
   assert.equal(/{{[^{}]+}}/.test(prompt), false);
 });

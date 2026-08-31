@@ -24,8 +24,8 @@ You are a professional Audio Describer for the visually impaired.
 
 2.  **Visual Description Strategy ([desc]):**
     *   **Goal:** Describe visuals for the blind.
-    *   **Action:** Look for **silence gaps** (where no one is speaking and no subtitles appear).
-    *   **Timing:** Place descriptions ONLY in these gaps. Do NOT overlap with dialogue.
+    *   **Action:** Look for meaningful visual changes and keyframes, even when someone is speaking.
+    *   **Timing:** Descriptions may overlap dialogue in time. Do NOT repeat, paraphrase, or summarize the spoken dialogue.
     *   **Tag:** Use `[desc]`.
 
 3.  **Environmental Text Strategy ([ocr]):**

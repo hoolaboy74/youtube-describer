@@ -60,7 +60,7 @@ Progress: [██████████] 100%
 - **Safe routing:** Five genre groups are allowed; low-confidence or conflicting classification uses a conservative fallback and never weakens v2 policy.
 - **Ordered publication:** Chunk drafts may be bounded-parallel, but continuity, deduplication, and canonical publication advance in timestamp order.
 - Canonical IDs normalize model whitespace and punctuation spacing while retaining tag, timestamp, provenance kind, and dialogue interval identity.
-- Hard-invalid candidates are rejected; ambiguous evidence, duplicates, uncertain mixed intervals, and dialogue overlap are quarantined and never TTS eligible.
+- Hard-invalid candidates are rejected; ambiguous evidence, duplicates, uncertain mixed intervals, and Korean dialogue duplicates are quarantined and never TTS eligible. Visual descriptions may overlap continuously spoken original audio by design.
 - Foreign audio permits confirmed dialogue tracks containing Korean translation text; mixed audio requires confirmed non-Korean intervals; unknown audio never translates.
 - Canonical script rows are additive and accepted-only; rejected and quarantined candidates remain in bounded internal diagnostics rather than playable storage.
 - All Gemini generation paths load and assert the codex-v2 baseline before provider calls, with stage-specific context composed as data.
@@ -84,8 +84,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-08-25T02:08:29.600Z
-Stopped at: Completed 01-02-PLAN.md
+Last session: 2026-08-31T13:00:00Z
+Stopped at: Removed the hard visual-dialogue overlap gate; automated policy and persistence tests pass.
 Resume file: None
 
 **Planned Phase:** 1 (Canonical Output, Provenance & v2 Policy) — 2 plans — 2026-08-24T08:22:45.054Z
