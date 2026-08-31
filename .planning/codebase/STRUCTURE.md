@@ -1,131 +1,190 @@
 # Codebase Structure
 
-**Analysis Date:** 2026-08-18
+**Analysis Date:** 2026-08-31
 
 ## Directory Layout
 
 ```text
-youtube-describer/
-├── .planning/       # Architecture maps, conventions, and codebase specifications
-├── backend/         # Express server, SQLite database, business logic, and scripts
-│   ├── bin/         # Pre-compiled platforms binary engines (e.g., bgutil POT solver)
-│   ├── cookies/     # YouTube session cookie files for yt-dlp authentication
-│   ├── db/          # SQLite database storage directory
-│   ├── logs/        # Server log files organized by KST dates
-│   ├── modules/     # Custom pipeline modules (language detector, analyzer, describer, synchronizer)
-│   ├── patches/     # npm package patches applied during postinstall
-│   ├── prompts/     # Templates and reference texts for LLM prompts
-│   ├── public/      # Public-facing static resources (e.g., cached TTS audio)
-│   ├── temp/        # Temporary folders created during video-frame processing
-│   └── yt_dlp_plugins/ # Custom plugin hook directories for yt-dlp
-└── frontend/        # React single page application files
-    ├── public/      # Frontend public templates, logos, and manifest configs
-    └── src/         # React source folder
-        ├── components/ # Shared react elements (layout headers, bottom nav)
-        ├── contexts/  # React contexts (accessibility state, authentication state)
-        ├── screens/   # Main app screens (PlayerScreen, HomeScreen, BoardScreen)
-        └── styles/    # CSS stylesheet folders
+youtube-describer-test/
+├── backend/                         # Node.js/Express service and processing tools
+│   ├── index.js                     # Express bootstrap and runtime cleanup
+│   ├── routes.js                    # API, auth, SSE, TTS, board, and admin routes
+│   ├── database.js                  # SQLite schema, migrations, queries, transactions
+│   ├── videoProcessor.js             # Interactive and batch media/AI pipeline
+│   ├── modules/                     # Focused policy, detection, and staged-processing helpers
+│   ├── prompts/                     # Stage prompt files used by the CLI chain
+│   ├── prompt_template_codex_v2.txt # Common canonical policy prompt
+│   ├── public/audio/                 # Generated TTS cache served by Express
+│   ├── temp/                         # Per-video transient downloads/frames/subtitles
+│   ├── db/                           # Runtime SQLite database and WAL sidecars
+│   ├── cookies/                      # Runtime YouTube cookie files
+│   ├── logs/                         # Runtime application logs
+│   ├── bin/                          # POT/cookie helper binaries and scripts
+│   └── test_*.js                    # Node built-in and integration test entry points
+├── frontend/
+│   ├── public/                       # CRA static assets and verification files
+│   └── src/                          # React application source
+│       ├── App.js                    # Route tree and provider composition
+│       ├── index.js                  # React DOM entry point
+│       ├── screens/                  # Routed page implementations
+│       ├── components/               # Shared layout/navigation/content components
+│       ├── contexts/                 # Auth and accessibility providers
+│       ├── hooks.js                  # Shared focus hook
+│       └── styles/                   # Global CSS
+├── docs/                             # Product, operations, integration, and test documentation
+├── .planning/                        # GSD state, requirements, roadmap, phases, and codebase maps
+├── deploy-prod.sh                    # Production deployment script
+├── deploy-test.sh                    # Test deployment script
+└── billing.csv                       # Operational billing input
 ```
 
 ## Directory Purposes
 
 **`backend/`:**
-- Purpose: Houses the Node.js Express server codebase, database integration schemas, deployment scripts, and automation tasks.
-- Contains: Express server configuration, CLI execution wrappers, database models.
-- Key files: `backend/index.js`, `backend/routes.js`, `backend/database.js`, `backend/videoProcessor.js`.
+- Purpose: Contains the deployable Node.js service, media processing, policy enforcement, persistence, CLI utilities, and backend tests.
+- Contains: CommonJS modules, prompt assets, runtime directories, command-line scripts, and integration fixtures.
+- Key files: `backend/index.js`, `backend/routes.js`, `backend/database.js`, `backend/videoProcessor.js`, and `backend/logger.js`.
 
 **`backend/modules/`:**
-- Purpose: Contains modular subsystems invoked during video downloading, frame parsing, language classifying, and transcription alignment.
-- Contains: Independent JavaScript modules.
-- Key files: `backend/modules/audioLanguageDetector.js`, `backend/modules/describer.js`, `backend/modules/analyzer.js`, `backend/modules/synchronizer.js`.
+- Purpose: Isolate reusable processing/policy concerns from the large route and processor modules.
+- Contains: `canonicalOutput.js`, `promptPolicy.js`, `ttsPolicy.js`, `audioLanguageDetector.js`, `analyzer.js`, `describer.js`, `synchronizer.js`, and `cliCanonicalOutput.js`.
+- Key files: Put canonical schema/validation changes in `backend/modules/canonicalOutput.js`; put common prompt resolution in `backend/modules/promptPolicy.js`; put TTS lookup rules in `backend/modules/ttsPolicy.js`.
 
-**`backend/cookies/`:**
-- Purpose: Stores YouTube session cookie files (in Netscape format) to authenticates requests, bypass bot filters, and bypass age restriction screens.
-- Contains: Secret token text files ending in `_cookies.txt`.
-- Key files: `backend/cookies/c7861967_cookies.txt`, `backend/cookies/hoolaboy_cookies.txt`.
+**`backend/prompts/`:**
+- Purpose: Stores stage-specific prompt assets used by the CLI processing chain.
+- Contains: `stage1_analyzer.txt`, `stage2_describer.txt`, and `stage3_synchronizer.txt`.
+- Key files: Keep the common safety/language baseline in `backend/prompt_template_codex_v2.txt`; stage files should be consumed through `backend/modules/promptPolicy.js` or an explicitly bounded overlay.
+
+**`backend/public/`:**
+- Purpose: Holds files exposed by the Express service.
+- Contains: The generated `audio/tts_cache/` hierarchy and any public static media.
+- Key files: TTS requests in `backend/routes.js` write under `backend/public/audio/tts_cache/`; do not place source media or unvalidated script data here.
+
+**`backend/temp/`, `backend/db/`, `backend/cookies/`, and `backend/logs/`:**
+- Purpose: Runtime state for media processing, SQLite, YouTube credentials/cookies, and logs.
+- Contains: Per-video transient files, `cache.db`/WAL sidecars, cookie files, and date-named log files.
+- Key files: `backend/videoProcessor.js` owns `backend/temp/<videoId>/` cleanup; `backend/database.js` owns the `backend/db/cache.db` default; `backend/logger.js` owns `backend/logs/`.
 
 **`frontend/src/screens/`:**
-- Purpose: Contains pages/screens rendered by the React Client App.
-- Contains: JavaScript component files and their matching CSS stylesheet files.
-- Key files: `frontend/src/screens/HomeScreen.js`, `frontend/src/screens/PlayerScreenV2.js`, `frontend/src/screens/Admin.js`.
+- Purpose: Routed page-level UI and page-specific API/state logic.
+- Contains: `HomeScreen.js`, `PlayerScreenV2.js`, auth/verification pages, board/post pages, account pages, and admin pages, each generally paired with a same-name CSS file.
+- Key files: Add new routed pages under `frontend/src/screens/` and register them in `frontend/src/App.js`; use `PlayerScreenV2.js` as the current player reference.
+
+**`frontend/src/components/`:**
+- Purpose: Shared visual/layout pieces used across screens.
+- Contains: `Layout.js`, `Header.js`, `BottomNav.js`, and `GuideContent.js` with paired CSS files.
+- Key files: Put site-wide navigation or repeated content here rather than duplicating it in screens; `frontend/src/components/Layout.js` controls the common header/bottom navigation shell.
 
 **`frontend/src/contexts/`:**
-- Purpose: Manages globally shared states (accessibility screen reader options, authentication logs) that are consumed by various app components.
-- Contains: React context creators.
-- Key files: `frontend/src/contexts/AuthContext.js`, `frontend/src/contexts/AccessibilityContext.js`.
+- Purpose: Cross-screen React state providers.
+- Contains: `AuthContext.js` for JWT/session state and `AccessibilityContext.js` for live-region announcements.
+- Key files: Add genuinely cross-page state here; keep player-only playback state in `frontend/src/screens/PlayerScreenV2.js`.
+
+**`.planning/`:**
+- Purpose: Project planning and generated codebase intelligence consumed by GSD planning/execution commands.
+- Contains: `PROJECT.md`, `REQUIREMENTS.md`, `ROADMAP.md`, `STATE.md`, phase plans/summaries, research, debug notes, and `.planning/codebase/` documents.
+- Key files: Architecture decisions are described in `.planning/PROJECT.md`, current execution context in `.planning/STATE.md`, and phase-specific constraints in `.planning/phases/01-canonical-output-provenance-v2-policy/01-CONTEXT.md`.
 
 ## Key File Locations
 
 **Entry Points:**
-- `backend/index.js`: Exposes the web listener port, launches crons, and serves static files.
-- `backend/process_video_cli.js`: Off-line processor command script for manual/batch administrative requests.
-- `frontend/src/index.js`: Mounts React DOM tree to template layout index page.
+- `backend/index.js`: Node/Express process entry point.
+- `backend/process_video_cli.js`: Manual staged processing entry point.
+- `frontend/src/index.js`: React DOM entry point.
+- `frontend/src/App.js`: Browser route and provider composition.
 
 **Configuration:**
-- `backend/.env`: Encapsulates environment configurations (Google AI credentials, API URLs, local server ports).
-- `backend/package.json`: Defines backend package requirements and execution script commands.
-- `frontend/package.json`: Holds UI framework dependencies, proxy targets, and build scripts.
+- `backend/package.json`: CommonJS runtime dependencies and `npm start` command.
+- `frontend/package.json`: CRA scripts, React dependencies, and development proxy to `http://localhost:4000`.
+- `backend/prompt_template_codex_v2.txt`: Common generation policy baseline.
+- `backend/database.js`: Default SQLite path, WAL mode, schema creation, additive compatibility migrations, and default settings.
+- `.planning/PROJECT.md`: Product architecture constraints and milestone direction.
 
 **Core Logic:**
-- `backend/videoProcessor.js`: Orchestrates downloads, extracts keyframes, sends prompts to Gemini, and updates database records.
-- `backend/routes.js`: Maps REST APIs, manages EventSource streams, runs JWT authentication, and tracks API request volumes.
-- `backend/database.js`: Runs DDL statements, handles sqlite connections, manages migrations, and handles transactions.
-- `frontend/src/screens/PlayerScreenV2.js`: Synchronizes YouTube embeds with streamed description cues, plays cached TTS audio, and ducks video volume.
+- `backend/routes.js`: HTTP boundary and request-to-processor wiring.
+- `backend/videoProcessor.js`: Media/AI orchestration and interactive/batch convergence.
+- `backend/modules/canonicalOutput.js`: Canonical parser/validator and legacy projection.
+- `backend/modules/audioLanguageDetector.js`: Four-state audio classification from Whisper samples.
+- `backend/database.js`: Video/script persistence and domain data access.
+- `frontend/src/screens/PlayerScreenV2.js`: Cached/SSE playback, filtering, scheduling, and identity-bound TTS requests.
 
 **Testing:**
-- `backend/test_full_workflow.js`: Simulates a complete download-to-script workflow.
-- `backend/test_tts.js`: Synthesizes speech manually and verifies that the output caching is valid.
-- `backend/test_whisper_concurrency.js`: Benchmarks concurrent language classifier pipelines under load.
-- `frontend/src/App.test.js`: Simple unit test verifying React tree render success.
+- `backend/test_canonical_output.js`: Canonical parser, validation, duplicate, provenance, and legacy projection fixtures.
+- `backend/test_canonical_integration.js`: SQLite migration/persistence, publication parity, quarantine, and TTS boundary fixtures.
+- `backend/test_prompt_policy.js`: Common v2 prompt loading/assertion fixtures.
+- `backend/test_subtitle_provenance.js` and `backend/test_audio_language_policy.js`: Dialogue/source-language and four-state language-policy fixtures.
+- `frontend/src/App.test.js`: CRA/React Testing Library application smoke test; frontend tests are otherwise sparse relative to the screen surface.
 
 ## Naming Conventions
 
 **Files:**
-- Backend logic files: CamelCase or kebab-case (e.g., `videoProcessor.js`, `clear-cache.js`).
-- Backend pipeline modules: camelCase (e.g., `audioLanguageDetector.js`).
-- Frontend screen/component view files: PascalCase (e.g., `PlayerScreenV2.js`, `Layout.js`).
-- Frontend stylesheet sheets: PascalCase matching the component name (e.g., `PlayerScreenV2.css`).
-- Cookies: lowercase prefix followed by `_cookies.txt` (e.g., `momcenter1_cookies.txt`).
+- Backend runtime modules use lower camel case, for example `videoProcessor.js`, `audioLanguageDetector.js`, and `promptPolicy.js` in `backend/` and `backend/modules/`.
+- React routed pages and reusable components use PascalCase, for example `frontend/src/screens/PlayerScreenV2.js` and `frontend/src/components/BottomNav.js`.
+- Stylesheets use the component/page name with `.css`, for example `frontend/src/screens/PlayerScreenV2.css`.
+- Backend tests use the `test_*.js` pattern, while the frontend follows CRA’s `*.test.js` pattern, such as `frontend/src/App.test.js`.
+- SQL table/column names use snake_case where introduced (`script_quarantine`, `validation_status`, `tts_eligible`), while legacy video/script identifiers retain camelCase (`videoId`, `createdAt`) in `backend/database.js`.
 
 **Directories:**
-- Storage directories (backend): Plural lowercase words (e.g., `cookies`, `logs`, `prompts`, `patches`).
-- Core folders: Short singular words (e.g., `db`, `bin`, `temp`).
-- React source directories: Lowercase semantic category naming (e.g., `components`, `contexts`, `screens`, `styles`).
+- Backend capability helpers live in `backend/modules/`; prompt assets live in `backend/prompts/`; runnable helper scripts/binaries live in `backend/bin/`.
+- Routed UI belongs in `frontend/src/screens/`; shared UI belongs in `frontend/src/components/`; global React state belongs in `frontend/src/contexts/`.
+- Runtime/generated directories are grouped under `backend/db/`, `backend/temp/`, `backend/logs/`, `backend/cookies/`, and `backend/public/audio/`.
 
 ## Where to Add New Code
 
 **New Feature:**
-- Primary code: Backend endpoints go to `backend/routes.js`, business operations go to `backend/videoProcessor.js`, and React pages go to `frontend/src/screens/`.
-- Tests: Integration test scripts go to the `backend/` root directory (e.g., `backend/test_[feature].js`).
+- Primary backend route: add the HTTP handler in `backend/routes.js`, keeping request validation/auth at the route boundary and data access in `backend/database.js`.
+- Processing behavior: add orchestration in `backend/videoProcessor.js` only when it is part of the main pipeline; extract reusable policy or stage logic into `backend/modules/`.
+- Browser route: add the screen under `frontend/src/screens/` and register it in `frontend/src/App.js`.
+- Tests: add focused Node fixtures under `backend/test_*.js`; add React Testing Library coverage under `frontend/src/*.test.js` or colocated `*.test.js` files.
 
 **New Component/Module:**
-- Implementation: Custom Node components go to `backend/modules/`, while frontend UI items go to `frontend/src/components/`.
+- Shared React component: `frontend/src/components/` with a same-name stylesheet when needed, then import it from screens.
+- Cross-cutting React state: `frontend/src/contexts/` only when multiple routes consume it; use `frontend/src/hooks.js` for small shared hooks.
+- Backend policy/data transformation: `backend/modules/` with a narrow CommonJS export; keep provider/process spawning at the orchestration boundary unless the helper owns that provider integration.
+- New script provenance or validation fields: update `backend/modules/canonicalOutput.js`, then the additive schema/projection in `backend/database.js`, then both player/API consumers.
 
 **Utilities:**
-- Shared helpers: Helper functions go to `backend/utils.js` or `frontend/src/hooks.js`.
+- Shared backend URL, password, verification, and VTT helpers belong in `backend/utils.js`.
+- Shared logging belongs in `backend/logger.js`.
+- Shared persistence queries belong in `backend/database.js`; do not issue ad hoc SQLite statements from React or route handlers when a domain helper exists.
 
 ## Special Directories
 
+**`backend/node_modules/` and `frontend/node_modules/`:**
+- Purpose: Installed dependency trees.
+- Generated: Yes.
+- Committed: No; ignored by the repository rules.
+
+**`frontend/build/`:**
+- Purpose: CRA production build output.
+- Generated: Yes.
+- Committed: No; ignored by `frontend/.gitignore`.
+
 **`backend/db/`:**
-- Purpose: Stores the SQLite database file (`cache.db`).
-- Generated: Yes. Created automatically on first server boot.
-- Committed: No. Ignored in `.gitignore` to prevent leaking production statistics.
+- Purpose: Runtime SQLite database, WAL, and shared-memory files.
+- Generated: Yes.
+- Committed: No; ignored by `.gitignore`.
 
 **`backend/temp/`:**
-- Purpose: Serves as a workspace for raw video downloads and keyframe picture grids.
-- Generated: Yes. Dynamically generated when a processing job is active.
-- Committed: No. Automatically deleted on success/failure and ignored in Git.
+- Purpose: Per-video downloads, extracted JPEG frames, VTT files, and transient WAVs.
+- Generated: Yes.
+- Committed: No; cleaned by `backend/videoProcessor.js` and ignored by `.gitignore`.
 
 **`backend/public/audio/tts_cache/`:**
-- Purpose: Caches Google TTS voice audio files using unique hashed filenames.
-- Generated: Yes. Generated dynamically during client playback queries.
-- Committed: No. Ignored in Git.
+- Purpose: Persistent on-disk MP3 cache addressed by a hashed video/event/voice/format key.
+- Generated: Yes.
+- Committed: No; served by `backend/index.js`, cleaned by its scheduled disk-pressure routine, and ignored by `.gitignore`.
 
-**`backend/logs/`:**
-- Purpose: Contains log files named with the date (KST time).
-- Generated: Yes. Created dynamically by the server logger.
-- Committed: No. Ignored in Git.
+**`backend/logs/` and `prod_report/`:**
+- Purpose: Runtime application logs and generated operational reports.
+- Generated: Yes.
+- Committed: No; `backend/logger.js` writes logs and `.gitignore` excludes both operational output areas.
+
+**`backend/cookies/`:**
+- Purpose: Runtime YouTube authentication/cookie material used by `yt-dlp`.
+- Generated: External/runtime-managed.
+- Committed: No; treat its contents as sensitive and keep all cookie selection/invalidating logic in `backend/videoProcessor.js` or `backend/bin/` helpers.
 
 ---
 
-*Structure analysis: 2026-08-18*
+*Structure analysis: 2026-08-31*

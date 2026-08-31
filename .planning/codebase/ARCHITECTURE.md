@@ -1,179 +1,184 @@
-<!-- refreshed: 2026-08-18 -->
 # Architecture
 
-**Analysis Date:** 2026-08-18
-
-## System Overview
-
-```text
-┌─────────────────────────────────────────────────────────────┐
-│             Presentation / Routing / Client UI              │
-├──────────────────┬──────────────────┬───────────────────────┤
-│    React SPA     │ Express Routes   │   Express Server      │
-│ `frontend/src/`  │`backend/routes.js`│  `backend/index.js`   │
-└────────┬─────────┴────────┬─────────┴──────────┬────────────┘
-         │                  │                     │
-         ▼                  ▼                     ▼
-┌─────────────────────────────────────────────────────────────┐
-│                 Video & AI Business Logic                   │
-│ `backend/videoProcessor.js` & `backend/modules/`            │
-└──────────────────────┬──────────────────────────────────────┘
-                       │
-                       ▼
-┌─────────────────────────────────────────────────────────────┐
-│           Caches, Database & External APIs                  │
-│ `backend/db/cache.db` & `backend/public/audio/tts_cache/`  │
-└─────────────────────────────────────────────────────────────┘
-```
-
-## Component Responsibilities
-
-| Component | Responsibility | File |
-|-----------|----------------|------|
-| Express Entrypoint | Boots the Express server, runs old audio cache cleanup routines periodically, and registers static/JSON parsing middleware. | `backend/index.js` |
-| Express API Routes | Exposes end-user REST APIs (e.g., search, script retrieval, comment CRUD, on-demand TTS synthesis) and manages Server-Sent Events (SSE) processing lines. | `backend/routes.js` |
-| Video Processor | Coordinates the main processing flow: downloads video, extracts visual frames, handles duplicate request locking, generates descriptions with Gemini, and saves results. | `backend/videoProcessor.js` |
-| Audio Language Detector | Extracts three audio slices (20%, 50%, 80% marks) using FFmpeg, analyzes speech with local Whisper-cli, and categorizes the audio language. | `backend/modules/audioLanguageDetector.js` |
-| Database Interface | Initializes SQLite connection in WAL mode, performs auto-migrations, and exposes helpers for database transactions (videos, comments, API costs). | `backend/database.js` |
-| Shared Utilities | Provides helpers for YouTube ID parsing, VTT parsing, password cryptography, and external Siloam/OCR API integrations. | `backend/utils.js` |
-| Logger | Logs events to date-separated files in Korea Standard Time (KST) and sends instant error notifications via Telegram Bot. | `backend/logger.js` |
-| React App Root | Mounts application routing, applies custom theme, and wraps contexts for global Accessibility and Auth status. | `frontend/src/App.js` |
-| Player V2 Screen | Plays the YouTube frame using `react-youtube`, consumes the backend SSE stream, manages play/pause overrides, caches TTS, and ducks sound. | `frontend/src/screens/PlayerScreenV2.js` |
+**Analysis Date:** 2026-08-31
 
 ## Pattern Overview
 
-**Overall:** Layered Architecture (Client-Server Architecture) with Asynchronous Processing and Hybrid Caching.
+**Overall:** React single-page application backed by a Node.js/Express modular monolith with a process-local media/AI pipeline and a single `better-sqlite3` database.
 
 **Key Characteristics:**
-- **On-Demand Progressive Streaming:** Rather than generating everything upfront, script data is streamed progressively via Server-Sent Events (SSE) from the backend, and TTS audio is generated on-demand when the playback reaches the specific timestamp.
-- **Content-Addressable Audio Cache:** Audio clips generated via Google Cloud TTS are cached using hashes of the model name and text, preventing duplicate generation costs.
-- **Resource Constraints and Parallelism:** Latency-critical tasks (hybrid keyframe extraction and language detection) are run in parallel, using spawn limits to prevent CPU starvation.
+- `frontend/src/index.js` boots a React 19 SPA; `frontend/src/App.js` owns browser routing and wraps pages in authentication and accessibility providers.
+- `backend/index.js` boots one Express server on port 4000, mounts `backend/routes.js` under `/api`, initializes SQLite, serves TTS cache files, and runs periodic cleanup in the same process.
+- `backend/videoProcessor.js` owns the end-to-end interactive and batch generation pipeline, including YouTube metadata, `yt-dlp`, FFmpeg, Whisper language detection, Gemini generation, canonical validation, SQLite publication, and SSE callbacks.
+- Interactive processing is held by the HTTP/SSE request, while `/batch-process` acknowledges with HTTP 202 and starts an in-process fire-and-forget promise; `processingLocks` in `backend/videoProcessor.js` is process-local rather than durable.
+- The canonical event contract in `backend/modules/canonicalOutput.js` is the policy boundary, while `backend/database.js` projects accepted events back to the legacy script shape used by the API and players.
 
 ## Layers
 
-**Presentation Layer (Client SPA):**
-- Purpose: Renders the user-facing web pages and handles accessible audio/video synchronized playbacks.
-- Location: `frontend/src/`
-- Contains: React components, screens, contexts, hooks, styles.
-- Depends on: Express API Routing Layer (interacts via `axios` and `EventSource`).
-- Used by: End users.
+**Browser presentation and routing:**
+- Purpose: Render public pages, authenticated account flows, community/admin pages, the YouTube player, accessibility announcements, and local playback preferences.
+- Location: `frontend/src/index.js`, `frontend/src/App.js`, `frontend/src/components/`, `frontend/src/contexts/`, and `frontend/src/screens/`.
+- Contains: React components, React Router routes, Axios calls, `EventSource` handling, YouTube iframe integration, Web Audio/TTS scheduling, and screen-reader live regions.
+- Depends on: `/api` endpoints in `backend/routes.js`, `react-youtube`, `axios`, browser `localStorage`, and the YouTube player API.
+- Used by: Browser users; `frontend/src/screens/PlayerScreenV2.js` is the active route for `/video/:videoId`, while `frontend/src/screens/PlayerScreen.js` and `frontend/src/PlayerScreen.js` retain legacy player implementations.
 
-**Presentation Layer (API Routing):**
-- Purpose: Declares REST and streaming endpoints, performs session authentications, and records analytics requests.
-- Location: `backend/routes.js`
-- Contains: Express routing paths, authentication checks, global tracking middleware.
-- Depends on: Video & AI Business Logic Layer, Data Access Layer.
-- Used by: Presentation Layer (Client SPA).
+**HTTP/API and access-control layer:**
+- Purpose: Validate request shape, record API activity, authenticate users, expose video/script/community/account/admin operations, and adapt processor callbacks to SSE.
+- Location: `backend/index.js` and `backend/routes.js`.
+- Contains: CORS/body middleware, `/api` route registration, `trackApiRequest`, JWT-based `requireAuth`/`requireBlindAuth`, admin password middleware, REST handlers, `/process` SSE, `/batch-process`, and `/tts`.
+- Depends on: `backend/database.js`, `backend/videoProcessor.js`, `backend/utils.js`, `backend/modules/ttsPolicy.js`, Google Cloud TTS, YouTube search, and JWT configuration.
+- Used by: All frontend screens and operational/CLI callers that use the HTTP API.
 
-**Video & AI Business Logic Layer:**
-- Purpose: Downloads YouTube video files, pulls out visual frames, infers language, runs LLM models, and calculates costs.
-- Location: `backend/videoProcessor.js`, `backend/modules/`
-- Contains: CLI invocations, Google AI API calls, parser utilities.
-- Depends on: Data Access Layer, Shared Utilities, external API clients (Gemini AI Studio).
-- Used by: Presentation Layer (API Routing).
+**Video processing orchestration:**
+- Purpose: Download source media and captions, extract frame/audio evidence, call Gemini, canonicalize generated output, persist accepted events, and report status.
+- Location: `backend/videoProcessor.js`.
+- Contains: `processVideo`, `processVideoBatch`, `extractKeyframesHybrid`, VTT parsing/subtitle selection, prompt assembly, Gemini calls, API-cost accounting, retry cleanup, process-local locks, and temporary-directory cleanup.
+- Depends on: `backend/database.js`, `backend/modules/audioLanguageDetector.js`, `backend/modules/promptPolicy.js`, `backend/modules/canonicalOutput.js`, `backend/utils.js`, `yt-dlp`, FFmpeg, Deno/POT tooling, Whisper, YouTube Data API, and Gemini.
+- Used by: `backend/routes.js` for interactive and batch requests; `backend/test_*` integration tests call exported helpers directly.
 
-**Data Access Layer:**
-- Purpose: Connects to the SQLite store, sets up indexes, runs schema changes, and reads/writes documents.
-- Location: `backend/database.js`
-- Contains: SQLite connector definitions, query methods, transactions, schemas.
-- Depends on: Node.js file system API.
-- Used by: Presentation Layer (API Routing), Video & AI Business Logic Layer.
+**Policy, canonicalization, and playback eligibility:**
+- Purpose: Convert model or CLI output into evidence-bearing events, enforce language/provenance and duplicate rules, preserve legacy tags, and define the server-side TTS eligibility boundary.
+- Location: `backend/modules/canonicalOutput.js`, `backend/modules/promptPolicy.js`, `backend/modules/ttsPolicy.js`, and `backend/prompt_template_codex_v2.txt`.
+- Contains: Allowlisted tags, canonical IDs, normalized text, visual/screen-text/foreign-dialogue provenance, accepted/quarantined/rejected status, common prompt loading/assertion, and accepted-event lookup by `videoId` plus `eventId`.
+- Depends on: Structured frame evidence, dialogue intervals, audio classification, the v2 prompt file, and the database projection returned by `backend/database.js`.
+- Used by: `backend/videoProcessor.js`, `backend/process_video_cli.js`, `backend/routes.js`, and `frontend/src/screens/PlayerScreenV2.js` plus the legacy player variants.
+
+**Persistence and domain data access:**
+- Purpose: Own SQLite connection, schema initialization/migrations, transactional writes, legacy-compatible reads, and all user/video/community/admin data access.
+- Location: `backend/database.js` with the runtime database at `backend/db/cache.db` when no `YOUTUBE_DESCRIBER_DB_PATH` override is configured.
+- Contains: `videos`, `scripts`, `script_quarantine`, `comments`, `donations`, `api_costs`, `settings`, `posts`, `post_comments`, `users`, `user_verifications`, watch history, favorites, and API request tables.
+- Depends on: `better-sqlite3`, filesystem setup, and `backend/logger.js`.
+- Used by: `backend/routes.js`, `backend/videoProcessor.js`, CLI processing, and tests that inject a temporary database path.
+
+**CLI processing chain:**
+- Purpose: Provide a script-driven multi-stage processing path with analysis, description, synchronization, and canonical persistence.
+- Location: `backend/process_video_cli.js`, `backend/modules/analyzer.js`, `backend/modules/describer.js`, `backend/modules/synchronizer.js`, and `backend/modules/cliCanonicalOutput.js`.
+- Contains: Chunk-oriented CLI media extraction, one-time visual analysis, stage-specific Gemini calls, JSON synchronization, CLI-to-canonical adaptation, and direct database writes.
+- Depends on: The same SQLite and canonical modules as the server, plus CLI-managed FFmpeg/`yt-dlp` work directories and Gemini.
+- Used by: Manual/operational command-line execution; it is not mounted as an Express route.
 
 ## Data Flow
 
-### Primary Request Path
+**Cached video playback:**
 
-1. **Client Request Trigger:** The browser opens an SSE stream to `/api/process?youtubeUrl=[URL]&token=[JWT]` (`frontend/src/screens/PlayerScreenV2.js:240`).
-2. **Authentication and Limits Verification:** The router checks session status (`backend/routes.js:285`) and queries total balance (`backend/routes.js:363`). If clear, it hands control to `processVideo` (`backend/videoProcessor.js:337`).
-3. **Locking and Initialization:** The system locks `videoId` in `processingLocks` (`backend/videoProcessor.js:340`) and registers a preliminary DB record (`backend/videoProcessor.js:360`).
-4. **Metadata Extraction:** Resolves title, duration, and embed status via the YouTube Data API (`backend/videoProcessor.js:400`).
-5. **Download Pipeline:** Downloads video-only files (max 360p) and autogenerated subtitle VTT tracks via `yt-dlp` using rolling cookies (`backend/videoProcessor.js:517`).
-6. **Parallel Extraction and Language Classification:**
-   - **Keyframes Extraction:** Hybrid extractor performs fast nokey I-frame scans, then backfills missing timestamps (`backend/videoProcessor.js:630`).
-   - **Language Classification:** Extracts audio samples at 20%, 50%, and 80% marks and invokes `whisper-cli` to determine language (`backend/modules/audioLanguageDetector.js:55`).
-7. **Gemini Streaming Execution:** Replaces template tags in `backend/prompt_template.txt` and calls the `generateContentStream` API using `gemini-3.1-pro-preview` under low-resolution mode (`backend/videoProcessor.js:720`).
-8. **Progressive Script Saving and Pushing:** Incoming script chunks matching regex parser patterns are stored in SQLite (`backend/videoProcessor.js:752`) and streamed to the client via SSE `script_chunk` payloads (`backend/videoProcessor.js:748`).
-9. **Final Assembly & Optimization:** Filters out overlapping OCR texts via Levenshtein calculations (`backend/videoProcessor.js:786`), updates video states (`backend/videoProcessor.js:805`), logs billing tokens (`backend/videoProcessor.js:814`), and purges workspace files (`backend/videoProcessor.js:871`).
+1. `frontend/src/screens/HomeScreen.js` loads `/api/cached-videos`, search/recommendation endpoints, and navigates to `/video/:videoId`.
+2. `frontend/src/screens/PlayerScreenV2.js` requests `/api/script/:videoId`; `backend/routes.js` calls `backend/database.js` `getVideo` and returns video metadata plus sorted script rows.
+3. The player filters only `validationStatus === 'accepted'` and `ttsEligible === true`, applies verbosity/subtitle preferences, and synchronizes selected events to the YouTube player clock.
+4. On an eligible event, `frontend/src/screens/PlayerScreenV2.js` posts `{ videoId, eventId }` to `/api/tts`; `backend/modules/ttsPolicy.js` resolves the exact accepted event, `backend/routes.js` synthesizes Korean MP3 through Google Cloud TTS, and the result is cached under `backend/public/audio/tts_cache/`.
+
+**Interactive generation over SSE:**
+
+1. `frontend/src/screens/PlayerScreenV2.js` opens `GET /api/process?youtubeUrl=...&token=...` after a missing, pending, or failed script; `frontend/src/screens/PlayerScreen.js` retains a legacy unauthenticated-compatible client path.
+2. `backend/routes.js` authenticates the request, checks `processingPaused`, extracts the YouTube ID, checks aggregate balance, creates an SSE response with 15-second heartbeats, and calls `processVideo` with an SSE callback.
+3. `backend/videoProcessor.js` rejects invalid/duplicate process-local requests, creates a preliminary SQLite video row, checks the cached completed record, fetches metadata through the YouTube Data API, enforces live/embed/duration/account limits, and marks the video as `processing`.
+4. The processor downloads a low-resolution video and `ko,en` captions with `yt-dlp`, retries bot/auth failures with another cookie, and stores temporary artifacts in `backend/temp/<videoId>/`.
+5. `extractKeyframesHybrid` runs FFmpeg I-frame extraction and bounded backfill; `audioLanguageDetector.detectLanguage` concurrently extracts three ten-second WAV samples and runs three Whisper language detections. The processor selects an original-language VTT and converts it to structured dialogue intervals.
+6. Frame images and integer timestamps are assembled into one Gemini multimodal request with the validated v2 prompt from `backend/modules/promptPolicy.js`. Interactive generation consumes `generateContentStream` and buffers the complete model text before validation.
+7. `canonicalizeModelOutput` in `backend/videoProcessor.js` parses tags and attaches nearest-frame, screen-text, or dialogue provenance; `validateEvents` in `backend/modules/canonicalOutput.js` separates accepted, quarantined, and rejected events.
+8. `publishCanonicalOutput` writes accepted events transactionally through `backend/database.js`, stores bounded diagnostics in `script_quarantine`, emits accepted legacy-compatible `script_chunk` events, updates video status, and emits `end` or an error event.
+9. The SSE client de-duplicates received events by canonical ID, sorts by timestamp, enables the player on the first accepted chunk, and closes on `end`; progress and script state are not replayed from a durable server event log.
+
+**Batch generation:**
+
+1. A caller posts a YouTube URL to `/api/batch-process`; `backend/routes.js` validates the URL, returns 202 immediately, and invokes `processVideoBatch` without retaining an HTTP response.
+2. `processVideoBatch` repeats the metadata/download/FFmpeg/Whisper/subtitle/Gemini sequence in `backend/videoProcessor.js`, but uses non-streaming `generateContent` and has no SSE callback.
+3. Batch output passes through `canonicalizeModelOutput` and `publishCanonicalOutput`, then the temporary directory is removed and SQLite status is set to `completed` or `failed`.
+
+**Canonical output and provenance:**
+
+1. Model lines must match the strict `[integer][v1|v2|v3|txt|trans] text` form in `backend/modules/canonicalOutput.js`.
+2. Visual tags require frame evidence; `[txt]` requires independently visible screen-text evidence; `[trans]` requires a confirmed foreign dialogue interval and a permitted `korean`/`foreign`/`mixed`/`unknown` decision.
+3. Normalized text, tag, timestamp, provenance kind, and dialogue identity form a deterministic event ID; duplicate, ambiguous, unsafe, or invalid candidates remain non-playable.
+4. `backend/database.js` stores accepted canonical fields in additive `scripts` columns and returns both legacy `verbosity` (`v1`/`v2`/`v3`/`text`/`translation`) and canonical metadata from `getVideo`.
+5. `backend/modules/ttsPolicy.js` requires the exact stored event to be accepted and TTS eligible; all player variants also enforce those fields before requesting audio.
 
 **State Management:**
-- **Server Locks:** Double-processing requests are blocked using a memory `Set` (`processingLocks` in `backend/videoProcessor.js:88`).
-- **Database Caches:** Completed video models, scripts, and comments are fetched directly from SQLite.
-- **Client Playback Caches:** TTS audio blobs are saved in a local memory Map ref (`audioCache` in `frontend/src/screens/PlayerScreenV2.js:586`) to speed up playback and avoid redundant API requests.
+- Persistent video lifecycle is represented by `videos.status`, `fail_reason`, `requested_by`, and `audio_language` in `backend/database.js`; script-level validation/provenance is represented by `scripts` and `script_quarantine`.
+- Processing ownership, duplicate detection, timing labels, and retry lifecycle are process-local in `backend/videoProcessor.js` through `processingLocks` and `timers`; there are no job/chunk/attempt tables or startup reconciliation routines.
+- Browser playback state, SSE connection state, verbosity, subtitle reading, playback mode/rate, and TTS cache URLs live in React state/refs and `localStorage` in `frontend/src/screens/PlayerScreenV2.js`.
 
 ## Key Abstractions
 
-**Dialogue Track:**
-- Purpose: Formats subtitle data (`.vtt`) into clean timestamp-tagged text matrices used by Gemini prompts to understand the conversation timeline.
-- Examples: `parseVttToDialogueTrack` in `backend/videoProcessor.js`.
-- Pattern: Parser method pattern.
+**Video processor:**
+- Purpose: Single orchestration boundary for both server generation modes.
+- Examples: `backend/videoProcessor.js:467` (`processVideo`) and `backend/videoProcessor.js:931` (`processVideoBatch`).
+- Pattern: Long async procedures coordinate external processes directly and call database helpers at lifecycle boundaries; keep new processing stages behind explicit helpers or modules while preserving the shared canonical publication call.
 
-**Audio Language Classification:**
-- Purpose: Classifies audio track language into `korean`, `foreign`, `mixed`, or `unknown` using a 3-point sample inference scheme to determine translation/speaking policies.
-- Examples: `backend/modules/audioLanguageDetector.js`.
-- Pattern: Helper module facade.
+**Canonical event:**
+- Purpose: Internal typed representation that carries identity, timestamp, text, tag, provenance, policy version, validation status/reasons, audio language, and TTS eligibility.
+- Examples: `backend/modules/canonicalOutput.js` and `backend/database.js:428`.
+- Pattern: Treat canonical fields as the source of truth; use `toLegacyScriptEvent` only at the API/SSE compatibility boundary.
 
-**Hybrid Keyframe Extractor:**
-- Purpose: Speed-optimizes video scanning by extracting I-frames first and then targeting search queries on the remaining gaps.
-- Examples: `extractKeyframesHybrid` in `backend/videoProcessor.js`.
-- Pattern: Two-phase pipeline optimizer.
+**Persistence adapter:**
+- Purpose: Convert canonical events into accepted-only SQLite rows and convert rows back into a legacy-compatible API DTO with canonical metadata.
+- Examples: `backend/database.js:436`, `backend/database.js:463`, and `backend/database.js:385`.
+- Pattern: Add schema changes additively through the existing `try/catch` column checks and keep writes inside `better-sqlite3` transactions.
 
-**TTS Cache Key:**
-- Purpose: Binds cached TTS files to the active Google TTS voice model to prevent serving outdated audio tracks.
-- Examples: `crypto.createHash('sha256').update(voiceName + ":" + text)` in `/api/tts` (`backend/routes.js:221`).
-- Pattern: Consistent hashing / Content-addressable cache.
+**SSE callback protocol:**
+- Purpose: Let `backend/videoProcessor.js` report progress and accepted script events without depending on Express response internals.
+- Examples: `backend/routes.js:328` (`sendSse`) and calls from `backend/videoProcessor.js`.
+- Pattern: Send named events with JSON payloads; preserve `status_update`, `start`, `script_chunk`, `end`, `duplicate_request`, and `backend_error` names for the current clients.
+
+**Player TTS scheduler:**
+- Purpose: Select eligible events by verbosity/audio policy and play identity-bound generated audio against the YouTube clock.
+- Examples: `frontend/src/screens/PlayerScreenV2.js:filteredScript`, `playableScript`, and `playDescription`.
+- Pattern: Keep eligibility filtering before scheduling and send `{ videoId, eventId }` to `/api/tts`; do not reintroduce raw-text synthesis.
 
 ## Entry Points
 
-**Express Web Daemon:**
-- Location: `backend/index.js`
-- Triggers: Spawned by PM2 or standard shell execution.
-- Responsibilities: Prepares database, registers static media folders, hooks listeners, and initiates daily audio sweeps.
+**Express server:**
+- Location: `backend/index.js`.
+- Triggers: `npm start` in `backend/package.json`.
+- Responsibilities: Load environment configuration, initialize SQLite, configure middleware/static TTS files, mount API routes, listen on `PORT` or 4000, and start disk cleanup.
 
-**Offline CLI script:**
-- Location: `backend/process_video_cli.js`
-- Triggers: Manual execution via command line.
-- Responsibilities: Runs the three-stage process (`analyzer`, `describer`, `synchronizer`) without Express overhead.
+**API router:**
+- Location: `backend/routes.js`.
+- Triggers: Requests under `/api` mounted by `backend/index.js`.
+- Responsibilities: Video/script/search/TTS operations, SSE and batch starts, auth/verification, account history/favorites, board/comments, and admin operations.
 
-**React Client App:**
-- Location: `frontend/src/index.js`
-- Triggers: Browser loading page index.
-- Responsibilities: Mounts DOM node, applies global styles, binds context handlers.
+**Interactive processor:**
+- Location: `backend/videoProcessor.js:467`.
+- Triggers: `GET /api/process` in `backend/routes.js`.
+- Responsibilities: Maintain the SSE-backed request while downloading, extracting, generating, validating, persisting, and cleaning up.
 
-## Architectural Constraints
+**Batch processor:**
+- Location: `backend/videoProcessor.js:931`.
+- Triggers: `POST /api/batch-process` in `backend/routes.js` or direct operational invocation.
+- Responsibilities: Run the non-streaming generation path in the background and persist final status.
 
-- **Threading:** Node.js runs on a single event loop. Heavy visual and audio operations (ffmpeg slicing, whisper-cli transcribing, yt-dlp downloading) are spawned off as external processes (`spawn`, `execFile`) to prevent blocking the event loop. Whisper-cli concurrency is limited to a custom number of threads (configured by `WHISPER_THREADS=1` to prevent VM CPU starvation).
-- **Global state:** Shared request locks (`processingLocks`) are stored in-memory. If the process crashes, the locks are cleared, and video generation records default back to their actual DB states.
-- **Circular imports:** No circular dependencies are permitted. The dependencies flow linearly: Routes -> Video Processor -> Modules/Database/Utils.
+**CLI processor:**
+- Location: `backend/process_video_cli.js`.
+- Triggers: Node command-line invocation with a YouTube URL and optional part/featured flags.
+- Responsibilities: Run the staged analyzer/describer/synchronizer chain, canonicalize each processed part, write accepted events/quarantine diagnostics, and update status.
 
-## Anti-Patterns
-
-### Synchronous File I/O in Async Handlers
-
-**What happens:** Inside `videoProcessor.js:711`, `fs.readFileSync` is used to load `prompt_template.txt` synchronously inside the asynchronous processing flow.
-**Why it's wrong:** Blocking operations stall Node's single-threaded event loop, degrading the server's throughput and increasing response latency for other concurrent users.
-**Do this instead:** Replace it with an asynchronous read using `fs.promises.readFile`:
-```javascript
-const prompt = await fs.promises.readFile(promptTemplatePath, 'utf-8');
-```
+**React application:**
+- Location: `frontend/src/index.js` and `frontend/src/App.js`.
+- Triggers: CRA development server or static frontend deployment loading `frontend/public/index.html`.
+- Responsibilities: Mount providers and routes for home, player, community, account, verification, and admin screens.
 
 ## Error Handling
 
-**Strategy:** Graceful degradation and user-facing notifications. Errors are categorized as early-stage validation, client duration limits, API quota limits, and system failures, and mapped to specific JSON payloads streamed through SSE or REST endpoints.
+**Strategy:** Validate at route, processor, canonical, persistence, and player boundaries; log server failures through `backend/logger.js`; expose user-safe SSE/HTTP messages while retaining detailed server logs.
 
 **Patterns:**
-- **SSE Error Injection:** Catches failures inside the async handler and writes `backend_error` payloads into the SSE stream (e.g. `funds_depleted`, `unverified_user_duration_exceeded`) to let the React client display informative alerts.
-- **yt-dlp Cookie Roll-over:** Detects bot-blocking messages (e.g., `HTTP Error 403`, `Login Required`). If detected on the first download attempt, the script invalidates the active cookie (`.invalid`) and automatically rolls over to a secondary cookie file for attempt 2.
+- `backend/routes.js` returns 4xx for malformed/auth/eligibility requests and 5xx JSON for caught database/provider failures.
+- `backend/videoProcessor.js` updates `videos.status` to `failed` with a reason, maps common errors to named SSE payloads, removes `backend/temp/<videoId>/`, and releases `processingLocks` in `finally`.
+- `backend/modules/canonicalOutput.js` rejects malformed hard failures and quarantines semantically ambiguous candidates; only accepted events reach `scripts`, SSE, or TTS.
+- `backend/database.js` wraps multi-row script/quarantine/video writes in transactions and logs/rethrows failures.
+- `frontend/src/screens/PlayerScreenV2.js` closes SSE on backend/network errors, announces status via `AccessibilityContext`, and avoids TTS when eligibility metadata is absent.
 
 ## Cross-Cutting Concerns
 
-**Logging:** Uses `backend/logger.js` to log events. Operations are recorded to daily files using KST timezones. System crashes or critical exceptions trigger immediate alert messages sent to administrators via the Telegram Bot API.
+**Logging:** `backend/logger.js` appends KST-dated files under `backend/logs/`, mirrors logs to development stdout, and sends deduplicated error alerts to Telegram when configured.
 
-**Validation:**
-- **URLs:** All inputs are parsed against `YOUTUBE_URL_REGEX` to prevent command-injection threats.
-- **OCR Identity Checks:** Validates user card photos using `gemini-2.5-flash` with response schema checking names, birth dates, and "시각장애" keywords.
+**Validation:** YouTube URL/ID checks are duplicated in `backend/utils.js` and `frontend/src/screens/HomeScreen.js`; canonical tag/timestamp/provenance/language/duplicate validation is centralized in `backend/modules/canonicalOutput.js`.
 
-**Authentication:** Binds JWT verification middleware (`requireAuth` and `requireBlindAuth`) inside `backend/routes.js`. Admin endpoints authenticate via custom Bearer headers comparing requests to the `admin_password` config in settings database.
+**Authentication:** `backend/routes.js` uses JWT bearer tokens for user routes, query-string tokens for SSE compatibility, and a separate database-backed admin password middleware; `frontend/src/contexts/AuthContext.js` persists the JWT in browser `localStorage` and sets Axios defaults.
+
+**Accessibility:** `frontend/src/contexts/AccessibilityContext.js` provides polite/assertive live regions; `frontend/src/hooks.js` manages focus on route changes; player screens expose keyboard controls and screen-reader status announcements.
+
+**Resource cleanup:** `backend/videoProcessor.js` removes per-video temporary media in `finally`; `backend/index.js` removes old nested TTS cache files only when disk usage is at least 70%, on startup and every 24 hours.
 
 ---
 
-*Architecture analysis: 2026-08-18*
+*Architecture analysis: 2026-08-31*

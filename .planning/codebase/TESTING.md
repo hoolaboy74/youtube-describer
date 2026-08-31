@@ -1,194 +1,201 @@
 # Testing Patterns
 
-**Analysis Date:** 2026-08-18
+**Analysis Date:** 2026-08-31
 
 ## Test Framework
 
 **Runner:**
-- Frontend: Jest (via `react-scripts test` version `5.0.1`)
-- Backend: Custom execution of standalone Node scripts (no formal test runner framework)
-- Config: `frontend/package.json` configurations (ESLint / Jest rules setup)
+- Backend deterministic tests use the Node built-in `node:test` runner and `node:assert/strict`, with no separate runner or config file. Examples are `backend/test_canonical_output.js`, `backend/test_audio_language_policy.js`, `backend/test_prompt_policy.js`, `backend/test_cli_canonical_output.js`, `backend/test_subtitle_provenance.js`, and `backend/test_canonical_integration.js`.
+- Frontend tests use Create React App's Jest runner through `react-scripts test`, configured by `frontend/package.json` and initialized by `frontend/src/setupTests.js`.
 
 **Assertion Library:**
-- Frontend: `@testing-library/jest-dom` (using `expect(...).toBeInTheDocument()`, etc.)
-- Backend: Custom log checks and conditional output validations (no formal assertion library like Mocha/Chai/Jest is used in the backend)
+- Backend assertions use `node:assert/strict`, including `assert.equal`, `assert.deepEqual`, `assert.ok`, `assert.match`, `assert.throws`, and `assert.rejects` in `backend/test_canonical_output.js`, `backend/test_prompt_policy.js`, and `backend/test_canonical_integration.js`.
+- Frontend assertions use Jest plus `@testing-library/jest-dom`, imported in `frontend/src/setupTests.js`; the only test, `frontend/src/App.test.js`, uses `toBeInTheDocument`.
 
 **Run Commands:**
 ```bash
-npm test                # Run all frontend tests (run inside frontend/ directory)
-node test_tts.js        # Run backend Text-to-Speech API integration test
-node test_full_workflow.js <youtube_url>  # Run backend video processing workflow test
-node test_matrix_runner.js [youtube_url] # Run backend local/remote and prompt matrix test
+node --test backend/test_canonical_output.js backend/test_audio_language_policy.js backend/test_prompt_policy.js backend/test_cli_canonical_output.js  # Deterministic policy suite; observed 23 passing tests
+node --test backend/test_canonical_output.js backend/test_audio_language_policy.js backend/test_prompt_policy.js backend/test_cli_canonical_output.js backend/test_subtitle_provenance.js backend/test_canonical_integration.js  # Full node:test set
+cd frontend && CI=true npm test -- --watchAll=false  # Single-run Jest/CRA tests
+cd frontend && npm run lint  # CRA ESLint with zero warnings allowed
+cd frontend && npm run build  # Production compilation
 ```
+- `backend/package.json` has a placeholder `npm test` script that exits with `Error: no test specified`; invoke Node's test runner directly until that script is replaced.
+- `frontend/package.json` also provides `npm start` and `npm run eject`, but they are development/build commands rather than test commands.
 
 ## Test File Organization
 
 **Location:**
-- Frontend: Co-located inside the `frontend/src/` directory (e.g., `App.test.js`).
-- Backend: Located in the root of the `backend/` directory (e.g., `backend/test_tts.js`, `backend/test_full_workflow.js`, `backend/test_matrix_runner.js`).
+- Backend tests are colocated at the `backend/` root rather than under `tests/` or `__tests__/`. Pure policy tests sit beside the implementation modules, while live probes and workflow scripts are also in `backend/`.
+- Frontend tests are colocated with the app entry area under `frontend/src/`; `frontend/src/App.test.js` is the only Jest test file detected.
 
 **Naming:**
-- Frontend: `[ComponentName].test.js`
-- Backend: `test_[feature].js` or `run_[feature]_test.js` or `poc_[feature].js`
+- Use `test_<subject>.js` for backend Node tests, such as `backend/test_prompt_policy.js`, `backend/test_subtitle_provenance.js`, and `backend/test_canonical_integration.js`.
+- The frontend follows CRA's `*.test.js` convention, currently represented by `frontend/src/App.test.js`.
 
 **Structure:**
 ```
-youtube-describer/
-├── backend/
-│   ├── test.js
-│   ├── test_full_workflow.js
-│   ├── test_gemini_3.js
-│   ├── test_local_video.js
-│   ├── test_matrix_runner.js
-│   ├── test_search.js
-│   ├── test_ssl.js
-│   ├── test_tts.js
-│   ├── test_whisper_concurrency.js
-│   └── run_comparison_test.js
-└── frontend/
-    └── src/
-        ├── App.test.js
-        └── setupTests.js
+backend/test_<subject>.js        # node:test unit or integration fixture
+backend/test_full_workflow.js    # live/manual media and provider workflow
+backend/test_matrix_runner.js    # live comparison benchmark
+frontend/src/App.test.js         # CRA/Jest component test
+frontend/src/setupTests.js       # shared jest-dom setup
 ```
+- Keep deterministic behavior tests in `backend/test_*.js` and keep network/media experiments clearly separate as executable scripts such as `backend/test_full_workflow.js`, `backend/test_local_video.js`, `backend/test_matrix_runner.js`, `backend/test_search.js`, and `backend/test_tts.js`.
 
 ## Test Structure
 
 **Suite Organization:**
-```typescript
-// Frontend Jest Pattern
-import { render, screen } from '@testing-library/react';
-import App from './App';
+```javascript
+// backend/test_canonical_output.js
+'use strict';
 
-test('renders learn react link', () => {
-  render(<App />);
-  const linkElement = screen.getByText(/learn react/i);
-  expect(linkElement).toBeInTheDocument();
-});
+const test = require('node:test');
+const assert = require('node:assert/strict');
 
-// Backend Standalone Integration Script Pattern
-require('dotenv').config();
-const { TextToSpeechClient } = require('@google-cloud/text-to-speech');
+const canonical = require('./modules/canonicalOutput');
 
-async function testTTS() {
-    console.log('--- TTS API Test Initializing ---');
-    try {
-        const ttsClient = new TextToSpeechClient({ fallback: 'rest' });
-        const request = {
-            input: { text: '안녕하세요. TTS API 테스트입니다.' },
-            voice: { languageCode: 'ko-KR', ssmlGender: 'FEMALE', name: 'ko-KR-Chirp3-HD-Sulafat' },
-            audioConfig: { audioEncoding: 'MP3' },
-        };
-        const [response] = await ttsClient.synthesizeSpeech(request);
-        console.log('TTS API call was successful: received', response.audioContent.length, 'bytes.');
-    } catch (error) {
-        console.error('API CALL FAILED:', error);
+test('rejects malformed, empty, overlong, and out-of-range candidates without clamping', () => {
+    const fixtures = [
+        ['[0][v2] 시작 시각도 허용하지 않습니다.', 'TIMESTAMP_OUT_OF_RANGE']
+    ];
+    for (const [line, reason] of fixtures) {
+        const event = parse(line);
+        assert.ok(event.validationReasons.includes(reason));
     }
-}
-testTTS();
+});
 ```
+- Organize tests by policy or behavior, not by private helper. `backend/test_canonical_output.js` covers parsing, provenance, duplicate handling, buckets, and legacy projection; `backend/test_audio_language_policy.js` uses a matrix for Korean, foreign, mixed, and unknown audio.
+- Use table-driven fixture arrays for equivalent cases, then assert exact status/reason/TTS fields as in `backend/test_canonical_output.js` and `backend/test_audio_language_policy.js`.
 
 **Patterns:**
-- Setup pattern: Backend tests define randomized IDs and local paths (e.g., `const runId = Math.random().toString(36).substring(2, 10); const tempVideoPath = path.join(baseTempDir, 'video_' + runId + '.mp4');`) and ensure temporary sandbox directories exist.
-- Teardown pattern: `finally` blocks in backend test scripts clean up the generated assets: checking for file existence and deleting temporary `.mp4` video files, sliced `.wav` audio files, keyframe `.jpg` images, and directory wrappers.
-- Assertion pattern: Logging the outputs of each execution block via `console.log` / `console.error` and checking for file sizes or status updates directly in the sqlite cache database.
+- Use small fixture factories to make provenance explicit: `visual`, `screenText`, `foreignDialogue`, and `trans` in `backend/test_canonical_output.js` and `backend/test_audio_language_policy.js`.
+- Assert both positive and negative safety behavior. Accepted events must carry `validationStatus: 'accepted'` and `ttsEligible: true`; rejected/quarantined events must not be TTS eligible in `backend/test_canonical_output.js` and `backend/test_canonical_integration.js`.
+- Assert compatibility projections at their boundary rather than duplicating the canonical object in every test, using `toLegacyScriptEvent` in `backend/test_canonical_output.js`.
+- Test async failures with `assert.rejects` and a predicate on the custom error code, as in `backend/test_prompt_policy.js`.
 
 ## Mocking
 
-**Framework:** Custom JavaScript mock implementation (no formal mocking library is loaded on the backend).
+**Framework:**
+- Backend deterministic tests do not use a mocking library. They inject plain objects/functions or use temporary child processes, as in `backend/test_canonical_integration.js`.
+- Frontend has Jest available through CRA, but no component mocks or network mocks are present in `frontend/src/App.test.js`.
 
 **Patterns:**
-```typescript
-// In test_matrix_runner.js:
-// Injects mock subtitles/dialogue track data when external API queries fail or return empty sets
-if (!subtitles || dialogueTrack.length === 0 || !dialogueTrack.some(t => t.start >= 160 && t.start <= 184)) {
-    console.log('-> Injecting Mock Subtitles for target interval (160s-184s)');
-    subtitles = `WEBVTT\n\n1\n00:02:40.000 --> 00:02:44.000\nYeah, he is Nolan.`;
-    dialogueTrack = [
-        { start: 160.0, end: 164.0, text: "Yeah, he is Nolan." }
-    ];
-}
+```javascript
+// backend/test_canonical_integration.js
+const fakeClient = {
+    async synthesizeSpeech(request) {
+        providerCalls += 1;
+        if (![accepted.text, foreignTranslation.text].includes(request.input.text)) {
+            throw new Error('unexpected raw text');
+        }
+        return [{ audioContent: Buffer.from('fake-mp3') }];
+    }
+};
+
+const handler = routes.createTtsHandler({
+    database: db,
+    client: fakeClient,
+    cacheRoot
+});
 ```
+- Inject provider/database/cache dependencies when a boundary is exposed, following `createTtsHandler` in `backend/routes.js` and its use in `backend/test_canonical_integration.js`.
+- Use a disposable SQLite database in a child Node process by setting `YOUTUBE_DESCRIBER_DB_PATH`, as `backend/test_canonical_integration.js` does; inspect the database with a read-only connection after writes.
 
 **What to Mock:**
-- Network-bound external API inputs where stable mock definitions can be injected to allow local execution of downstream parsing code.
+- Mock Gemini/TTS responses, filesystem cache roots, and provider-boundary clients for deterministic tests, following the fake TTS client in `backend/test_canonical_integration.js`.
+- Replace download, FFmpeg, Whisper, YouTube, and EventSource interactions before adding tests around `backend/videoProcessor.js` or `frontend/src/screens/PlayerScreenV2.js`; the existing live scripts call real services and binaries.
 
 **What NOT to Mock:**
-- Local system command execution processes (like `ffmpeg`, `yt-dlp`, and `whisper-cli`) as their actual process exits and generated files are required for testing pipeline integrity.
+- Keep pure canonical normalization, validation, language policy, and prompt assertions real; these are the deterministic contracts in `backend/modules/canonicalOutput.js` and `backend/modules/promptPolicy.js`.
+- Keep migration SQL and accepted/quarantine persistence real in temporary databases, as required by `backend/test_canonical_integration.js`.
 
 ## Fixtures and Factories
 
 **Test Data:**
-```typescript
-// Declared inline inside test files to define configurations or input parameters
-const promptConfigs = [
-    { name: 'simple_ocr', path: path.join(__dirname, 'prompt_template_simple_ocr.txt') },
-    { name: 'old', path: path.join(__dirname, 'prompt_template_old.txt') },
-    { name: 'current', path: path.join(__dirname, 'prompt_template.txt') }
-];
+```javascript
+// backend/test_audio_language_policy.js
+const dialogue = (sourceLanguage, overrides = {}) => ({
+    kind: 'foreign_dialogue',
+    dialogueInterval: {
+        start: 12,
+        end: 16,
+        sourceLanguage,
+        confirmed: true,
+        ...overrides
+    }
+});
 
-const resolutionConfigs = [
-    { name: 'low', mediaResolution: 'MEDIA_RESOLUTION_LOW' },
-    { name: 'high', mediaResolution: 'MEDIA_RESOLUTION_HIGH' }
-];
+const screen = (text = '독립 화면 글자') => ({
+    kind: 'screen_text',
+    frameEvidence: [{ frameId: 'screen-1', timestamp: 12, visibleText: text }]
+});
 ```
+- Prefer fixed timestamps, fixed IDs, bounded Korean/English text, and explicit provenance over random or production data, following `backend/test_canonical_output.js`, `backend/test_audio_language_policy.js`, and `backend/test_cli_canonical_output.js`.
+- Prompt tests use a temporary directory and remove it in `finally`, as in `backend/test_prompt_policy.js`; VTT tests use the same `mkdtempSync`/`rmSync` pattern in `backend/test_subtitle_provenance.js`.
+- Integration tests use `backend/test_canonical_integration.js`'s `__RESULT__` stdout marker to transfer structured child-process results and clean disposable directories in `finally` blocks.
 
 **Location:**
-- Stated inline inside individual test scripts (e.g., `test_matrix_runner.js`, `test_full_workflow.js`).
+- There is no shared fixtures directory or factory module. Factories are local to each test file, especially `backend/test_canonical_output.js`, `backend/test_audio_language_policy.js`, and `backend/test_subtitle_provenance.js`.
+- Frontend has no fixture or factory directory; `frontend/src/App.test.js` renders the application directly.
 
 ## Coverage
 
-**Requirements:** None enforced
+**Requirements:**
+- No coverage threshold, coverage configuration, or coverage script is present in `backend/package.json`, `frontend/package.json`, or repository configuration files.
+- Jest/Istanbul dependencies arrive transitively with CRA, but no `--coverage`, `collectCoverage`, `coverageThreshold`, `nyc`, or `c8` setting is configured.
 
 **View Coverage:**
 ```bash
-# None configured
+cd frontend && npm test -- --coverage --watchAll=false  # CRA/Jest coverage, if dependencies resolve
 ```
+- No backend coverage command is defined; add instrumentation only with an explicit project decision because the backend runner is currently direct `node --test`.
 
 ## Test Types
 
 **Unit Tests:**
-- Frontend: Single basic React component test (`App.test.js`) ensuring the component is correctly rendered and contains standard content.
+- `backend/test_canonical_output.js`, `backend/test_audio_language_policy.js`, `backend/test_cli_canonical_output.js`, and `backend/test_prompt_policy.js` exercise pure parsing, normalization, policy, provenance, and prompt composition without network calls.
+- `backend/test_subtitle_provenance.js` tests VTT parsing/selection and canonical binding with temporary files, while still importing the processor module.
 
 **Integration Tests:**
-- Backend: Large-scale workflow integration tests that download real YouTube video files, perform multi-step media parsing (FFmpeg keyframes, Whisper Speech-to-Text), communicate with external APIs (Google Cloud TTS, Gemini AI Vision), cache metadata inside SQLite database instances, and output performance logs or JSON analysis sheets.
+- `backend/test_canonical_integration.js` covers additive SQLite migration, accepted-only persistence, quarantine storage, interactive/batch parity, legacy compatibility, and TTS provider/cache boundary behavior.
+- The integration harness uses real `better-sqlite3` and route/database code against temporary paths, then asserts database rows and API-like response objects.
 
 **E2E Tests:**
-- Not used
+- No browser E2E framework is configured. Executable media/provider workflows such as `backend/test_full_workflow.js`, `backend/test_local_video.js`, `backend/test_matrix_runner.js`, `backend/test_whisper_concurrency.js`, and `backend/test_tts.js` require live credentials, binaries, network access, or local media.
 
 ## Common Patterns
 
 **Async Testing:**
-```typescript
-// Wrapping async process spawning in a Node Promise wrapper
-function runProcess(cmd, args, ignoreSubErrors = false) {
-    return new Promise((resolve, reject) => {
-        const child = spawn(cmd, args);
-        let stderr = '';
-        child.stderr.on('data', data => { stderr += data.toString(); });
-        child.on('close', code => {
-            if (code === 0 || ignoreSubErrors) {
-                resolve();
-            } else {
-                reject(new Error(`${cmd} failed with code ${code}. Stderr: ${stderr}`));
-            }
-        });
-    });
-}
+```javascript
+// backend/test_prompt_policy.js
+test('default prompt resolution uses the v2 baseline and resolves all placeholders', async () => {
+    const loaded = await loadPolicyPrompt();
+    assert.equal(loaded.policyVersion, POLICY_VERSION);
+});
 ```
+- Use an `async` test callback and `await` for promise-returning APIs, as in `backend/test_prompt_policy.js`.
+- For child-process integration, use synchronous `spawnSync` plus a structured marker when the test needs deterministic setup/teardown, as in `backend/test_canonical_integration.js`.
 
 **Error Testing:**
-```typescript
-// try-catch block wrapping call executions and checking for specific errors
-try {
-    const result = await model.generateContent(prompt);
-} catch (error) {
-    console.error("Gemini API call failed:", error);
-    if (error.message.includes("invalid API key")) {
-        console.error("Please verify GOOGLE_API_KEY inside your .env file.");
-    }
-}
+```javascript
+await assert.rejects(
+    loadPolicyPrompt({ promptFile: path.join(directory, 'missing.txt') }),
+    error => error instanceof PolicyPromptError && error.code === 'POLICY_PROMPT_NOT_FOUND'
+);
 ```
+- Assert stable domain codes and response status codes rather than provider-specific error text, following `backend/test_prompt_policy.js` and `backend/test_canonical_integration.js`.
+- For policy failures, assert the exact reason code and `ttsEligible: false`; this is the safety pattern in `backend/test_canonical_output.js` and `backend/test_audio_language_policy.js`.
+
+## Coverage Gaps
+
+- Frontend behavior is almost entirely untested: `frontend/src/App.test.js` is a stale Create React App smoke test that searches for “learn react”, and no tests cover `frontend/src/screens/PlayerScreenV2.js`, `frontend/src/contexts/AuthContext.js`, `frontend/src/contexts/AccessibilityContext.js`, SSE recovery, keyboard behavior, screen-reader announcements, or TTS scheduling.
+- The frontend test command fails in this worktree before executing tests because Jest cannot resolve the declared `react-router-dom` dependency from `frontend/src/App.js`, despite its declaration in `frontend/package.json`; restore a complete frontend install before relying on Jest results.
+- Backend route/auth/database coverage is narrow. `backend/test_canonical_integration.js` exercises selected canonical/TTS paths, but no systematic tests cover the many handlers in `backend/routes.js`, authentication branches, pagination, settings, user verification, or the broad database API in `backend/database.js`.
+- The main processing pipeline has no deterministic tests for retries, duplicate locks, download failures, FFmpeg/Whisper failures, Gemini refusal/stream behavior, API cost accounting, cleanup, or batch/interactive progress. Those paths live primarily in `backend/videoProcessor.js` and are exercised only by live/manual scripts such as `backend/test_full_workflow.js` and `backend/test_matrix_runner.js`.
+- Restart/recovery, durable job/chunk state, chunk-boundary continuity, bounded resource concurrency, and SSE reconnect replay have no test fixtures. The active planning requirements in `.planning/REQUIREMENTS.md` identify these as future behavior, but no implementation test surface exists yet.
+- `npm run lint` is not a clean quality gate: `frontend/src/PlayerScreen.js:527` produces a missing-hook-dependency warning and `--max-warnings 0` turns it into a failure. Backend has no equivalent lint gate.
 
 ---
 
-*Testing analysis: 2026-08-18*
+*Testing analysis: 2026-08-31*
