@@ -44,7 +44,7 @@ test('foreign translation provenance matches a timestamp inside a fractional VTT
         fs.writeFileSync(vttPath, [
             'WEBVTT',
             '',
-            '00:00:05.50 --> 00:00:08.00',
+            '00:00:05.50 --> 00:00:08.00 align:start position:0%',
             'This is the original English speech.',
             ''
         ].join('\n'));
@@ -105,6 +105,44 @@ test('foreign translation binds when integer output rounds a fractional cue star
         assert.equal(result.accepted.length, 1);
         assert.equal(result.accepted[0].ttsEligible, true);
         assert.equal(result.accepted[0].provenance.dialogueInterval.start, 0.16);
+    } finally {
+        fs.rmSync(directory, { recursive: true, force: true });
+    }
+});
+
+test('WebVTT cue settings and whitespace lines preserve the first dialogue cue', () => {
+    const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'youtube-describer-vtt-'));
+    const vttPath = path.join(directory, 'video.en.vtt');
+    try {
+        fs.writeFileSync(vttPath, [
+            'WEBVTT',
+            '',
+            '00:00:00.000 --> 00:00:01.710 align:start position:0%',
+            ' ',
+            'Google<00:00:00.320><c> Gemini</c> just released.',
+            '',
+            '00:00:01.710 --> 00:00:03.150 align:start position:0%',
+            'Google Gemini just released a bunch of brand new models.',
+            ''
+        ].join('\n'));
+
+        const dialogueTrack = parseVttToDialogueTrack(vttPath, 'en', {
+            foreign: true,
+            sourceRole: 'original_dialogue'
+        });
+        const result = canonicalizeModelOutput('[1][trans] 구글 제미나이가 새로운 소식을 발표했습니다.', {
+            duration: 20,
+            audioLanguage: 'foreign',
+            dialogueTrack,
+            dialogueTimestampTolerance: 1,
+            frameEvidence: []
+        });
+
+        assert.equal(dialogueTrack[0].start, 0);
+        assert.equal(dialogueTrack[0].end, 1.71);
+        assert.match(dialogueTrack[0].sourceText, /Google Gemini/);
+        assert.equal(result.accepted.length, 1);
+        assert.equal(result.accepted[0].provenance.dialogueInterval.end, 1.71);
     } finally {
         fs.rmSync(directory, { recursive: true, force: true });
     }

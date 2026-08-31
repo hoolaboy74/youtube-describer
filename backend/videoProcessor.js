@@ -1241,9 +1241,12 @@ function parseVttToDialogueTrack(vttPath, sourceLang, options = {}) {
 
     for (const line of lines) {
         if (line.includes('-->')) {
+            if (currentItem && currentItem.sourceText) {
+                track.push(currentItem);
+            }
             const parts = line.split('-->');
             const start = parseTimestamp(parts[0].trim());
-            const end = parseTimestamp(parts[1].trim());
+            const end = parseTimestamp(parts[1].trim().split(/\s+/, 1)[0]);
             currentItem = {
                 start,
                 end,
@@ -1259,11 +1262,6 @@ function parseVttToDialogueTrack(vttPath, sourceLang, options = {}) {
             if (cleanText) {
                 currentItem.sourceText = currentItem.sourceText ? currentItem.sourceText + ' ' + cleanText : cleanText;
             }
-        } else if (currentItem && !line.trim()) {
-            if (currentItem.sourceText) {
-                track.push(currentItem);
-            }
-            currentItem = null;
         }
     }
     if (currentItem && currentItem.sourceText) {
