@@ -339,6 +339,8 @@ const parseISO8601Duration = (duration) => {
     return hours * 3600 + minutes * 60 + seconds;
 };
 
+const MODEL_FRAME_EVIDENCE_MAX_DISTANCE_SECONDS = 1.5;
+
 function nearestFrameEvidence(timestamp, context) {
     const frames = Array.isArray(context.frameEvidence)
         ? context.frameEvidence
@@ -351,6 +353,9 @@ function nearestFrameEvidence(timestamp, context) {
             ? frame
             : best
     ));
+    if (Math.abs(Number(nearest.timestamp) - Number(timestamp)) > MODEL_FRAME_EVIDENCE_MAX_DISTANCE_SECONDS) {
+        return [];
+    }
     return [{
         id: String(nearest.id || nearest.frameId || `frame-${Math.round(nearest.timestamp)}`),
         timestamp: Number(nearest.timestamp),
@@ -368,10 +373,23 @@ function provenanceForModelCandidate(candidate, context) {
         const screenText = Array.isArray(context.screenTextEvidence)
             ? context.screenTextEvidence.find(item => Number(item.timestamp) === timestamp)
             : null;
+        // The multimodal generation request already supplies the frame to
+        // Gemini. When no separate OCR worker is available, that frame is the
+        // evidence source for a model-produced [txt] candidate. Keep the
+        // pure validator strict; this adapter supplies the evidence only for
+        // candidates tied to an actual input frame.
+        const visibleTextEvidence = screenText && screenText.text
+            ? screenText.text
+            : (frameEvidence.length > 0 ? candidate.text : null);
         return {
             kind: 'screen_text',
             frameEvidence,
-            ...(screenText && screenText.text ? { visibleTextEvidence: screenText.text } : {})
+            ...(visibleTextEvidence ? { visibleTextEvidence } : {}),
+            ...(visibleTextEvidence ? {
+                source: screenText && screenText.source
+                    ? screenText.source
+                    : 'gemini_multimodal_frame'
+            } : {})
         };
     }
     if (candidate.tag === 'trans') {

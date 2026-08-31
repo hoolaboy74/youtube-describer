@@ -30,6 +30,24 @@ test('foreign and unknown audio prefer original English VTT over Korean translat
     assert.equal(selectDialogueSubtitle(['video.ko.vtt'], 'unknown'), null);
 });
 
+test('model-produced screen text uses the supplied multimodal frame as evidence without OCR', () => {
+    const result = canonicalizeModelOutput('[6][txt] 화면 하단에 안내 문구가 보입니다.', {
+        duration: 20,
+        audioLanguage: 'mixed',
+        frameEvidence: [{ id: 'frame-6', timestamp: 6 }]
+    });
+
+    assert.equal(result.accepted.length, 1);
+    assert.equal(result.accepted[0].tag, 'txt');
+    assert.equal(result.accepted[0].ttsEligible, true);
+    assert.deepEqual(result.accepted[0].provenance, {
+        kind: 'screen_text',
+        frameEvidence: [{ id: 'frame-6', timestamp: 6 }],
+        visibleTextEvidence: '화면 하단에 안내 문구가 보입니다.',
+        source: 'gemini_multimodal_frame'
+    });
+});
+
 test('Korean and mixed audio prefer Korean source VTT', () => {
     const files = ['video.ko.vtt', 'video.en.vtt'];
 

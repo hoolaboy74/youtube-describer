@@ -178,12 +178,13 @@ test('interactive-style and batch-style canonical publication have identical acc
         '[14][v2] 한 사람이 문 옆에 서 있습니다.',
         '[20][trans] 문을 열어 주세요.',
         '[22][txt] 안녕하세요.',
+        '[24][txt] 화면 상단에 안내 문구가 있습니다.',
         '[99][v1] 영상 밖의 문장입니다.'
       ].join('\\n');
       const context = {
         duration: 30,
         audioLanguage: 'foreign',
-        frameEvidence: [{ id: 'frame-12', timestamp: 12 }, { id: 'frame-14', timestamp: 14 }, { id: 'frame-22', timestamp: 22 }],
+        frameEvidence: [{ id: 'frame-12', timestamp: 12 }, { id: 'frame-14', timestamp: 14 }, { id: 'frame-22', timestamp: 22 }, { id: 'frame-24', timestamp: 24 }],
         dialogueTrack: [
           { start: 20, end: 24, sourceLanguage: 'en', sourceText: 'Please open the door.', confirmed: true, foreign: true },
           { start: 22, end: 25, sourceLanguage: 'ko', sourceText: '안녕하세요.', confirmed: true, foreign: true }
@@ -209,9 +210,9 @@ test('interactive-style and batch-style canonical publication have identical acc
       readDb.close();
     `);
     assert.equal(result.same, true);
-    assert.equal(result.acceptedIds.length, 2);
+    assert.equal(result.acceptedIds.length, 3);
     assert.deepEqual(result.stored, result.acceptedIds.map(id => ({ id, validation_status: 'accepted' })));
-    assert.deepEqual(result.acceptedLegacy.map(event => event.verbosity), ['v2', 'translation']);
+    assert.deepEqual(result.acceptedLegacy.map(event => event.verbosity), ['v2', 'translation', 'text']);
     assert.ok(result.quarantine.some(row => row.reason_code === 'DUPLICATE_EVENT'));
     assert.ok(result.quarantine.some(row => row.reason_code === 'DIALOGUE_DUPLICATE'));
     assert.ok(result.quarantine.some(row => row.reason_code === 'TIMESTAMP_OUT_OF_RANGE'));

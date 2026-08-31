@@ -6,6 +6,8 @@ const {
   validateEvents
 } = require('./canonicalOutput');
 
+const MODEL_FRAME_EVIDENCE_MAX_DISTANCE_SECONDS = 1.5;
+
 function audioClassificationFor(language) {
   const normalized = String(language || '').toLowerCase();
   if (['ko', 'kor', 'korean'].includes(normalized)) return 'korean';
@@ -15,14 +17,17 @@ function audioClassificationFor(language) {
 }
 
 function nearestFrameEvidence(timestamp, frames = []) {
-  return frames
+    const sorted = frames
     .filter(frame => frame && Number.isFinite(Number(frame.timestamp)))
     .map(frame => ({
       id: frame.id || frame.frameId || frame.path,
       timestamp: Number(frame.timestamp)
     }))
-    .sort((left, right) => Math.abs(left.timestamp - timestamp) - Math.abs(right.timestamp - timestamp))
-    .slice(0, 8);
+    .sort((left, right) => Math.abs(left.timestamp - timestamp) - Math.abs(right.timestamp - timestamp));
+    if (sorted.length === 0 || Math.abs(sorted[0].timestamp - timestamp) > MODEL_FRAME_EVIDENCE_MAX_DISTANCE_SECONDS) {
+      return [];
+    }
+    return sorted.slice(0, 8);
 }
 
 function dialogueIntervalAt(timestamp, dialogueTrack = []) {
@@ -56,11 +61,12 @@ function provenanceForItem(item, tag, context) {
   if (tag === 'txt') {
     const visibleText = typeof item.visibleTextEvidence === 'string'
       ? item.visibleTextEvidence
-      : undefined;
+      : (frameEvidence.length > 0 ? item.text : undefined);
     return {
       kind: 'screen_text',
       frameEvidence,
-      ...(visibleText ? { visibleTextEvidence: visibleText } : {})
+      ...(visibleText ? { visibleTextEvidence: visibleText } : {}),
+      ...(visibleText ? { source: item.visibleTextEvidence ? 'provided_screen_text' : 'gemini_multimodal_frame' } : {})
     };
   }
   if (tag === 'trans') {
