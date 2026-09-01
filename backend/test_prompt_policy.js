@@ -26,6 +26,16 @@ test('default prompt resolution uses the v2 baseline and resolves all placeholde
     for (const tag of ['[v1]', '[v2]', '[v3]', '[txt]', '[trans]']) {
       assert.ok(loaded.prompt.includes(tag), `missing ${tag}`);
     }
+    for (const marker of [
+      '전체 타임라인 검토와 후보 수집',
+      '청취 가치 선별과 압축',
+      '영상 전체 범위의 중복 제거',
+      '최종 자체 검수'
+    ]) {
+      assert.ok(loaded.prompt.includes(marker), `missing quality workflow: ${marker}`);
+    }
+    assert.equal(loaded.prompt.includes('해설 개수나 일정한 시간 간격을 맞추기 위해'), true);
+    assert.equal(loaded.prompt.includes('반드시 `[txt]`를 사용하십시오'), true);
     assert.equal(/{{[^{}]+}}/.test(loaded.prompt), false);
     assert.equal(loaded.prompt.includes('(제목 없음)'), true);
   } finally {
