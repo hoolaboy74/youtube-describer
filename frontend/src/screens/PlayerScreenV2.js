@@ -601,6 +601,7 @@ function PlayerScreenV2() {
             // Q&A TTS is separate from canonical video-description TTS. A
             // failed speech request must never replace a successful answer.
             const qaTtsId = response.qaTtsId;
+            const qaTtsStreamPath = response.qaTtsStreamPath;
             const audioPlayer = audioPlayerRef.current;
             if (qaTtsId && audioPlayer) {
                 try {
@@ -612,16 +613,36 @@ function PlayerScreenV2() {
                         if (player) player.setVolume(100);
                     };
 
-                    const ttsResponse = await axios.post('/api/qa-tts', { qaTtsId }, { responseType: 'blob' });
-                    const audioUrl = URL.createObjectURL(ttsResponse.data);
-                    audioPlayer.src = audioUrl;
-                    audioPlayer.playbackRate = playbackRateRef.current || 1.3;
-                    audioPlayer.volume = 1.0;
-                    audioPlayer.play().catch(e => {
-                        console.error('Q&A audio play failed:', e);
-                        isTtsPlayingRef.current = false;
-                        player.setVolume(100);
-                    });
+                    const playBufferedFallback = async () => {
+                        const ttsResponse = await axios.post(`${API_BASE}/api/qa-tts`, { qaTtsId }, { responseType: 'blob' });
+                        const audioUrl = URL.createObjectURL(ttsResponse.data);
+                        audioPlayer.onerror = null;
+                        audioPlayer.src = audioUrl;
+                        audioPlayer.playbackRate = playbackRateRef.current || 1.3;
+                        audioPlayer.volume = 1.0;
+                        await audioPlayer.play();
+                    };
+
+                    if (qaTtsStreamPath) {
+                        let streamFallbackStarted = false;
+                        const startStreamFallback = () => {
+                            if (streamFallbackStarted) return;
+                            streamFallbackStarted = true;
+                            playBufferedFallback().catch(error => {
+                                console.error('Q&A audio fallback failed:', error);
+                                isTtsPlayingRef.current = false;
+                                player.setVolume(100);
+                                announceQaPolite('답변은 표시되었습니다. 음성 재생에 실패했습니다.');
+                            });
+                        };
+                        audioPlayer.onerror = startStreamFallback;
+                        audioPlayer.src = `${API_BASE}${qaTtsStreamPath}`;
+                        audioPlayer.playbackRate = playbackRateRef.current || 1.3;
+                        audioPlayer.volume = 1.0;
+                        audioPlayer.play().catch(startStreamFallback);
+                    } else {
+                        await playBufferedFallback();
+                    }
                 } catch (ttsError) {
                     console.error('Q&A TTS failed:', ttsError);
                     isTtsPlayingRef.current = false;

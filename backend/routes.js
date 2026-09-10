@@ -31,6 +31,9 @@ const router = express.Router();
 // Use 'rest' fallback only if custom CA certs are present (local dev environment)
 const ttsClientOptions = process.env.NODE_EXTRA_CA_CERTS ? { fallback: 'rest' } : {};
 const ttsClient = new TextToSpeechClient(ttsClientOptions);
+// REST fallback is compatible with one-shot MP3 synthesis but cannot perform
+// bidirectional streaming. Keep a separate gRPC client for Chirp streaming.
+const streamingTtsClient = new TextToSpeechClient();
 const audioCacheDir = path.join(__dirname, 'public', 'audio');
 const qaTtsStore = createQaTtsStore();
 const QA_MODEL_NAME = process.env.QA_MODEL_NAME || 'gemini-3.5-flash-lite';
@@ -330,6 +333,69 @@ function createQaTtsHandler({ store = qaTtsStore, client = ttsClient, cacheRoot 
     };
 }
 
+function createQaTtsStreamHandler({ store = qaTtsStore, client = streamingTtsClient } = {}) {
+    return (req, res) => {
+        const answer = store.getByStreamTicket({ ticket: req.params.ticket });
+        if (!answer) {
+            return res.status(422).json({ error: 'A current Q&A audio stream ticket is required' });
+        }
+        if (typeof client.streamingSynthesize !== 'function') {
+            return res.status(503).json({ error: 'Streaming speech is unavailable' });
+        }
+
+        const voiceName = 'ko-KR-Chirp3-HD-Sulafat';
+        const startedAt = Date.now();
+        let firstAudioAt = null;
+        let completed = false;
+        let speechStream;
+        try {
+            speechStream = client.streamingSynthesize();
+            res.status(200).set({
+                'Content-Type': 'audio/ogg; codecs=opus',
+                'Cache-Control': 'no-store, no-transform',
+                'X-Accel-Buffering': 'no',
+                'Referrer-Policy': 'no-referrer'
+            });
+            res.flushHeaders?.();
+
+            speechStream.on('data', (response) => {
+                const audioContent = response.audioContent;
+                if (!audioContent || res.writableEnded) return;
+                if (firstAudioAt === null) firstAudioAt = Date.now();
+                res.write(audioContent);
+            });
+            speechStream.on('error', (error) => {
+                logger.error('Q&A streaming TTS API Error:', error);
+                if (!res.writableEnded) res.end();
+            });
+            speechStream.on('end', () => {
+                completed = true;
+                logger.info(
+                    `[QA-TTS] Streamed answer (First audio: ${firstAudioAt ? firstAudioAt - startedAt : -1}ms, ` +
+                    `Total: ${Date.now() - startedAt}ms).`
+                );
+                if (!res.writableEnded) res.end();
+            });
+            res.on('close', () => {
+                if (!completed && speechStream && !speechStream.destroyed) speechStream.destroy();
+            });
+
+            speechStream.write({
+                streamingConfig: {
+                    voice: { languageCode: 'ko-KR', name: voiceName },
+                    streamingAudioConfig: { audioEncoding: 'OGG_OPUS' }
+                }
+            });
+            speechStream.write({ input: { text: answer.text } });
+            speechStream.end();
+        } catch (error) {
+            logger.error('Q&A streaming TTS setup error:', error);
+            if (!res.headersSent) return res.status(500).json({ error: 'Failed to start Q&A speech stream' });
+            res.end();
+        }
+    };
+}
+
 router.post('/tts', createTtsHandler());
 
 // 인증 미들웨어: 로그인 완료된 회원만 허용 (시각장애인 여부 상관없음)
@@ -362,6 +428,7 @@ function requireAuth(req, res, next) {
 }
 
 router.post('/qa-tts', requireAuth, createQaTtsHandler());
+router.get('/qa-tts-stream/:ticket', createQaTtsStreamHandler());
 
 // 인증 미들웨어: 로그인 완료 및 시각장애인으로 인증된 회원만 허용
 function requireBlindAuth(req, res, next) {
@@ -1001,6 +1068,9 @@ ${historyContext}User's Question: "${question}"`;
             text: answer,
             dialogueTexts
         });
+        const qaTtsStreamTicket = qaTtsId
+            ? qaTtsStore.issueStreamTicket({ id: qaTtsId, userId: req.user.id })
+            : null;
 
         // 7. Output result
         logger.info(
@@ -1012,7 +1082,8 @@ ${historyContext}User's Question: "${question}"`;
             answer,
             timestamp: targetTime,
             fromCache,
-            qaTtsId
+            qaTtsId,
+            qaTtsStreamPath: qaTtsStreamTicket ? `/api/qa-tts-stream/${qaTtsStreamTicket}` : null
         };
         if (wantsStream) {
             writeQaStreamEvent(res, 'done', responsePayload);
@@ -2404,6 +2475,7 @@ router.get('/sitemap', (req, res) => {
 module.exports = router;
 module.exports.createTtsHandler = createTtsHandler;
 module.exports.createQaTtsHandler = createQaTtsHandler;
+module.exports.createQaTtsStreamHandler = createQaTtsStreamHandler;
 module.exports.cleanQaAnswer = cleanQaAnswer;
 module.exports.takeCompletedQaSentences = takeCompletedQaSentences;
 module.exports.writeQaStreamEvent = writeQaStreamEvent;
