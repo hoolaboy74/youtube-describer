@@ -37,6 +37,37 @@ const QA_MODEL_NAME = process.env.QA_MODEL_NAME || 'gemini-3.5-flash-lite';
 
 const YouTube = require('youtube-sr').default;
 
+function cleanQaAnswer(text) {
+    return String(text || '')
+        .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+        .replace(/https?:\/\/[^\s]+/g, '')
+        .replace(/\[\d+\]/g, '')
+        .replace(/[\*\_\#\`\-\>\+\=\[\]\{\}]/g, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+}
+
+function writeQaStreamEvent(res, event, payload) {
+    if (!res.writableEnded) {
+        res.write(`event: ${event}\ndata: ${JSON.stringify(payload)}\n\n`);
+    }
+}
+
+// Do not expose raw partial model output. Send only complete sentences after
+// applying the same plain-text cleanup as the final Q&A answer.
+function takeCompletedQaSentences(text) {
+    let lastBoundary = 0;
+    const boundaryPattern = /[.!?。！？]+(?:\s+|$)/g;
+    let match;
+    while ((match = boundaryPattern.exec(text)) !== null) {
+        lastBoundary = match.index + match[0].length;
+    }
+    return {
+        completed: text.slice(0, lastBoundary),
+        remaining: text.slice(lastBoundary)
+    };
+}
+
 // 전역 API 추적 미들웨어: 회원/비회원 식별 및 DB 적재
 function trackApiRequest(req, res, next) {
     let userId = null;
@@ -624,6 +655,7 @@ const getAdjacentSubtitles = async (videoId, targetTime) => {
 // --- VIDEO Q&A API ENDPOINT ---
 router.post('/video-qa', requireAuth, async (req, res) => {
     const requestStartedAt = Date.now();
+    const wantsStream = req.accepts(['text/event-stream', 'json']) === 'text/event-stream';
     const { videoId, timestamp, question, history } = req.body;
     if (!videoId || timestamp === undefined || !question) {
         return res.status(400).json({ error: 'videoId, timestamp, and question are required.' });
@@ -901,17 +933,49 @@ ${historyContext}User's Question: "${question}"`;
             model: QA_MODEL_NAME,
             tools: [{ googleSearch: {} }]
         });
-        const result = await model.generateContent([systemPrompt, ...imageParts]);
+        let providerResponse;
+        let rawAnswer = '';
+        if (wantsStream) {
+            res.status(200);
+            res.set({
+                'Content-Type': 'text/event-stream; charset=utf-8',
+                'Cache-Control': 'no-cache, no-transform',
+                Connection: 'keep-alive',
+                'X-Accel-Buffering': 'no'
+            });
+            res.flushHeaders?.();
+            writeQaStreamEvent(res, 'meta', { timestamp: targetTime, fromCache });
+
+            const streamResult = await model.generateContentStream([systemPrompt, ...imageParts]);
+            let pendingText = '';
+            for await (const chunk of streamResult.stream) {
+                if (!chunk.text) continue;
+                const delta = chunk.text();
+                rawAnswer += delta;
+                pendingText += delta;
+                const { completed, remaining } = takeCompletedQaSentences(pendingText);
+                pendingText = remaining;
+                const safeText = cleanQaAnswer(completed);
+                if (safeText) writeQaStreamEvent(res, 'delta', { text: `${safeText} ` });
+            }
+            const finalPartial = cleanQaAnswer(pendingText);
+            if (finalPartial) writeQaStreamEvent(res, 'delta', { text: finalPartial });
+            providerResponse = await streamResult.response;
+        } else {
+            const result = await model.generateContent([systemPrompt, ...imageParts]);
+            providerResponse = result.response;
+            rawAnswer = providerResponse.text();
+        }
         const modelElapsedMs = Date.now() - modelStartedAt;
-        let answer = result.response.text().trim();
+        const answer = cleanQaAnswer(rawAnswer);
 
         // Persist the provider-reported token usage and actual Google Search
         // queries together, so the detailed ledger and the daily user summary
         // cannot drift apart.
         try {
-            const usage = result.response.usageMetadata;
+            const usage = providerResponse.usageMetadata;
             if (usage) {
-                const searchQueries = extractGoogleSearchQueryCount(result.response);
+                const searchQueries = extractGoogleSearchQueryCount(providerResponse);
                 const recordedCost = db.recordGeminiUsage({
                     videoId,
                     userId: req.user.id,
@@ -927,14 +991,6 @@ ${historyContext}User's Question: "${question}"`;
         } catch (costErr) {
             logger.error(`[QA-COST-ERROR] Failed to save Q&A API cost:`, costErr);
         }
-
-        // Strip any remaining markdown symbols, URLs, and citations to ensure pure plain text for screen readers
-        answer = answer
-            .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Remove markdown link structure but keep text
-            .replace(/https?:\/\/[^\s]+/g, '')        // Remove URLs
-            .replace(/\[\d+\]/g, '')                  // Remove citations like [1]
-            .replace(/[\*\_\#\`\-\>\+\=\[\]\{\}]/g, '') // Remove markdown syntax characters
-            .trim();
 
         const dialogueTexts = dialogueContext
             .split('\n')
@@ -952,15 +1008,24 @@ ${historyContext}User's Question: "${question}"`;
             `(Source: ${fromCache ? 'cache' : 'on-demand'}, Model: ${QA_MODEL_NAME}, ` +
             `Frames: ${selectedFrames.length}, Model: ${modelElapsedMs}ms, Total: ${Date.now() - requestStartedAt}ms).`
         );
-        res.json({
+        const responsePayload = {
             answer,
             timestamp: targetTime,
             fromCache,
             qaTtsId
-        });
+        };
+        if (wantsStream) {
+            writeQaStreamEvent(res, 'done', responsePayload);
+            return res.end();
+        }
+        res.json(responsePayload);
 
     } catch (err) {
         logger.error(`Q&A endpoint failed for videoId ${videoId}:`, err);
+        if (wantsStream && res.headersSent) {
+            writeQaStreamEvent(res, 'error', { error: 'Failed to process video Q&A.' });
+            return res.end();
+        }
         res.status(500).json({ error: 'Failed to process video Q&A.' });
     }
 });
@@ -2339,3 +2404,6 @@ router.get('/sitemap', (req, res) => {
 module.exports = router;
 module.exports.createTtsHandler = createTtsHandler;
 module.exports.createQaTtsHandler = createQaTtsHandler;
+module.exports.cleanQaAnswer = cleanQaAnswer;
+module.exports.takeCompletedQaSentences = takeCompletedQaSentences;
+module.exports.writeQaStreamEvent = writeQaStreamEvent;

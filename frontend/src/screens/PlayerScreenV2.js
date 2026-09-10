@@ -20,6 +20,52 @@ function formatTime(seconds) {
 
 const SILENT_AUDIO = 'data:audio/wav;base64,U1JpZ0AAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA';
 
+async function requestStreamingQa({ apiBase, token, payload, onDelta }) {
+    const response = await fetch(`${apiBase}/api/video-qa`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            Accept: 'text/event-stream',
+            Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify(payload)
+    });
+
+    if (!response.ok || !response.body) {
+        const errorPayload = await response.json().catch(() => ({}));
+        throw new Error(errorPayload.error || 'Q&A stream request failed');
+    }
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+    let completedPayload = null;
+
+    const consumeEvent = (block) => {
+        const lines = block.split('\n');
+        const event = lines.find(line => line.startsWith('event:'))?.slice(6).trim();
+        const data = lines.filter(line => line.startsWith('data:')).map(line => line.slice(5).trim()).join('\n');
+        if (!event || !data) return;
+        const parsed = JSON.parse(data);
+        if (event === 'delta') onDelta(parsed.text || '');
+        if (event === 'done') completedPayload = parsed;
+        if (event === 'error') throw new Error(parsed.error || 'Q&A stream failed');
+    };
+
+    while (true) {
+        const { value, done } = await reader.read();
+        buffer += decoder.decode(value || new Uint8Array(), { stream: !done });
+        let boundary;
+        while ((boundary = buffer.indexOf('\n\n')) !== -1) {
+            consumeEvent(buffer.slice(0, boundary));
+            buffer = buffer.slice(boundary + 2);
+        }
+        if (done) break;
+    }
+    if (!completedPayload) throw new Error('Q&A stream ended before completion');
+    return completedPayload;
+}
+
 function ShareButton() {
     const { announcePolite } = useAccessibility();
     const [isCopied, setIsCopied] = useState(false);
@@ -529,14 +575,23 @@ function PlayerScreenV2() {
             }));
 
         try {
-            const response = await axios.post('/api/video-qa', {
-                videoId,
-                timestamp: currentTimestamp,
-                question: userQuestion,
-                history: qaHistory
+            const response = await requestStreamingQa({
+                apiBase: API_BASE,
+                token,
+                payload: {
+                    videoId,
+                    timestamp: currentTimestamp,
+                    question: userQuestion,
+                    history: qaHistory
+                },
+                onDelta: (text) => {
+                    setQaList(prev => prev.map(qa =>
+                        qa.id === newQaId ? { ...qa, answer: `${qa.answer}${text}` } : qa
+                    ));
+                }
             });
 
-            const answerText = response.data.answer;
+            const answerText = response.answer;
 
             setQaList(prev => prev.map(qa => 
                 qa.id === newQaId ? { ...qa, answer: answerText, isGenerating: false } : qa
@@ -545,7 +600,7 @@ function PlayerScreenV2() {
 
             // Q&A TTS is separate from canonical video-description TTS. A
             // failed speech request must never replace a successful answer.
-            const qaTtsId = response.data.qaTtsId;
+            const qaTtsId = response.qaTtsId;
             const audioPlayer = audioPlayerRef.current;
             if (qaTtsId && audioPlayer) {
                 try {
