@@ -12,13 +12,13 @@ const {
     verifySiloamMember, 
     verifyCardOCR,
     getIsImpersonateAvailable,
-    preprocessVtt,
-    calculateApiCost
+    preprocessVtt
 } = require('./utils');
 const logger = require('./logger');
 const { findAcceptedTtsEvent } = require('./modules/ttsPolicy');
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const { spawn, execFile } = require('child_process');
+const { extractGoogleSearchQueryCount } = require('./modules/geminiCost');
 
 // JWT 기반 세션 관리 설정
 const jwt = require('jsonwebtoken');
@@ -859,29 +859,23 @@ ${historyContext}User's Question: "${question}"`;
         const result = await model.generateContent([systemPrompt, ...imageParts]);
         let answer = result.response.text().trim();
 
-        // API 비용 계산 및 일일 집계 테이블(qa_user_daily_costs)에 UPSERT
+        // Persist the provider-reported token usage and actual Google Search
+        // queries together, so the detailed ledger and the daily user summary
+        // cannot drift apart.
         try {
             const usage = result.response.usageMetadata;
             if (usage) {
-                const promptTokens = usage.promptTokenCount || 0;
-                const completionTokens = usage.candidatesTokenCount || 0;
-                const totalTokens = usage.totalTokenCount || 0;
-                
-                const modelName = "gemini-3.8-flash";
-                const calculatedCost = calculateApiCost(modelName, promptTokens, completionTokens, totalTokens);
-                
-                // 한국 시간(KST) YYYY-MM-DD 날짜 구하기
-                const logDate = new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Seoul' });
-                const userId = req.user.id;
-
-                db.upsertQaCost({
-                    userId,
+                const recordedCost = db.recordGeminiUsage({
                     videoId,
-                    logDate,
-                    promptTokens,
-                    completionTokens,
-                    cost: calculatedCost
+                    userId: req.user.id,
+                    requestType: 'qa',
+                    modelName: "gemini-3.8-flash",
+                    usageMetadata: usage,
+                    searchQueries: extractGoogleSearchQueryCount(result.response)
                 });
+                logger.info(`[QA-COST] Recorded $${recordedCost.totalCost.toFixed(6)} for ${videoId}.`);
+            } else {
+                logger.error(`[QA-COST-ERROR] Gemini returned no usage metadata for ${videoId}; no unverifiable cost was recorded.`);
             }
         } catch (costErr) {
             logger.error(`[QA-COST-ERROR] Failed to save Q&A API cost:`, costErr);

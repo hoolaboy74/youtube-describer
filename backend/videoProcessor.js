@@ -52,43 +52,10 @@ const API_KEY = process.env.GOOGLE_API_KEY;
 if (!API_KEY) {
   throw new Error("GOOGLE_API_KEY is not defined in the environment");
 }
-const MODEL_NAME = process.env.GEMINI_MODEL || "gemini-3.1-pro-preview";
+const MODEL_NAME = process.env.GEMINI_MODEL || "gemini-3.8-flash";
 const genAI = new GoogleGenerativeAI(API_KEY);
 const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY || API_KEY;
 const youtube = google.youtube({ version: 'v3', auth: YOUTUBE_API_KEY });
-const calculateApiCost = (modelName, promptTokenCount, candidatesTokenCount, totalTokenCount) => {
-    const promptTokens = promptTokenCount || 0;
-    const candidatesTokens = candidatesTokenCount || 0;
-    const totalTokens = totalTokenCount || (promptTokens + candidatesTokens);
-    
-    const modelLower = modelName ? modelName.toLowerCase() : "";
-    let inputRate = 1.25; // Default legacy pro rate (gemini-1.5-pro / gemini-2.5-pro)
-    let outputRate = 10.00;
-    let inputRateOverLimit = 2.50;
-    let outputRateOverLimit = 15.00;
-
-    if (modelLower.includes('3.1-pro')) {
-        inputRate = 2.00;
-        outputRate = 12.00;
-        inputRateOverLimit = 4.00;
-        outputRateOverLimit = 18.00;
-    } else if (modelLower.includes('3.5-flash')) {
-        inputRate = 1.50;
-        outputRate = 9.00;
-        inputRateOverLimit = 1.50;
-        outputRateOverLimit = 9.00;
-    } else if (modelLower.includes('1.5-flash')) {
-        inputRate = 0.075;
-        outputRate = 0.30;
-        inputRateOverLimit = 0.15;
-        outputRateOverLimit = 0.60;
-    }
-
-    const inputCost = (promptTokens / 1000000) * (totalTokens <= 200000 ? inputRate : inputRateOverLimit);
-    const outputCost = (candidatesTokens / 1000000) * (totalTokens <= 200000 ? outputRate : outputRateOverLimit);
-    const totalCost = inputCost + outputCost;
-    return isNaN(totalCost) ? 0 : totalCost;
-};
 
 const processingLocks = new Set();
 const timers = new Map();
@@ -911,12 +878,15 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null, userId = nul
         const finalResponse = await result.response;
         const usageMetadata = finalResponse.usageMetadata;
         if (usageMetadata) {
-            const promptTokenCount = usageMetadata.promptTokenCount || 0;
-            const candidatesTokenCount = usageMetadata.candidatesTokenCount || 0;
-            const totalTokenCount = usageMetadata.totalTokenCount || (promptTokenCount + candidatesTokenCount);
-            const cost = calculateApiCost(MODEL_NAME, promptTokenCount, candidatesTokenCount, totalTokenCount);
-            db.addApiCost({ videoId, model_used: MODEL_NAME, image_tokens: promptTokenCount, text_tokens: candidatesTokenCount, cost: isNaN(cost) ? 0 : cost });
-            logger.info(`[${requestHash}] Logged API cost: ${(isNaN(cost) ? 0 : cost).toFixed(6)} USD`);
+            const recordedCost = db.recordGeminiUsage({
+                videoId,
+                requestType: 'description',
+                modelName: MODEL_NAME,
+                usageMetadata
+            });
+            logger.info(`[${requestHash}] Logged API cost: ${recordedCost.totalCost.toFixed(6)} USD`);
+        } else {
+            logger.error(`[${requestHash}] Gemini returned no usage metadata; no unverifiable cost was recorded.`);
         }
 
         // QA 용 프레임 영구 보존 로직 복구
@@ -1287,12 +1257,15 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
 
         const usageMetadata = result.response.usageMetadata;
         if (usageMetadata) {
-            const promptTokenCount = usageMetadata.promptTokenCount || 0;
-            const candidatesTokenCount = usageMetadata.candidatesTokenCount || 0;
-            const totalTokenCount = usageMetadata.totalTokenCount || (promptTokenCount + candidatesTokenCount);
-            const cost = calculateApiCost(MODEL_NAME, promptTokenCount, candidatesTokenCount, totalTokenCount);
-            db.addApiCost({ videoId, model_used: MODEL_NAME, image_tokens: promptTokenCount, text_tokens: candidatesTokenCount, cost: isNaN(cost) ? 0 : cost });
-            logger.info(`[${requestHash}] Logged API cost for batch: ${(isNaN(cost) ? 0 : cost).toFixed(6)} USD`);
+            const recordedCost = db.recordGeminiUsage({
+                videoId,
+                requestType: 'description',
+                modelName: MODEL_NAME,
+                usageMetadata
+            });
+            logger.info(`[${requestHash}] Logged API cost for batch: ${recordedCost.totalCost.toFixed(6)} USD`);
+        } else {
+            logger.error(`[${requestHash}] Gemini returned no usage metadata for batch processing; no unverifiable cost was recorded.`);
         }
         
         if (result.response.promptFeedback && result.response.promptFeedback.blockReason) {
