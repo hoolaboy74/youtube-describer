@@ -853,7 +853,7 @@ ${dialogueContext || '(No dialogue/subtitles available around this time)'}
 ${historyContext}User's Question: "${question}"`;
 
         const model = genAI.getGenerativeModel({ 
-            model: "gemini-3.1-flash-lite",
+            model: "gemini-3.8-flash",
             tools: [{ googleSearch: {} }]
         });
         const result = await model.generateContent([systemPrompt, ...imageParts]);
@@ -867,7 +867,7 @@ ${historyContext}User's Question: "${question}"`;
                 const completionTokens = usage.candidatesTokenCount || 0;
                 const totalTokens = usage.totalTokenCount || 0;
                 
-                const modelName = "gemini-3.1-flash-lite";
+                const modelName = "gemini-3.8-flash";
                 const calculatedCost = calculateApiCost(modelName, promptTokens, completionTokens, totalTokens);
                 
                 // 한국 시간(KST) YYYY-MM-DD 날짜 구하기
