@@ -276,8 +276,258 @@ main {
     cursor: default !important;
 }
 
+.verbosity-control button:hover {
+    background-color: #dee2e6;
+}
 
+.verbosity-control button[aria-pressed="true"] {
+    background-color: #61dafb;
+    color: white;
+    border-color: #61dafb;
+    cursor: default;
+}
 
+/* Verbosity Tag in Script List */
+.verbosity-tag {
+    display: inline-block;
+    margin-left: 8px;
+    margin-right: 8px;
+    padding: 2px 6px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    color: white;
+    border-radius: 4px;
+    line-height: 1;
+}
+
+.verbosity-1 { background-color: #28a745; } /* Green */
+.verbosity-2 { background-color: #ffc107; } /* Yellow */
+.verbosity-3 { background-color: #dc3545; } /* Red */
+
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+}
+
+@media (max-width: 600px) {
+    .App {
+        padding: 10px;
+    }
+
+    .App-header h1 {
+        font-size: 1.8rem;
+    }
+
+    .url-form {
+        flex-direction: column;
+    }
+
+    .video-header {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .controls-container {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 15px;
+    }
+
+    .script-container ul {
+        max-height: 200px;
+    }
+
+    .thumbnail {
+        width: 100px;
+        height: 56px;
+    }
+
+    .header-top {
+        flex-direction: column;
+        gap: 10px;
+    }
+}
+
+/* Play Button Overlay Styles */
+.play-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  z-index: 10;
+  transition: opacity 0.3s ease;
+  opacity: 1; /* Default: visible (for paused state) */
+}
+
+/* When video is playing, make the overlay invisible... */
+.play-overlay.is-playing {
+  opacity: 0;
+}
+
+/* ...but show it again when the user hovers over the video area. */
+.video-container:hover .play-overlay.is-playing {
+  opacity: 1;
+}
+
+.big-play-button {
+  background: none;
+  border: 3px solid white;
+  border-radius: 50%;
+  width: 80px;
+  height: 80px;
+  color: white;
+  font-size: 38px; /* Adjusted for better balance */
+  line-height: 1; /* Let flexbox handle alignment */
+  text-align: center;
+  padding: 0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex; /* Use flexbox for centering */
+  justify-content: center;
+  align-items: center;
+  padding-left: 6px; /* Optical adjustment for play icon */
+}
+
+.big-play-button:hover {
+  transform: scale(1.1);
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* --- Comments Section --- */
+.comments-container {
+    width: 100%;
+    text-align: left;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+    margin-top: 20px;
+}
+
+.comments-container h3 {
+    margin-top: 0;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+.comment-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.comment-form .comment-meta {
+    display: flex;
+    gap: 10px;
+}
+
+.comment-form input[type="text"],
+.comment-form input[type="password"] {
+    flex: 1;
+    padding: 10px;
+    font-size: 0.9rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.comment-form textarea {
+    padding: 10px;
+    font-size: 0.9rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    min-height: 80px;
+    resize: vertical;
+}
+
+.comment-form button {
+    align-self: flex-end;
+    padding: 8px 20px;
+    font-size: 0.9rem;
+    color: white;
+    background-color: #007bff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.comment-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.comment-item {
+    padding: 15px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.comment-item:last-child {
+    border-bottom: none;
+}
+
+.comment-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.comment-header strong {
+    font-size: 1rem;
+}
+
+.comment-date {
+    font-size: 0.8rem;
+    color: #888;
+}
+
+.comment-item p {
+    margin: 0 0 10px 0;
+}
+
+.comment-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.comment-actions button {
+    background: none;
+    border: none;
+    color: #007bff;
+    cursor: pointer;
+    padding: 0;
+    font-size: 0.85rem;
+}
+
+.comment-edit-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.comment-edit-form textarea {
+    padding: 10px;
+    font-size: 0.9rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    min-height: 60px;
+}
+=======
+>>>>>>> main
 
 /* --- Financial Summary & Donation Section --- */
 .financial-summary-container {

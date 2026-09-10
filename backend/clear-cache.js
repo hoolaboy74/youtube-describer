@@ -10,6 +10,7 @@ const ttsCacheDir = path.join(backendDir, 'public', 'audio', 'tts_cache');
 const tempDir = path.join(backendDir, 'temp');
 const dbPath = path.join(backendDir, 'db', 'cache.db');
 const videoAudioDir = path.join(backendDir, 'public', 'audio');
+const framesCacheDir = path.join(backendDir, 'public', 'frames');
 
 // 1. Clear File System Caches
 console.log('Clearing file system caches...');
@@ -20,6 +21,10 @@ if (fs.existsSync(ttsCacheDir)) {
 if (fs.existsSync(tempDir)) {
     fs.rmSync(tempDir, { recursive: true, force: true });
     console.log('  - Deleted temp directory.');
+}
+if (fs.existsSync(framesCacheDir)) {
+    fs.rmSync(framesCacheDir, { recursive: true, force: true });
+    console.log('  - Deleted frames cache directory.');
 }
 if(fs.existsSync(videoAudioDir)) {
     const videoDirs = fs.readdirSync(videoAudioDir);

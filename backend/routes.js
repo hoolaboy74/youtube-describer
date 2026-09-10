@@ -10,10 +10,15 @@ const {
     hashPassword, 
     verifyPassword, 
     verifySiloamMember, 
-    verifyCardOCR 
+    verifyCardOCR,
+    getIsImpersonateAvailable,
+    preprocessVtt,
+    calculateApiCost
 } = require('./utils');
 const logger = require('./logger');
 const { findAcceptedTtsEvent } = require('./modules/ttsPolicy');
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+const { spawn, execFile } = require('child_process');
 
 // JWT 기반 세션 관리 설정
 const jwt = require('jsonwebtoken');
@@ -401,6 +406,507 @@ router.post('/batch-process', (req, res) => {
     processVideoBatch(videoId, youtubeUrl).catch(err => {
         logger.error(`[batch-${videoId.substring(0,8)}] Unhandled error in batch processing:`, err);
     });
+});
+
+// Initialize Gemini API for Q&A
+const API_KEY = process.env.GOOGLE_API_KEY;
+const genAI = API_KEY ? new GoogleGenerativeAI(API_KEY) : null;
+
+// Q&A Helper: cookie path resolver for fallback yt-dlp call
+const getQACookiePath = () => {
+    const cookiesDir = path.join(__dirname, 'cookies');
+    if (!fs.existsSync(cookiesDir)) return null;
+    const cookieFiles = fs.readdirSync(cookiesDir).filter(file => file.endsWith('_cookies.txt') && fs.statSync(path.join(cookiesDir, file)).size > 0);
+    if (cookieFiles.length === 0) return null;
+    return path.join(cookiesDir, cookieFiles[Math.floor(Math.random() * cookieFiles.length)]);
+};
+
+// Cache for direct stream URLs to prevent repetitive yt-dlp calls during continuous Q&A sessions (key: videoId, value: { url, expiresAt })
+const streamUrlCache = new Map();
+
+// Q&A Helper: fetch and extract adjacent subtitles (ko/en) for dialog understanding
+const getAdjacentSubtitles = async (videoId, targetTime) => {
+    const subtitlesDir = path.join(__dirname, 'public', 'subtitles');
+    if (!fs.existsSync(subtitlesDir)) {
+        fs.mkdirSync(subtitlesDir, { recursive: true });
+    }
+
+    const cachedVttPath = path.join(subtitlesDir, `${videoId}.vtt`);
+    const noSubPath = path.join(subtitlesDir, `${videoId}.nosub`);
+
+    // 0. If marked as no subtitles, return early to prevent redundant download attempts
+    if (fs.existsSync(noSubPath)) {
+        return '';
+    }
+
+    // 1. If not cached, download subtitles using yt-dlp
+    if (!fs.existsSync(cachedVttPath)) {
+        logger.info(`[QA-SUB-${videoId.substring(0,8)}] Subtitles not cached. Downloading...`);
+        const tempDir = path.join(__dirname, 'temp', `sub-${videoId}-${Date.now()}`);
+        fs.mkdirSync(tempDir, { recursive: true });
+
+        const cookiePath = getQACookiePath();
+        const useImpersonate = getIsImpersonateAvailable();
+        const proxyArgs = process.env.YTDLP_PROXY ? ['--proxy', process.env.YTDLP_PROXY] : [];
+
+        const ytdlpArgs = [
+            '--skip-download',
+            '--write-auto-sub',
+            '--write-sub',
+            '--sub-lang', 'ko,en',
+            '-o', path.join(tempDir, videoId)
+        ];
+        if (cookiePath) ytdlpArgs.push('--cookies', cookiePath);
+        if (proxyArgs.length > 0) ytdlpArgs.push(...proxyArgs);
+        if (useImpersonate) ytdlpArgs.push('--impersonate', 'safari');
+        ytdlpArgs.push(`https://www.youtube.com/watch?v=${videoId}`);
+
+        try {
+            await new Promise((resolve, reject) => {
+                const process = spawn('yt-dlp', ytdlpArgs);
+                let stderrData = '';
+                process.stderr.on('data', (d) => { stderrData += d.toString(); });
+                process.on('close', (code) => {
+                    if (code === 0) resolve();
+                    else reject(new Error(`yt-dlp exited with ${code}. Stderr: ${stderrData}`));
+                });
+                process.on('error', reject);
+            });
+
+            // Scan tempDir for downloaded vtt file
+            const files = fs.readdirSync(tempDir);
+            const koSub = files.find(f => f.includes('.ko.vtt'));
+            const enSub = files.find(f => f.includes('.en.vtt') || f.includes('.en-'));
+            
+            let selectedSubFile = null;
+            if (koSub) {
+                selectedSubFile = koSub;
+            } else if (enSub) {
+                selectedSubFile = enSub;
+                logger.info(`[QA-SUB-${videoId.substring(0,8)}] Korean subtitles not found. Using English fallback: ${enSub}`);
+            }
+
+            if (selectedSubFile) {
+                fs.copyFileSync(path.join(tempDir, selectedSubFile), cachedVttPath);
+                logger.info(`[QA-SUB-${videoId.substring(0,8)}] Subtitles saved to cache.`);
+            } else {
+                logger.warn(`[QA-SUB-${videoId.substring(0,8)}] No suitable subtitles found on YouTube. Creating negative cache flag.`);
+                try {
+                    fs.writeFileSync(noSubPath, '');
+                } catch (writeErr) {
+                    logger.error(`[QA-SUB-${videoId.substring(0,8)}] Failed to write negative cache flag:`, writeErr);
+                }
+            }
+        } catch (err) {
+            logger.error(`[QA-SUB-${videoId.substring(0,8)}] Failed to download subtitles:`, err);
+        } finally {
+            if (fs.existsSync(tempDir)) {
+                try {
+                    fs.rmSync(tempDir, { recursive: true, force: true });
+                } catch (rmErr) {
+                    logger.error('Failed to cleanup temp subtitles dir:', rmErr);
+                }
+            }
+        }
+    }
+
+    // 2. Read and parse cached subtitles if available
+    if (fs.existsSync(cachedVttPath)) {
+        try {
+            const rawContent = fs.readFileSync(cachedVttPath, 'utf-8');
+            const lines = rawContent.split(/\r?\n/);
+            const dialogueLines = [];
+            let currentStart = null;
+            let currentEnd = null;
+            let currentTextParts = [];
+
+            const timeToSec = (hh, mm, ss, ms) => 
+                parseInt(hh, 10) * 3600 + parseInt(mm, 10) * 60 + parseInt(ss, 10) + parseInt(ms, 10) / 1000;
+
+            for (const line of lines) {
+                const trimmed = line.trim();
+                if (!trimmed) {
+                    if (currentStart !== null && currentEnd !== null && currentTextParts.length > 0) {
+                        const fullText = currentTextParts.join(' ');
+                        if (currentStart <= targetTime + 45 && currentEnd >= targetTime - 120) {
+                            dialogueLines.push(`[${currentStart.toFixed(1)}초~${currentEnd.toFixed(1)}초] ${fullText}`);
+                        }
+                    }
+                    currentStart = null;
+                    currentEnd = null;
+                    currentTextParts = [];
+                    continue;
+                }
+
+                const timeMatch = trimmed.match(/^(\d{2}):(\d{2}):(\d{2})\.(\d{3})\s*-->\s*(\d{2}):(\d{2}):(\d{2})\.(\d{3})/);
+                if (timeMatch) {
+                    if (currentStart !== null && currentEnd !== null && currentTextParts.length > 0) {
+                        const fullText = currentTextParts.join(' ');
+                        if (currentStart <= targetTime + 45 && currentEnd >= targetTime - 120) {
+                            dialogueLines.push(`[${currentStart.toFixed(1)}초~${currentEnd.toFixed(1)}초] ${fullText}`);
+                        }
+                    }
+                    currentStart = timeToSec(timeMatch[1], timeMatch[2], timeMatch[3], timeMatch[4]);
+                    currentEnd = timeToSec(timeMatch[5], timeMatch[6], timeMatch[7], timeMatch[8]);
+                    currentTextParts = [];
+                } else {
+                    if (trimmed === 'WEBVTT' || trimmed.startsWith('Kind:') || trimmed.startsWith('Language:')) {
+                        continue;
+                    }
+                    if (currentStart !== null) {
+                        const cleanText = trimmed.replace(/<[^>]*>/g, '');
+                        if (cleanText) {
+                            currentTextParts.push(cleanText);
+                        }
+                    }
+                }
+            }
+
+            if (currentStart !== null && currentEnd !== null && currentTextParts.length > 0) {
+                const fullText = currentTextParts.join(' ');
+                if (currentStart <= targetTime + 45 && currentEnd >= targetTime - 120) {
+                    dialogueLines.push(`[${currentStart.toFixed(1)}초~${currentEnd.toFixed(1)}초] ${fullText}`);
+                }
+            }
+
+            return dialogueLines.join('\n');
+        } catch (parseErr) {
+            logger.error(`[QA-SUB-${videoId.substring(0,8)}] Subtitle parsing failed:`, parseErr);
+        }
+    }
+
+    return '';
+};
+
+// --- VIDEO Q&A API ENDPOINT ---
+router.post('/video-qa', requireAuth, async (req, res) => {
+    const { videoId, timestamp, question, history } = req.body;
+    if (!videoId || timestamp === undefined || !question) {
+        return res.status(400).json({ error: 'videoId, timestamp, and question are required.' });
+    }
+
+    if (!genAI) {
+        return res.status(500).json({ error: 'Gemini API key is not configured.' });
+    }
+
+    try {
+        const targetTime = parseFloat(timestamp);
+        
+        // 1. Get video record to check if it exists and fetch title
+        const videoData = db.getVideo(videoId);
+        if (!videoData) {
+            return res.status(404).json({ error: 'Video script data not found in DB.' });
+        }
+        const videoTitle = videoData.title;
+
+        // 2. Fetch adjacent script context and generate global outline from DB
+        let scriptContext = '';
+        let globalOutline = '';
+        if (videoData.script && Array.isArray(videoData.script)) {
+            // 2.1. Adjacent context (T - 120s to T + 45s asymmetric window)
+            const contextLines = videoData.script.filter(line => {
+                const diff = targetTime - line.timestamp;
+                return diff >= -45 && diff <= 120;
+            });
+            scriptContext = contextLines.map(line => `[${line.timestamp}초] ${line.text}`).join('\n');
+
+            // 2.2. Global outline (approx. 60-second intervals)
+            const outlineLines = [];
+            let lastSampledTime = -999;
+            for (const line of videoData.script) {
+                if (line.timestamp >= lastSampledTime + 60) {
+                    outlineLines.push(`[${Math.round(line.timestamp)}초] ${line.text}`);
+                    lastSampledTime = line.timestamp;
+                }
+            }
+            globalOutline = outlineLines.join('\n');
+        }
+
+        // 2.3. Fetch actual dialogue (subtitles) context around this timestamp
+        const dialogueContext = await getAdjacentSubtitles(videoId, targetTime);
+
+        // 3. Find adjacent cached frame files
+        const framesDir = path.join(__dirname, 'public', 'frames', videoId);
+        let selectedFrames = [];
+        let fromCache = true;
+
+        if (fs.existsSync(framesDir)) {
+            const files = await fs.promises.readdir(framesDir);
+            const frameFiles = files.filter(f => f.startsWith('frame-') && f.endsWith('.jpg'));
+            const frames = frameFiles.map(file => {
+                const match = file.match(/frame-(\d+(?:\.\d+)?)\.jpg/);
+                if (!match) return null;
+                return {
+                    file,
+                    timestamp: parseFloat(match[1]),
+                    absolutePath: path.join(framesDir, file)
+                };
+            }).filter(Boolean);
+
+            if (frames.length > 0) {
+                // targetTime 기준 T-3초 ~ T+1초 탐색
+                const rangeStart = targetTime - 3;
+                const rangeEnd = targetTime + 1;
+                selectedFrames = frames.filter(f => f.timestamp >= rangeStart && f.timestamp <= rangeEnd);
+
+                // 만약 이 범위 안에 없으면, 가장 가까운 프레임 중 시간 차이가 2초 이내인 것 2장 확보
+                if (selectedFrames.length === 0) {
+                    frames.sort((a, b) => Math.abs(a.timestamp - targetTime) - Math.abs(b.timestamp - targetTime));
+                    const closest = frames[0];
+                    if (closest && Math.abs(closest.timestamp - targetTime) <= 2) {
+                        selectedFrames = frames.slice(0, 2);
+                    }
+                } else {
+                    selectedFrames.sort((a, b) => a.timestamp - b.timestamp);
+                }
+            }
+        }
+
+        const imageParts = [];
+
+        // 4. If local cache hits, prepare image parts
+        if (selectedFrames.length > 0) {
+            for (const frame of selectedFrames) {
+                const data = await fs.promises.readFile(frame.absolutePath);
+                imageParts.push({
+                    inlineData: {
+                        data: data.toString('base64'),
+                        mimeType: 'image/jpeg'
+                    }
+                });
+                imageParts.push({ text: `Timestamp of this frame: [${Math.round(frame.timestamp)}s]` });
+            }
+        } else {
+            // 5. Cache miss: Fallback to on-demand frame extraction
+            logger.info(`[QA-${videoId.substring(0,8)}] Cache miss at timestamp ${targetTime}. Initiating on-demand extraction...`);
+            fromCache = false;
+
+            const tempDir = path.join(__dirname, 'temp', `qa-${videoId}-${Date.now()}`);
+            await fs.promises.mkdir(tempDir, { recursive: true });
+
+            try {
+                const startTime = parseFloat(Math.max(0, targetTime - 2).toFixed(1));
+                const youtubeUrl = `https://www.youtube.com/watch?v=${videoId}`;
+                const tempVideoPath = path.join(tempDir, 'temp_video.mp4');
+
+                const cookiePath = getQACookiePath();
+                const useImpersonate = getIsImpersonateAvailable();
+
+                // 1. Download video using yt-dlp with 2-step retry (cookie -> no-cookie fallback)
+                let downloadSuccess = false;
+                let downloadAttempt = 1;
+                let activeCookiePath = cookiePath;
+
+                while (!downloadSuccess && downloadAttempt <= 2) {
+                    const isRetry = downloadAttempt === 2;
+                    const currentCookiePath = isRetry ? null : activeCookiePath;
+                    
+                    const currentYtdlpArgs = [
+                        '-f', 'bestvideo[height<=480][ext=mp4]/best[height<=480][ext=mp4]'
+                    ];
+                    if (currentCookiePath) currentYtdlpArgs.push('--cookies', currentCookiePath);
+                    if (process.env.YTDLP_PROXY) currentYtdlpArgs.push('--proxy', process.env.YTDLP_PROXY);
+                    if (useImpersonate) currentYtdlpArgs.push('--impersonate', 'safari');
+                    currentYtdlpArgs.push(youtubeUrl, '-o', tempVideoPath);
+
+                    logger.info(`[QA-${videoId.substring(0,8)}] Download attempt ${downloadAttempt} with YT-DLP: ${currentYtdlpArgs.join(' ')}`);
+
+                    try {
+                        await new Promise((resolve, reject) => {
+                            const downloadProcess = spawn('yt-dlp', currentYtdlpArgs);
+                            let stderrData = '';
+                            
+                            downloadProcess.stderr.on('data', (data) => {
+                                stderrData += data.toString();
+                            });
+                            
+                            downloadProcess.on('close', (code) => {
+                                if (code === 0) resolve();
+                                else {
+                                    reject(new Error(`yt-dlp exited with code ${code}. Stderr: ${stderrData}`));
+                                }
+                            });
+                            downloadProcess.on('error', reject);
+                        });
+                        downloadSuccess = true;
+                    } catch (err) {
+                        logger.warn(`[QA-${videoId.substring(0,8)}] Download attempt ${downloadAttempt} failed: ${err.message}`);
+                        
+                        // If 1st attempt failed and we used a cookie, invalidate the cookie
+                        if (downloadAttempt === 1 && activeCookiePath) {
+                            const invalidPath = activeCookiePath + '.invalid';
+                            logger.warn(`[QA-${videoId.substring(0,8)}] Invalidating cookie: renaming to ${path.basename(invalidPath)}`);
+                            try {
+                                fs.renameSync(activeCookiePath, invalidPath);
+                            } catch (renameErr) {
+                                logger.error(`[QA-${videoId.substring(0,8)}] Failed to rename invalid cookie file:`, renameErr);
+                            }
+                        }
+                        
+                        if (downloadAttempt === 2) {
+                            throw err; // Re-throw to fallback block if second attempt fails
+                        }
+                        downloadAttempt++;
+                    }
+                }
+
+                // 2. Extract frames from local downloaded video using ffmpeg
+                const ffmpegArgs = [
+                    '-ss', startTime.toString(),
+                    '-i', tempVideoPath,
+                    '-t', '3.5',
+                    '-vf', 'fps=1,scale=640:360',
+                    '-q:v', '5',
+                    'frame-%04d.jpg'
+                ];
+
+                logger.info(`[QA-${videoId.substring(0,8)}] Extracting frames with ffmpeg: ffmpeg ${ffmpegArgs.join(' ')}`);
+
+                await new Promise((resolve, reject) => {
+                    const ffmpegProcess = spawn('ffmpeg', ffmpegArgs, { cwd: tempDir });
+                    let stderrData = '';
+                    
+                    if (ffmpegProcess.stderr) {
+                        ffmpegProcess.stderr.on('data', (data) => {
+                            stderrData += data.toString();
+                        });
+                    }
+                    
+                    ffmpegProcess.on('close', (code) => {
+                        if (code === 0) resolve();
+                        else {
+                            logger.error(`[QA-FFMPEG-ERROR] ffmpeg exited with code ${code}. Stderr:\n${stderrData}`);
+                            reject(new Error(`ffmpeg exited with code ${code}`));
+                        }
+                    });
+                    ffmpegProcess.on('error', reject);
+                });
+
+                // 3. Process extracted frames
+                const files = (await fs.promises.readdir(tempDir)).filter(f => f.startsWith('frame-') && f.endsWith('.jpg')).sort();
+                const targetFramesDir = path.join(__dirname, 'public', 'frames', videoId);
+                await fs.promises.mkdir(targetFramesDir, { recursive: true });
+
+                for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
+                    const filePath = path.join(tempDir, file);
+                    const timestampVal = startTime + i;
+                    const cacheFileName = `frame-${timestampVal}.jpg`;
+                    const cacheFilePath = path.join(targetFramesDir, cacheFileName);
+
+                    // Copy extracted frame to standard cache path for future Q&A hits
+                    if (!fs.existsSync(cacheFilePath)) {
+                        await fs.promises.copyFile(filePath, cacheFilePath);
+                    }
+
+                    const data = await fs.promises.readFile(cacheFilePath);
+                    imageParts.push({
+                        inlineData: {
+                            data: data.toString('base64'),
+                            mimeType: 'image/jpeg'
+                        }
+                    });
+                    imageParts.push({ text: `Timestamp of this frame: [${Math.round(timestampVal)}s]` });
+                }
+            } catch (fallbackErr) {
+                logger.error(`Fallback frame extraction failed for ${videoId}:`, fallbackErr);
+                // Continue without images if extraction fails
+            } finally {
+                if (fs.existsSync(tempDir)) {
+                    await fs.promises.rm(tempDir, { recursive: true, force: true }).catch(() => {});
+                }
+            }
+        }
+
+        // 6. Build prompt and invoke Gemini with Google Search tool
+        let historyContext = '';
+        if (history && Array.isArray(history) && history.length > 0) {
+            historyContext = 'Previous Conversation History (Use this for context if the user asks follow-up questions):\n' +
+                history.map(item => `User: ${item.question}\nAI Assistant: ${item.answer}`).join('\n\n') + '\n\n';
+        }
+
+        const systemPrompt = `You are a smart assistive AI companion for a visually impaired user watching YouTube videos. 
+The user paused the video at [${Math.round(targetTime)}s] to ask a question.
+Provide a clear, detailed, and helpful answer in Korean.
+Since the user cannot see, focus on describing visual elements, reading any text visible on the screen, or clarifying actions occurring in the video.
+Make sure your tone is polite and professional.
+
+[CRITICAL REQUIREMENT]
+1. Do NOT use any Markdown formatting, symbols, syntax, or links. (Do NOT use asterisks like **, *, hashes like #, underscores, backticks, bullet dashes, or blockquotes). The visually impaired user uses a screen reader which will read out every punctuation mark, which is very annoying. Generate the response in strictly plain, natural conversational Korean text only.
+2. Do NOT spoil or describe any events, scripts, or details occurring AFTER the current timestamp [${Math.round(targetTime)}s]. The user is currently watching the video at this exact moment; revealing future story or visual details will ruin their experience.
+3. Only answer questions directly related to this video (its title, script context, visual frames, or narrative). If the user asks something completely unrelated to the video, politely decline and state that you can only answer questions related to the current video.
+4. If you use the Google Search tool, ONLY search for information directly relevant to the video's content, context, subjects, or concepts mentioned in the video. Do NOT search for unrelated external topics.
+5. Do NOT include any source links, URLs, citations, footnotes, or website references (e.g. "[1]", "(source: www.example.com)", links like "[text](url)") in your response. The answer must be a single natural conversational text without quoting where the information came from.
+6. Use the "Actual Dialogue / Subtitles" context to answer questions about what characters/narrators said at or around the current timestamp (e.g. "방금 뭐라고 했어?", "주인공 대사가 뭐야?").
+
+Video Title: "${videoTitle}"
+
+Video Global Outline (Brief chronological summary of the entire video):
+${globalOutline || '(No outline available)'}
+
+Script Context around the paused timestamp (T - 120s ~ T + 45s):
+${scriptContext || '(No script context available)'}
+
+Actual Dialogue / Subtitles spoken in the video around this timestamp (T - 120s ~ T + 45s):
+${dialogueContext || '(No dialogue/subtitles available around this time)'}
+
+${historyContext}User's Question: "${question}"`;
+
+        const model = genAI.getGenerativeModel({ 
+            model: "gemini-3.1-flash-lite",
+            tools: [{ googleSearch: {} }]
+        });
+        const result = await model.generateContent([systemPrompt, ...imageParts]);
+        let answer = result.response.text().trim();
+
+        // API 비용 계산 및 일일 집계 테이블(qa_user_daily_costs)에 UPSERT
+        try {
+            const usage = result.response.usageMetadata;
+            if (usage) {
+                const promptTokens = usage.promptTokenCount || 0;
+                const completionTokens = usage.candidatesTokenCount || 0;
+                const totalTokens = usage.totalTokenCount || 0;
+                
+                const modelName = "gemini-3.1-flash-lite";
+                const calculatedCost = calculateApiCost(modelName, promptTokens, completionTokens, totalTokens);
+                
+                // 한국 시간(KST) YYYY-MM-DD 날짜 구하기
+                const logDate = new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Seoul' });
+                const userId = req.user.id;
+
+                db.upsertQaCost({
+                    userId,
+                    videoId,
+                    logDate,
+                    promptTokens,
+                    completionTokens,
+                    cost: calculatedCost
+                });
+            }
+        } catch (costErr) {
+            logger.error(`[QA-COST-ERROR] Failed to save Q&A API cost:`, costErr);
+        }
+
+        // Strip any remaining markdown symbols, URLs, and citations to ensure pure plain text for screen readers
+        answer = answer
+            .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Remove markdown link structure but keep text
+            .replace(/https?:\/\/[^\s]+/g, '')        // Remove URLs
+            .replace(/\[\d+\]/g, '')                  // Remove citations like [1]
+            .replace(/[\*\_\#\`\-\>\+\=\[\]\{\}]/g, '') // Remove markdown syntax characters
+            .trim();
+
+        // 7. Output result
+        logger.info(`[QA-${videoId.substring(0,8)}] Answered question at ${targetTime}s (Source: ${fromCache ? 'cache' : 'on-demand'}).`);
+        res.json({
+            answer,
+            timestamp: targetTime,
+            fromCache
+        });
+
+    } catch (err) {
+        logger.error(`Q&A endpoint failed for videoId ${videoId}:`, err);
+        res.status(500).json({ error: 'Failed to process video Q&A.' });
+    }
 });
 
 // --- COMMENTS API ENDPOINTS ---
