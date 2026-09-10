@@ -16,22 +16,35 @@ function billingMonth(value = new Date()) {
 
 function pricingFor(modelName, occurredAt = new Date()) {
     const normalized = String(modelName || '').toLowerCase();
-    if (!normalized.includes('gemini-3.8-flash')) {
-        throw new Error(`No verified Gemini pricing is configured for model: ${modelName}`);
+    const date = occurredAt instanceof Date ? occurredAt : new Date(occurredAt);
+    if (normalized.includes('gemini-3.8-flash')) {
+        const introductoryPricingEnds = new Date('2027-01-01T00:00:00.000Z');
+        const introductory = date < introductoryPricingEnds;
+        return {
+            model: 'gemini-3.8-flash',
+            version: introductory ? 'gemini-3.8-flash-standard-2026' : 'gemini-3.8-flash-standard-2027',
+            inputPerMillion: introductory ? 0.75 : 1.50,
+            outputPerMillion: introductory ? 3.75 : 7.50,
+            cachedInputPerMillion: introductory ? 0.075 : 0.15,
+            toolInputPerMillion: introductory ? 0.75 : 1.50
+        };
     }
 
-    const date = occurredAt instanceof Date ? occurredAt : new Date(occurredAt);
-    const introductoryPricingEnds = new Date('2027-01-01T00:00:00.000Z');
-    const introductory = date < introductoryPricingEnds;
+    // Gemini 3.5 Flash-Lite standard pricing: $0.30/M input, $2.50/M output
+    // (including thinking), and $0.03/M cached input. Tool prompt tokens are
+    // input tokens and use the same input rate.
+    if (normalized.includes('gemini-3.5-flash-lite')) {
+        return {
+            model: 'gemini-3.5-flash-lite',
+            version: 'gemini-3.5-flash-lite-standard',
+            inputPerMillion: 0.30,
+            outputPerMillion: 2.50,
+            cachedInputPerMillion: 0.03,
+            toolInputPerMillion: 0.30
+        };
+    }
 
-    return {
-        model: 'gemini-3.8-flash',
-        version: introductory ? 'gemini-3.8-flash-standard-2026' : 'gemini-3.8-flash-standard-2027',
-        inputPerMillion: introductory ? 0.75 : 1.50,
-        outputPerMillion: introductory ? 3.75 : 7.50,
-        cachedInputPerMillion: introductory ? 0.075 : 0.15,
-        toolInputPerMillion: introductory ? 0.75 : 1.50
-    };
+    throw new Error(`No verified Gemini pricing is configured for model: ${modelName}`);
 }
 
 function calculateGeminiCost({

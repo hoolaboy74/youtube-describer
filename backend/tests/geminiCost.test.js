@@ -50,6 +50,26 @@ test('Gemini 3.8 Flash switches to the documented 2027 standard rates', () => {
     assert.equal(cost.totalCost, 9);
 });
 
+test('Gemini 3.5 Flash-Lite charges standard input, cache, tool, and output rates', () => {
+    const cost = calculateGeminiCost({
+        modelName: 'gemini-3.5-flash-lite',
+        usageMetadata: {
+            promptTokenCount: 1_000_000,
+            cachedContentTokenCount: 200_000,
+            toolUsePromptTokenCount: 100_000,
+            candidatesTokenCount: 200_000,
+            thoughtsTokenCount: 100_000
+        }
+    });
+
+    assert.equal(cost.version, 'gemini-3.5-flash-lite-standard');
+    assertClose(cost.inputCost, 0.24);
+    assertClose(cost.cachedCost, 0.006);
+    assertClose(cost.toolCost, 0.03);
+    assertClose(cost.outputCost, 0.75);
+    assertClose(cost.totalCost, 1.026);
+});
+
 test('Google Search query count comes from provider grounding metadata', () => {
     assert.equal(extractGoogleSearchQueryCount({
         candidates: [

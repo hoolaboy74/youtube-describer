@@ -33,6 +33,7 @@ const ttsClientOptions = process.env.NODE_EXTRA_CA_CERTS ? { fallback: 'rest' } 
 const ttsClient = new TextToSpeechClient(ttsClientOptions);
 const audioCacheDir = path.join(__dirname, 'public', 'audio');
 const qaTtsStore = createQaTtsStore();
+const QA_MODEL_NAME = process.env.QA_MODEL_NAME || 'gemini-3.5-flash-lite';
 
 const YouTube = require('youtube-sr').default;
 
@@ -622,6 +623,7 @@ const getAdjacentSubtitles = async (videoId, targetTime) => {
 
 // --- VIDEO Q&A API ENDPOINT ---
 router.post('/video-qa', requireAuth, async (req, res) => {
+    const requestStartedAt = Date.now();
     const { videoId, timestamp, question, history } = req.body;
     if (!videoId || timestamp === undefined || !question) {
         return res.status(400).json({ error: 'videoId, timestamp, and question are required.' });
@@ -894,11 +896,13 @@ ${dialogueContext || '(No dialogue/subtitles available around this time)'}
 
 ${historyContext}User's Question: "${question}"`;
 
+        const modelStartedAt = Date.now();
         const model = genAI.getGenerativeModel({ 
-            model: "gemini-3.8-flash",
+            model: QA_MODEL_NAME,
             tools: [{ googleSearch: {} }]
         });
         const result = await model.generateContent([systemPrompt, ...imageParts]);
+        const modelElapsedMs = Date.now() - modelStartedAt;
         let answer = result.response.text().trim();
 
         // Persist the provider-reported token usage and actual Google Search
@@ -907,13 +911,14 @@ ${historyContext}User's Question: "${question}"`;
         try {
             const usage = result.response.usageMetadata;
             if (usage) {
+                const searchQueries = extractGoogleSearchQueryCount(result.response);
                 const recordedCost = db.recordGeminiUsage({
                     videoId,
                     userId: req.user.id,
                     requestType: 'qa',
-                    modelName: "gemini-3.8-flash",
+                    modelName: QA_MODEL_NAME,
                     usageMetadata: usage,
-                    searchQueries: extractGoogleSearchQueryCount(result.response)
+                    searchQueries
                 });
                 logger.info(`[QA-COST] Recorded $${recordedCost.totalCost.toFixed(6)} for ${videoId}.`);
             } else {
@@ -942,7 +947,11 @@ ${historyContext}User's Question: "${question}"`;
         });
 
         // 7. Output result
-        logger.info(`[QA-${videoId.substring(0,8)}] Answered question at ${targetTime}s (Source: ${fromCache ? 'cache' : 'on-demand'}).`);
+        logger.info(
+            `[QA-${videoId.substring(0,8)}] Answered question at ${targetTime}s ` +
+            `(Source: ${fromCache ? 'cache' : 'on-demand'}, Model: ${QA_MODEL_NAME}, ` +
+            `Frames: ${selectedFrames.length}, Model: ${modelElapsedMs}ms, Total: ${Date.now() - requestStartedAt}ms).`
+        );
         res.json({
             answer,
             timestamp: targetTime,
