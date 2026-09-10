@@ -19,6 +19,7 @@ const { findAcceptedTtsEvent } = require('./modules/ttsPolicy');
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const { spawn, execFile } = require('child_process');
 const { extractGoogleSearchQueryCount } = require('./modules/geminiCost');
+const { createQaTtsStore } = require('./modules/qaTtsStore');
 
 // JWT 기반 세션 관리 설정
 const jwt = require('jsonwebtoken');
@@ -31,6 +32,7 @@ const router = express.Router();
 const ttsClientOptions = process.env.NODE_EXTRA_CA_CERTS ? { fallback: 'rest' } : {};
 const ttsClient = new TextToSpeechClient(ttsClientOptions);
 const audioCacheDir = path.join(__dirname, 'public', 'audio');
+const qaTtsStore = createQaTtsStore();
 
 const YouTube = require('youtube-sr').default;
 
@@ -258,6 +260,44 @@ function createTtsHandler({ database = db, client = ttsClient, cacheRoot = audio
     };
 }
 
+// Q&A answers are not canonical video-script events. Keep their TTS contract
+// separate and accept only a short-lived server-issued answer ID, never an
+// arbitrary client-supplied text payload.
+function createQaTtsHandler({ store = qaTtsStore, client = ttsClient, cacheRoot = audioCacheDir } = {}) {
+    return async (req, res) => {
+        try {
+            const answer = store.get({ id: req.body?.qaTtsId, userId: req.user?.id });
+            if (!answer) {
+                return res.status(422).json({ error: 'A current server-issued Q&A answer is required' });
+            }
+
+            const voiceName = 'ko-KR-Chirp3-HD-Sulafat';
+            const hash = crypto.createHash('sha256')
+                .update(`qa:${voiceName}:ko-KR:MP3:${answer.text}`)
+                .digest('hex');
+            const cacheDirPath = path.join(cacheRoot, 'qa_tts_cache', hash.substring(0, 2), hash.substring(2, 4));
+            const audioFilePath = path.join(cacheDirPath, `${hash}.mp3`);
+
+            if (fs.existsSync(audioFilePath)) {
+                return res.sendFile(audioFilePath);
+            }
+
+            await fs.promises.mkdir(cacheDirPath, { recursive: true });
+            const [ttsResponse] = await client.synthesizeSpeech({
+                input: { text: answer.text },
+                voice: { languageCode: 'ko-KR', name: voiceName },
+                audioConfig: { audioEncoding: 'MP3' },
+            });
+            await fs.promises.writeFile(audioFilePath, ttsResponse.audioContent, 'binary');
+            res.set('Content-Type', 'audio/mpeg');
+            res.send(ttsResponse.audioContent);
+        } catch (error) {
+            logger.error('Q&A TTS API Error:', error);
+            res.status(500).json({ error: 'Failed to synthesize Q&A speech' });
+        }
+    };
+}
+
 router.post('/tts', createTtsHandler());
 
 // 인증 미들웨어: 로그인 완료된 회원만 허용 (시각장애인 여부 상관없음)
@@ -288,6 +328,8 @@ function requireAuth(req, res, next) {
         return res.status(401).json({ error: '인증 세션이 만료되었습니다. 다시 로그인해 주십시오.' });
     }
 }
+
+router.post('/qa-tts', requireAuth, createQaTtsHandler());
 
 // 인증 미들웨어: 로그인 완료 및 시각장애인으로 인증된 회원만 허용
 function requireBlindAuth(req, res, next) {
@@ -889,12 +931,23 @@ ${historyContext}User's Question: "${question}"`;
             .replace(/[\*\_\#\`\-\>\+\=\[\]\{\}]/g, '') // Remove markdown syntax characters
             .trim();
 
+        const dialogueTexts = dialogueContext
+            .split('\n')
+            .map(line => line.replace(/^\[[^\]]+\]\s*/, '').trim())
+            .filter(Boolean);
+        const qaTtsId = qaTtsStore.issue({
+            userId: req.user.id,
+            text: answer,
+            dialogueTexts
+        });
+
         // 7. Output result
         logger.info(`[QA-${videoId.substring(0,8)}] Answered question at ${targetTime}s (Source: ${fromCache ? 'cache' : 'on-demand'}).`);
         res.json({
             answer,
             timestamp: targetTime,
-            fromCache
+            fromCache,
+            qaTtsId
         });
 
     } catch (err) {
@@ -2276,3 +2329,4 @@ router.get('/sitemap', (req, res) => {
 
 module.exports = router;
 module.exports.createTtsHandler = createTtsHandler;
+module.exports.createQaTtsHandler = createQaTtsHandler;

@@ -542,32 +542,38 @@ function PlayerScreenV2() {
                 qa.id === newQaId ? { ...qa, answer: answerText, isGenerating: false } : qa
             ));
             setIsQaLoading(false);
+            announceQaPolite('답변이 준비되었습니다.');
 
-            // Play answer with TTS audio
-            isTtsPlayingRef.current = true;
-            player.setVolume(10);
-            
+            // Q&A TTS is separate from canonical video-description TTS. A
+            // failed speech request must never replace a successful answer.
+            const qaTtsId = response.data.qaTtsId;
             const audioPlayer = audioPlayerRef.current;
-            if (audioPlayer) {
-                audioPlayer.pause();
-                
-                onAudioEndedRef.current = () => {
-                    isTtsPlayingRef.current = false;
-                    if (player) {
-                        player.setVolume(100);
-                    }
-                };
+            if (qaTtsId && audioPlayer) {
+                try {
+                    isTtsPlayingRef.current = true;
+                    player.setVolume(10);
+                    audioPlayer.pause();
+                    onAudioEndedRef.current = () => {
+                        isTtsPlayingRef.current = false;
+                        if (player) player.setVolume(100);
+                    };
 
-                const ttsResponse = await axios.post(`/api/tts`, { text: answerText }, { responseType: 'blob' });
-                const audioUrl = URL.createObjectURL(ttsResponse.data);
-                
-                audioPlayer.src = audioUrl;
-                audioPlayer.playbackRate = playbackRateRef.current || 1.3;
-                audioPlayer.volume = 1.0;
-                audioPlayer.play().catch(e => {
-                    console.error("Q&A Audio play failed:", e);
+                    const ttsResponse = await axios.post('/api/qa-tts', { qaTtsId }, { responseType: 'blob' });
+                    const audioUrl = URL.createObjectURL(ttsResponse.data);
+                    audioPlayer.src = audioUrl;
+                    audioPlayer.playbackRate = playbackRateRef.current || 1.3;
+                    audioPlayer.volume = 1.0;
+                    audioPlayer.play().catch(e => {
+                        console.error('Q&A audio play failed:', e);
+                        isTtsPlayingRef.current = false;
+                        player.setVolume(100);
+                    });
+                } catch (ttsError) {
+                    console.error('Q&A TTS failed:', ttsError);
                     isTtsPlayingRef.current = false;
-                });
+                    player.setVolume(100);
+                    announceQaPolite('답변은 표시되었습니다. 음성 재생에 실패했습니다.');
+                }
             }
 
 
