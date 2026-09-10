@@ -13,6 +13,12 @@ function isMobile() {
     return /Mobi|Android/i.test(navigator.userAgent);
 }
 
+function supportsProgressiveOggOpus() {
+    const isSafari = /Safari/i.test(navigator.userAgent) && !/(Chrome|Chromium|CriOS|Edg)/i.test(navigator.userAgent);
+    if (isSafari) return false;
+    return document.createElement('audio').canPlayType('audio/ogg; codecs="opus"') !== '';
+}
+
 const verbosityLabels = { 1: '최소', 2: '기본', 3: '최대' };
 function formatTime(seconds) {
     return new Date(seconds * 1000).toISOString().substr(11, 8);
@@ -623,7 +629,7 @@ function PlayerScreenV2() {
                         await audioPlayer.play();
                     };
 
-                    if (qaTtsStreamPath) {
+                    if (qaTtsStreamPath && supportsProgressiveOggOpus()) {
                         let streamFallbackStarted = false;
                         const startStreamFallback = () => {
                             if (streamFallbackStarted) return;
