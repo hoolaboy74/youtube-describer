@@ -542,7 +542,6 @@ function PlayerScreenV2() {
                 qa.id === newQaId ? { ...qa, answer: answerText, isGenerating: false } : qa
             ));
             setIsQaLoading(false);
-            announceQaPolite('답변이 준비되었습니다.');
 
             // Q&A TTS is separate from canonical video-description TTS. A
             // failed speech request must never replace a successful answer.
