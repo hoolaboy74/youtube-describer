@@ -487,8 +487,8 @@ function PlayerScreenV2() {
                 return;
             }
 
-            // Open QA Modal via 'q' or 'Q' key - Pause everything first
-            if (e.key === 'q' || e.key === 'Q') {
+            // Open Q&A modal via the Q key, including Korean-layout ㅂ - pause first.
+            if (e.key === 'q' || e.key === 'Q' || e.key === 'ㅂ') {
                 e.preventDefault();
                 handleOpenQaModal();
                 return;
