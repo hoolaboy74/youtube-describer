@@ -23,6 +23,11 @@ const db = new Database(dbPath);
 db.pragma('journal_mode = WAL');
 let qaCacheManager;
 let qaMedia;
+let qaRequestReceipts;
+function getQaRequestReceipts() {
+  if (!qaRequestReceipts) qaRequestReceipts = require('./modules/qaRequestReceipts').createQaRequestReceipts(db);
+  return qaRequestReceipts;
+}
 function getQaMedia() {
   if (!qaMedia) {
     const { createQaMedia, createDefaultMediaAdapter } = require('./modules/qaMedia');
@@ -1797,6 +1802,7 @@ module.exports = {
   init,
   getQaCacheManager,
   getQaMedia,
+  getQaRequestReceipts,
   saveApiRequest,
   getSitemapData,
   createUser,

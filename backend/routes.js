@@ -433,7 +433,8 @@ const { createQaRequestStore } = require('./modules/qaRequestStore');
 const { createQaRouter } = require('./modules/qaRoutes');
 const { createQaGeneration } = require('./modules/qaGeneration');
 const { createQaSpeech } = require('./modules/qaSpeech');
-const incrementalQaStore = createQaRequestStore();
+const incrementalQaReceipts = db.getQaRequestReceipts();
+const incrementalQaStore = createQaRequestStore({ receipts: incrementalQaReceipts });
 const incrementalQaSpeech = createQaSpeech({ client: ttsClient, streamingClient: streamingTtsClient });
 let incrementalQaRun;
 const qaMaintenance = setInterval(() => {
@@ -448,9 +449,9 @@ router.use('/qa', createQaRouter({ auth: requireAuth, store: incrementalQaStore,
             model: new GoogleGenerativeAI(process.env.GOOGLE_API_KEY).getGenerativeModel({ model: QA_MODEL_NAME,
                 generationConfig: { maxOutputTokens: 4096 } }),
             speech: incrementalQaSpeech,
-            recordUsage: (request, response) => db.recordGeminiUsage({ videoId: request.input.videoId, userId: request.userId,
+            recordUsage: (request, response) => incrementalQaReceipts.record(request, response.usageMetadata, () => db.recordGeminiUsage({ videoId: request.input.videoId, userId: request.userId,
                 requestType: 'qa', modelName: QA_MODEL_NAME, usageMetadata: response.usageMetadata,
-                searchQueries: extractGoogleSearchQueryCount(response) }),
+                searchQueries: extractGoogleSearchQueryCount(response) })),
         });
         return incrementalQaRun(request);
     },

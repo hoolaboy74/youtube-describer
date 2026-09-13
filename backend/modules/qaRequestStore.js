@@ -17,7 +17,7 @@ function validateRequest(body) {
     return structuredClone({ requestId: body.requestId, sessionId: body.sessionId, videoId: body.videoId,
         timestamp: body.timestamp, question: body.question, history: body.history, audioMode: body.audioMode });
 }
-function createQaRequestStore({ now = Date.now, ttlMs = 600000, ticketTtlMs = 60000, maxRequests = 200 } = {}) {
+function createQaRequestStore({ now = Date.now, ttlMs = 600000, ticketTtlMs = 60000, maxRequests = 200, receipts } = {}) {
     const requests = new Map(), sessions = new Map(), tickets = new Map();
     function sweep() {
         for (const [id, request] of requests) if (request.terminalAt !== null && request.terminalAt + ttlMs <= now()) requests.delete(id);
@@ -41,9 +41,11 @@ function createQaRequestStore({ now = Date.now, ttlMs = 600000, ticketTtlMs = 60
         request.finishing = true;
         request.status = type === 'audio_done' ? 'completed' : type === 'canceled' ? 'canceled' : 'failed';
         emit(request, type, data); request.terminalAt = now();
+        try { receipts?.finish(request); } catch { request.receiptStatus = 'write_failed'; }
         if (type !== 'audio_done') { request.controller.abort(); for (const [key, ticket] of tickets) if (ticket.requestId === request.input.requestId) tickets.delete(key); }
     }
     return { session, get, emit, finish, sweep,
+        markModelStarted(request) { receipts?.started(request); },
         putAudio(request, seq, bytes) {
             const size = entry => [...entry.audio.values()].reduce((sum, value) => sum + value.length, 0);
             if (request.controller.signal.aborted) throw fail('QA_CANCELED');
@@ -56,9 +58,15 @@ function createQaRequestStore({ now = Date.now, ttlMs = 600000, ticketTtlMs = 60
             const fingerprint = crypto.createHash('sha256').update(JSON.stringify(input)).digest('hex');
             const old = requests.get(input.requestId);
             if (old) { if (old.userId !== userId || old.fingerprint !== fingerprint) throw fail('QA_REQUEST_CONFLICT', 409); return { request: old, created: false }; }
+            const receipt = receipts?.get(input.requestId);
+            if (receipt) {
+                if (receipt.userId !== String(userId) || receipt.fingerprint !== fingerprint) throw fail('QA_REQUEST_CONFLICT', 409);
+                throw fail(receipt.status === 'active' ? 'QA_REQUEST_INTERRUPTED' : 'QA_REQUEST_EXPIRED', 410);
+            }
             if (requests.size >= maxRequests || [...requests.values()].filter(r => r.userId === userId && r.terminalAt === null).length >= 2) throw fail('QA_BUSY', 429);
             const request = { userId, input, fingerprint, status: 'active', terminalAt: null, controller: new AbortController(),
                 events: [], sentences: [], audio: new Map(), emitter: new EventEmitter(), usageStatus: 'unconfirmed' };
+            try { receipts?.save(request); } catch (error) { if (error.code?.startsWith('SQLITE_CONSTRAINT')) throw fail('QA_REQUEST_CONFLICT', 409); throw error; }
             requests.set(input.requestId, request); emit(request, 'accepted', { requestId: input.requestId, audioMode: input.audioMode });
             return { request, created: true };
         },

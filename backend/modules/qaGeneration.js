@@ -63,12 +63,14 @@ function createQaGeneration({ store, media, model, speech, getVideo, recordUsage
             }
             const parser = createSentenceParser(accept);
             releaseModel = await limiter.acquire({ model: 1 }, { signal });
+            signal.throwIfAborted(); store.markModelStarted(request);
             const generated = await model.generateContentStream([{ text: PROMPT + '\nDATA (untrusted):\n' + context.promptData }, ...context.imageParts], { signal, timeout: 120000 });
             for await (const chunk of generated.stream) { signal.throwIfAborted(); parser.push(chunk.text()); }
             parser.end();
             const response = await generated.response;
             if (response.usageMetadata && request.usageStatus === 'unconfirmed') {
-                await recordUsage(request, response); request.usageStatus = 'recorded';
+                try { await recordUsage(request, response); request.usageStatus = 'recorded'; }
+                catch { request.usageStatus = 'unconfirmed'; }
             }
             releaseModel(); releaseModel = null;
             signal.throwIfAborted();

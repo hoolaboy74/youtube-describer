@@ -4,7 +4,7 @@ No deployment or push has been performed. All flags remain opt-in; no environmen
 
 ## Local verification
 
-- Isolated backend suite: 93 passed (node --test, single test concurrency, temporary SQLite).
+- Isolated backend suite: 95 passed (node --test, single test concurrency, temporary SQLite).
 - Focused frontend suites: 13 passed (qaClient, qaAudioController, qaLatencyTrace, useQaConversation).
 - Frontend production build: passed.
 - Full frontend suite: App.test.js fails on the existing react-router-dom/Jest resolution path. The Q&A suites pass.
@@ -21,6 +21,10 @@ No deployment or push has been performed. All flags remain opt-in; no environmen
 
 Rollback: disable `QA_INCREMENTAL_SPEECH_ENABLED` and reload the player to select the legacy route. Cache warming can remain enabled or be disabled separately. Preserve cache versions, source provenance, video/script tables and current conversation state; disabling a route is not permission to delete assets.
 
+## Request/accounting recovery
+
+`qa_request_receipts` retains request ID, owner, body fingerprint, lifecycle status and usage status without conversation text. Reusing an existing ID after process restart returns 410 rather than automatically calling the model again. Recorded usage and both existing QA cost ledgers commit in one transaction. A crash/cancel without provider usage leaves `usageStatus='unconfirmed'`; it is not a zero-cost result. Reconcile those entries against available provider records before making total-cost claims.
+
 ## Not yet release-complete
 
-The live comparison matrix, physical-device checks and factuality/semantic-duplicate evaluation are outstanding. explicit external-search grounding, reconciliation of unconfirmed canceled usage, and reverse-order Q&A-first/main-generator media ownership need follow-up before declaring the entire DESIGN complete. The existing pipeline-first ordering, bounded resources, sentence MP3 path and automated failure cases are implemented and tested. This checkpoint intentionally does not mark all QA-01–QA-10 acceptance criteria as complete.
+The live comparison matrix, physical-device checks and factuality/semantic-duplicate evaluation are outstanding. explicit external-search grounding, reverse-order Q&A-first/main-generator media ownership need follow-up before declaring the entire DESIGN complete. The existing pipeline-first ordering, bounded resources, sentence MP3 path and automated failure cases are implemented and tested. This checkpoint intentionally does not mark all QA-01–QA-10 acceptance criteria as complete.
