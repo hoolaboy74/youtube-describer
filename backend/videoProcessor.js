@@ -5,6 +5,8 @@ const path = require('path');
 const util = require('util');
 const os = require('os');
 const { execFile, spawn, execSync } = require('child_process');
+const { spawnLimitedMedia } = require('./modules/mediaResourceLimiter');
+const { extractFrames } = require('./modules/frameExtraction');
 const db = require('./database');
 const { formatTime, preprocessVtt, isValidYoutubeUrl, getIsImpersonateAvailable } = require('./utils');
 const logger = require('./logger');
@@ -147,153 +149,22 @@ const timeEnd = (label) => {
 /**
  * Parallel Keyframe Extraction using FFmpeg Time-Chunking
  */
-async function extractKeyframesHybrid({ tempVideoPath, tempVideoFilename, baseTempDir, totalDuration, requestHash, sseHandler }) {
-    if (!fs.existsSync(tempVideoPath)) {
-        throw new Error('Video file download failed or file not found.');
-    }
-
-    logger.info(`[${requestHash}] Starting hybrid keyframe extraction (duration: ${totalDuration}s)`);
-
-    // Step 1: Fast I-frame extraction with showinfo
-    // sse status update omitted for high-speed extraction
-    const rawTimestamps = await new Promise((resolve, reject) => {
-        const extractedTimestamps = [];
-        let chunkStderr = '';
-
-        const ffmpegArgs = [
-            '-loglevel', 'info',
-            '-skip_frame', 'nokey', // I-frame only decoding to reduce CPU load by 90%
-            '-i', tempVideoFilename,
-            '-vf', "fps=1/2,scale=640:-1,showinfo",
-            '-vsync', '0',
-            '-q:v', '5',
-            `frame_raw_%04d.jpg`
-        ];
-
-        const ffmpegProcess = spawn('ffmpeg', ffmpegArgs, { cwd: baseTempDir });
-
-        ffmpegProcess.stderr.on('data', (data) => {
-            const stderrChunk = data.toString();
-            chunkStderr += stderrChunk;
-            if (chunkStderr.length > 10000) {
-                chunkStderr = chunkStderr.substring(chunkStderr.length - 10000);
-            }
-            
-            const timeMatches = stderrChunk.matchAll(/pts_time:(\d+\.?\d*)/g);
-            for (const match of timeMatches) {
-                extractedTimestamps.push(parseFloat(match[1]));
-            }
-
-            // progress report omitted since extraction takes < 1.5 seconds
+async function extractKeyframesHybrid({ tempVideoPath, baseTempDir, totalDuration, requestHash }) {
+    const result = await extractFrames({
+        inputPath: path.resolve(tempVideoPath),
+        outputDir: path.join(baseTempDir, 'source-frames'),
+        durationMs: Math.round(totalDuration * 1000),
+    });
+    if (!result.ready) {
+        throw Object.assign(new Error('Frame coverage is incomplete'), {
+            code: 'FRAME_COVERAGE_INCOMPLETE', coverageHoles: result.coverageHoles,
         });
-
-        ffmpegProcess.on('error', (err) => reject(new Error(`ffmpeg spawn error: ${err.message}`)));
-        ffmpegProcess.on('close', (code) => {
-            if (code === 0 || chunkStderr.includes('Nothing was written into output file') || chunkStderr.includes('No filtered frames')) {
-                resolve(extractedTimestamps.sort((a, b) => a - b));
-            } else {
-                reject(new Error(`ffmpeg exited with code ${code}. Stderr: ${chunkStderr}`));
-            }
-        });
-    });
-
-    // Step 2: Gap Detection
-    logger.info(`[${requestHash}] Raw I-frame extraction complete. Detected ${rawTimestamps.length} frames. Scanning for gaps...`);
-    const gapTargetTimes = [];
-    for (let target = 0; target < totalDuration; target += 2) {
-        const closest = rawTimestamps.find(t => Math.abs(t - target) <= 1.0);
-        if (!closest) {
-            gapTargetTimes.push(target);
-        }
     }
-
-    // Step 3: Backfill Execution
-    if (gapTargetTimes.length > 0) {
-        logger.info(`[${requestHash}] Found ${gapTargetTimes.length} missing frame slots. Starting backfill (concurrency limit: 3)...`);
-        
-        const chunkLimit = 3;
-        for (let i = 0; i < gapTargetTimes.length; i += chunkLimit) {
-            const chunk = gapTargetTimes.slice(i, i + chunkLimit);
-            const chunkPromises = chunk.map((time, idx) => {
-                const globalIdx = i + idx;
-                return new Promise((resolveBackfill) => {
-                    const ffmpegArgs = [
-                        '-loglevel', 'quiet',
-                        '-ss', time.toFixed(3), // Fast Seeking
-                        '-i', tempVideoFilename,
-                        '-vf', "scale=640:-1",
-                        '-vframes', '1',
-                        '-q:v', '5',
-                        `frame_backfill_${globalIdx}_%04d.jpg`
-                    ];
-
-                    const ffmpegProcess = spawn('ffmpeg', ffmpegArgs, { cwd: baseTempDir });
-                    ffmpegProcess.on('error', (err) => {
-                        logger.warn(`[${requestHash}] Backfill spawn error for ${time}s (ignored): ${err.message}`);
-                        resolveBackfill(null);
-                    });
-                    ffmpegProcess.on('close', (code) => {
-                        if (code === 0) {
-                            resolveBackfill({ time, idx: globalIdx });
-                        } else {
-                            logger.warn(`[${requestHash}] Backfill failed for ${time}s (ignored) with code ${code}`);
-                            resolveBackfill(null);
-                        }
-                    });
-                });
-            });
-            await Promise.all(chunkPromises);
-        }
+    for (const [index, frame] of result.frames.entries()) {
+        await fs.promises.rename(frame.path, path.join(baseTempDir, `frame-${String(index + 1).padStart(4, '0')}.jpg`));
     }
-
-    // Step 4: Re-index unified frames sequentially to frame-%04d.jpg & prepare return timestamps
-    const files = fs.readdirSync(baseTempDir);
-    const rawFiles = files.filter(f => f.startsWith('frame_raw_') && f.endsWith('.jpg')).sort();
-    const backfillFiles = files.filter(f => f.startsWith('frame_backfill_') && f.endsWith('.jpg')).sort();
-
-    // Map time to file paths for unified sorting
-    const unifiedList = [];
-    rawFiles.forEach((file, idx) => {
-        const t = rawTimestamps[idx] !== undefined ? rawTimestamps[idx] : idx * 2.0;
-        unifiedList.push({ file, time: t });
-    });
-
-    backfillFiles.forEach(file => {
-        const match = file.match(/frame_backfill_(\d+)_/);
-        if (match) {
-            const idx = parseInt(match[1], 10);
-            const t = gapTargetTimes[idx];
-            if (t !== undefined) {
-                unifiedList.push({ file, time: t });
-            }
-        }
-    });
-
-    // Chronological sorting
-    unifiedList.sort((a, b) => a.time - b.time);
-
-    const finalTimestamps = [];
-    unifiedList.forEach((item, index) => {
-        const srcPath = path.join(baseTempDir, item.file);
-        const dstFilename = `frame-${String(index + 1).padStart(4, '0')}.jpg`;
-        const dstPath = path.join(baseTempDir, dstFilename);
-
-        if (fs.existsSync(srcPath)) {
-            fs.renameSync(srcPath, dstPath);
-        }
-        finalTimestamps.push(item.time);
-    });
-
-    // Clean up remaining temp files just in case
-    const remainingTempFiles = fs.readdirSync(baseTempDir).filter(f => (f.startsWith('frame_raw_') || f.startsWith('frame_backfill_')) && f.endsWith('.jpg'));
-    for (const file of remainingTempFiles) {
-        try { fs.unlinkSync(path.join(baseTempDir, file)); } catch (e) {}
-    }
-
-    logger.info(`[${requestHash}] Hybrid extraction complete. Total frames unified: ${finalTimestamps.length}`);
-    // sse status update omitted for high-speed extraction
-
-    return finalTimestamps;
+    logger.info(`[${requestHash}] Extracted ${result.frames.length} frames with verified source PTS.`);
+    return result.frames.map(frame => frame.timestampMs / 1000);
 }
 
 // Helper to parse ISO 8601 duration
@@ -652,7 +523,7 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null, userId = nul
 
                     const ytdlpPath = 'yt-dlp';
                     logger.info(`[${requestHash}] Executing YT-DLP: ${ytdlpPath} ${ytdlpArgs.join(' ')}`);
-                    const downloadProcess = spawn(ytdlpPath, ytdlpArgs, { cwd: baseTempDir });
+                    const downloadProcess = spawnLimitedMedia(ytdlpPath, ytdlpArgs, { cwd: baseTempDir, disk: { root: baseTempDir, maxBytes: 1024 ** 3 } }, { download: 1, fullDownload: 1, ffmpeg: 1 });
                     let lastProgress = -1;
                     let stdoutBuffer = '';
                     let stderrData = '';
@@ -1099,7 +970,7 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
 
                     const ytdlpPath = 'yt-dlp';
                     logger.info(`[${requestHash}] Executing YT-DLP: ${ytdlpPath} ${ytdlpArgs.join(' ')}`);
-                    const downloadProcess = spawn(ytdlpPath, ytdlpArgs, { cwd: baseTempDir });
+                    const downloadProcess = spawnLimitedMedia(ytdlpPath, ytdlpArgs, { cwd: baseTempDir, disk: { root: baseTempDir, maxBytes: 1024 ** 3 } }, { download: 1, fullDownload: 1, ffmpeg: 1 });
                     let stderrData = '';
 
                     downloadProcess.stdout.on('data', (data) => {

@@ -17,7 +17,8 @@ const {
 const logger = require('./logger');
 const { findAcceptedTtsEvent } = require('./modules/ttsPolicy');
 const { GoogleGenerativeAI } = require("@google/generative-ai");
-const { spawn, execFile } = require('child_process');
+const { execFile } = require('child_process');
+const { spawnLimitedMedia } = require('./modules/mediaResourceLimiter');
 const { extractGoogleSearchQueryCount } = require('./modules/geminiCost');
 const { createQaTtsStore } = require('./modules/qaTtsStore');
 
@@ -604,7 +605,7 @@ const getAdjacentSubtitles = async (videoId, targetTime) => {
 
         try {
             await new Promise((resolve, reject) => {
-                const process = spawn('yt-dlp', ytdlpArgs);
+                const process = spawnLimitedMedia('yt-dlp', ytdlpArgs, { disk: { root: tempDir, maxBytes: 32 * 1024 * 1024 } }, { download: 1 }, 10);
                 let stderrData = '';
                 process.stderr.on('data', (d) => { stderrData += d.toString(); });
                 process.on('close', (code) => {
@@ -856,7 +857,7 @@ router.post('/video-qa', requireAuth, async (req, res) => {
 
                     try {
                         await new Promise((resolve, reject) => {
-                            const downloadProcess = spawn('yt-dlp', currentYtdlpArgs);
+                            const downloadProcess = spawnLimitedMedia('yt-dlp', currentYtdlpArgs, { disk: { root: tempDir, maxBytes: 1024 ** 3 } }, { download: 1, fullDownload: 1, ffmpeg: 1 }, 10);
                             let stderrData = '';
                             
                             downloadProcess.stderr.on('data', (data) => {
@@ -906,7 +907,7 @@ router.post('/video-qa', requireAuth, async (req, res) => {
                 logger.info(`[QA-${videoId.substring(0,8)}] Extracting frames with ffmpeg: ffmpeg ${ffmpegArgs.join(' ')}`);
 
                 await new Promise((resolve, reject) => {
-                    const ffmpegProcess = spawn('ffmpeg', ffmpegArgs, { cwd: tempDir });
+                    const ffmpegProcess = spawnLimitedMedia('ffmpeg', ffmpegArgs, { cwd: tempDir, timeoutMs: 30000 }, { ffmpeg: 1 }, 10);
                     let stderrData = '';
                     
                     if (ffmpegProcess.stderr) {

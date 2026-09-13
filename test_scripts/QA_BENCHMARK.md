@@ -76,3 +76,21 @@ node test_scripts/qa_browser_audio_probe.js /tmp/qa-provider-run-01 > /tmp/qa-br
 구간 다운로드는 해당 프로토콜/쿠키/프록시 환경에서 전체 다운로드와 비교한다. 다운로드 파일 크기를 실제 전송 바이트로 간주하지 않는다. 실제 전송량과 중복량을 측정하기 전 비용 절감이나 속도 개선을 주장하지 않는다.
 
 회귀 테스트가 기존 routes.js를 import하면 SQLite를 열므로 `YOUTUBE_DESCRIBER_DB_PATH`를 새 임시 경로로 설정한다. 여러 테스트 파일이 같은 DB 경로를 쓰는 실행은 `--test-concurrency=1`로 직렬화한다. `backend/npm test`는 실제 테스트 suite가 아니다.
+
+## 전체·구간 다운로드 실측 (2026-09-14 추가)
+
+```sh
+node test_scripts/qa_download_benchmark.js --live OT0wMk7yIEo 120 /tmp/qa-download-new-run
+```
+
+출력 디렉터리는 새 경로여야 한다. 전체 1회와 `[T-4,T+2]` 구간 1회를 순서대로 받으며 쿠키·기존 yt-dlp 설정·운영 캐시를 사용하지 않는다. 두 요청 모두 video-only, 최대 480p MP4 선택식이다. 명령당 60초, 알려진 파일 크기 100MiB, 시험 디렉터리 실제 사용량 예약 200MiB를 적용한다. 디스크 가용 공간은 여유분 2GiB 이상이어야 한다. 사용량은 실행 중 1초 간격 및 종료 시 검사하므로 외부 프로세스가 그 사이에 잠시 한도를 넘길 수 있다.
+
+로컬 wrapper가 오래된 Python을 선택할 때만 해당 실행의 PATH를 지정한다. 전역 Python 설정은 변경하지 않는다.
+
+```sh
+QA_BENCHMARK_PATH="/opt/homebrew/bin:$PATH" node test_scripts/qa_download_benchmark.js --live OT0wMk7yIEo 120 /tmp/qa-download-new-run
+```
+
+localhost CONNECT proxy가 **실제 수신 TLS 바이트**를 googlevideo 미디어와 나머지 메타데이터로 나누어 센다. TLS/HTTP 오버헤드를 포함하며 암호화된 URL·쿠키·본문은 기록하지 않는다. `fileBytes`는 파일 크기이고 `mediaInboundBytes`와 다르다. 추가 구간 요청의 미디어 수신량은 관찰할 수 있지만, 암호화된 원본 바이트 범위의 정확한 중복량은 측정하지 않는다. proxy 사용 자체의 오버헤드와 전체→구간 실행 순서 효과가 있으므로 1회 결과를 일반화하지 않는다.
+
+두 파일의 formatId가 같으면 FFmpeg framemd5로 구간 프레임을 원본 프레임의 PTS에 대응시킨다. 반복 정지 화면으로 후보 PTS가 여러 개이면 모호성을 그대로 남긴다. 구간의 0초를 원본 T-4초와 무조건 같다고 가정하지 않는다. 비교 중 `-copyts`와 종료 시각은 같은 기준을 사용하며, 비교 프레임 0개를 성공으로 처리하지 않는다.

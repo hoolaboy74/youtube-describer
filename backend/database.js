@@ -3,6 +3,8 @@ const fs = require('fs');
 const Database = require('better-sqlite3');
 const logger = require('./logger');
 const crypto = require('crypto');
+const { migrateQaCache } = require('./modules/qaCacheStore');
+const { createQaCacheManager } = require('./modules/qaCacheManager');
 const {
   GOOGLE_SEARCH_FREE_QUERIES_PER_MONTH,
   billingMonth,
@@ -19,6 +21,16 @@ const dbPath = process.env.YOUTUBE_DESCRIBER_DB_PATH
   : path.join(dbDir, 'cache.db');
 const db = new Database(dbPath);
 db.pragma('journal_mode = WAL');
+let qaCacheManager;
+function getQaCacheManager() {
+  if (!qaCacheManager) {
+    const root = process.env.QA_CACHE_ROOT || (process.env.YOUTUBE_DESCRIBER_DB_PATH
+      ? path.join(path.dirname(dbPath), 'qa-cache')
+      : path.join(__dirname, 'cache', 'qa'));
+    qaCacheManager = createQaCacheManager({ db, root });
+  }
+  return qaCacheManager;
+}
 
 // DB 초기화: 테이블 생성
 function init() {
@@ -430,6 +442,8 @@ function init() {
   db.exec(`CREATE INDEX IF NOT EXISTS idx_api_requests_created_at ON api_requests(createdAt)`);
   db.exec(`CREATE INDEX IF NOT EXISTS idx_api_requests_ip ON api_requests(ip)`);
 
+  migrateQaCache(db);
+  getQaCacheManager().reconcile();
   logger.info('Database initialized successfully.');
 }
 
@@ -821,8 +835,12 @@ function deleteComment(commentId) {
 
 // 영상 삭제 (관련 스크립트와 댓글은 ON DELETE CASCADE로 자동 삭제됨)
 function deleteVideo(videoId) {
-  const result = db.prepare('DELETE FROM videos WHERE videoId = ?').run(videoId);
-  return result;
+  return db.transaction(() => {
+    for (const table of ['qa_frame_assets', 'qa_subtitle_assets', 'qa_cache_jobs']) {
+      db.prepare(`DELETE FROM ${table} WHERE videoId = ?`).run(videoId);
+    }
+    return db.prepare('DELETE FROM videos WHERE videoId = ?').run(videoId);
+  })();
 }
 
 // --- Admin Page Functions ---
@@ -1769,6 +1787,7 @@ function saveApiRequest({ userId, guestId, ip, apiPath }) {
 
 module.exports = {
   init,
+  getQaCacheManager,
   saveApiRequest,
   getSitemapData,
   createUser,
