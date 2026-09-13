@@ -8,6 +8,7 @@ import Header from '../components/Header';
 import { useAccessibility } from '../contexts/AccessibilityContext';
 import { useAuth } from '../contexts/AuthContext';
 import './PlayerScreenV2.css';
+import { createQaLatencyTrace } from '../services/qaLatencyTrace';
 
 function isMobile() {
     return /Mobi|Android/i.test(navigator.userAgent);
@@ -580,6 +581,9 @@ function PlayerScreenV2() {
                 answer: qa.answer
             }));
 
+        const latencyTrace = createQaLatencyTrace({
+            requestId: newQaId, historyTurns: qaHistory.length, timestamp: currentTimestamp
+        });
         try {
             const response = await requestStreamingQa({
                 apiBase: API_BASE,
@@ -591,12 +595,14 @@ function PlayerScreenV2() {
                     history: qaHistory
                 },
                 onDelta: (text) => {
+                    if (text) latencyTrace.mark('firstText');
                     setQaList(prev => prev.map(qa =>
                         qa.id === newQaId ? { ...qa, answer: `${qa.answer}${text}` } : qa
                     ));
                 }
             });
 
+            latencyTrace.mark('generationDone');
             const answerText = response.answer;
 
             setQaList(prev => prev.map(qa => 
@@ -610,6 +616,7 @@ function PlayerScreenV2() {
             const qaTtsStreamPath = response.qaTtsStreamPath;
             const audioPlayer = audioPlayerRef.current;
             if (qaTtsId && audioPlayer) {
+                latencyTrace.mark('ttsRequested');
                 try {
                     isTtsPlayingRef.current = true;
                     player.setVolume(10);
@@ -626,6 +633,7 @@ function PlayerScreenV2() {
                         audioPlayer.src = audioUrl;
                         audioPlayer.playbackRate = playbackRateRef.current || 1.3;
                         audioPlayer.volume = 1.0;
+                        latencyTrace.audio(audioPlayer, 'mp3');
                         await audioPlayer.play();
                     };
 
@@ -635,6 +643,7 @@ function PlayerScreenV2() {
                             if (streamFallbackStarted) return;
                             streamFallbackStarted = true;
                             playBufferedFallback().catch(error => {
+                                latencyTrace.finish(error.name === 'NotAllowedError' ? 'autoplay-blocked' : 'audio-error');
                                 console.error('Q&A audio fallback failed:', error);
                                 isTtsPlayingRef.current = false;
                                 player.setVolume(100);
@@ -645,21 +654,26 @@ function PlayerScreenV2() {
                         audioPlayer.src = `${API_BASE}${qaTtsStreamPath}`;
                         audioPlayer.playbackRate = playbackRateRef.current || 1.3;
                         audioPlayer.volume = 1.0;
+                        latencyTrace.audio(audioPlayer, 'ogg');
                         audioPlayer.play().catch(startStreamFallback);
                     } else {
                         await playBufferedFallback();
                     }
                 } catch (ttsError) {
+                    latencyTrace.finish(ttsError.name === 'NotAllowedError' ? 'autoplay-blocked' : 'audio-error');
                     console.error('Q&A TTS failed:', ttsError);
                     isTtsPlayingRef.current = false;
                     player.setVolume(100);
                     announceQaPolite('답변은 표시되었습니다. 음성 재생에 실패했습니다.');
                 }
+            } else {
+                latencyTrace.finish('no-audio');
             }
 
 
 
         } catch (error) {
+            latencyTrace.finish('generation-error');
             console.error('Q&A failed:', error);
             setQaList(prev => prev.map(qa => 
                 qa.id === newQaId ? { ...qa, answer: '답변을 생성하는 데 실패했습니다. 다시 시도해 주세요.', isGenerating: false } : qa
