@@ -24,3 +24,8 @@ test('autoplay rejection is not recorded as actual playback', async () => {
     controller.enqueue(0, '/first'); await flush(); expect(onPlaying).not.toHaveBeenCalled(); expect(onError).toHaveBeenCalledTimes(1);
     audio.play.mockResolvedValue(); controller.resume(); audio.onplaying(); expect(onPlaying).toHaveBeenCalledTimes(1);
 });
+test('an unplayed OGG can switch to MP3, but a partially played stream cannot restart automatically', async () => {
+    const { controller, audio, onError } = setup(); controller.prepare(); controller.enqueue(-1, '/stream', true); await flush();
+    audio.onerror(); expect(onError).not.toHaveBeenCalled(); expect(controller.fallback()).toBe(true);
+    controller.enqueue(0, '/mp3'); await flush(); audio.onplaying(); expect(controller.fallback()).toBe(false);
+});

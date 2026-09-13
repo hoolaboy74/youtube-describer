@@ -62,3 +62,13 @@ test('a rejected candidate never reaches TTS and cancel suppresses a late unary 
     const running = run(request); await speaking.promise; store.finish(request, 'canceled'); gate.resolve(); await running;
     assert.equal(calls, 1); assert.equal(request.audio.size, 0); assert.equal(request.events.at(-1).type, 'canceled');
 });
+test('OGG failure before bytes falls back per sentence, but failure after bytes cannot trigger automatic rereading', async () => {
+    for (const bytes of [0, 1]) {
+        const store = createQaRequestStore(), { request } = store.accept(1, input({ audioMode: 'ogg' })); let mp3Calls = 0;
+        const failed = Promise.reject(new Error('injected')); failed.catch(() => {});
+        const run = createQaGeneration({ store, getVideo: () => ({ duration: 60 }), media: { prepare: async () => ({ frames: [], subtitles: { cues: [] } }) },
+            model: { generateContentStream: async () => ({ stream: (async function* () { yield { text: () => JSON.stringify({ seq: 0, text: UNKNOWN, kind: 'explanation', evidenceIds: [] }) + '\n' }; })(), response: Promise.resolve({}) }) },
+            speech: { ogg: async () => ({ bytes, firstByte: failed, done: failed, write: async () => {}, cancel() {} }), mp3: async () => { mp3Calls++; return Buffer.from('mp3'); } }, recordUsage: () => {} });
+        await run(request); assert.equal(mp3Calls, bytes ? 0 : 1); assert.equal(request.status, bytes ? 'failed' : 'completed');
+    }
+});

@@ -1,12 +1,12 @@
 'use strict';
 const express = require('express');
-function createQaRouter({ auth, store, run, manager, enabled = () => process.env.QA_INCREMENTAL_SPEECH_ENABLED === 'true' }) {
+function createQaRouter({ auth, store, run, manager, synthesizeSentence, enabled = () => process.env.QA_INCREMENTAL_SPEECH_ENABLED === 'true' }) {
     const router = express.Router();
     const wrap = fn => (req, res, next) => Promise.resolve().then(() => fn(req, res)).catch(error => {
         if (res.headersSent) return res.destroy();
         res.status(error.status || 500).json({ code: error.code || 'QA_REQUEST_FAILED' });
     });
-    router.get('/config', auth, (req, res) => res.json({ incrementalSpeech: enabled(), cacheWarming: process.env.QA_CACHE_WARMING_ENABLED === 'true' }));
+    router.get('/config', auth, (req, res) => res.json({ incrementalSpeech: enabled(), oggStreaming: process.env.QA_OGG_STREAMING_ENABLED === 'true', cacheWarming: process.env.QA_CACHE_WARMING_ENABLED === 'true' }));
     router.use((req, res, next) => enabled() ? next() : res.status(404).json({ code: 'QA_DISABLED' }));
     const owned = req => store.get(req.params.id, req.user.id);
     router.post('/requests', auth, wrap((req, res) => {
@@ -37,10 +37,21 @@ function createQaRouter({ auth, store, run, manager, enabled = () => process.env
         const request = owned(req); if (!request) return res.status(404).json({ code: 'QA_REQUEST_MISSING' });
         store.finish(request, 'canceled'); res.json({ status: request.status });
     }));
-    router.post('/requests/:id/audio', auth, wrap((req, res) => {
+    router.post('/requests/:id/audio', auth, wrap(async (req, res) => {
         const request = owned(req); if (!request) return res.status(404).json({ code: 'QA_REQUEST_MISSING' });
         const seq = req.body?.seq;
-        if (request.input.audioMode !== 'mp3' || !Number.isInteger(seq) || !request.audio.has(seq)) return res.status(404).json({ code: 'QA_AUDIO_UNAVAILABLE' });
+        if (!Number.isInteger(seq) || seq < 0) return res.status(404).json({ code: 'QA_AUDIO_UNAVAILABLE' });
+        if (!request.audio.has(seq)) {
+            const sentence = request.sentences.find(value => value.seq === seq);
+            if (!sentence || request.status !== 'completed' || !synthesizeSentence) return res.status(404).json({ code: 'QA_AUDIO_UNAVAILABLE' });
+            request.replayPromises ||= new Map();
+            if (!request.replayPromises.has(seq)) {
+                const task = synthesizeSentence(sentence.text, request.controller.signal).then(bytes => store.putAudio(request, seq, bytes));
+                request.replayPromises.set(seq, task);
+                task.finally(() => request.replayPromises.delete(seq)).catch(() => {});
+            }
+            await request.replayPromises.get(seq);
+        }
         res.json({ path: `/api/qa/audio/${store.ticket(request, seq)}` });
     }));
     router.get('/audio/:ticket', wrap(async (req, res) => {
@@ -53,18 +64,21 @@ function createQaRouter({ auth, store, run, manager, enabled = () => process.env
         }
         // A continuous stream has one consumer. Reconnecting after partial
         // playback must never silently restart all previously heard sentences.
+        if (request.effectiveAudioMode === 'mp3') return res.status(204).end();
         if (request.audioClaimed) return res.status(409).end();
         request.audioClaimed = true;
         const connect = () => {
             if (res.destroyed || !request.ogg) return;
             request.emitter.removeListener('audio', connect);
-            res.type('audio/ogg'); request.ogg.output.on('error', () => res.destroy()); request.ogg.output.pipe(res);
+            res.type('audio/ogg'); request.ogg.output.on('error', () => { if (request.ogg.bytes > 0) res.destroy(); }); request.ogg.output.pipe(res);
         };
+        const fallback = () => { if (!res.headersSent) res.status(204); res.end(); };
+        request.emitter.on('audio_fallback', fallback);
         const abort = () => res.destroy(); request.controller.signal.addEventListener('abort', abort, { once: true });
         request.emitter.on('audio', connect); connect();
         res.on('close', () => {
-            request.emitter.removeListener('audio', connect); request.controller.signal.removeEventListener('abort', abort);
-            if (!res.writableEnded) store.finish(request, 'error', { code: 'QA_AUDIO_DISCONNECTED' });
+            request.emitter.removeListener('audio', connect); request.emitter.removeListener('audio_fallback', fallback); request.controller.signal.removeEventListener('abort', abort);
+            if (!res.writableEnded && request.effectiveAudioMode !== 'mp3') store.finish(request, 'error', { code: 'QA_AUDIO_DISCONNECTED' });
         });
     }));
     router.post('/sessions/:id/presence', auth, wrap((req, res) => {

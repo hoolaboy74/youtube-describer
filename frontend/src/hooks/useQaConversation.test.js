@@ -1,12 +1,13 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { useQaConversation } from './useQaConversation';
 import { createQaClient } from '../services/qaClient';
-import { createQaAudioController } from '../services/qaAudioController';
+import { createQaAudioController, chooseQaAudioMode } from '../services/qaAudioController';
 jest.mock('../services/qaClient');
 jest.mock('../services/qaAudioController');
 let client, callbacks, audio, events, submitted;
 beforeEach(() => {
     let sequence = 0; Object.defineProperty(window, 'crypto', { configurable: true, value: { randomUUID: () => `request-${++sequence}` } }); events = undefined;
+    chooseQaAudioMode.mockReturnValue('mp3');
     audio = { prepare: jest.fn(), cancel: jest.fn(), enqueue: jest.fn(), complete: jest.fn(), resume: jest.fn() };
     createQaAudioController.mockImplementation(options => { callbacks = options; return audio; });
     client = { config: jest.fn(async () => ({ incrementalSpeech: true })), presence: jest.fn(async () => {}), cancel: jest.fn(async () => {}),

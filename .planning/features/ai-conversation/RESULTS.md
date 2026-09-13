@@ -76,3 +76,14 @@ Provider 시험은 모델 2회(실제 총 입력 133토큰, 출력 129토큰), T
 02는 SQLite lease/fencing/자산 등록/재시작 대조, legacy 자산 분리, 공통 원본 PTS 추출, 기존 생성 경로 연결, 다운로드·FFmpeg·Whisper 실행 한도 및 디스크 예약을 구현했다. 전체 캐시 worker·현재 구간 우선 실행·신규 Q&A API 연결은 03 이후의 작업이다. 실제 모바일 청취와 대표 5/15/30분 영상의 전후 지연 비교는 미완료다.
 
 최종 통합 회귀: backend 78/78 통과. 임시 SQLite와 파일별 직렬 실행을 사용했다. 이번 단계에서 실제 frontend 사용자 흐름은 바꾸지 않았다.
+
+## 2026-09-14 production speech-module integration probe
+
+Controlled closed model records with the second record delayed three seconds, production request/policy/generation/speech modules, real Google TTS, zero model/download calls. Raw report: `results/incremental-speech-20260914.json`.
+
+| Mode | First audio | Second candidate | Before generation finished? |
+|---|---:|---:|---|
+| OGG | 3463 ms | 3002 ms | **No** |
+| Sentence MP3 | 826 ms | 3001 ms | Yes |
+
+Both completed; neither failure nor slow sample was discarded. This is one sequential cold-client OGG / subsequent MP3 sample, not a fair P50/P95 comparison or mobile audible playback measurement. The OGG implementation sends the first sentence before later TTS inputs, but that alone did not deliver first audio before the three-second model gate in this run. Browser defaults therefore remain sentence MP3. `QA_OGG_STREAMING_ENABLED=true` permits staging browser capability selection for further testing; it is not enabled by default.

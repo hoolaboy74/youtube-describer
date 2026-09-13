@@ -27,13 +27,15 @@ function createQaSpeech({ client, streamingClient, limiter = qaProviderLimiter }
             const output = new PassThrough({ highWaterMark: 1024 * 1024 });
             output.on('error', () => {});
             let finished = false, totalBytes = 0;
+            let firstResolve, firstReject;
+            const firstByte = new Promise((a,b) => { firstResolve = a; firstReject = b; }); firstByte.catch(() => {});
             let resolve, reject;
             const done = new Promise((a,b) => { resolve = a; reject = b; }); done.catch(() => {});
             const stop = error => {
                 if (finished) return; finished = true;
                 signal.removeEventListener('abort', abort); clearTimeout(timer);
                 rpc.destroy(); release();
-                if (error) { output.destroy(error); reject(error); } else { output.end(); resolve(); }
+                if (error) { firstReject(error); output.destroy(error); reject(error); } else { output.end(); resolve(); }
             };
             const abort = () => stop(new Error('QA_CANCELED'));
             const timer = setTimeout(() => stop(new Error('QA_TTS_TIMEOUT')), 120000); timer.unref?.();
@@ -42,12 +44,12 @@ function createQaSpeech({ client, streamingClient, limiter = qaProviderLimiter }
             rpc.on('end', () => stop(totalBytes ? null : new Error('QA_AUDIO_EMPTY')));
             rpc.on('data', value => {
                 if (finished || !value.audioContent?.length) return;
-                totalBytes += value.audioContent.length;
+                totalBytes += value.audioContent.length; firstResolve();
                 if (output.readableLength + value.audioContent.length > 1024 * 1024) return stop(new Error('QA_SLOW_AUDIO_CONSUMER'));
                 output.write(Buffer.from(value.audioContent));
             });
             rpc.write({ streamingConfig: { voice, streamingAudioConfig: { audioEncoding: 'OGG_OPUS' } } });
-            return { output, done,
+            return { output, done, firstByte, get bytes() { return totalBytes; },
                 async write(text) { signal.throwIfAborted(); if (finished) throw new Error('QA_AUDIO_CLOSED'); if (!rpc.write({ input: { text } })) await once(rpc, 'drain', { signal }); },
                 end() { if (!finished) rpc.end(); }, cancel: abort,
             };

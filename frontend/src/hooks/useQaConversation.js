@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createQaClient } from '../services/qaClient';
-import { createQaAudioController } from '../services/qaAudioController';
+import { createQaAudioController, chooseQaAudioMode } from '../services/qaAudioController';
 import { createQaLatencyTrace } from '../services/qaLatencyTrace';
 const uuid = () => window.crypto?.randomUUID?.() || `qa-${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
 export function useQaConversation({ apiBase, token, videoId, announceError }) {
     const [enabled, setEnabled] = useState(false), [turns, setTurns] = useState([]), [busy, setBusy] = useState(false), [audioError, setAudioError] = useState('');
     const client = useMemo(() => createQaClient({ apiBase, token }), [apiBase, token]);
     const history = useRef([]), active = useRef(null), session = useRef(null), audio = useRef(null), mounted = useRef(true);
+    const allowOgg = useRef(false);
     const announce = useRef(announceError); announce.current = announceError;
     const update = useCallback((id, patch) => {
         history.current = history.current.map(turn => turn.id === id ? { ...turn, ...patch } : turn);
@@ -23,7 +24,7 @@ export function useQaConversation({ apiBase, token, videoId, announceError }) {
         mounted.current = true; const controller = new AbortController(); session.current = uuid(); history.current = []; setTurns([]); setEnabled(false); setBusy(false);
         let heartbeat; const sessionId = session.current;
         if (token) client.config(controller.signal).then(config => {
-            if (controller.signal.aborted) return; setEnabled(config.incrementalSpeech);
+            if (controller.signal.aborted) return; setEnabled(config.incrementalSpeech); allowOgg.current = config.oggStreaming === true;
             if (config.incrementalSpeech) { client.presence(sessionId, videoId, true).catch(() => {});
                 heartbeat = setInterval(() => client.presence(sessionId, videoId, true).catch(() => {}), 60000); }
         }).catch(() => {});
@@ -32,28 +33,32 @@ export function useQaConversation({ apiBase, token, videoId, announceError }) {
     const ask = useCallback(async ({ question, timestamp, playbackRate }) => {
         if (active.current || !question.trim()) return;
         const id = uuid(), controller = new AbortController();
+        const audioMode = chooseQaAudioMode(window, { allowOgg: allowOgg.current }); let usingOgg = audioMode === 'ogg';
         const payloadHistory = history.current.map(turn => ({ requestId: turn.id, timestamp: turn.timestamp, question: turn.question, answer: turn.answer, status: turn.status }));
         const request = { id, controller }; active.current = request; setBusy(true); setAudioError('');
         const trace = createQaLatencyTrace({ requestId: id, timestamp, historyTurns: payloadHistory.length, implementation: 'incremental' });
         request.trace = trace;
         let errorAnnounced = false;
         const onError = message => { if (active.current !== request) return; setAudioError(message); if (!errorAnnounced) { errorAnnounced = true; announce.current(message); } };
-        audio.current = createQaAudioController({ onPlaying: () => trace.playing('mp3'), onError,
+        audio.current = createQaAudioController({ onPlaying: () => trace.playing(usingOgg ? 'ogg' : 'mp3'), onError,
             onDone: () => { if (active.current === request) { active.current = null; setBusy(false); } } });
         audio.current.prepare(playbackRate);
         history.current = [...history.current, { id, timestamp, question, answer: '', status: 'partial', isGenerating: true, seqs: [] }]; setTurns([...history.current]);
         try {
-            // Sentence MP3 is the default until mobile OGG release checks pass.
             const accepted = await client.submit({ requestId: id, sessionId: session.current, videoId, timestamp, question,
-                history: payloadHistory, audioMode: 'mp3' }, controller.signal);
+                history: payloadHistory, audioMode }, controller.signal);
             if (active.current !== request) return;
+            if (accepted.audioPath) audio.current.enqueue(-1, apiBase + accepted.audioPath, true);
             await client.events(accepted.eventsPath, { signal: controller.signal, onEvent: event => {
                 if (active.current !== request) return;
                 const turn = history.current.find(value => value.id === id);
                 if (event.type === 'sentence' && !turn.seqs.includes(event.data.seq)) {
                     trace.mark('firstText'); update(id, { answer: [turn.answer, event.data.text].filter(Boolean).join(' '), seqs: [...turn.seqs, event.data.seq] });
                 }
-                if (event.type === 'sentence_audio') audio.current.enqueue(event.data.seq, apiBase + event.data.path);
+                if (event.type === 'sentence_audio') {
+                    if (usingOgg) { if (!audio.current.fallback()) throw new Error('QA_PARTIAL_STREAM_INTERRUPTED'); usingOgg = false; }
+                    audio.current.enqueue(event.data.seq, apiBase + event.data.path);
+                }
                 if (event.type === 'generation_done') trace.mark('generationDone');
                 if (event.type === 'audio_done') { update(id, { isGenerating: false, status: 'completed' }); audio.current.complete(); }
                 if (event.type === 'error') throw new Error(event.data.code);

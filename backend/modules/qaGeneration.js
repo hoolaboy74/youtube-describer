@@ -18,6 +18,7 @@ function createQaGeneration({ store, media, model, speech, getVideo, recordUsage
         timeout(120000, 'QA_TOTAL_TIMEOUT');
         let first = timeout(45000, 'QA_FIRST_SENTENCE_TIMEOUT'), idle;
         let audioChain = Promise.resolve(), ogg, releaseModel;
+        request.effectiveAudioMode = request.input.audioMode;
         try {
             const video = getVideo(request.input.videoId);
             if (!video?.duration || request.input.timestamp >= video.duration) throw new Error('QA_VIDEO_UNAVAILABLE');
@@ -34,14 +35,29 @@ function createQaGeneration({ store, media, model, speech, getVideo, recordUsage
                 const sentence = result.sentence; request.sentences.push(sentence); store.emit(request, 'sentence', sentence);
                 audioChain = audioChain.then(async () => {
                     signal.throwIfAborted();
-                    if (request.input.audioMode === 'ogg') {
-                        if (!ogg) { ogg = await speech.ogg(signal); request.ogg = ogg; ogg.done.catch(() => { if (!signal.aborted) store.finish(request, 'error', { code: 'QA_TTS_FAILED' }); }); request.emitter.emit('audio'); }
-                        await ogg.write(sentence.text);
-                    } else {
-                        const bytes = await speech.mp3(sentence.text, signal);
-                        signal.throwIfAborted(); store.putAudio(request, sentence.seq, bytes);
-                        store.emit(request, 'sentence_audio', { seq: sentence.seq, path: `/api/qa/audio/${store.ticket(request, sentence.seq)}` });
+                    if (request.effectiveAudioMode === 'ogg') {
+                        if (!ogg) {
+                            let firstByteTimer;
+                            try {
+                                ogg = await speech.ogg(signal); request.ogg = ogg;
+                                const activeOgg = ogg;
+                                ogg.done.catch(() => { if (!signal.aborted && activeOgg.bytes > 0) store.finish(request, 'error', { code: 'QA_TTS_FAILED' }); });
+                                request.emitter.emit('audio');
+                                await ogg.write(sentence.text);
+                                await Promise.race([ogg.firstByte, new Promise((resolve,reject) => { firstByteTimer=setTimeout(()=>reject(new Error('QA_TTS_FIRST_BYTE_TIMEOUT')),15000); })]);
+                                return;
+                            } catch (error) {
+                                if (signal.aborted || ogg?.bytes > 0) throw error;
+                                request.effectiveAudioMode = 'mp3';
+                                // Closing an unstarted OGG response is not a
+                                // request cancellation during this fallback.
+                                request.emitter.emit('audio_fallback'); ogg?.cancel(); ogg = null;
+                            } finally { clearTimeout(firstByteTimer); }
+                        } else { await ogg.write(sentence.text); return; }
                     }
+                    const bytes = await speech.mp3(sentence.text, signal);
+                    signal.throwIfAborted(); store.putAudio(request, sentence.seq, bytes);
+                    store.emit(request, 'sentence_audio', { seq: sentence.seq, path: `/api/qa/audio/${store.ticket(request, sentence.seq)}` });
                 });
                 audioChain.catch(() => { if (!signal.aborted) store.finish(request, 'error', { code: 'QA_TTS_FAILED' }); });
             }
