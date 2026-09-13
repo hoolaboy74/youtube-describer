@@ -8,6 +8,7 @@ import Header from '../components/Header';
 import { useAccessibility } from '../contexts/AccessibilityContext';
 import { useAuth } from '../contexts/AuthContext';
 import './PlayerScreenV2.css';
+import { useQaConversation } from '../hooks/useQaConversation';
 import { createQaLatencyTrace } from '../services/qaLatencyTrace';
 
 function isMobile() {
@@ -244,8 +245,8 @@ function PlayerScreenV2() {
 
     // Q&A States & Hooks
     const [question, setQuestion] = useState('');
-    const [qaList, setQaList] = useState([]);
-    const [isQaLoading, setIsQaLoading] = useState(false);
+    const [legacyQaList, setQaList] = useState([]);
+    const [legacyQaLoading, setIsQaLoading] = useState(false);
     const inputRef = useRef(null);
     const qaTriggerBtnRef = useRef(null);
     const [qaPoliteAnnouncement, setQaPoliteAnnouncement] = useState('');
@@ -258,6 +259,12 @@ function PlayerScreenV2() {
             qaTimeoutRef.current = setTimeout(() => setQaPoliteAnnouncement(''), 3000);
         }, 100);
     }, []);
+    const incrementalQa = useQaConversation({ apiBase: API_BASE, token, videoId, announceError: announceQaPolite });
+    const { cancel: cancelIncrementalQa } = incrementalQa;
+    const incrementalQaEnabled = incrementalQa.enabled && legacyQaList.length === 0;
+    const qaList = incrementalQaEnabled ? incrementalQa.turns : legacyQaList;
+    const isQaLoading = incrementalQaEnabled ? incrementalQa.busy : legacyQaLoading;
+    const qaPreviousVolume = useRef(100);
     const qaListEndRef = useRef(null);
     const modalRef = useRef(null);
     const closeBtnRef = useRef(null);
@@ -359,6 +366,7 @@ function PlayerScreenV2() {
         const currentlyPlaying = isVideoPlaying || isAudioPlaying;
 
         setWasPlaying(currentlyPlaying);
+        qaPreviousVolume.current = player.getVolume();
 
         // Pause video on modal open
         if (isVideoPlaying) player.pauseVideo();
@@ -393,11 +401,12 @@ function PlayerScreenV2() {
         }
         
         setIsQaModalOpen(true);
-        announceQaPolite('질문 하세요');
-    }, [player, announceQaPolite, user]);
+        if (!incrementalQaEnabled) announceQaPolite('질문 하세요');
+    }, [player, announceQaPolite, user, incrementalQaEnabled]);
 
     // Close QA Modal, stop TTS, and resume video playback
     const handleCloseQaModal = useCallback(() => {
+        cancelIncrementalQa();
         setIsQaModalOpen(false);
         // iOS 동기적 모달 숨김 처리 강제
         if (modalRef.current) {
@@ -412,9 +421,9 @@ function PlayerScreenV2() {
             }
         }
 
-        // Restore video volume unconditionally to prevent audio ducking from sticking
+        // Restore the volume captured when opening the conversation.
         if (player) {
-            player.setVolume(100);
+            player.setVolume(qaPreviousVolume.current);
         }
 
         // 2. Resume video playback ONLY IF it was playing when modal opened
@@ -431,7 +440,7 @@ function PlayerScreenV2() {
         }
 
         announcePolite('질의응답 닫힘');
-    }, [player, announcePolite, wasPlaying]);
+    }, [player, announcePolite, wasPlaying, cancelIncrementalQa]);
 
     // Keyboard shortcut logic for Q&A and video playback
     useEffect(() => {
@@ -475,6 +484,7 @@ function PlayerScreenV2() {
                     return;
                 }
                 
+                if (incrementalQaEnabled) return;
                 // Space bar toggle playback within Modal when not typing
                 if (e.key === ' ' || e.key === 'Spacebar') {
                     e.preventDefault();
@@ -525,10 +535,11 @@ function PlayerScreenV2() {
 
         document.addEventListener('keydown', handleKeyDown);
         return () => document.removeEventListener('keydown', handleKeyDown);
-    }, [player, announcePolite, handleTogglePlay, isQaModalOpen, handleCloseQaModal, handleOpenQaModal]);
+    }, [player, announcePolite, handleTogglePlay, isQaModalOpen, handleCloseQaModal, handleOpenQaModal, incrementalQaEnabled]);
 
     // Seek to specific timestamp and resume play
     const handleSeekTo = (timestamp) => {
+        cancelIncrementalQa();
         if (player) {
             player.seekTo(timestamp, true);
             player.playVideo();
@@ -546,7 +557,14 @@ function PlayerScreenV2() {
 
     // Send question to backend Q&A API
     const handleAskQuestion = async () => {
-        if (!question.trim() || !player) return;
+        if (incrementalQaEnabled && isQaLoading) { cancelIncrementalQa(); return; }
+        if (!question.trim() || !player || isQaLoading) return;
+        if (incrementalQaEnabled) {
+            player.pauseVideo(); audioPlayerRef.current?.pause(); setIsPlaying(false);
+            const payload = { question: question.trim(), timestamp: player.getCurrentTime(), playbackRate: playbackRateRef.current };
+            setQuestion(''); inputRef.current?.focus();
+            await incrementalQa.ask(payload); return;
+        }
 
         player.pauseVideo();
         setIsPlaying(false);
@@ -1478,6 +1496,7 @@ function PlayerScreenV2() {
                                                     gap: '4px'
                                                 }}>
                                                     <span style={{ fontSize: '0.75rem', color: '#888', fontWeight: '600' }}>AI 비서</span>
+                                                    {incrementalQaEnabled && qa.answer && !qa.isGenerating && <button onClick={() => { player?.pauseVideo(); audioPlayerRef.current?.pause(); incrementalQa.replay(qa.id); }} aria-label={`${formatTime(qa.timestamp)} 질문 답변 다시 듣기`}>다시 듣기</button>}
                                                     <div style={{
                                                         backgroundColor: '#ffffff',
                                                         color: '#222222',
@@ -1489,7 +1508,7 @@ function PlayerScreenV2() {
                                                         border: '1px solid #e2e8f0',
                                                         boxShadow: '0 2px 6px rgba(0,0,0,0.02)'
                                                     }}>
-                                                        {qa.isGenerating ? (
+                                                        {incrementalQaEnabled ? <span>{qa.answer || (qa.status === 'canceled' ? '응답이 취소되었습니다.' : qa.status === 'failed' ? '답변을 받지 못했습니다.' : '답변 준비 중')}</span> : qa.isGenerating ? (
                                                             <span style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#0070f3' }}>
                                                                 <span style={{ fontStyle: 'italic' }}>구글 검색 및 장면 정밀 분석 중...</span>
                                                             </span>
@@ -1504,6 +1523,7 @@ function PlayerScreenV2() {
                                     <div ref={qaListEndRef} />
                                 </div>
 
+                                {incrementalQaEnabled && incrementalQa.audioError && <div><p>{incrementalQa.audioError}</p><button onClick={incrementalQa.resume}>음성 재생</button></div>}
                                 {/* Modal Footer (Input controls) */}
                                 <div style={{
                                     padding: '20px 24px',
@@ -1522,7 +1542,7 @@ function PlayerScreenV2() {
                                         value={question}
                                         onChange={(e) => setQuestion(e.target.value)}
                                         onKeyDown={(e) => {
-                                            if (e.key === 'Enter') handleAskQuestion();
+                                            if (e.key === 'Enter' && !e.nativeEvent.isComposing && e.keyCode !== 229 && !isQaLoading) { e.preventDefault(); handleAskQuestion(); }
                                         }}
                                         style={{
                                             flex: 1,
@@ -1539,7 +1559,7 @@ function PlayerScreenV2() {
 
                                     <button
                                         onClick={handleAskQuestion}
-                                        disabled={isQaLoading || !question.trim()}
+                                        disabled={incrementalQaEnabled ? !isQaLoading && !question.trim() : isQaLoading || !question.trim()}
                                         style={{
                                             padding: '0 24px',
                                             height: '46px',
@@ -1549,13 +1569,13 @@ function PlayerScreenV2() {
                                             border: 'none',
                                             fontSize: '0.95rem',
                                             fontWeight: '600',
-                                            cursor: (isQaLoading || !question.trim()) ? 'not-allowed' : 'pointer',
-                                            opacity: (isQaLoading || !question.trim()) ? 0.6 : 1,
+                                            cursor: (incrementalQaEnabled && isQaLoading) || question.trim() ? 'pointer' : 'not-allowed',
+                                            opacity: (incrementalQaEnabled && isQaLoading) || question.trim() ? 1 : 0.6,
                                             transition: 'background-color 0.2s',
                                             flexShrink: 0
                                         }}
                                     >
-                                        전송
+                                        {incrementalQaEnabled && isQaLoading ? '응답 취소' : '전송'}
                                     </button>
                                 </div>
                             </div>
