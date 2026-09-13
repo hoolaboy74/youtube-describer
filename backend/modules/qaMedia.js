@@ -83,6 +83,7 @@ function createQaMedia({ manager, adapter, now = Date.now, extract = extractFram
     const reader = createSubtitleReader(manager);
     const sourceEvents = new (require('node:events').EventEmitter)();
     sourceEvents.setMaxListeners(0);
+    const priorities = new Map();
     const workRoot = path.join(manager.root,'jobs');
     const idFolder = id => crypto.createHash('sha256').update(id).digest('hex');
     async function directory(videoId, kind) { const parent=path.join(workRoot,idFolder(videoId));await fs.mkdir(parent,{recursive:true}); return fs.mkdtemp(path.join(parent,kind+'-')); }
@@ -138,6 +139,30 @@ function createQaMedia({ manager, adapter, now = Date.now, extract = extractFram
     }
     const service = {
         FRAME_VERSION, SUB_VERSION,
+        async cleanupJobs({ ttlMs = 3600000 } = {}) {
+            const activeIds = manager.store.db.prepare('SELECT DISTINCT videoId FROM qa_cache_jobs WHERE leaseUntil>?').all(now()).map(row=>idFolder(row.videoId));
+            for(const id of pipeline.keys())activeIds.push(idFolder(id));
+            for(const [id,source] of sources)if(source.readers)activeIds.push(idFolder(id));
+            const active=new Set(activeIds);
+            for(const entry of await fs.readdir(workRoot,{withFileTypes:true}).catch(()=>[])) {
+                if(entry.name.startsWith('.expired-')) { await fs.rm(path.join(workRoot,entry.name),{recursive:true,force:true});continue; }
+                if(!entry.isDirectory()||active.has(entry.name))continue;
+                const folder=path.join(workRoot,entry.name);
+                for(const child of await fs.readdir(folder,{withFileTypes:true})) {
+                    const file=path.join(folder,child.name),stat=await fs.stat(file).catch(()=>null);
+                    if(stat && stat.mtimeMs+ttlMs<=now()) {
+                        const tombstone=path.join(workRoot,`.expired-${crypto.randomUUID()}`);
+                        const moved=manager.store.db.transaction(()=>{
+                            const live=manager.store.db.prepare('SELECT DISTINCT videoId FROM qa_cache_jobs WHERE leaseUntil>?').all(now());
+                            if(live.some(row=>idFolder(row.videoId)===entry.name)||[...pipeline.keys()].some(id=>idFolder(id)===entry.name))return false;
+                            try { require('node:fs').renameSync(file,tombstone);return true; } catch(error) { if(error.code==='ENOENT')return false;throw error; }
+                        }).immediate();
+                        if(moved)await fs.rm(tombstone,{recursive:true,force:true});
+                    }
+                }
+            }
+            for(const [id,source] of sources)if(source.owned&&!source.readers && !await fs.stat(source.file).catch(()=>null))sources.delete(id);
+        },
         beginPipeline(videoId) {
             if(pipeline.has(videoId))return pipeline.get(videoId);
             // Reserve immediately before the generator starts its download. Q&A
@@ -172,7 +197,7 @@ function createQaMedia({ manager, adapter, now = Date.now, extract = extractFram
                     if(producing){await waitFor(producing.framesDone,signal);manager.markReady(lease,durationMs);return;}
                     const out=await directory(videoId,'frames');
                     try {
-                        const result=await extract({inputPath:source.file,outputDir:out,durationMs,signal,onFrame:async frame=>{
+                        const result=await extract({inputPath:source.file,outputDir:out,durationMs,signal,priorityTimestampMs:priorities.get(videoId)||0,onFrame:async frame=>{
                             if(manager.referenceCount(videoId,FRAME_VERSION)===0 && now()-lease.lastAccessAt>300000) throw Object.assign(new Error('Cache warming paused'),{code:'CACHE_IDLE'});
                             await manager.publishFrame(lease,frame,FRAME_VERSION);
                         }});
@@ -184,6 +209,7 @@ function createQaMedia({ manager, adapter, now = Date.now, extract = extractFram
             fullJobs.set(videoId,task);task.catch(()=>{}).finally(()=>fullJobs.delete(videoId));return task;
         },
         async ensureCurrentWindow(videoId,timestampMs,durationMs,{signal}={}) {
+            priorities.set(videoId,timestampMs);
             let frames=current(videoId,timestampMs);
             if(frames.length && timestampMs-frames.at(-1).timestampMs<=1000)return frames;
             const bucket=Math.floor(timestampMs/10000);const key=videoId+':'+bucket;
@@ -220,7 +246,9 @@ function createQaMedia({ manager, adapter, now = Date.now, extract = extractFram
         },
         async ensureSubtitles(videoId,{signal}={}) {
             const existing=manager.store.subtitle(videoId,SUB_VERSION);
-            if(existing && (existing.state==='ready'||existing.retryAfter>now()))return reader(videoId,SUB_VERSION);
+            if(existing && (existing.state==='ready'||existing.retryAfter>now())) {
+                try { return await reader(videoId,SUB_VERSION); } catch { manager.invalidateSubtitle(videoId,SUB_VERSION); }
+            }
             if(!subtitleJobs.has(videoId)) {
                 const task=owned(videoId,SUB_VERSION,async(lease,taskSignal)=>{
                     const dir=await directory(videoId,'subtitles');
@@ -240,7 +268,7 @@ function createQaMedia({ manager, adapter, now = Date.now, extract = extractFram
             const subtitles=service.ensureSubtitles(videoId,{signal});
             const frames=service.ensureCurrentWindow(videoId,timestampMs,durationMs,{signal});
             if(warm)service.ensureFullCache(videoId,durationMs).catch(()=>{});
-            const values=await Promise.all([frames,subtitles]);return {frames:values[0],subtitles:values[1]};
+            const values=await Promise.all([frames,subtitles]);return {frames:values[0].map(frame=>({...frame,path:manager.assetPath(frame.relativePath)})),subtitles:values[1]};
         },
     };
     return service;

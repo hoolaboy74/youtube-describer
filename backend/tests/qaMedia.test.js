@@ -14,3 +14,7 @@ test('complete source wins over a slow section and the section is canceled befor
 const{manager,frame,root}=await setup(t);const started=deferred();let aborted=false;const service=createQaMedia({manager,adapter:{section:async(id,start,end,dir,signal)=>{started.resolve();await new Promise((resolve,reject)=>signal.addEventListener('abort',()=>{aborted=true;reject(new Error('aborted'));},{once:true}));}},windowExtract:async options=>{assert.equal(options.section,false);return[frame(12000)];}});
 const pipeline=service.beginPipeline('abcdefghijk');const result=service.ensureCurrentWindow('abcdefghijk',12500,20000);await started.promise;pipeline.ready(path.join(root,'source.mp4'));assert.equal((await result).length,1);assert.equal(aborted,true);await pipeline.finish();
 });
+test('runtime corrupt subtitle is refetched and current-question frames remain available',async t=>{
+const{manager,frame,root}=await setup(t);const file=path.join(root,'captions.vtt');await fs.writeFile(file,'WEBVTT\n\n00:01.000 --> 00:02.000\n원문\n');const lease=manager.store.claim('abcdefghijk','subtitles-v1','test');const asset=await manager.publishSubtitle(lease,file);manager.store.release(lease);await fs.writeFile(manager.assetPath(asset.relativePath),'corrupt');let calls=0;
+const service=createQaMedia({manager,adapter:{subtitles:async()=>{calls++;return{file,metadata:{provenance:'unknown'}};}}});const result=await service.ensureSubtitles('abcdefghijk');assert.equal(calls,1);assert.equal(result.cues[0].sourceText,'원문');
+});

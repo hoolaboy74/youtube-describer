@@ -102,7 +102,7 @@ function trackApiRequest(req, res, next) {
             userId,
             guestId,
             ip,
-            apiPath: req.path
+            apiPath: req.path.replace(/^(\/qa\/audio\/)[^/]+$/, '$1[redacted]')
         });
     } catch (err) {
         logger.error('[Tracker] Failed to record API request:', err.message);
@@ -427,6 +427,32 @@ function requireAuth(req, res, next) {
         return res.status(401).json({ error: '인증 세션이 만료되었습니다. 다시 로그인해 주십시오.' });
     }
 }
+
+// New Q&A remains opt-in while browser and policy release checks run.
+const { createQaRequestStore } = require('./modules/qaRequestStore');
+const { createQaRouter } = require('./modules/qaRoutes');
+const { createQaGeneration } = require('./modules/qaGeneration');
+const { createQaSpeech } = require('./modules/qaSpeech');
+const incrementalQaStore = createQaRequestStore();
+let incrementalQaRun;
+const qaMaintenance = setInterval(() => {
+    incrementalQaStore.sweep();
+    if (process.env.QA_CACHE_WARMING_ENABLED === 'true' || process.env.QA_INCREMENTAL_SPEECH_ENABLED === 'true') db.getQaMedia().cleanupJobs().catch(() => {});
+}, 60000);
+qaMaintenance.unref();
+router.use('/qa', createQaRouter({ auth: requireAuth, store: incrementalQaStore, manager: () => db.getQaCacheManager(),
+    run: request => {
+        if (!incrementalQaRun) incrementalQaRun = createQaGeneration({ store: incrementalQaStore, media: db.getQaMedia(), getVideo: db.getVideo,
+            model: new GoogleGenerativeAI(process.env.GOOGLE_API_KEY).getGenerativeModel({ model: QA_MODEL_NAME,
+                generationConfig: { maxOutputTokens: 4096 } }),
+            speech: createQaSpeech({ client: ttsClient, streamingClient: streamingTtsClient }),
+            recordUsage: (request, response) => db.recordGeminiUsage({ videoId: request.input.videoId, userId: request.userId,
+                requestType: 'qa', modelName: QA_MODEL_NAME, usageMetadata: response.usageMetadata,
+                searchQueries: extractGoogleSearchQueryCount(response) }),
+        });
+        return incrementalQaRun(request);
+    },
+}));
 
 router.post('/qa-tts', requireAuth, createQaTtsHandler());
 router.get('/qa-tts-stream/:ticket', createQaTtsStreamHandler());

@@ -90,6 +90,13 @@ function createQaCacheManager({ db, root, now = Date.now }) {
                 return store.subtitle(lease.videoId, lease.cacheVersion);
             } finally { staged.reservation.release(); await fs.promises.rm(staged.file, { force: true }); }
         },
+        invalidateSubtitle(videoId, cacheVersion) {
+            db.transaction(() => {
+                if ((store.job(videoId, cacheVersion)?.leaseUntil || 0) > now()) return;
+                db.prepare("UPDATE qa_subtitle_assets SET state='unknown',relativePath=NULL,checksum=NULL,retryAfter=0 WHERE videoId=? AND cacheVersion=?").run(videoId, cacheVersion);
+                db.prepare("UPDATE qa_cache_jobs SET state='queued',retryAfter=0,fencingToken=fencingToken+1 WHERE videoId=? AND cacheVersion=?").run(videoId, cacheVersion);
+            }).immediate();
+        },
         subtitleUnavailable(lease, state) {
             if (!['absent','retryable_failed'].includes(state)) throw new Error('Invalid subtitle absence state');
             return store.fenced(lease, () => {
@@ -104,9 +111,13 @@ function createQaCacheManager({ db, root, now = Date.now }) {
             if (!Number.isSafeInteger(timestampMs) || timestampMs < 0 || !Number.isInteger(count) || count < 1 || count > 100) throw new Error('Invalid frame window');
             const selected = [];
             for (const frame of store.listFrames(videoId, cacheVersion, timestampMs).reverse()) {
-                try {
-                    if (digest(fs.readFileSync(absolute(frame.relativePath))) === frame.checksum) selected.push(frame);
-                } catch { /* Missing or corrupted assets cannot become model evidence. */ }
+                let valid = false;
+                try { valid = digest(fs.readFileSync(absolute(frame.relativePath))) === frame.checksum; } catch {}
+                if (valid) selected.push(frame);
+                else db.transaction(() => {
+                    db.prepare('DELETE FROM qa_frame_assets WHERE videoId=? AND cacheVersion=? AND sourcePtsMs=? AND checksum=?').run(videoId, cacheVersion, frame.sourcePtsMs, frame.checksum);
+                    db.prepare("UPDATE qa_cache_jobs SET state='queued',retryAfter=0,fencingToken=fencingToken+1 WHERE videoId=? AND cacheVersion=? AND leaseUntil<=?").run(videoId, cacheVersion, now());
+                }).immediate();
                 if (selected.length === count) break;
             }
             return selected.reverse();
