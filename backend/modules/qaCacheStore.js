@@ -54,6 +54,9 @@ function createQaCacheStore(db, { now = Date.now } = {}) {
                 return job(videoId, cacheVersion);
             }).immediate();
         },
+        release(lease) {
+            return fenced(lease, () => db.prepare('UPDATE qa_cache_jobs SET owner=NULL,leaseUntil=0 WHERE videoId=? AND cacheVersion=?').run(lease.videoId, lease.cacheVersion));
+        },
         renew(lease, leaseMs = 60000) {
             if (!Number.isSafeInteger(leaseMs) || leaseMs <= 0) throw new Error('Invalid cache lease duration');
             return fenced(lease, () => {
@@ -76,13 +79,13 @@ function createQaCacheStore(db, { now = Date.now } = {}) {
             return db.prepare('SELECT * FROM qa_frame_assets WHERE videoId=? AND cacheVersion=? AND timestampMs<=? ORDER BY timestampMs')
                 .all(videoId, cacheVersion, beforeMs);
         },
-        insertFrame(lease, frame) {
+        insertFrame(lease, frame, assetVersion = lease.cacheVersion) {
             assertLease(lease); // Caller owns a fenced transaction across rename + registration.
             db.prepare(`INSERT OR IGNORE INTO qa_frame_assets(videoId,cacheVersion,sourcePtsMs,originPtsMs,timestampMs,relativePath,sourceKind,checksum,width,height)
                 VALUES(@videoId,@cacheVersion,@sourcePtsMs,@originPtsMs,@timestampMs,@relativePath,@sourceKind,@checksum,@width,@height)`)
-                .run({ ...frame, videoId: lease.videoId, cacheVersion: lease.cacheVersion });
+                .run({ ...frame, videoId: lease.videoId, cacheVersion: assetVersion });
             return db.prepare('SELECT * FROM qa_frame_assets WHERE videoId=? AND cacheVersion=? AND sourcePtsMs=?')
-                .get(lease.videoId, lease.cacheVersion, frame.sourcePtsMs);
+                .get(lease.videoId, assetVersion, frame.sourcePtsMs);
         },
         subtitle(videoId, cacheVersion) {
             return db.prepare('SELECT * FROM qa_subtitle_assets WHERE videoId=? AND cacheVersion=?').get(videoId, cacheVersion);

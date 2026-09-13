@@ -149,17 +149,19 @@ const timeEnd = (label) => {
 /**
  * Parallel Keyframe Extraction using FFmpeg Time-Chunking
  */
-async function extractKeyframesHybrid({ tempVideoPath, baseTempDir, totalDuration, requestHash }) {
+async function extractKeyframesHybrid({ tempVideoPath, baseTempDir, totalDuration, requestHash, qaPipeline }) {
     const result = await extractFrames({
         inputPath: path.resolve(tempVideoPath),
         outputDir: path.join(baseTempDir, 'source-frames'),
         durationMs: Math.round(totalDuration * 1000),
+        onFrame: qaPipeline ? frame => qaPipeline.publish(frame).catch(() => {}) : undefined,
     });
     if (!result.ready) {
         throw Object.assign(new Error('Frame coverage is incomplete'), {
             code: 'FRAME_COVERAGE_INCOMPLETE', coverageHoles: result.coverageHoles,
         });
     }
+    qaPipeline?.complete();
     for (const [index, frame] of result.frames.entries()) {
         await fs.promises.rename(frame.path, path.join(baseTempDir, `frame-${String(index + 1).padStart(4, '0')}.jpg`));
     }
@@ -359,6 +361,7 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null, userId = nul
 
     const baseTempDir = path.join(__dirname, 'temp', videoId);
     let cookiePath = null;
+    let qaPipeline = null;
 
     try {
         const cachedData = db.getVideo(videoId);
@@ -371,6 +374,7 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null, userId = nul
         }
 
         await fs.promises.mkdir(baseTempDir, { recursive: true });
+        if (process.env.QA_CACHE_WARMING_ENABLED === 'true') qaPipeline = db.getQaMedia().beginPipeline(videoId);
 
         logger.info(`[${requestHash}] Step 1: Starting initial data extraction...`);
         const extractionLabel = `[${requestHash}] Initial Data Extraction Time`;
@@ -605,6 +609,8 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null, userId = nul
             }
         }
 
+        qaPipeline?.ready(tempVideoPath);
+
         // Update filesize after download
         if (fs.existsSync(tempVideoPath)) {
             filesize = fs.statSync(tempVideoPath).size;
@@ -618,6 +624,7 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null, userId = nul
         const [allTimestamps, audioLanguage] = await Promise.all([
             extractKeyframesHybrid({
                 tempVideoPath,
+                qaPipeline,
                 tempVideoFilename,
                 baseTempDir,
                 totalDuration,
@@ -836,6 +843,7 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null, userId = nul
             sseHandler('backend_error', errorPayload);
         }
     } finally {
+        await qaPipeline?.finish();
         if (fs.existsSync(baseTempDir)) {
             await fs.promises.rm(baseTempDir, { recursive: true, force: true });
         }
@@ -864,6 +872,7 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
 
     const baseTempDir = path.join(__dirname, 'temp', videoId);
     let cookiePath = null;
+    let qaPipeline = null;
 
     try {
         const cachedData = db.getVideo(videoId);
@@ -873,6 +882,7 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
         }
 
         await fs.promises.mkdir(baseTempDir, { recursive: true });
+        if (process.env.QA_CACHE_WARMING_ENABLED === 'true') qaPipeline = db.getQaMedia().beginPipeline(videoId);
 
         const videoResponse = await youtube.videos.list({
             part: 'snippet,contentDetails,status',
@@ -1019,6 +1029,8 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
             }
         }
 
+        qaPipeline?.ready(tempVideoPath);
+
         // Update filesize after download
         if (fs.existsSync(tempVideoPath)) {
             filesize = fs.statSync(tempVideoPath).size;
@@ -1030,6 +1042,7 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
         const [allTimestamps, audioLanguage] = await Promise.all([
             extractKeyframesHybrid({
                 tempVideoPath,
+                qaPipeline,
                 tempVideoFilename,
                 baseTempDir,
                 totalDuration,
@@ -1204,6 +1217,7 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
             }
         }
     } finally {
+        await qaPipeline?.finish();
         if (fs.existsSync(baseTempDir)) {
             await fs.promises.rm(baseTempDir, { recursive: true, force: true });
         }

@@ -22,6 +22,14 @@ const dbPath = process.env.YOUTUBE_DESCRIBER_DB_PATH
 const db = new Database(dbPath);
 db.pragma('journal_mode = WAL');
 let qaCacheManager;
+let qaMedia;
+function getQaMedia() {
+  if (!qaMedia) {
+    const { createQaMedia, createDefaultMediaAdapter } = require('./modules/qaMedia');
+    qaMedia = createQaMedia({ manager: getQaCacheManager(), adapter: createDefaultMediaAdapter({ backendRoot: __dirname, getVideo }) });
+  }
+  return qaMedia;
+}
 function getQaCacheManager() {
   if (!qaCacheManager) {
     const root = process.env.QA_CACHE_ROOT || (process.env.YOUTUBE_DESCRIBER_DB_PATH
@@ -1788,6 +1796,7 @@ function saveApiRequest({ userId, guestId, ip, apiPath }) {
 module.exports = {
   init,
   getQaCacheManager,
+  getQaMedia,
   saveApiRequest,
   getSitemapData,
   createUser,

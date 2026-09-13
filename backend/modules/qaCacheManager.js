@@ -34,7 +34,7 @@ function createQaCacheManager({ db, root, now = Date.now }) {
     }
     const references = new Map();
     return {
-        store,
+        store, root, assetPath: absolute,
         async indexLegacy(lease, { framesDirectory, subtitlePath }) {
             if (!lease.cacheVersion.startsWith('legacy-')) throw new Error('Legacy assets require a separate cache version');
             store.assertLease(lease);
@@ -52,22 +52,22 @@ function createQaCacheManager({ db, root, now = Date.now }) {
             if (subtitlePath && fs.existsSync(subtitlePath)) await this.publishSubtitle(lease, subtitlePath, { provenance: 'legacy' });
             return { indexedFiles: count, provenance: 'legacy', verifiedCoverage: false };
         },
-        async publishFrame(lease, frame) {
+        async publishFrame(lease, frame, assetVersion = lease.cacheVersion) {
             store.assertLease(lease);
             if (![frame.sourcePtsMs, frame.originPtsMs, frame.timestampMs].every(Number.isSafeInteger)
                 || frame.timestampMs < 0 || frame.timestampMs !== frame.sourcePtsMs - frame.originPtsMs
                 || !['keyframe','backfill','window','legacy'].includes(frame.sourceKind)
-                || (frame.sourceKind === 'legacy') !== lease.cacheVersion.startsWith('legacy-')) throw new Error('Invalid frame provenance');
+                || (frame.sourceKind === 'legacy') !== assetVersion.startsWith('legacy-')) throw new Error('Invalid frame provenance');
             const staged = await stage(frame.path, 5 * 1024 * 1024);
             try {
                 const { info } = await sharp(staged.bytes, { failOn: 'warning' }).raw().toBuffer({ resolveWithObject: true });
                 if (info.width < 1 || info.height < 1 || (frame.sourceKind !== 'legacy' && info.width !== 640)) throw new Error('Invalid frame dimensions');
-                const relativePath = path.join(folder(lease.videoId, lease.cacheVersion), `${frame.sourcePtsMs}-${staged.checksum}.jpg`);
+                const relativePath = path.join(folder(lease.videoId, assetVersion), `${frame.sourcePtsMs}-${staged.checksum}.jpg`);
                 return store.fenced(lease, () => {
                     fs.mkdirSync(path.dirname(absolute(relativePath)), { recursive: true });
                     fs.renameSync(staged.file, absolute(relativePath));
                     return store.insertFrame(lease, { sourcePtsMs: frame.sourcePtsMs, originPtsMs: frame.originPtsMs, timestampMs: frame.timestampMs,
-                        relativePath, sourceKind: frame.sourceKind, checksum: staged.checksum, width: info.width, height: info.height });
+                        relativePath, sourceKind: frame.sourceKind, checksum: staged.checksum, width: info.width, height: info.height }, assetVersion);
                 });
             } finally { staged.reservation.release(); await fs.promises.rm(staged.file, { force: true }); }
         },

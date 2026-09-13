@@ -115,3 +115,37 @@ async function extractFrames({ inputPath, outputDir, durationMs, signal, onFrame
     } finally { await fs.rm(staging, { recursive: true, force: true }); }
 }
 module.exports = { createShowinfoParser, findCoverageHoles, extractFrames };
+
+// A section's first PTS is NOT the original timeline origin. The downloader
+// supplies the independently probed source origin when passing a section.
+async function extractFrameWindow({ inputPath, outputDir, startMs, endMs, sourceOriginPtsMs, section = false, signal, run = runMediaProcess }) {
+    if (![startMs, endMs].every(Number.isSafeInteger) || startMs < 0 || endMs < startMs || endMs - startMs > 20000) throw new Error('Invalid current window');
+    let originPtsMs = sourceOriginPtsMs;
+    if (!section) {
+        const probe = await run('ffprobe', ['-v','error','-select_streams','v:0','-show_entries','stream=start_time','-of','json',inputPath], { needs: { ffmpeg: 1 }, signal, timeoutMs: 15000 });
+        const origin = JSON.parse(probe.stdout).streams?.[0]?.start_time;
+        if (origin === undefined || !Number.isFinite(Number(origin))) throw new Error('Missing source origin');
+        originPtsMs = Math.round(Number(origin) * 1000);
+    }
+    if (!Number.isSafeInteger(originPtsMs)) throw new Error('Missing proven section origin');
+    await fs.mkdir(outputDir, { recursive: true });
+    const parser = createShowinfoParser();
+    const from = (startMs + originPtsMs) / 1000, to = (endMs + originPtsMs) / 1000;
+    await run('ffmpeg', ['-hide_banner','-nostdin','-copyts', ...(!section ? ['-ss',String(startMs / 1000)] : []), '-i',inputPath,
+        '-map','0:v:0','-to',String(to + .001),'-vf',`select='between(t,${from},${to})*(isnan(prev_selected_t)+gte(t-prev_selected_t,0.9))',scale=640:-1,showinfo`,
+        '-fps_mode','passthrough','-q:v','5',path.join(outputDir,'window-%08d.jpg')],
+        { needs: { ffmpeg: 1 }, signal, priority: 20, timeoutMs: 30000, disk: { root: outputDir, maxBytes: 32 * 1024 * 1024 }, onStderr: b => parser.push(b) });
+    const pts = parser.end();
+    const result = [];
+    for (const [index, sourcePtsMs] of pts) {
+        const timestampMs = sourcePtsMs - originPtsMs;
+        if (timestampMs < startMs || timestampMs > endMs) continue;
+        const file = path.join(outputDir, `window-${String(index + 1).padStart(8,'0')}.jpg`);
+        const bytes = await fs.readFile(file);
+        const { info } = await sharp(bytes).raw().toBuffer({ resolveWithObject: true });
+        result.push({ path: file, sourcePtsMs, originPtsMs, timestampMs, sourceKind: 'window', checksum: crypto.createHash('sha256').update(bytes).digest('hex'), width: info.width, height: info.height });
+    }
+    if (!result.length) throw new Error('No past frame in current window');
+    return result;
+}
+module.exports.extractFrameWindow = extractFrameWindow;
