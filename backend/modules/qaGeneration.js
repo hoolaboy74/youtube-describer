@@ -70,6 +70,7 @@ function createQaGeneration({ store, media, model, searchModel, speech, getVideo
             }
             const parser = createSentenceParser(accept);
             const externalSearch = searchModel && wantsExternalSearch(request.input.question);
+            report('route_selected', { mode: externalSearch ? 'external_search' : 'video_context' });
             let response;
             if (!context.imageParts.length && ![...context.evidence.values()].some(item => ['title', 'script'].includes(item.kind)) && !externalSearch) {
                 report('no_visual_evidence');

@@ -2,7 +2,7 @@
 const { StringDecoder } = require('node:string_decoder');
 const { normalizeText } = require('./canonicalOutput');
 const { SEARCH_UNAVAILABLE, EXTERNAL_PREFIX } = require('./qaSearch');
-const POLICY_VERSION = 'qa-sentence-v2';
+const POLICY_VERSION = 'qa-sentence-v3';
 const UNKNOWN = '현재 화면에서 확인할 수 있는 정보가 부족합니다.';
 const EXPLANATIONS = new Set([SEARCH_UNAVAILABLE, UNKNOWN, '화면만으로는 알 수 없습니다.', '확인된 외국어 대사가 없어 번역할 수 없습니다.']);
 const compact = text => normalizeText(text).replace(/[^\p{L}\p{N}]/gu, '');
@@ -31,14 +31,15 @@ function validateSentence(candidate, context, accepted = []) {
     const window = context.frameWindow || { startMs: 0, endMs: context.timestampMs };
     if (evidence.some(value => value.kind === 'frame' ? value.timestampMs > window.endMs || value.timestampMs < window.startMs
         : value.kind === 'cue' && value.end * 1000 > window.endMs)) return reject('future');
-    if (/(?:분명히|틀림없이|아마도|인 것 같)/.test(text)) return reject('unsupported-inference');
+    const groundedExternal = candidate.kind === 'explanation' && evidence.length === 1 && evidence[0].kind === 'external'
+        && text === EXTERNAL_PREFIX + evidence[0].claim && evidence[0].sources?.length > 0;
+    if (!groundedExternal && /(?:분명히|틀림없이|아마도|인 것 같)/.test(text)) return reject('unsupported-inference');
     const restricted = text.match(/(?:때문에|의도|속마음|연인|부부|아버지|어머니|슬퍼|행복해|화가 나)/g) || [];
     // A relationship/causal term explicitly in a cited description is usable;
     // a visual frame ID alone cannot justify invented narrative information.
-    if (restricted.some(term => !evidence.some(item => item.kind === 'script' && item.text.includes(term)))) return reject('unsupported-inference');
+    if (!groundedExternal && restricted.some(term => !evidence.some(item => item.kind === 'script' && item.text.includes(term)))) return reject('unsupported-inference');
     if (candidate.kind === 'explanation') {
-        const external = evidence.length === 1 && evidence[0].kind === 'external' && text === EXTERNAL_PREFIX + evidence[0].claim;
-        if (!external && (!EXPLANATIONS.has(text) || evidence.length)) return reject('explanation');
+        if (!groundedExternal && (!EXPLANATIONS.has(text) || evidence.length)) return reject('explanation');
     } else if (candidate.kind === 'context') {
         if (!evidence.some(value => ['script', 'title'].includes(value.kind))
             || evidence.some(value => !['script', 'title', 'frame'].includes(value.kind))) return reject('context-evidence');

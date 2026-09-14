@@ -29,10 +29,36 @@ test('external claims are attributed explanations, never visual evidence or unsu
 });
 test('external mode retains the full history, invokes one model and sends only grounded text to TTS', async () => {
     const store = createQaRequestStore(); const history = [{ requestId: 'previous-123', timestamp: 50, question: '원문', answer: '이전 답변', status: 'partial' }];
-    const { request } = store.accept(1, { requestId: 'request-123', sessionId: 'session-123', videoId: 'abcdefghijk', timestamp: 12, question: '인터넷에서 자료를 검색해 주세요.', history, audioMode: 'mp3' });
+    const { request } = store.accept(1, { requestId: 'request-123', sessionId: 'session-123', videoId: 'abcdefghijk', timestamp: 12, question: '유튜버의 약력에 대해 검색해 주세요.', history, audioMode: 'mp3' });
     let calls = 0, recorded = 0;
     await createQaGeneration({ store, getVideo: () => ({ duration: 60 }), media: { prepare: async () => ({ frames: [], subtitles: { cues: [] } }) },
         model: { generateContentStream: () => { throw new Error('unexpected second model'); } }, searchModel: { generateContent: async prompt => { calls++; assert.ok(prompt.includes(JSON.stringify(history))); return { response: response() }; } },
         speech: { mp3: async text => { assert.equal(text, EXTERNAL_PREFIX + claim); return Buffer.from('audio'); } }, recordUsage: () => { recorded++; } })(request);
     assert.equal(calls, 1); assert.equal(recorded, 1); assert.equal(request.status, 'completed'); assert.ok(request.events.find(e => e.type === 'generation_done').data.searchSuggestions);
+});
+
+test('ordinary Korean biography search requests route externally without requiring a search-engine name', () => {
+    for (const question of ['유튜버의 약력에 대해 검색해 줘.', '이 사람 약력 검색', '경력을 검색을 해 봐', '프로필을 찾아봐', '학력을 알아봐 주세요']) assert.equal(wantsExternalSearch(question), true, question);
+    for (const question of ['검색창은 어디에 있나요?', '화면에 보이는 검색어가 뭐야?', '검색하지 말고 대본으로 설명해 줘.', '검색 없이 설명해 주세요.']) assert.equal(wantsExternalSearch(question), false, question);
+});
+test('source-grounded biography/causal terms survive visual-inference filters without allowing invented additions', () => {
+    for (const claim of ['그의 아버지는 음악 교사입니다.', '부부가 함께 운영하는 채널입니다.', '공연 일정 때문에 활동을 중단했습니다.']) {
+        const evidence = { id: 'search-0', kind: 'external', claim, sources: [{ url: 'https://example.com/bio', title: '약력' }] };
+        const context = { evidence: new Map([[evidence.id, evidence]]), timestampMs: 0, cues: [], audioClassification: 'unknown' };
+        const answer = { seq: 0, kind: 'explanation', text: EXTERNAL_PREFIX + claim, evidenceIds: [evidence.id] };
+        assert.equal(validateSentence(answer, context).accepted, true, claim);
+        assert.equal(validateSentence({ ...answer, text: EXTERNAL_PREFIX + '그의 어머니는 의사입니다.' }, context).accepted, false);
+        assert.equal(validateSentence({ ...answer, kind: 'visual' }, context).accepted, false);
+    }
+});
+test('a search without usable source support reports external-search failure rather than missing screen evidence', async () => {
+    const store = createQaRequestStore();
+    const { request } = store.accept(1, { requestId: 'search-empty-123', sessionId: 'session-empty-123', videoId: 'abcdefghijk', timestamp: 12, question: '유튜버 약력 검색해 줘.', history: [], audioMode: 'mp3' });
+    const spoken = [], logs = [];
+    await createQaGeneration({ store, getVideo: () => ({ duration: 60 }), media: { prepare: async () => ({ frames: [], subtitles: { cues: [] } }) },
+        model: { generateContentStream: () => assert.fail('search misrouted to scene model') },
+        searchModel: { generateContent: async () => ({ response: { text: () => '출처 없는 약력입니다.' } }) },
+        speech: { mp3: async text => { spoken.push(text); return Buffer.from('audio'); } }, recordUsage: () => {}, log: line => logs.push(line) })(request);
+    assert.equal(request.status, 'completed'); assert.deepEqual(spoken, ['외부 자료를 확인하지 못했습니다.']);
+    assert.ok(logs.some(line => line.includes('external_search')));
 });
