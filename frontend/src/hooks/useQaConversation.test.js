@@ -54,10 +54,19 @@ test('uses the player rate for initial speech, live changes and replay without r
 });
 test('validation failures announce a response-validation problem once without claiming missing video evidence', async () => {
     const announceError = jest.fn();
-    client.events.mockImplementation(async (path, options) => options.onEvent({ type: 'error', data: { code: 'QA_ANSWER_VALIDATION_FAILED' } }));
+    client.events.mockImplementation(async (path, options) => options.onEvent({ type: 'error', data: { code: 'QA_ANSWER_FORMAT_INVALID' } }));
     const { result } = renderHook(() => useQaConversation({ apiBase: '', token: 'token', videoId: 'abcdefghijk', announceError }));
     await waitFor(() => expect(result.current.enabled).toBe(true));
     await act(async () => { await result.current.ask({ question: '현재 화면을 설명해 주세요.', timestamp: 23.479 }); });
-    expect(announceError).toHaveBeenCalledTimes(1); expect(announceError).toHaveBeenCalledWith('답변을 검증하지 못했습니다. 다시 질문해 주세요.');
+    expect(announceError).toHaveBeenCalledTimes(1); expect(announceError).toHaveBeenCalledWith('답변 형식을 읽지 못했습니다. 다시 질문해 주세요.');
     expect(result.current.turns[0].answer).toBe(''); expect(result.current.turns[0].status).toBe('failed');
+});
+test('search sources arriving after speech do not replace or truncate the model answer', async () => {
+    const { result } = renderHook(() => useQaConversation({ apiBase: '', token: 'token', videoId: 'abcdefghijk', announceError: jest.fn() }));
+    await waitFor(() => expect(result.current.enabled).toBe(true));
+    act(() => { result.current.ask({ question: '학력을 검색해', timestamp: 12 }); });
+    await waitFor(() => expect(events).toBeDefined());
+    const text = '학력: 학교 이름, 학부 이름'; const sources = [{ url: 'https://example.com/profile', title: '프로필' }];
+    act(() => { events.onEvent({ type: 'sentence', data: { seq: 0, text } }); events.onEvent({ type: 'generation_done', data: { sources } }); });
+    expect(result.current.turns[0].answer).toBe(text); expect(result.current.turns[0].sources).toEqual(sources);
 });

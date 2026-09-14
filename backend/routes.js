@@ -432,6 +432,7 @@ function requireAuth(req, res, next) {
 const { createQaRequestStore } = require('./modules/qaRequestStore');
 const { createQaRouter } = require('./modules/qaRoutes');
 const { createQaGeneration } = require('./modules/qaGeneration');
+const { createQaModel } = require('./modules/qaSearch');
 const { createQaSpeech } = require('./modules/qaSpeech');
 const incrementalQaReceipts = db.getQaRequestReceipts();
 const incrementalQaStore = createQaRequestStore({ receipts: incrementalQaReceipts });
@@ -446,9 +447,7 @@ router.use('/qa', createQaRouter({ auth: requireAuth, store: incrementalQaStore,
     synthesizeSentence: (text, signal) => incrementalQaSpeech.mp3(text, signal),
     run: request => {
         if (!incrementalQaRun) incrementalQaRun = createQaGeneration({ store: incrementalQaStore, media: db.getQaMedia(), getVideo: db.getVideo,
-            model: new GoogleGenerativeAI(process.env.GOOGLE_API_KEY).getGenerativeModel({ model: QA_MODEL_NAME,
-                generationConfig: { maxOutputTokens: 4096 } }),
-            searchModel: new GoogleGenerativeAI(process.env.GOOGLE_API_KEY).getGenerativeModel({ model: QA_MODEL_NAME, tools: [{ googleSearch: {} }], generationConfig: { maxOutputTokens: 1024 } }),
+            model: createQaModel(new GoogleGenerativeAI(process.env.GOOGLE_API_KEY), QA_MODEL_NAME),
             speech: incrementalQaSpeech,
             recordUsage: (request, response) => incrementalQaReceipts.record(request, response.usageMetadata, () => db.recordGeminiUsage({ videoId: request.input.videoId, userId: request.userId,
                 requestType: 'qa', modelName: QA_MODEL_NAME, usageMetadata: response.usageMetadata,

@@ -1,5 +1,7 @@
 # 04 — Incremental request, validation and speech API
 
+**Current contract (2026-09-14, latest user instruction):** Search selection belongs to the model. Q&A answer postprocessing validates transport format only. See [MODEL-OUTPUT-CONTRACT.md](MODEL-OUTPUT-CONTRACT.md); it supersedes the historical sentence-policy/search-routing descriptions below.
+
 Implemented behind `QA_INCREMENTAL_SPEECH_ENABLED=true`; default remains the legacy route.
 
 - Authenticated request acceptance, owner/session isolation, body-fingerprint idempotency, monotonic SSE replay, cancellation, presence, and authenticated MP3 ticket renewal.

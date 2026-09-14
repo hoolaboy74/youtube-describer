@@ -1,5 +1,7 @@
 # 06 — Validation and rollout checkpoint
 
+Latest Q&A contract: [MODEL-OUTPUT-CONTRACT.md](MODEL-OUTPUT-CONTRACT.md). Historical content-gate acceptance criteria below no longer describe the incremental answer path following the user's explicit format-only instruction.
+
 No deployment or push has been performed. All flags remain opt-in; no environment secrets or production configuration were changed.
 
 ## Local verification

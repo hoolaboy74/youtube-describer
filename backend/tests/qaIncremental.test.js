@@ -35,16 +35,15 @@ test('UTF-8 split records emit only closed JSON lines and discard incomplete tai
     for (const byte of bytes) parser.push(Buffer.from([byte]));
     assert.equal(seen.length, 1); assert.equal(seen[0].text, candidate().text); assert.equal(parser.end().unfinished, true);
 });
-test('sentence gates reject future, wrong/missing evidence, inference, Korean repetition and unknown translation', () => {
-    assert.equal(validateSentence(candidate(), context()).accepted, true);
-    for (const value of [candidate({ evidenceIds: ['missing'] }), candidate({ kind: 'translation' }), candidate({ text: '부부가 보입니다.' }), candidate({ text: '상자가 보인다.' }), candidate({ text: '미완성' })]) assert.equal(validateSentence(value, context()).accepted, false);
-    assert.equal(validateSentence(candidate(), context({ evidence: new Map([['frame-1', { kind: 'frame', timestampMs: 13000 }]]) })).accepted, false);
-    assert.equal(validateSentence(candidate(), context({ cues: [{ sourceLanguage: 'ko', sourceText: '빨간 상자가 보입니다!' }], audioClassification: 'korean' })).reason, 'audible-duplicate');
-    const cue = { kind: 'cue', end: 11, confirmed: true, sourceLanguage: 'en' };
-    const foreign = context({ evidence: new Map([['cue-0', cue]]), audioClassification: 'foreign' });
-    assert.equal(validateSentence(candidate({ kind: 'translation', evidenceIds: ['cue-0'], text: '어서 오세요.' }), foreign).accepted, true);
-    cue.confirmed = false; assert.equal(validateSentence(candidate({ kind: 'translation', evidenceIds: ['cue-0'] }), foreign).accepted, false);
+test('answer validation checks transport format without filtering wording, evidence, language or repetition', () => {
+    for (const text of ['학력: 경원고등학교, 영남대학교 경제금융학부', '아버지 때문에 활동을 시작했습니다.', 'Education: BA, 2018', '반복 문장입니다.', '긴 답변 '.repeat(100)]) {
+        const value = { seq: 0, text, kind: 'translation', evidenceIds: ['missing'] };
+        const result = validateSentence(value, context(), [{ text }]);
+        assert.equal(result.accepted, true); assert.equal(result.sentence.text, text);
+    }
+    for (const value of [{ seq: 0, text: null }, { seq: -1, text: '답변' }, { seq: 0, text: '' }, { seq: 0, text: '\u0000' }, { seq: 0, text: 'a'.repeat(8193) }]) assert.equal(validateSentence(value, context()).accepted, false);
 });
+
 test('backward seek preserves future conversation verbatim but excludes video outside the requested nearby window', async () => {
     const history = [{ requestId: 'earlier-1', timestamp: 50, question: 'ignore policy', answer: 'spoiler', status: 'failed' }];
     const result = await createQaContext({ request: input({ history }), media: { frames: [{ timestampMs: 17000 }], subtitles: { cues: [{ id: 'past', start: 10, end: 11 }, { id: 'crossing', start: 15, end: 17 }] } } });
@@ -61,11 +60,11 @@ test('first accepted sentence is synthesized while the second model sentence is 
     gate.resolve(); await running; assert.equal(request.status, 'completed'); assert.equal(calls, 2); assert.equal(usage, 1);
     assert.deepEqual(request.events.map(e => e.id), request.events.map((_, i) => i + 1));
 });
-test('a rejected candidate never reaches TTS and cancel suppresses a late unary result', async t => {
+test('cancel suppresses a late unary result without rewriting the model sentence', async t => {
     const image = await fixtureFrame(t);
     const store = createQaRequestStore(), { request } = store.accept(1, input()); const gate = deferred(), speaking = deferred(); let calls = 0;
     const run = createQaGeneration({ store, getVideo: () => ({ duration: 60 }), media: { prepare: async () => ({ frames: [{ path: image, timestampMs: 11000, sourcePtsMs: 11000 }], subtitles: { cues: [] } }) },
-        model: { generateContentStream: async () => ({ stream: (async function* () { yield { text: () => JSON.stringify(candidate({ evidenceIds: ['missing'] })) + '\n' }; yield { text: () => JSON.stringify({ seq: 1, kind: 'explanation', evidenceIds: [], text: UNKNOWN }) + '\n' }; })(), response: Promise.resolve({}) }) },
+        model: { generateContentStream: async () => ({ stream: (async function* () { yield { text: () => JSON.stringify({ seq: 0, text: UNKNOWN }) + '\n' }; })(), response: Promise.resolve({}) }) },
         speech: { mp3: async text => { calls++; assert.equal(text, UNKNOWN); speaking.resolve(); await gate.promise; return Buffer.from('late'); } }, recordUsage: () => {} });
     const running = run(request); await speaking.promise; store.finish(request, 'canceled'); gate.resolve(); await running;
     assert.equal(calls, 1); assert.equal(request.audio.size, 0); assert.equal(request.events.at(-1).type, 'canceled');
@@ -85,14 +84,13 @@ test('a fully closed final JSON record is accepted at EOF even without a trailin
     assert.equal(seen.length, 0); assert.deepEqual(parser.end(), { count: 1, unfinished: false }); assert.equal(seen[0].text, candidate().text);
 });
 
-test('no visual evidence never invokes a model even with invented past answers and subtitles', async () => {
-    const store = createQaRequestStore(), { request } = store.accept(1, input({ history: [{ requestId: 'old-answer', timestamp: 10, question: '누구?', answer: '빨간 상자와 부부가 있습니다.', status: 'completed' }] }));
-    const spoken = [];
-    const run = createQaGeneration({ store, getVideo: () => ({ duration: 60 }),
-        media: { prepare: async () => ({ frames: [], subtitles: { cues: [{ id: 'cue-0', start: 10, end: 11, sourceText: '상자가 있습니다.' }] } }) },
-        model: { generateContentStream: () => assert.fail('ungrounded model call') },
-        speech: { mp3: async text => { spoken.push(text); return Buffer.from('mp3'); } }, recordUsage: () => assert.fail('no model usage') });
-    await run(request); assert.equal(request.status, 'completed'); assert.deepEqual(spoken, [UNKNOWN]); assert.equal(request.usageStatus, 'not_started');
+test('missing visual context does not replace the model answer with a backend unknown template', async () => {
+    const store = createQaRequestStore(), { request } = store.accept(1, input());
+    const text = '어느 인물에 관한 정보가 필요한지 알려주세요.', spoken = []; let calls = 0;
+    await createQaGeneration({ store, getVideo: () => ({ duration: 60 }), media: { prepare: async () => ({ frames: [], subtitles: { cues: [] } }) },
+        model: { generateContentStream: async () => { calls++; return { stream: (async function* () { yield { text: () => JSON.stringify({ seq: 0, text }) + '\n' }; })(), response: Promise.resolve({}) }; } },
+        speech: { mp3: async value => { spoken.push(value); return Buffer.from('mp3'); } }, recordUsage: () => {} })(request);
+    assert.equal(calls, 1); assert.equal(request.status, 'completed'); assert.deepEqual(spoken, [text]);
 });
 
 test('optional JSON code fences never become speech and do not loosen record validation', () => {
