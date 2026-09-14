@@ -34,10 +34,21 @@ function findCoverageHoles(frames, durationMs) {
     if (!Array.isArray(frames) || frames.some(f => !Number.isSafeInteger(f.timestampMs) || f.timestampMs < 0)) throw new Error('Invalid frame timestamp');
     const points = frames.map(f => f.timestampMs).sort((a, b) => a - b);
     const holes = [];
-    let i = 0;
-    for (let t = 0; t < durationMs; t += 2000) {
-        while (i < points.length && points[i] < t - 1000) i++;
-        if (i === points.length || points[i] > t + 1000) holes.push(t);
+    if (!points.length) {
+        for (let t = 0; t < durationMs; t += 1500) holes.push(t);
+        return holes;
+    }
+    if (points[0] > 1000) {
+        holes.push(0);
+        for (let t = 1500; points[0] - (t - 1500) > 2000; t += 1500) holes.push(t);
+    }
+    // Leave seek/PTS rounding headroom while enforcing actual adjacent gaps.
+    for (let i = 0; i < points.length; i++) {
+        const end = i + 1 < points.length ? points[i + 1] : durationMs;
+        for (let t = points[i]; end - t > 2000;) {
+            t += 1500;
+            holes.push(t);
+        }
     }
     return holes;
 }
@@ -73,7 +84,7 @@ async function extractFrames({ inputPath, outputDir, durationMs, signal, onFrame
         };
         const parser = createShowinfoParser();
         await run('ffmpeg', ['-hide_banner', '-nostdin', '-copyts', '-skip_frame', 'nokey', '-i', inputPath,
-            '-map', '0:v:0', '-vf', 'scale=640:-1,showinfo', '-fps_mode', 'passthrough', '-q:v', '5', path.join(staging, 'key-%08d.jpg')],
+            '-map', '0:v:0', '-vf', "select='isnan(prev_selected_t)+gte(t-prev_selected_t,1)',scale=640:-1,showinfo", '-fps_mode', 'passthrough', '-q:v', '5', path.join(staging, 'key-%08d.jpg')],
             { needs: { ffmpeg: 1 }, signal, timeoutMs: 180000, maxOutputBytes: 16 * 1024 * 1024, disk: { root: outputDir, maxBytes: 1024 ** 3 }, onStderr: chunk => parser.push(chunk) });
         const pts = parser.end();
         const files = (await fs.readdir(staging)).filter(name => /^key-\d{8}\.jpg$/.test(name)).sort();

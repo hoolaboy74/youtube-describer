@@ -39,8 +39,8 @@ test('legacy generator wrapper keeps ordered frame filenames and returns proven 
     await runMediaProcess('ffmpeg', ['-hide_banner', '-nostdin', '-f', 'lavfi', '-i', 'testsrc2=size=160x90:rate=10:duration=6',
         '-c:v', 'libx264', '-preset', 'ultrafast', '-g', '40', '-sc_threshold', '0', '-bf', '0', '-output_ts_offset', '7', input], { needs: { ffmpeg: 1 } });
     const timestamps = await extractKeyframesHybrid({ tempVideoPath: input, tempVideoFilename: 'source.mp4', baseTempDir: base, totalDuration: 6, requestHash: 'offline-fixture' });
-    assert.deepEqual(timestamps, [0, 2, 4]);
-    assert.deepEqual(fs.readdirSync(base).filter(name => /^frame-/.test(name)).sort(), ['frame-0001.jpg', 'frame-0002.jpg', 'frame-0003.jpg']);
+    assert.deepEqual(timestamps, [0, 1.5, 3, 4]);
+    assert.deepEqual(fs.readdirSync(base).filter(name => /^frame-/.test(name)).sort(), ['frame-0001.jpg', 'frame-0002.jpg', 'frame-0003.jpg', 'frame-0004.jpg']);
 });
 
 test('audio language detector fails conservatively and cleans samples after a Whisper spawn failure', async () => {

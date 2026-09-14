@@ -168,12 +168,8 @@ function createQaMedia({ manager, adapter, log = message => logger.info(message)
     }
     function current(videoId,timestampMs,durationMs,around=false) {
         const end=around?Math.min(durationMs-1,timestampMs+FRAME_RADIUS_MS):timestampMs;
-        const frames=manager.framesBefore(videoId,FRAME_VERSION,end,around?100:4).filter(f=>f.timestampMs>=Math.max(0,timestampMs-FRAME_RADIUS_MS));
-        // Bound image tokens while retaining both ends and the nearest frame.
-        if(frames.length<=8)return frames;
-        const indices=new Set([0,frames.length-1,frames.reduce((best,frame,i)=>Math.abs(frame.timestampMs-timestampMs)<Math.abs(frames[best].timestampMs-timestampMs)?i:best,0)]);
-        for(let i=1;indices.size<8&&i<8;i++)indices.add(Math.round(i*(frames.length-1)/8));
-        return [...indices].sort((a,b)=>a-b).map(i=>frames[i]);
+        if (around) return manager.framesInRange(videoId, FRAME_VERSION, Math.max(0,timestampMs-FRAME_RADIUS_MS), end, timestampMs);
+        return manager.framesBefore(videoId,FRAME_VERSION,end,4).filter(f=>f.timestampMs>=Math.max(0,timestampMs-FRAME_RADIUS_MS));
     }
     const service = {
         FRAME_VERSION, SUB_VERSION,
@@ -261,7 +257,7 @@ function createQaMedia({ manager, adapter, log = message => logger.info(message)
             priorities.set(videoId,timestampMs);
             let frames=current(videoId,timestampMs,durationMs,around);
             const freshness=manager.store.job(videoId,FRAME_VERSION)?.state==='ready'?2000:1000;
-            if(frames.length && (around ? frames[0].timestampMs<=Math.max(0,timestampMs-FRAME_RADIUS_MS)+freshness && frames.at(-1).timestampMs>=Math.min(durationMs-1,timestampMs+FRAME_RADIUS_MS)-freshness : timestampMs-frames.at(-1).timestampMs<=freshness)){report(videoId,'window_hit',{timestampMs,frames:frames.length});return frames;}
+            if(frames.length && (around ? frames.some(f=>f.timestampMs<=timestampMs) && frames[0].timestampMs<=Math.max(0,timestampMs-FRAME_RADIUS_MS)+freshness && frames.at(-1).timestampMs>=Math.min(durationMs-1,timestampMs+FRAME_RADIUS_MS)-freshness : timestampMs-frames.at(-1).timestampMs<=freshness)){report(videoId,'window_hit',{timestampMs,frames:frames.length});return frames;}
             report(videoId,'window_miss',{timestampMs});
             const bucket=Math.floor(timestampMs/10000);const key=videoId+':'+bucket;
             if(!windowJobs.has(key)) {

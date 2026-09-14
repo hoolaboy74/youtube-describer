@@ -13,9 +13,12 @@ test('showinfo parser preserves PTS across byte boundaries and rejects duplicate
     const invalid = createShowinfoParser();
     assert.throws(() => invalid.push(Buffer.from('n: 0 pts: 0 pts_time:0\nn: 0 pts: 1 pts_time:1\n')));
 });
-test('coverage measures actual normalized PTS with an inclusive tolerance', () => {
-    assert.deepEqual(findCoverageHoles([{ timestampMs: 0 }, { timestampMs: 8000 }], 10000), [2000, 4000, 6000]);
+test('coverage measures adjacent gaps and video boundaries', () => {
+    assert.deepEqual(findCoverageHoles([{ timestampMs: 0 }, { timestampMs: 8000 }], 10000), [1500, 3000, 4500, 6000]);
     assert.deepEqual(findCoverageHoles([{ timestampMs: 1000 }, { timestampMs: 3000 }], 4000), []);
+    assert.deepEqual(findCoverageHoles([{ timestampMs: 1000 }, { timestampMs: 4000 }], 5000), [2500]);
+    assert.deepEqual(findCoverageHoles([{ timestampMs: 1500 }], 5000), [0, 3000]);
+    assert.deepEqual(findCoverageHoles([{ timestampMs: 5000 }], 6000), [0, 1500, 3000]);
 });
 
 test('real VFR media: keyframes published before exact backfill, PTS remains proven and replayable', async () => {
@@ -59,4 +62,19 @@ test('failed backfills retain usable keys without marking complete; publication 
         await assert.rejects(extractFrames({ inputPath: input, outputDir: path.join(dir, 'stale'), durationMs: 6000,
             onFrame: frame => { if (frame.sourceKind === 'backfill') throw Object.assign(new Error('stale worker'), { code: 'STALE_CACHE_LEASE' }); } }), { code: 'STALE_CACHE_LEASE' });
     } finally { await fs.rm(dir, { recursive: true, force: true }); }
+});
+
+
+test('all-intra 30fps source is thinned before JPEG output while preserving source PTS', async () => {
+    const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'qa-dense-'));
+    try {
+        const input = path.join(dir, 'dense.mp4');
+        await runMediaProcess('ffmpeg', ['-hide_banner','-nostdin','-f','lavfi','-i','testsrc2=size=160x90:rate=30:duration=6',
+            '-c:v','libx264','-preset','ultrafast','-g','1','-bf','0',input], {needs:{ffmpeg:1}});
+        const result = await extractFrames({inputPath:input,outputDir:path.join(dir,'frames'),durationMs:6000});
+        assert.equal(result.ready,true);
+        assert.equal(result.frames.length,6);
+        assert.deepEqual(result.frames.map(f=>f.timestampMs),[0,1000,2000,3000,4000,5000]);
+        assert.equal((await fs.readdir(path.join(dir,'frames'))).length,6);
+    } finally { await fs.rm(dir,{recursive:true,force:true}); }
 });

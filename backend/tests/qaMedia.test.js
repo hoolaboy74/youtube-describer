@@ -55,3 +55,22 @@ const service=createQaMedia({manager,adapter:{section:async(id,start,end)=>{down
 const cold=await service.prepare('abcdefghijk',19900,30000,{warm:false});assert.ok(cold.frames.some(f=>f.timestampMs<19900));assert.ok(cold.frames.some(f=>f.timestampMs>19900));assert.ok(cold.frames.every(f=>f.timestampMs>=15900&&f.timestampMs<=23900));assert.ok(cold.frames.length<=8);
 const warm=await service.prepare('abcdefghijk',19900,30000,{warm:false});assert.equal(downloads,1);assert.deepEqual(warm.frames,cold.frames);
 });
+
+
+test('dense cached windows retain the nearest past frame and hit on repeated questions',async t=>{
+    const {manager,frame}=await setup(t);
+    const lease=manager.store.claim('densevideo1',FRAME_VERSION,'test');
+    for(let ms=0;ms<14000;ms+=33) await manager.publishFrame(lease,frame(ms));
+    manager.store.release(lease);
+    const logs=[];
+    const service=createQaMedia({manager,log:line=>logs.push(line),adapter:{section:()=>{throw new Error('unexpected extraction');}}});
+    for(let attempt=0;attempt<2;attempt++) {
+        const frames=await service.ensureCurrentWindow('densevideo1',9247,20000,{around:true});
+        assert.equal(frames.length,8);
+        assert.ok(frames.some(f=>f.timestampMs===9240));
+        assert.ok(frames[0].timestampMs<=5300);
+        assert.ok(frames.at(-1).timestampMs>=13200);
+        assert.ok(frames.every(f=>f.timestampMs>=5247&&f.timestampMs<=13247));
+    }
+    assert.equal(logs.filter(line=>line.includes('window_hit')).length,2);
+});

@@ -122,6 +122,35 @@ function createQaCacheManager({ db, root, now = Date.now }) {
             }
             return selected.reverse();
         },
+        framesInRange(videoId, cacheVersion, startMs, endMs, timestampMs, count = 8) {
+            if (![startMs, endMs, timestampMs].every(Number.isSafeInteger) || startMs < 0 || endMs < startMs
+                || !Number.isInteger(count) || count < 3 || count > 100) throw new Error('Invalid frame range');
+            let candidates = db.prepare('SELECT * FROM qa_frame_assets WHERE videoId=? AND cacheVersion=? AND timestampMs BETWEEN ? AND ? ORDER BY timestampMs')
+                .all(videoId, cacheVersion, startMs, endMs);
+            // Select metadata first: dense caches must not require reading every JPEG.
+            while (candidates.length) {
+                const selected = new Set([0, candidates.length - 1]);
+                const anchor = candidates.findLastIndex(frame => frame.timestampMs <= timestampMs);
+                if (anchor >= 0) selected.add(anchor);
+                while (selected.size < Math.min(count, candidates.length)) {
+                    let best = -1, distance = -1;
+                    for (let i = 0; i < candidates.length; i++) {
+                        if (selected.has(i)) continue;
+                        const nearest = Math.min(...[...selected].map(j => Math.abs(candidates[i].timestampMs - candidates[j].timestampMs)));
+                        if (nearest > distance) { best = i; distance = nearest; }
+                    }
+                    selected.add(best);
+                }
+                const frames = [...selected].sort((a,b) => a-b).map(i => candidates[i]);
+                const invalid = frames.filter(frame => {
+                    try { return digest(fs.readFileSync(absolute(frame.relativePath))) !== frame.checksum; } catch { return true; }
+                });
+                if (!invalid.length) return frames;
+                const bad = new Set(invalid.map(frame => frame.sourcePtsMs));
+                candidates = candidates.filter(frame => !bad.has(frame.sourcePtsMs));
+            }
+            return [];
+        },
         markReady(lease, durationMs) {
             return store.fenced(lease, () => {
                 const frames = store.listFrames(lease.videoId, lease.cacheVersion);
