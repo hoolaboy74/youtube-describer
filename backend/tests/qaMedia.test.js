@@ -1,5 +1,5 @@
 const test=require('node:test');const assert=require('node:assert/strict');const fs=require('node:fs/promises');const os=require('node:os');const path=require('node:path');const Database=require('better-sqlite3');const sharp=require('sharp');
-const {createQaCacheManager}=require('../modules/qaCacheManager');const {createQaMedia,FRAME_VERSION}=require('../modules/qaMedia');const {parseVtt}=require('../modules/qaSubtitles');
+const {createQaCacheManager}=require('../modules/qaCacheManager');const {createQaMedia,createDefaultMediaAdapter,FRAME_VERSION}=require('../modules/qaMedia');const {parseVtt}=require('../modules/qaSubtitles');
 const deferred=()=>{let resolve,reject;const promise=new Promise((a,b)=>{resolve=a;reject=b;});return{resolve,reject,promise};};
 async function setup(t){const root=await fs.mkdtemp(path.join(os.tmpdir(),'qa-media-'));const db=new Database(path.join(root,'test.db'));t.after(async()=>{db.close();await fs.rm(root,{recursive:true,force:true});});const manager=createQaCacheManager({db,root});const image=path.join(root,'frame.jpg');await sharp({create:{width:640,height:360,channels:3,background:'#123456'}}).jpeg().toFile(image);const frame=timestampMs=>({path:image,sourcePtsMs:timestampMs,originPtsMs:0,timestampMs,sourceKind:'keyframe'});return{root,manager,frame};}
 test('current window and VTT begin together and answer before blocked full warming; same-bucket requests share work',async t=>{const{manager,frame}=await setup(t);const full=deferred();const started=[];let sections=0;const service=createQaMedia({manager,adapter:{full:async()=>{started.push('full');return full.promise;},section:async()=>{sections++;started.push('window');return{file:'fake',originPtsMs:0};},subtitles:async()=>{started.push('vtt');return null;}},windowExtract:async()=>[frame(12000),frame(14000)],extract:async()=>({ready:true})});
@@ -146,4 +146,30 @@ test('failed section falls back to the shared source without waiting for full-fr
         clearTimeout(timer);downloadGate.resolve();fullGate.resolve();
         await preparing.catch(()=>{});await service.ensureFullCache('YmEnygA7pHc',20000);
     }
+});
+
+test('default downloader retries a failed cookie request without exposing its content',async t=>{
+    const root=await fs.mkdtemp(path.join(os.tmpdir(),'qa-ytdlp-'));t.after(()=>fs.rm(root,{recursive:true,force:true}));
+    await fs.mkdir(path.join(root,'cookies'));await fs.writeFile(path.join(root,'cookies','active_cookies.txt'),'secret-cookie');
+    const calls=[];
+    const adapter=createDefaultMediaAdapter({backendRoot:root,getVideo:()=>null,run:async(file,args)=>{
+        calls.push(args);
+        if(calls.length===1)throw Object.assign(new Error('yt-dlp failed'),{code:'MEDIA_EXIT',exitCode:1,stderr:'secret-cookie'});
+        await fs.writeFile(args[args.indexOf('-o')+1],'video');return{};
+    }});
+    const directory=path.join(root,'work');await fs.mkdir(directory);
+    const output=await adapter.full('YmEnygA7pHc',directory);
+    assert.equal(await fs.readFile(output,'utf8'),'video');assert.equal(calls.length,2);
+    assert.ok(calls[0].includes('--cookies'));assert.ok(!calls[1].includes('--cookies'));
+    assert.ok(calls[0].includes('--force-ipv4'));assert.ok(calls[0].includes('--js-runtimes'));
+    assert.ok(!calls.flat().join(' ').includes('secret-cookie'));
+});
+
+test('media diagnostics retain an exit code but never process stderr',async t=>{
+    const {manager}=await setup(t), logs=[];
+    const failure=()=>{throw Object.assign(new Error('failed'),{code:'MEDIA_EXIT',exitCode:23,stderr:'signed-url-token'});};
+    const service=createQaMedia({manager,log:line=>logs.push(line),adapter:{section:async()=>failure(),full:async()=>failure()}});
+    await assert.rejects(service.ensureCurrentWindow('abcdefghijk',12500,20000),{code:'MEDIA_EXIT'});
+    const line=logs.find(value=>value.includes('"event":"work_failed"'));
+    assert.ok(line.includes('"exitCode":23'));assert.ok(!line.includes('signed-url-token'));
 });
