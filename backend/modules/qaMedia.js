@@ -3,6 +3,7 @@ const fs = require('node:fs/promises');
 const path = require('node:path');
 const crypto = require('node:crypto');
 const { runMediaProcess } = require('./mediaResourceLimiter');
+const { mediaDiskBudget } = require('./mediaDiskBudget');
 const { extractFrames, extractFrameWindow } = require('./frameExtraction');
 const { createSubtitleReader, parseVtt } = require('./qaSubtitles');
 const FRAME_VERSION = 'frames-v1', SUB_VERSION = 'subtitles-v1';
@@ -39,7 +40,7 @@ function createDefaultMediaAdapter({ backendRoot, getVideo, run = runMediaProces
     return {
         async full(videoId, directory, signal) {
             const file = path.join(directory,'source.mp4');
-            await run('yt-dlp',[...await commonArgs(directory),'-f',format,'-o',file,`https://www.youtube.com/watch?v=${videoId}`],
+            await run('yt-dlp',[...await commonArgs(directory),'-f','best[height<=480][ext=mp4][vcodec!=none][acodec!=none]/bestvideo[height<=480][ext=mp4]+bestaudio[ext=m4a]/bestvideo[height<=480][ext=mp4]','--merge-output-format','mp4','-o',file,`https://www.youtube.com/watch?v=${videoId}`],
                 { needs: { download: 1, fullDownload: 1, ffmpeg: 1 }, signal, timeoutMs:180000, disk:{root:directory,maxBytes:1024**3} });
             return file;
         },
@@ -63,11 +64,11 @@ function createDefaultMediaAdapter({ backendRoot, getVideo, run = runMediaProces
                 {needs:{download:1,ffmpeg:1},priority:20,signal,timeoutMs:45000,disk:{root:directory,maxBytes:128*1024*1024}});
             return { file, originPtsMs:Math.round(Number(origin)*1000) };
         },
-        async subtitles(videoId,directory,signal) {
+        async subtitles(videoId,directory,signal,{forceDownload=false}={}) {
             const existing = path.join(backendRoot,'public','subtitles',`${videoId}.vtt`);
             const video = getVideo(videoId);
             const audioClassification = ['korean','foreign','mixed'].includes(video?.audio_language) ? video.audio_language : 'unknown';
-            if (await fs.stat(existing).catch(()=>null)) return { file:existing, metadata:{ audioClassification, provenance:'legacy' } };
+            if (!forceDownload && await fs.stat(existing).catch(()=>null)) return { file:existing, metadata:{ audioClassification, provenance:'legacy' } };
             await run('yt-dlp',[...await commonArgs(directory),'--skip-download','--write-sub','--write-auto-sub','--sub-lang','en,ko','--sub-format','vtt','-o',path.join(directory,'captions'),`https://www.youtube.com/watch?v=${videoId}`],
                 {needs:{download:1},priority:20,signal,timeoutMs:45000,disk:{root:directory,maxBytes:32*1024*1024}});
             const files = (await fs.readdir(directory)).filter(f=>f.endsWith('.vtt'));
@@ -79,7 +80,7 @@ function createDefaultMediaAdapter({ backendRoot, getVideo, run = runMediaProces
     };
 }
 function createQaMedia({ manager, adapter, now = Date.now, extract = extractFrames, windowExtract = extractFrameWindow }) {
-    const fullJobs = new Map(), windowJobs = new Map(), subtitleJobs = new Map(), sources = new Map(), pipeline = new Map();
+    const rawJobs = new Map(), fullJobs = new Map(), windowJobs = new Map(), subtitleJobs = new Map(), sources = new Map(), pipeline = new Map();
     const reader = createSubtitleReader(manager);
     const sourceEvents = new (require('node:events').EventEmitter)();
     sourceEvents.setMaxListeners(0);
@@ -111,26 +112,52 @@ function createQaMedia({ manager, adapter, now = Date.now, extract = extractFram
         const manifest=path.join(workRoot,idFolder(videoId),'source.json');
         try {
             const data=JSON.parse(await fs.readFile(manifest,'utf8'));
+            if(data.sourceVersion!=='av-v1')return null;
             const file=manager.assetPath(data.relativePath);
             const stat=await fs.stat(file);
             if(stat.size!==data.bytes || await checksum(file)!==data.checksum) return null;
             const source={file,owned:true,readers:0,manifest};sources.set(videoId,source);return source;
         } catch{return null;}
     }
+    async function materialize(source, target) {
+        if(path.resolve(source)===path.resolve(target))return;
+        await fs.mkdir(path.dirname(target),{recursive:true});
+        const pending=target+'.shared-'+crypto.randomUUID();let reservation;
+        try {
+            try { await fs.link(source,pending); }
+            catch(error) {
+                if(error.code!=='EXDEV')throw error;
+                const bytes=(await fs.stat(source)).size;reservation=mediaDiskBudget.reserve(path.dirname(target),bytes);
+                await fs.copyFile(source,pending);reservation.check((await fs.stat(pending)).size);
+            }
+            await fs.rename(pending,target);
+        } finally { reservation?.release();await fs.rm(pending,{force:true}); }
+    }
+    async function ensureRawSource(videoId, produce) {
+        if(rawJobs.has(videoId))return rawJobs.get(videoId);
+        const task=owned(videoId,'raw-source-v1',async(lease,signal)=>{
+            const saved=await rememberedSource(videoId);if(saved)return saved;
+            manager.store.transition(lease,'downloading');
+            const dir=await directory(videoId,'source');
+            const downloaded=produce ? await produce(signal) : await adapter.full(videoId,dir,signal);
+            const file=path.join(dir,'source.mp4');await materialize(downloaded,file);
+            const bytes=(await fs.stat(file)).size;
+            if(!bytes||bytes>1024**3)throw Object.assign(new Error('Invalid source size'),{code:'SOURCE_SIZE_LIMIT'});
+            const manifest=path.join(workRoot,idFolder(videoId),'source.json');
+            const pending=manifest+'.'+lease.fencingToken;
+            await fs.writeFile(pending,JSON.stringify({sourceVersion:'av-v1',relativePath:path.relative(manager.root,file),bytes,checksum:await checksum(file)}));
+            manager.store.fenced(lease,()=>require('node:fs').renameSync(pending,manifest));
+            const source={file,owned:true,readers:0,manifest};sources.set(videoId,source);sourceEvents.emit(videoId,source);return source;
+        });
+        rawJobs.set(videoId,task);task.catch(()=>{}).finally(()=>rawJobs.delete(videoId));return task;
+    }
     async function getSource(videoId,lease,signal) {
         const saved=await rememberedSource(videoId);if(saved)return saved;
         if(pipeline.has(videoId))return waitFor(pipeline.get(videoId).promise,signal);
-        const dir=await directory(videoId,'full');
-        const file=await adapter.full(videoId,dir,signal);
-        const bytes=(await fs.stat(file)).size;
-        const manifest=path.join(workRoot,idFolder(videoId),'source.json');
-        const pending=manifest+'.'+lease.fencingToken;
-        await fs.writeFile(pending,JSON.stringify({relativePath:path.relative(manager.root,file),bytes,checksum:await checksum(file)}));
-        manager.store.fenced(lease,()=>require('node:fs').renameSync(pending,manifest));
-        const source={file,owned:true,readers:0,manifest};sources.set(videoId,source);sourceEvents.emit(videoId,source);return source;
+        return waitFor(ensureRawSource(videoId),signal);
     }
     async function cleanupSource(videoId,source) {
-        if(source.owned && !source.readers && ![...windowJobs.keys()].some(key=>key.startsWith(videoId+':')) && manager.store.job(videoId,FRAME_VERSION)?.state==='ready') {
+        if(source.owned && !source.readers && !pipeline.has(videoId) && ![...windowJobs.keys()].some(key=>key.startsWith(videoId+':')) && manager.store.job(videoId,FRAME_VERSION)?.state==='ready') {
             sources.delete(videoId);await fs.rm(path.dirname(source.file),{recursive:true,force:true});await fs.rm(source.manifest,{force:true});
         }
     }
@@ -168,21 +195,32 @@ function createQaMedia({ manager, adapter, now = Date.now, extract = extractFram
             // Reserve immediately before the generator starts its download. Q&A
             // then waits for this source rather than issuing another full download.
             let resolve,reject;const promise=new Promise((a,b)=>{resolve=a;reject=b;});promise.catch(()=>{});
-            let readySource, finishFrames, failFrames;
+            let readySource, finishFrames, failFrames, pinned=false;
             const framesDone=new Promise((a,b)=>{finishFrames=a;failFrames=b;});framesDone.catch(()=>{});
             const entry={promise,framesDone,
                 publish:frame=>owned(videoId,'pipeline-v1',lease=>manager.publishFrame(lease,frame,FRAME_VERSION)),
-                complete:()=>finishFrames(),
-                ready(file){readySource={file,owned:false,readers:0};sources.set(videoId,readySource);sourceEvents.emit(videoId,readySource);resolve(readySource);},
+                complete(durationMs){finishFrames();if(durationMs)service.ensureFullCache(videoId,durationMs).catch(()=>{});},
+                async withSource(target,download) {
+                    let downloaded=false;
+                    const source=await ensureRawSource(videoId,async signal=>{await download(signal);downloaded=true;return target;});
+                    source.readers++;pinned=true;readySource=source;
+                    await materialize(source.file,target);entry.ready(source.file);
+                    if(!downloaded && adapter.subtitles) {
+                        try { await adapter.subtitles(videoId,path.dirname(target),new AbortController().signal,{forceDownload:true}); } catch { /* Missing captions leave the generator's dialogue track empty. */ }
+                    }
+                },
+                ready(file){readySource=sources.get(videoId)||{file,owned:false,readers:0};sources.set(videoId,readySource);sourceEvents.emit(videoId,readySource);resolve(readySource);},
                 fail(){reject(new Error('Pipeline source failed'));failFrames(new Error('Pipeline frames failed'));pipeline.delete(videoId);},
                 async finish(){
                     reject(new Error('Pipeline source closed'));
                     failFrames(new Error('Pipeline frames closed'));
                     // Stop new readers before allowing the generator to remove its MP4.
                     pipeline.delete(videoId);
-                    if(sources.get(videoId)===readySource)sources.delete(videoId);
+                    if(!readySource?.owned && sources.get(videoId)===readySource)sources.delete(videoId);
                     await fullJobs.get(videoId)?.catch(()=>{});
+                    if(pinned){readySource.readers--;pinned=false;}
                     while(readySource?.readers)await pause(25);
+                    if(readySource)await cleanupSource(videoId,readySource);
                 },
             };
             pipeline.set(videoId,entry);return entry;
@@ -211,7 +249,8 @@ function createQaMedia({ manager, adapter, now = Date.now, extract = extractFram
         async ensureCurrentWindow(videoId,timestampMs,durationMs,{signal}={}) {
             priorities.set(videoId,timestampMs);
             let frames=current(videoId,timestampMs);
-            if(frames.length && timestampMs-frames.at(-1).timestampMs<=1000)return frames;
+            const freshness=manager.store.job(videoId,FRAME_VERSION)?.state==='ready'?2000:1000;
+            if(frames.length && timestampMs-frames.at(-1).timestampMs<=freshness)return frames;
             const bucket=Math.floor(timestampMs/10000);const key=videoId+':'+bucket;
             if(!windowJobs.has(key)) {
                 const task=owned(videoId,`window-v1-${bucket}`,async(lease,taskSignal)=>{

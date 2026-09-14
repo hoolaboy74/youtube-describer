@@ -98,3 +98,7 @@ Both completed; neither failure nor slow sample was discarded. This is one seque
 - This response contained one sentence, so audio did not precede model completion. The controlled delayed-second-sentence test separately proves that the code does not wait for the whole answer before starting synthesis. Neither observation establishes a P50/P95 target.
 
 No claim of physical-device audible playback, screen-reader usability, full subtitle context or representative latency is made. The first timeout is not excluded from the attempt history.
+
+## 2026-09-14 shared AV source validation
+
+The full-source adapter now requests an audio-bearing MP4 so the main generator can adopt a Q&A-first source without downloading the video again. The current-section adapter still requests only video. One bounded fixture download completed in 6849 ms, 51,848,355 bytes: AV1 854×480 video plus AAC audio, both starting at PTS 0; duration 1040.022 s. Raw report: `shared-av-20260914.json`. This is a format/reuse validation sample, not a speed comparison with the earlier video-only benchmark under different network conditions.

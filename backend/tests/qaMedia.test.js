@@ -18,3 +18,25 @@ test('runtime corrupt subtitle is refetched and current-question frames remain a
 const{manager,frame,root}=await setup(t);const file=path.join(root,'captions.vtt');await fs.writeFile(file,'WEBVTT\n\n00:01.000 --> 00:02.000\n원문\n');const lease=manager.store.claim('abcdefghijk','subtitles-v1','test');const asset=await manager.publishSubtitle(lease,file);manager.store.release(lease);await fs.writeFile(manager.assetPath(asset.relativePath),'corrupt');let calls=0;
 const service=createQaMedia({manager,adapter:{subtitles:async()=>{calls++;return{file,metadata:{provenance:'unknown'}};}}});const result=await service.ensureSubtitles('abcdefghijk');assert.equal(calls,1);assert.equal(result.cues[0].sourceText,'원문');
 });
+test('Q&A-first and generator-first orderings share one complete source and preserve generator files through cache cleanup',async t=>{
+for(const order of ['qa-first','generator-first']) {
+const{manager,frame,root}=await setup(t);const started=deferred(),downloadGate=deferred(),extractGate=deferred();let qaDownloads=0,generatorDownloads=0;
+const service=createQaMedia({manager,adapter:{full:async(id,dir)=>{qaDownloads++;started.resolve();await downloadGate.promise;const file=path.join(dir,'source.mp4');await fs.writeFile(file,'shared-source');return file;}},extract:async({onFrame})=>{await extractGate.promise;await onFrame(frame(0));await onFrame(frame(2000));return{ready:true};}});
+const target=path.join(root,'generator','video.mp4');let pipeline,warming,preparing;
+const generate=async()=>{generatorDownloads++;started.resolve();await downloadGate.promise;await fs.mkdir(path.dirname(target),{recursive:true});await fs.writeFile(target,'shared-source');};
+if(order==='qa-first'){warming=service.ensureFullCache('abcdefghijk',4000);await started.promise;pipeline=service.beginPipeline('abcdefghijk');preparing=pipeline.withSource(target,generate);}
+else{pipeline=service.beginPipeline('abcdefghijk');preparing=pipeline.withSource(target,generate);await started.promise;warming=service.ensureFullCache('abcdefghijk',4000);}
+downloadGate.resolve();await preparing;assert.equal(await fs.readFile(target,'utf8'),'shared-source');assert.equal(qaDownloads+generatorDownloads,1);await pipeline.publish(frame(0));await pipeline.publish(frame(2000));pipeline.complete(4000);extractGate.resolve();await warming;await pipeline.finish();assert.equal(await fs.readFile(target,'utf8'),'shared-source');assert.equal(manager.store.job('abcdefghijk',FRAME_VERSION).state,'ready');
+}
+});
+test('a restarted coordinator reuses the durable complete source after frame extraction failed',async t=>{
+const{manager,frame}=await setup(t);let downloads=0;
+const first=createQaMedia({manager,adapter:{full:async(id,dir)=>{downloads++;const file=path.join(dir,'source.mp4');await fs.writeFile(file,'complete-source');return file;}},extract:async()=>{throw new Error('injected extraction failure');}});
+await assert.rejects(first.ensureFullCache('abcdefghijk',20000));
+const restarted=createQaMedia({manager,adapter:{section:()=>{throw new Error('unexpected section');},full:()=>{throw new Error('unexpected download');}},windowExtract:async({inputPath})=>{assert.equal(await fs.readFile(inputPath,'utf8'),'complete-source');return[frame(12000)];}});
+assert.equal((await restarted.ensureCurrentWindow('abcdefghijk',12500,20000)).length,1);assert.equal(downloads,1);
+});
+test('completed two-second-grid caches do not re-extract ordinary questions between grid points',async t=>{
+const{manager,frame}=await setup(t);const lease=manager.store.claim('abcdefghijk',FRAME_VERSION,'test');manager.store.transition(lease,'extracting');await manager.publishFrame(lease,frame(0));await manager.publishFrame(lease,frame(2000));manager.markReady(lease,4000);
+const service=createQaMedia({manager,adapter:{section:()=>{throw new Error('warm cache unexpectedly downloaded');}}});const frames=await service.ensureCurrentWindow('abcdefghijk',3500,4000);assert.equal(frames.at(-1).timestampMs,2000);
+});
