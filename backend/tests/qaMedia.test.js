@@ -53,7 +53,7 @@ test('cold windows span both sides even at bucket edges, and warmed windows pres
 const {manager,frame}=await setup(t);let downloads=0;
 const service=createQaMedia({manager,adapter:{section:async(id,start,end)=>{downloads++;assert.equal(start,6000);assert.equal(end,25000);return{file:'fixture',originPtsMs:0};},subtitles:async()=>null},windowExtract:async options=>{assert.equal(options.startMs,6000);assert.equal(options.endMs,23999);return Array.from({length:18},(_,i)=>frame(6000+i*1000));}});
 const cold=await service.prepare('abcdefghijk',19900,30000,{warm:false});assert.ok(cold.frames.some(f=>f.timestampMs<19900));assert.ok(cold.frames.some(f=>f.timestampMs>19900));assert.ok(cold.frames.every(f=>f.timestampMs>=15900&&f.timestampMs<=23900));assert.ok(cold.frames.length<=8);
-const warm=await service.prepare('abcdefghijk',19900,30000,{warm:false});assert.equal(downloads,1);assert.deepEqual(warm.frames,cold.frames);
+const warm=await service.prepare('abcdefghijk',19900,30000,{warm:false});assert.equal(downloads,1);assert.deepEqual(warm.frames,cold.frames);assert.equal(cold.fromCache,false);assert.equal(warm.fromCache,true);
 });
 
 
@@ -94,4 +94,24 @@ test('restart can read a source manifest from the historical hashed job director
         assert.equal(await fs.readFile(inputPath,'utf8'),'source');return[frame(12000)];
     }});
     assert.equal((await restarted.ensureCurrentWindow(id,12500,20000)).length,1);
+});
+
+
+test('generator captions are published once to the shared cache and Q&A reads without downloading',async t=>{
+    const {manager,root}=await setup(t);const id='94L2Z6Xyoxc';
+    const file=path.join(root,'downloaded.en.vtt');await fs.writeFile(file,'WEBVTT\n\n00:01.000 --> 00:02.000\nHello\n');
+    const service=createQaMedia({manager,adapter:{subtitles:()=>{throw new Error('unexpected download');}}});
+    await service.publishSubtitles(id,file,{audioClassification:'foreign',provenance:'unknown'});
+    const result=await service.ensureSubtitles(id);
+    assert.equal(result.state,'ready');assert.equal(result.cues[0].sourceText,'Hello');assert.equal(result.cues[0].confirmed,false);
+    assert.ok(manager.store.subtitle(id,'subtitles-v1').relativePath.startsWith('assets/'+id+'/subtitles/'));
+    await service.publishSubtitles(id,null);
+    assert.equal((await service.ensureSubtitles(id)).cues[0].sourceText,'Hello');
+});
+
+test('missing generator captions do not create a permanent no-subtitle marker',async t=>{
+    const {manager,root}=await setup(t);const file=path.join(root,'captions.vtt');await fs.writeFile(file,'WEBVTT\n\n');let downloads=0;
+    const service=createQaMedia({manager,adapter:{subtitles:async()=>{downloads++;return{file,metadata:{}};}}});
+    await service.publishSubtitles('94L2Z6Xyoxc',null);
+    assert.equal((await service.ensureSubtitles('94L2Z6Xyoxc')).state,'ready');assert.equal(downloads,1);
 });

@@ -67,10 +67,8 @@ function createDefaultMediaAdapter({ backendRoot, getVideo, run = runMediaProces
             return { file, originPtsMs:Math.round(Number(origin)*1000) };
         },
         async subtitles(videoId,directory,signal,{forceDownload=false}={}) {
-            const existing = path.join(backendRoot,'public','subtitles',`${videoId}.vtt`);
             const video = getVideo(videoId);
             const audioClassification = ['korean','foreign','mixed'].includes(video?.audio_language) ? video.audio_language : 'unknown';
-            if (!forceDownload && await fs.stat(existing).catch(()=>null)) return { file:existing, metadata:{ audioClassification, provenance:'legacy' } };
             await run('yt-dlp',[...await commonArgs(directory),'--skip-download','--write-sub','--write-auto-sub','--sub-lang','en,ko','--sub-format','vtt','-o',path.join(directory,'captions'),`https://www.youtube.com/watch?v=${videoId}`],
                 {needs:{download:1},priority:20,signal,timeoutMs:45000,disk:{root:directory,maxBytes:32*1024*1024}});
             const files = (await fs.readdir(directory)).filter(f=>f.endsWith('.vtt'));
@@ -179,6 +177,14 @@ function createQaMedia({ manager, adapter, log = message => logger.info(message)
         if (around) return manager.framesInRange(videoId, FRAME_VERSION, Math.max(0,timestampMs-FRAME_RADIUS_MS), end, timestampMs);
         return manager.framesBefore(videoId,FRAME_VERSION,end,4).filter(f=>f.timestampMs>=Math.max(0,timestampMs-FRAME_RADIUS_MS));
     }
+    function windowReady(videoId, frames, timestampMs, durationMs, around) {
+        const freshness=manager.store.job(videoId,FRAME_VERSION)?.state==='ready'?2000:1000;
+        return frames.length > 0 && (around
+            ? frames.some(f=>f.timestampMs<=timestampMs)
+                && frames[0].timestampMs<=Math.max(0,timestampMs-FRAME_RADIUS_MS)+freshness
+                && frames.at(-1).timestampMs>=Math.min(durationMs-1,timestampMs+FRAME_RADIUS_MS)-freshness
+            : timestampMs-frames.at(-1).timestampMs<=freshness);
+    }
     const service = {
         FRAME_VERSION, SUB_VERSION,
         async cleanupJobs({ ttlMs = 3600000 } = {}) {
@@ -264,8 +270,7 @@ function createQaMedia({ manager, adapter, log = message => logger.info(message)
         async ensureCurrentWindow(videoId,timestampMs,durationMs,{signal,around=false}={}) {
             priorities.set(videoId,timestampMs);
             let frames=current(videoId,timestampMs,durationMs,around);
-            const freshness=manager.store.job(videoId,FRAME_VERSION)?.state==='ready'?2000:1000;
-            if(frames.length && (around ? frames.some(f=>f.timestampMs<=timestampMs) && frames[0].timestampMs<=Math.max(0,timestampMs-FRAME_RADIUS_MS)+freshness && frames.at(-1).timestampMs>=Math.min(durationMs-1,timestampMs+FRAME_RADIUS_MS)-freshness : timestampMs-frames.at(-1).timestampMs<=freshness)){report(videoId,'window_hit',{timestampMs,frames:frames.length});return frames;}
+            if(windowReady(videoId,frames,timestampMs,durationMs,around)){report(videoId,'window_hit',{timestampMs,frames:frames.length});return frames;}
             report(videoId,'window_miss',{timestampMs});
             const bucket=Math.floor(timestampMs/10000);const key=videoId+':'+bucket;
             if(!windowJobs.has(key)) {
@@ -299,6 +304,20 @@ function createQaMedia({ manager, adapter, log = message => logger.info(message)
             if(!frames.length){await waitFor(service.ensureFullCache(videoId,durationMs),signal);frames=current(videoId,timestampMs,durationMs,around);}
             if(!frames.length)throw new Error('No verified past frame');return frames;
         },
+        async publishSubtitles(videoId, file, metadata = {}) {
+            // Serialize with an in-flight Q&A download before publishing generator captions.
+            await subtitleJobs.get(videoId)?.catch(() => {});
+            return owned(videoId, SUB_VERSION, async lease => {
+                if (file) {
+                    parseVtt(await fs.readFile(file, 'utf8'), metadata);
+                    await manager.publishSubtitle(lease, file, metadata);
+                } else {
+                    // No generator captions does not prove YouTube has no subtitles.
+                    // Leave absence discovery to the ordinary bounded downloader.
+                    report(videoId, 'pipeline_subtitle_missing');
+                }
+            });
+        },
         async ensureSubtitles(videoId,{signal}={}) {
             const existing=manager.store.subtitle(videoId,SUB_VERSION);
             if(existing && (existing.state==='ready'||existing.retryAfter>now())) {
@@ -321,11 +340,12 @@ function createQaMedia({ manager, adapter, log = message => logger.info(message)
         async prepare(videoId,timestampMs,durationMs,{signal,warm=true,referenceId}={}) {
             if(!/^[A-Za-z0-9_-]{11}$/.test(videoId)||!Number.isSafeInteger(timestampMs)||timestampMs<0||!Number.isSafeInteger(durationMs)||durationMs<=0||timestampMs>=durationMs)throw new Error('Invalid Q&A media request');
             if(referenceId)manager.touchReference(videoId,FRAME_VERSION,referenceId);
+            const fromCache=windowReady(videoId,current(videoId,timestampMs,durationMs,true),timestampMs,durationMs,true);
             const subtitles=service.ensureSubtitles(videoId,{signal});
             const frames=service.ensureCurrentWindow(videoId,timestampMs,durationMs,{signal,around:true});
             report(videoId,'prepare',{timestampMs,warm,cacheRoot:manager.root});
             if(warm)service.ensureFullCache(videoId,durationMs).catch(()=>report(videoId,'warming_failed'));
-            const values=await Promise.all([frames,subtitles]);report(videoId,'prepared',{frames:values[0].length,subtitleState:values[1].state,cues:values[1].cues.length});return {frames:values[0].map(frame=>({...frame,path:manager.assetPath(frame.relativePath)})),subtitles:values[1]};
+            const values=await Promise.all([frames,subtitles]);report(videoId,'prepared',{frames:values[0].length,subtitleState:values[1].state,cues:values[1].cues.length});return {fromCache,frames:values[0].map(frame=>({...frame,path:manager.assetPath(frame.relativePath)})),subtitles:values[1]};
         },
     };
     return service;

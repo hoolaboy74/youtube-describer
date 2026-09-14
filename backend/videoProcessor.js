@@ -374,7 +374,7 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null, userId = nul
         }
 
         await fs.promises.mkdir(baseTempDir, { recursive: true });
-        if (process.env.QA_CACHE_WARMING_ENABLED === 'true' || process.env.QA_INCREMENTAL_SPEECH_ENABLED === 'true') qaPipeline = db.getQaMedia().beginPipeline(videoId);
+        qaPipeline = db.getQaMedia().beginPipeline(videoId);
 
         logger.info(`[${requestHash}] Step 1: Starting initial data extraction...`);
         const extractionLabel = `[${requestHash}] Initial Data Extraction Time`;
@@ -641,8 +641,9 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null, userId = nul
         // Load only a source-language dialogue track. For foreign/unknown audio,
         // a Korean VTT is commonly YouTube's translated caption track, not
         // evidence of Korean speech, so it must never win over the original VTT.
+        const potentialSubtitles = fs.readdirSync(baseTempDir).filter(f => f.endsWith('.vtt'));
         const subtitleSelection = selectDialogueSubtitle(
-            fs.readdirSync(baseTempDir).filter(f => f.endsWith('.vtt')),
+            potentialSubtitles,
             audioLanguage
         );
         let dialogueTrack = [];
@@ -659,36 +660,11 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null, userId = nul
             logger.info(`[${requestHash}] No usable original-language subtitles found for ${audioLanguage}; dialogue track is empty.`);
         }
 
-        // QA 캐시용 자막 영구 보존 로직
-        const targetSubtitlesDir = path.join(__dirname, 'public', 'subtitles');
-        if (selectedSubtitlePath && fs.existsSync(selectedSubtitlePath)) {
-            try {
-                if (!fs.existsSync(targetSubtitlesDir)) {
-                    fs.mkdirSync(targetSubtitlesDir, { recursive: true });
-                }
-                const cachedSubPath = path.join(targetSubtitlesDir, `${videoId}.vtt`);
-                if (!fs.existsSync(cachedSubPath)) {
-                    fs.copyFileSync(selectedSubtitlePath, cachedSubPath);
-                    logger.info(`[${requestHash}] Saved subtitles to public/subtitles for QA cache.`);
-                }
-            } catch (subSaveErr) {
-                logger.error(`[${requestHash}] Failed to save subtitles to QA cache: ${subSaveErr.message}`);
-            }
-        } else {
-            logger.warn(`[${requestHash}] No suitable subtitle file found (tried ko, en). Proceeding without subtitles.`);
-            try {
-                if (!fs.existsSync(targetSubtitlesDir)) {
-                    fs.mkdirSync(targetSubtitlesDir, { recursive: true });
-                }
-                const noSubPath = path.join(targetSubtitlesDir, `${videoId}.nosub`);
-                if (!fs.existsSync(noSubPath)) {
-                    fs.writeFileSync(noSubPath, '');
-                    logger.info(`[${requestHash}] Saved nosub flag to public/subtitles for QA cache.`);
-                }
-            } catch (noSubErr) {
-                logger.error(`[${requestHash}] Failed to save nosub flag: ${noSubErr.message}`);
-            }
-        }
+        // Publish downloaded captions to the same durable store used by Q&A.
+        // A filename alone does not prove original speech provenance.
+        const qaSubtitlePath = selectedSubtitlePath || (potentialSubtitles[0] ? path.join(baseTempDir, potentialSubtitles[0]) : null);
+        await db.getQaMedia().publishSubtitles(videoId, qaSubtitlePath, { audioClassification: audioLanguage, provenance: 'unknown' })
+            .catch(() => logger.warn(`[${requestHash}] Q&A subtitle cache publication failed; on-demand retry remains available.`));
         timeEnd(extractionLabel);
         logger.info(`[${requestHash}] Initial data extraction complete. Title: ${videoTitle}, Total Frames: ${allTimestamps.length}, Dialogue Count: ${dialogueTrack.length}`);
         
@@ -771,29 +747,6 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null, userId = nul
             logger.error(`[${requestHash}] Gemini returned no usage metadata; no unverifiable cost was recorded.`);
         }
 
-        // QA 용 프레임 영구 보존 로직 복구
-        const targetFramesDir = path.join(__dirname, 'public', 'frames', videoId);
-        try {
-            if (!fs.existsSync(targetFramesDir)) {
-                fs.mkdirSync(targetFramesDir, { recursive: true });
-            }
-            const allFrameFiles = (await fs.promises.readdir(baseTempDir)).filter(f => f.startsWith('frame-') && f.endsWith('.jpg')).sort();
-            for (let i = 0; i < allTimestamps.length; i++) {
-                const timestamp = allTimestamps[i];
-                const frameFile = allFrameFiles[i];
-                if (frameFile) {
-                    const srcPath = path.join(baseTempDir, frameFile);
-                    const cacheFileName = `frame-${timestamp}.jpg`;
-                    const cacheFilePath = path.join(targetFramesDir, cacheFileName);
-                    if (fs.existsSync(srcPath)) {
-                        fs.copyFileSync(srcPath, cacheFilePath);
-                    }
-                }
-            }
-            logger.info(`[${requestHash}] Saved ${allTimestamps.length} frames to public/frames for QA cache.`);
-        } catch (qaFrameErr) {
-            logger.error(`[${requestHash}] Failed to save frames to QA cache: ${qaFrameErr.message}`);
-        }
         timeEnd(aiLabel);
         if (sseHandler) sseHandler('end', { message: 'Processing complete.' });
         
@@ -886,7 +839,7 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
         }
 
         await fs.promises.mkdir(baseTempDir, { recursive: true });
-        if (process.env.QA_CACHE_WARMING_ENABLED === 'true' || process.env.QA_INCREMENTAL_SPEECH_ENABLED === 'true') qaPipeline = db.getQaMedia().beginPipeline(videoId);
+        qaPipeline = db.getQaMedia().beginPipeline(videoId);
 
         const videoResponse = await youtube.videos.list({
             part: 'snippet,contentDetails,status',
@@ -1061,8 +1014,9 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
         ]);
 
         // Keep batch subtitle selection identical to the interactive path.
+        const potentialSubtitles = fs.readdirSync(baseTempDir).filter(f => f.endsWith('.vtt'));
         const subtitleSelection = selectDialogueSubtitle(
-            fs.readdirSync(baseTempDir).filter(f => f.endsWith('.vtt')),
+            potentialSubtitles,
             audioLanguage
         );
         let dialogueTrack = [];
@@ -1079,36 +1033,11 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
             logger.info(`[${requestHash}] No usable original-language subtitles found for ${audioLanguage} (batch); dialogue track is empty.`);
         }
 
-        // QA 캐시용 자막 영구 보존 로직 (Batch)
-        const targetSubtitlesDir = path.join(__dirname, 'public', 'subtitles');
-        if (selectedSubtitlePath && fs.existsSync(selectedSubtitlePath)) {
-            try {
-                if (!fs.existsSync(targetSubtitlesDir)) {
-                    fs.mkdirSync(targetSubtitlesDir, { recursive: true });
-                }
-                const cachedSubPath = path.join(targetSubtitlesDir, `${videoId}.vtt`);
-                if (!fs.existsSync(cachedSubPath)) {
-                    fs.copyFileSync(selectedSubtitlePath, cachedSubPath);
-                    logger.info(`[${requestHash}] Saved subtitles to public/subtitles for QA cache (batch).`);
-                }
-            } catch (subSaveErr) {
-                logger.error(`[${requestHash}] Failed to save subtitles to QA cache (batch): ${subSaveErr.message}`);
-            }
-        } else {
-            logger.warn(`[${requestHash}] No suitable subtitle file found for batch (tried ko, en).`);
-            try {
-                if (!fs.existsSync(targetSubtitlesDir)) {
-                    fs.mkdirSync(targetSubtitlesDir, { recursive: true });
-                }
-                const noSubPath = path.join(targetSubtitlesDir, `${videoId}.nosub`);
-                if (!fs.existsSync(noSubPath)) {
-                    fs.writeFileSync(noSubPath, '');
-                    logger.info(`[${requestHash}] Saved nosub flag to public/subtitles for QA cache (batch).`);
-                }
-            } catch (noSubErr) {
-                logger.error(`[${requestHash}] Failed to save nosub flag (batch): ${noSubErr.message}`);
-            }
-        }
+        // Publish downloaded captions to the same durable store used by Q&A.
+        // A filename alone does not prove original speech provenance.
+        const qaSubtitlePath = selectedSubtitlePath || (potentialSubtitles[0] ? path.join(baseTempDir, potentialSubtitles[0]) : null);
+        await db.getQaMedia().publishSubtitles(videoId, qaSubtitlePath, { audioClassification: audioLanguage, provenance: 'unknown' })
+            .catch(() => logger.warn(`[${requestHash}] Q&A subtitle cache publication failed; on-demand retry remains available.`));
         timeEnd(extractionLabel);
         logger.info(`[${requestHash}] Initial data extraction complete. Title: ${videoTitle}, Total Frames: ${allTimestamps.length}, Dialogue Count: ${dialogueTrack.length}`);
 
@@ -1184,29 +1113,6 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
             }
         });
 
-        // QA 용 프레임 영구 보존 로직 복구 (Batch)
-        const targetFramesDir = path.join(__dirname, 'public', 'frames', videoId);
-        try {
-            if (!fs.existsSync(targetFramesDir)) {
-                fs.mkdirSync(targetFramesDir, { recursive: true });
-            }
-            const allFrameFiles = (await fs.promises.readdir(baseTempDir)).filter(f => f.startsWith('frame-') && f.endsWith('.jpg')).sort();
-            for (let i = 0; i < allTimestamps.length; i++) {
-                const timestamp = allTimestamps[i];
-                const frameFile = allFrameFiles[i];
-                if (frameFile) {
-                    const srcPath = path.join(baseTempDir, frameFile);
-                    const cacheFileName = `frame-${timestamp}.jpg`;
-                    const cacheFilePath = path.join(targetFramesDir, cacheFileName);
-                    if (fs.existsSync(srcPath)) {
-                        fs.copyFileSync(srcPath, cacheFilePath);
-                    }
-                }
-            }
-            logger.info(`[${requestHash}] Saved ${allTimestamps.length} frames to public/frames for QA cache (batch).`);
-        } catch (qaFrameErr) {
-            logger.error(`[${requestHash}] Failed to save frames to QA cache (batch): ${qaFrameErr.message}`);
-        }
         timeEnd(aiLabel);
         logger.info(`[${requestHash}] Successfully generated and cached ${canonicalOutput.accepted.length} canonical events for batch processing.`);
         
