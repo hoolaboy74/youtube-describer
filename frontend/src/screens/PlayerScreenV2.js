@@ -1516,6 +1516,8 @@ function PlayerScreenV2() {
                                                             <span>{qa.answer}</span>
                                                         )}
                                                     </div>
+                                                    {incrementalQaEnabled && qa.sources?.length > 0 && <div aria-label="외부 자료 출처">{qa.sources.map((source, index) => /^https:\/\//.test(source.url) && <a key={`${source.url}-${index}`} href={source.url} target="_blank" rel="noopener noreferrer" style={{ display: 'block' }}>출처: {source.title} (새 창)</a>)}</div>}
+                                                    {incrementalQaEnabled && qa.searchSuggestions && <iframe title="Google 검색 제안" sandbox="allow-popups allow-popups-to-escape-sandbox" referrerPolicy="no-referrer" style={{ width: '100%', height: '160px', border: 0 }} srcDoc={`<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; img-src https://www.gstatic.com data:">${qa.searchSuggestions}`} />}
                                                 </div>
                                             </div>
                                         ))

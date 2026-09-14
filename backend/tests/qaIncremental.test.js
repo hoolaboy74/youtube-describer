@@ -72,3 +72,7 @@ test('OGG failure before bytes falls back per sentence, but failure after bytes 
         await run(request); assert.equal(mp3Calls, bytes ? 0 : 1); assert.equal(request.status, bytes ? 'failed' : 'completed');
     }
 });
+test('a fully closed final JSON record is accepted at EOF even without a trailing newline', () => {
+    const seen = [], parser = createSentenceParser(value => seen.push(value)); parser.push(JSON.stringify(candidate()));
+    assert.equal(seen.length, 0); assert.deepEqual(parser.end(), { count: 1, unfinished: false }); assert.equal(seen[0].text, candidate().text);
+});

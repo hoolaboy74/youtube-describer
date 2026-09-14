@@ -1,9 +1,10 @@
 'use strict';
 const { StringDecoder } = require('node:string_decoder');
 const { normalizeText } = require('./canonicalOutput');
+const { SEARCH_UNAVAILABLE, EXTERNAL_PREFIX } = require('./qaSearch');
 const POLICY_VERSION = 'qa-sentence-v1';
 const UNKNOWN = '현재 화면에서 확인할 수 있는 정보가 부족합니다.';
-const EXPLANATIONS = new Set([UNKNOWN, '화면만으로는 알 수 없습니다.', '확인된 외국어 대사가 없어 번역할 수 없습니다.']);
+const EXPLANATIONS = new Set([SEARCH_UNAVAILABLE, UNKNOWN, '화면만으로는 알 수 없습니다.', '확인된 외국어 대사가 없어 번역할 수 없습니다.']);
 const compact = text => normalizeText(text).replace(/[^\p{L}\p{N}]/gu, '');
 function duplicate(a, b) {
     const left = compact(a), right = compact(b);
@@ -30,7 +31,8 @@ function validateSentence(candidate, context, accepted = []) {
     if (evidence.some(value => !value)) return reject('evidence');
     if (evidence.some(value => value.kind === 'frame' ? value.timestampMs > context.timestampMs : value.end * 1000 > context.timestampMs)) return reject('future');
     if (candidate.kind === 'explanation') {
-        if (!EXPLANATIONS.has(text) || evidence.length) return reject('explanation');
+        const external = evidence.length === 1 && evidence[0].kind === 'external' && text === EXTERNAL_PREFIX + evidence[0].claim;
+        if (!external && (!EXPLANATIONS.has(text) || evidence.length)) return reject('explanation');
     } else if (candidate.kind === 'translation') {
         if (!['foreign', 'mixed'].includes(context.audioClassification) || !evidence.length
             || evidence.some(value => value.kind !== 'cue' || !value.confirmed || !value.sourceLanguage
@@ -41,7 +43,8 @@ function validateSentence(candidate, context, accepted = []) {
     const spoken = context.cues.filter(cue => cue.sourceLanguage === 'ko' || ['korean', 'mixed', 'unknown'].includes(context.audioClassification));
     if (spoken.some(cue => duplicate(text, cue.sourceText))) return reject('audible-duplicate');
     return { accepted: true, sentence: Object.freeze({ seq: accepted.length, text, kind: candidate.kind,
-        evidenceIds: Object.freeze([...candidate.evidenceIds]), policyVersion: POLICY_VERSION }) };
+        evidenceIds: Object.freeze([...candidate.evidenceIds]), policyVersion: POLICY_VERSION,
+        ...(evidence[0]?.kind === 'external' ? { sources: Object.freeze(evidence[0].sources.map(source => Object.freeze({ ...source }))) } : {}) }) };
 }
 function createSentenceParser(onCandidate) {
     const decoder = new StringDecoder('utf8');
@@ -59,6 +62,12 @@ function createSentenceParser(onCandidate) {
         }
     }
     return { push(chunk) { consume(typeof chunk === 'string' ? chunk : decoder.write(chunk)); },
-        end() { consume(decoder.end()); const unfinished = !!pending.trim(); pending = ''; return { count: next, unfinished }; } };
+        end() {
+            consume(decoder.end()); const tail = pending.trim(); pending = '';
+            if (!tail) return { count: next, unfinished: false };
+            let value; try { value = JSON.parse(tail); } catch { return { count: next, unfinished: true }; }
+            if (value.seq !== next++) throw new Error('QA_RECORD_SEQUENCE');
+            onCandidate(value); return { count: next, unfinished: false };
+        } };
 }
 module.exports = { POLICY_VERSION, UNKNOWN, validateSentence, duplicate, createSentenceParser };

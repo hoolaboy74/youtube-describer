@@ -4,7 +4,7 @@ No deployment or push has been performed. All flags remain opt-in; no environmen
 
 ## Local verification
 
-- Isolated backend suite: 98 passed (node --test, single test concurrency, temporary SQLite).
+- Isolated backend suite: 108 passed (node --test, single test concurrency, temporary SQLite).
 - Focused frontend suites: 13 passed (qaClient, qaAudioController, qaLatencyTrace, useQaConversation).
 - Frontend production build: passed.
 - Full frontend suite: App.test.js fails on the existing react-router-dom/Jest resolution path. The Q&A suites pass.
@@ -27,4 +27,4 @@ Rollback: disable `QA_INCREMENTAL_SPEECH_ENABLED` and reload the player to selec
 
 ## Not yet release-complete
 
-The live comparison matrix, physical-device checks and factuality/semantic-duplicate evaluation are outstanding. Explicit external-search grounding needs follow-up before declaring the entire DESIGN complete. Both main-generator/Q&A download orderings, bounded resources, sentence MP3 path and automated failure cases are implemented and tested. This checkpoint intentionally does not mark all QA-01–QA-10 acceptance criteria as complete.
+The live comparison matrix, physical-device checks and factuality/semantic-duplicate evaluation are outstanding. Explicit external-search grounding is implemented and deterministically tested; live provider and search-widget accessibility checks remain before declaring the entire DESIGN complete. Both main-generator/Q&A download orderings, bounded resources, sentence MP3 path and automated failure cases are implemented and tested. This checkpoint intentionally does not mark all QA-01–QA-10 acceptance criteria as complete.

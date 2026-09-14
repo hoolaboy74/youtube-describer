@@ -53,13 +53,13 @@ export function useQaConversation({ apiBase, token, videoId, announceError }) {
                 if (active.current !== request) return;
                 const turn = history.current.find(value => value.id === id);
                 if (event.type === 'sentence' && !turn.seqs.includes(event.data.seq)) {
-                    trace.mark('firstText'); update(id, { answer: [turn.answer, event.data.text].filter(Boolean).join(' '), seqs: [...turn.seqs, event.data.seq] });
+                    trace.mark('firstText'); update(id, { answer: [turn.answer, event.data.text].filter(Boolean).join(' '), seqs: [...turn.seqs, event.data.seq], sources: [...new Map([...(turn.sources || []), ...(event.data.sources || [])].map(source => [source.url, source])).values()] });
                 }
                 if (event.type === 'sentence_audio') {
                     if (usingOgg) { if (!audio.current.fallback()) throw new Error('QA_PARTIAL_STREAM_INTERRUPTED'); usingOgg = false; }
                     audio.current.enqueue(event.data.seq, apiBase + event.data.path);
                 }
-                if (event.type === 'generation_done') trace.mark('generationDone');
+                if (event.type === 'generation_done') { trace.mark('generationDone'); if (event.data.searchSuggestions) update(id, { searchSuggestions: event.data.searchSuggestions }); }
                 if (event.type === 'audio_done') { update(id, { isGenerating: false, status: 'completed' }); audio.current.complete(); }
                 if (event.type === 'error') throw new Error(event.data.code);
                 if (event.type === 'canceled') cancel();

@@ -91,10 +91,9 @@ function calculateGeminiCost({
 
 function extractGoogleSearchQueryCount(response) {
     const candidates = Array.isArray(response?.candidates) ? response.candidates : [];
-    return candidates.reduce((count, candidate) => {
-        const queries = candidate?.groundingMetadata?.webSearchQueries;
-        return count + (Array.isArray(queries) ? queries.length : 0);
-    }, 0);
+    const queries = candidates.flatMap(candidate => Array.isArray(candidate?.groundingMetadata?.webSearchQueries)
+        ? candidate.groundingMetadata.webSearchQueries : []);
+    return new Set(queries.filter(query => typeof query === 'string').map(query => query.trim()).filter(Boolean)).size;
 }
 
 module.exports = {
