@@ -165,6 +165,20 @@ test('default downloader retries a failed cookie request without exposing its co
     assert.ok(!calls.flat().join(' ').includes('secret-cookie'));
 });
 
+test('default downloader retries an authentication failure with a different valid cookie',async t=>{
+    const root=await fs.mkdtemp(path.join(os.tmpdir(),'qa-ytdlp-alternative-'));t.after(()=>fs.rm(root,{recursive:true,force:true}));
+    await fs.mkdir(path.join(root,'cookies'));await fs.writeFile(path.join(root,'cookies','first_cookies.txt'),'first-secret');await fs.writeFile(path.join(root,'cookies','second_cookies.txt'),'second-secret');
+    const copiedCookies=[];
+    const adapter=createDefaultMediaAdapter({backendRoot:root,getVideo:()=>null,pickCookie:paths=>paths[0],run:async(file,args)=>{
+        const cookie=args[args.indexOf('--cookies')+1];copiedCookies.push(await fs.readFile(cookie,'utf8'));
+        if(copiedCookies.length===1)throw Object.assign(new Error('yt-dlp failed'),{code:'MEDIA_EXIT',exitCode:1,stderr:'ERROR: Sign in to confirm you are not a bot'});
+        await fs.writeFile(args[args.indexOf('-o')+1],'video');return{};
+    }});
+    const directory=path.join(root,'work');await fs.mkdir(directory);
+    await adapter.full('YmEnygA7pHc',directory);
+    assert.deepEqual(copiedCookies,['first-secret','second-secret']);
+});
+
 test('media diagnostics retain an exit code but never process stderr',async t=>{
     const {manager}=await setup(t), logs=[];
     const failure=()=>{throw Object.assign(new Error('failed'),{code:'MEDIA_EXIT',exitCode:23,stderr:'signed-url-token'});};
