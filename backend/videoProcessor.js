@@ -161,7 +161,7 @@ async function extractKeyframesHybrid({ tempVideoPath, baseTempDir, totalDuratio
             code: 'FRAME_COVERAGE_INCOMPLETE', coverageHoles: result.coverageHoles,
         });
     }
-    qaPipeline?.complete(Math.round(totalDuration * 1000));
+    await qaPipeline?.complete(Math.round(totalDuration * 1000));
     for (const [index, frame] of result.frames.entries()) {
         await fs.promises.rename(frame.path, path.join(baseTempDir, `frame-${String(index + 1).padStart(4, '0')}.jpg`));
     }

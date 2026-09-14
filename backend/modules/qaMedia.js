@@ -259,11 +259,42 @@ function createQaMedia({ manager, adapter, log = message => logger.info(message)
             // Reserve immediately before the generator starts its download. Q&A
             // then waits for this source rather than issuing another full download.
             let resolve,reject;const promise=new Promise((a,b)=>{resolve=a;reject=b;});promise.catch(()=>{});
-            let readySource, finishFrames, failFrames, pinned=false;
+            let readySource, finishFrames, failFrames, pinned=false, framesComplete=false;
             const framesDone=new Promise((a,b)=>{finishFrames=a;failFrames=b;});framesDone.catch(()=>{});
+            // The generator calls publish once per extracted frame. Keep one
+            // fenced lease for the pipeline instead of claiming/releasing a
+            // cache job and writing two log lines for every individual frame.
+            let publishLease, publishLeasePromise, publishTimer;
+            async function publisher() {
+                if(publishLeasePromise)return publishLeasePromise;
+                publishLeasePromise=(async()=>{
+                    const controller=new AbortController();const lease=await leaseFor(videoId,'pipeline-v1',controller.signal);
+                    if(!lease)return null;
+                    publishLease=lease;
+                    publishTimer=setInterval(()=>{try{manager.store.renew(lease);}catch{controller.abort();}},15000);publishTimer.unref?.();
+                    report(videoId,'work_started',{version:'pipeline-v1'});
+                    return lease;
+                })();
+                return publishLeasePromise;
+            }
+            async function closePublisher(error) {
+                let lease;try { lease=await publishLeasePromise; } catch { return; }
+                if(!lease)return;
+                clearInterval(publishTimer);
+                if(error) {
+                    const code=typeof error.code === 'string' && /^[A-Z_]+$/.test(error.code) ? error.code : 'CACHE_WORK_FAILED';
+                    report(videoId,'work_failed',{version:'pipeline-v1',code});
+                    try { manager.store.transition(lease,'retryable_failed',{retryAfter:now()+60000,lastError:error.code||'cache-work-failed'}); } catch {}
+                } else report(videoId,'work_completed',{version:'pipeline-v1'});
+                try { manager.store.release(lease); } catch {}
+                publishLease=null;
+            }
             const entry={promise,framesDone,
-                publish:frame=>owned(videoId,'pipeline-v1',lease=>manager.publishFrame(lease,frame,FRAME_VERSION)),
-                complete(durationMs){finishFrames();if(durationMs)service.ensureFullCache(videoId,durationMs).catch(()=>{});},
+                async publish(frame) { const lease=await publisher();if(lease)await manager.publishFrame(lease,frame,FRAME_VERSION); },
+                async complete(durationMs){
+                    if(!framesComplete){framesComplete=true;finishFrames();if(durationMs)service.ensureFullCache(videoId,durationMs).catch(()=>{});}
+                    await closePublisher();
+                },
                 async withSource(target,download) {
                     let downloaded=false;
                     const source=await ensureRawSource(videoId,async signal=>{await download(signal);downloaded=true;return target;});
@@ -274,10 +305,10 @@ function createQaMedia({ manager, adapter, log = message => logger.info(message)
                     }
                 },
                 ready(file){readySource=sources.get(videoId)||{file,owned:false,readers:0};sources.set(videoId,readySource);sourceEvents.emit(videoId,readySource);resolve(readySource);},
-                fail(){reject(new Error('Pipeline source failed'));failFrames(new Error('Pipeline frames failed'));pipeline.delete(videoId);},
+                async fail(){const error=new Error('Pipeline frames failed');reject(new Error('Pipeline source failed'));failFrames(error);await closePublisher(error);pipeline.delete(videoId);},
                 async finish(){
                     reject(new Error('Pipeline source closed'));
-                    failFrames(new Error('Pipeline frames closed'));
+                    if(!framesComplete){const error=new Error('Pipeline frames closed');failFrames(error);await closePublisher(error);}
                     // Stop new readers before allowing the generator to remove its MP4.
                     pipeline.delete(videoId);
                     if(!readySource?.owned && sources.get(videoId)===readySource)sources.delete(videoId);
