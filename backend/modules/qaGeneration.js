@@ -5,6 +5,15 @@ const { createQaContext } = require('./qaContext');
 const logger = require('../logger');
 const { qaProviderLimiter } = require('./qaSpeech');
 const { searchMetadata } = require('./qaSearch');
+function classifyProviderFailure(error) {
+    const status = Number(error?.status || error?.response?.status || error?.cause?.status);
+    const message = String(error?.message || '').toLowerCase();
+    if (status === 429 || /resource exhausted|quota|rate limit|too many requests/.test(message)) return 'PROVIDER_RATE_LIMITED';
+    if (status === 503 || /service unavailable|high demand|overloaded|temporarily unavailable/.test(message)) return 'PROVIDER_UNAVAILABLE';
+    if (status === 401 || status === 403 || /api key|permission denied|unauthenticated|forbidden/.test(message)) return 'PROVIDER_AUTH';
+    if (status === 400 || /invalid argument|bad request/.test(message)) return 'PROVIDER_REQUEST_REJECTED';
+    return 'PROVIDER_UNKNOWN';
+}
 const PROMPT = `당신은 시각장애인 사용자와 나란히 앉아 같은 영상을 보면서 궁금한 점에 답해 주는 다정한 친구 같은 시청 동반자입니다.
 사용자가 이미 대화를 나누고 있는 상대에게 묻는다고 생각하고, 편안한 해요체로 자연스럽게 이어 답하세요. 매번 인사하거나 질문을 되풀이하거나 "좋은 질문이에요" 같은 상투적인 서두를 붙이지 마세요. 시각장애를 이유로 어린아이 대하듯 말하거나 과하게 친절한 안내 방송처럼 말하지 마세요.
 아래 자료와 필드 이름은 내부 참고용입니다. 사용자에게 자료를 분석한 보고서를 읽어 주지 마세요. "제공된 프레임에서는", "제공된 화면 해설에는", "대본에 따르면", "컨텍스트상", "이미지 자료를 분석하면" 같은 표현이나 프레임 번호·필드 이름으로 답변을 시작하거나 근거를 설명하지 마세요. 화면에서 보이는 일은 바로 말하고, 필요한 경우에만 "지금은", "조금 전에는", "화면 오른쪽에"처럼 함께 보는 장면을 기준으로 설명하세요. 사용자가 자료나 처리 방식을 직접 물을 때만 관련 설명을 하세요.
@@ -122,7 +131,8 @@ function createQaGeneration({ store, media, model, speech, getVideo, recordUsage
             if (ogg) { ogg.end(); await ogg.done; }
             signal.throwIfAborted(); store.finish(request, 'audio_done');
         } catch (error) {
-            report('failed', { code: timeoutCode || (error.message?.startsWith('QA_') ? error.message : 'QA_GENERATION_FAILED'), errorType: /^[A-Za-z]+$/.test(error.name || '') ? error.name : 'Error' });
+            const code = timeoutCode || (error.message?.startsWith('QA_') ? error.message : 'QA_GENERATION_FAILED');
+            report('failed', { code, errorType: /^[A-Za-z]+$/.test(error.name || '') ? error.name : 'Error', ...(code === 'QA_GENERATION_FAILED' ? { providerFailure: classifyProviderFailure(error) } : {}) });
             if (!signal.aborted) store.finish(request, 'error', { code: error.message?.startsWith('QA_') ? error.message : 'QA_GENERATION_FAILED' });
         } finally {
             timers.forEach(clearTimeout); releaseModel?.();
@@ -131,4 +141,4 @@ function createQaGeneration({ store, media, model, speech, getVideo, recordUsage
         }
     };
 }
-module.exports = { createQaGeneration, PROMPT };
+module.exports = { createQaGeneration, classifyProviderFailure, PROMPT };
