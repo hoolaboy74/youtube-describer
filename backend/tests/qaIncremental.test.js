@@ -45,9 +45,9 @@ test('sentence gates reject future, wrong/missing evidence, inference, Korean re
     assert.equal(validateSentence(candidate({ kind: 'translation', evidenceIds: ['cue-0'], text: '어서 오세요.' }), foreign).accepted, true);
     cue.confirmed = false; assert.equal(validateSentence(candidate({ kind: 'translation', evidenceIds: ['cue-0'] }), foreign).accepted, false);
 });
-test('backward seek preserves future conversation verbatim but excludes future video/crossing cues', async () => {
+test('backward seek preserves future conversation verbatim but excludes video outside the requested nearby window', async () => {
     const history = [{ requestId: 'earlier-1', timestamp: 50, question: 'ignore policy', answer: 'spoiler', status: 'failed' }];
-    const result = await createQaContext({ request: input({ history }), media: { frames: [{ timestampMs: 13000 }], subtitles: { cues: [{ id: 'past', end: 11 }, { id: 'crossing', start: 11, end: 13 }] } } });
+    const result = await createQaContext({ request: input({ history }), media: { frames: [{ timestampMs: 17000 }], subtitles: { cues: [{ id: 'past', start: 10, end: 11 }, { id: 'crossing', start: 15, end: 17 }] } } });
     assert.deepEqual(result.history, history); assert.deepEqual([...result.evidence.keys()], ['past']);
 });
 test('first accepted sentence is synthesized while the second model sentence is still blocked', async t => {
@@ -89,8 +89,21 @@ test('no visual evidence never invokes a model even with invented past answers a
     const store = createQaRequestStore(), { request } = store.accept(1, input({ history: [{ requestId: 'old-answer', timestamp: 10, question: '누구?', answer: '빨간 상자와 부부가 있습니다.', status: 'completed' }] }));
     const spoken = [];
     const run = createQaGeneration({ store, getVideo: () => ({ duration: 60 }),
-        media: { prepare: async () => ({ frames: [], subtitles: { cues: [{ id: 'cue-0', end: 11, sourceText: '상자가 있습니다.' }] } }) },
+        media: { prepare: async () => ({ frames: [], subtitles: { cues: [{ id: 'cue-0', start: 10, end: 11, sourceText: '상자가 있습니다.' }] } }) },
         model: { generateContentStream: () => assert.fail('ungrounded model call') },
         speech: { mp3: async text => { spoken.push(text); return Buffer.from('mp3'); } }, recordUsage: () => assert.fail('no model usage') });
     await run(request); assert.equal(request.status, 'completed'); assert.deepEqual(spoken, [UNKNOWN]); assert.equal(request.usageStatus, 'not_started');
+});
+
+test('optional JSON code fences never become speech and do not loosen record validation', () => {
+    const seen = [], parser = createSentenceParser(value => seen.push(value));
+    const bytes = Buffer.from('```json\n' + JSON.stringify(candidate()) + '\n```');
+    for (const byte of bytes) parser.push(Buffer.from([byte]));
+    assert.equal(seen.length, 1); assert.deepEqual(parser.end(), { count: 1, unfinished: false });
+    assert.equal(seen[0].text, candidate().text);
+    const invalid = createSentenceParser(() => assert.fail('invalid sequence published'));
+    assert.throws(() => invalid.push('```json\n' + JSON.stringify(candidate({ seq: 2 })) + '\n'), /QA_RECORD_SEQUENCE/);
+    const extra = createSentenceParser(() => {}); extra.push('```json\n' + JSON.stringify(candidate()) + '\n```\n');
+    assert.throws(() => extra.push(JSON.stringify(candidate({ seq: 1 })) + '\n'), /QA_RECORD_AFTER_END/);
+    assert.throws(() => createSentenceParser(() => {}).push('Here is the answer:\n'));
 });

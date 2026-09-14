@@ -6,6 +6,7 @@ const logger = require('../logger');
 const { runMediaProcess } = require('./mediaResourceLimiter');
 const { mediaDiskBudget } = require('./mediaDiskBudget');
 const { extractFrames, extractFrameWindow } = require('./frameExtraction');
+const { FRAME_RADIUS_MS } = require('./qaContext');
 const { createSubtitleReader, parseVtt } = require('./qaSubtitles');
 const FRAME_VERSION = 'frames-v1', SUB_VERSION = 'subtitles-v1';
 const abortError = () => Object.assign(new Error('Q&A media canceled'), { name: 'AbortError' });
@@ -165,8 +166,14 @@ function createQaMedia({ manager, adapter, log = message => logger.info(message)
             sources.delete(videoId);await fs.rm(path.dirname(source.file),{recursive:true,force:true});await fs.rm(source.manifest,{force:true});
         }
     }
-    function current(videoId,timestampMs) {
-        return manager.framesBefore(videoId,FRAME_VERSION,timestampMs,4).filter(f=>f.timestampMs>=Math.max(0,timestampMs-4000));
+    function current(videoId,timestampMs,durationMs,around=false) {
+        const end=around?Math.min(durationMs-1,timestampMs+FRAME_RADIUS_MS):timestampMs;
+        const frames=manager.framesBefore(videoId,FRAME_VERSION,end,around?100:4).filter(f=>f.timestampMs>=Math.max(0,timestampMs-FRAME_RADIUS_MS));
+        // Bound image tokens while retaining both ends and the nearest frame.
+        if(frames.length<=8)return frames;
+        const indices=new Set([0,frames.length-1,frames.reduce((best,frame,i)=>Math.abs(frame.timestampMs-timestampMs)<Math.abs(frames[best].timestampMs-timestampMs)?i:best,0)]);
+        for(let i=1;indices.size<8&&i<8;i++)indices.add(Math.round(i*(frames.length-1)/8));
+        return [...indices].sort((a,b)=>a-b).map(i=>frames[i]);
     }
     const service = {
         FRAME_VERSION, SUB_VERSION,
@@ -250,15 +257,15 @@ function createQaMedia({ manager, adapter, log = message => logger.info(message)
             });
             fullJobs.set(videoId,task);task.catch(()=>{}).finally(()=>fullJobs.delete(videoId));return task;
         },
-        async ensureCurrentWindow(videoId,timestampMs,durationMs,{signal}={}) {
+        async ensureCurrentWindow(videoId,timestampMs,durationMs,{signal,around=false}={}) {
             priorities.set(videoId,timestampMs);
-            let frames=current(videoId,timestampMs);
+            let frames=current(videoId,timestampMs,durationMs,around);
             const freshness=manager.store.job(videoId,FRAME_VERSION)?.state==='ready'?2000:1000;
-            if(frames.length && timestampMs-frames.at(-1).timestampMs<=freshness){report(videoId,'window_hit',{timestampMs,frames:frames.length});return frames;}
+            if(frames.length && (around ? frames[0].timestampMs<=Math.max(0,timestampMs-FRAME_RADIUS_MS)+freshness && frames.at(-1).timestampMs>=Math.min(durationMs-1,timestampMs+FRAME_RADIUS_MS)-freshness : timestampMs-frames.at(-1).timestampMs<=freshness)){report(videoId,'window_hit',{timestampMs,frames:frames.length});return frames;}
             report(videoId,'window_miss',{timestampMs});
             const bucket=Math.floor(timestampMs/10000);const key=videoId+':'+bucket;
             if(!windowJobs.has(key)) {
-                const task=owned(videoId,`window-v1-${bucket}`,async(lease,taskSignal)=>{
+                const task=owned(videoId,`window-v2-${bucket}`,async(lease,taskSignal)=>{
                     const dir=await directory(videoId,'window');let source=await rememberedSource(videoId);let section=null;let reading=false;
                     try {
                         if(!source) {
@@ -266,7 +273,7 @@ function createQaMedia({ manager, adapter, log = message => logger.info(message)
                                 const cancelSection=new AbortController();
                                 let onSource;
                                 const available=new Promise(resolve=>{onSource=value=>{value.readers++;reading=true;source=value;resolve({source:value});};sourceEvents.once(videoId,onSource);});
-                                const downloading=adapter.section(videoId,Math.max(0,bucket*10000-4000),Math.min(durationMs,(bucket+1)*10000+1000),dir,AbortSignal.any([taskSignal,cancelSection.signal]));
+                                const downloading=adapter.section(videoId,Math.max(0,bucket*10000-4000),Math.min(durationMs,(bucket+1)*10000+FRAME_RADIUS_MS+1000),dir,AbortSignal.any([taskSignal,cancelSection.signal]));
                                 try {
                                     const winner=await Promise.race([downloading.then(value=>({section:value})),available]);
                                     if(source){cancelSection.abort();await downloading.catch(()=>{});}
@@ -276,7 +283,7 @@ function createQaMedia({ manager, adapter, log = message => logger.info(message)
                             catch { if(taskSignal.aborted)throw abortError();await service.ensureFullCache(videoId,durationMs);source=await rememberedSource(videoId);if(!source)return; }
                         }
                         if(source&&!reading){source.readers++;reading=true;}
-                        const end=Math.min(durationMs-1,(bucket+1)*10000-1);
+                        const end=Math.min(durationMs-1,(bucket+1)*10000+FRAME_RADIUS_MS-1);
                         const window=await windowExtract({inputPath:source?.file||section.file,outputDir:path.join(dir,'frames'),startMs:Math.max(0,bucket*10000-4000),endMs:end,
                             sourceOriginPtsMs:section?.originPtsMs,section:!!section,signal:taskSignal});
                         for(const frame of window)await manager.publishFrame(lease,frame,FRAME_VERSION);
@@ -284,8 +291,8 @@ function createQaMedia({ manager, adapter, log = message => logger.info(message)
                 });
                 windowJobs.set(key,task);task.catch(()=>{}).finally(async()=>{windowJobs.delete(key);const source=sources.get(videoId);if(source)await cleanupSource(videoId,source);}).catch(()=>{});
             }
-            await waitFor(windowJobs.get(key),signal);frames=current(videoId,timestampMs);
-            if(!frames.length){await waitFor(service.ensureFullCache(videoId,durationMs),signal);frames=current(videoId,timestampMs);}
+            await waitFor(windowJobs.get(key),signal);frames=current(videoId,timestampMs,durationMs,around);
+            if(!frames.length){await waitFor(service.ensureFullCache(videoId,durationMs),signal);frames=current(videoId,timestampMs,durationMs,around);}
             if(!frames.length)throw new Error('No verified past frame');return frames;
         },
         async ensureSubtitles(videoId,{signal}={}) {
@@ -311,7 +318,7 @@ function createQaMedia({ manager, adapter, log = message => logger.info(message)
             if(!/^[A-Za-z0-9_-]{11}$/.test(videoId)||!Number.isSafeInteger(timestampMs)||timestampMs<0||!Number.isSafeInteger(durationMs)||durationMs<=0||timestampMs>=durationMs)throw new Error('Invalid Q&A media request');
             if(referenceId)manager.touchReference(videoId,FRAME_VERSION,referenceId);
             const subtitles=service.ensureSubtitles(videoId,{signal});
-            const frames=service.ensureCurrentWindow(videoId,timestampMs,durationMs,{signal});
+            const frames=service.ensureCurrentWindow(videoId,timestampMs,durationMs,{signal,around:true});
             report(videoId,'prepare',{timestampMs,warm,cacheRoot:manager.root});
             if(warm)service.ensureFullCache(videoId,durationMs).catch(()=>report(videoId,'warming_failed'));
             const values=await Promise.all([frames,subtitles]);report(videoId,'prepared',{frames:values[0].length,subtitleState:values[1].state,cues:values[1].cues.length});return {frames:values[0].map(frame=>({...frame,path:manager.assetPath(frame.relativePath)})),subtitles:values[1]};

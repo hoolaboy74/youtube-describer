@@ -1,0 +1,93 @@
+{
+  "videoId": "KFjlKrrZpqc",
+  "model": "gemini-3.5-flash-lite",
+  "attempts": [
+    {
+      "question": "노트북을 쓰는 사람은 앞에서 무엇을 하다가 지금 이 행동을 하는 거야?",
+      "scriptEntries": 60,
+      "titlePresent": true,
+      "videoId": "KFjlKrrZpqc",
+      "timestamp": 33,
+      "modelCalls": 1,
+      "realTtsCalls": 0,
+      "durationMs": 6647,
+      "status": "failed",
+      "sentences": []
+    },
+    {
+      "question": "노트북을 쓰는 사람은 앞에서 무엇을 하다가 지금 이 행동을 하는 거야?",
+      "scriptEntries": 60,
+      "titlePresent": true,
+      "videoId": "KFjlKrrZpqc",
+      "timestamp": 33,
+      "modelCalls": 1,
+      "realTtsCalls": 0,
+      "durationMs": 3079,
+      "status": "failed",
+      "sentences": []
+    },
+    {
+      "question": "노트북을 쓰는 사람은 앞에서 무엇을 하다가 지금 이 행동을 하는 거야?",
+      "scriptEntries": 60,
+      "titlePresent": true,
+      "videoId": "KFjlKrrZpqc",
+      "timestamp": 33,
+      "modelCalls": 1,
+      "realTtsCalls": 0,
+      "durationMs": 3453,
+      "status": "failed",
+      "sentences": []
+    },
+    {
+      "question": "노트북을 쓰는 사람은 앞에서 무엇을 하다가 지금 이 행동을 하는 거야?",
+      "scriptEntries": 60,
+      "titlePresent": true,
+      "videoId": "KFjlKrrZpqc",
+      "timestamp": 33,
+      "modelCalls": 1,
+      "realTtsCalls": 0,
+      "durationMs": 1819,
+      "status": "completed",
+      "sentences": [
+        {
+          "seq": 0,
+          "text": "노트북을 쓰는 사람은 준혁의 방에 찾아와 자리에 앉은 뒤 이야기를 나누고 있었습니다.",
+          "kind": "context",
+          "evidenceIds": [
+            "script-4"
+          ],
+          "policyVersion": "qa-sentence-v2"
+        },
+        {
+          "seq": 1,
+          "text": "세호는 진지한 표정으로 이야기를 이어가다 노트북을 켜고 키보드를 빠르게 두드리며 블로그에 글을 작성하기 시작했습니다.",
+          "kind": "context",
+          "evidenceIds": [
+            "script-4",
+            "script-6",
+            "script-7"
+          ],
+          "policyVersion": "qa-sentence-v2"
+        }
+      ],
+      "usage": {
+        "promptTokenCount": 17257,
+        "candidatesTokenCount": 105,
+        "totalTokenCount": 17362,
+        "promptTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 8457
+          },
+          {
+            "modality": "IMAGE",
+            "tokenCount": 8800
+          }
+        ],
+        "serviceTier": "standard"
+      }
+    }
+  ],
+  "realTtsCalls": 0,
+  "limitation": "Full context/model probe, not audible playback or comprehensive factuality validation. Failed attempts have unconfirmed usage. Successful response includes an unsupported laptop-turn-on detail."
+}

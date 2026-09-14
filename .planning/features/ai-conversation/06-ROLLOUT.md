@@ -4,7 +4,7 @@ No deployment or push has been performed. All flags remain opt-in; no environmen
 
 ## Local verification
 
-- Isolated backend suite: 111 passed (node --test, single test concurrency, temporary SQLite).
+- Isolated backend suite: 118 passed (node --test, single test concurrency, temporary SQLite).
 - Focused frontend suites: 13 passed (qaClient, qaAudioController, qaLatencyTrace, useQaConversation).
 - Frontend production build: passed.
 - Full frontend suite: App.test.js fails on the existing react-router-dom/Jest resolution path. The Q&A suites pass.
@@ -38,3 +38,7 @@ Changes: incremental Q&A now defaults to full warming unless explicitly disabled
 An isolated, initially empty cache reproduced current-window/VTT readiness at 2,396 ms and full-cache readiness at 9,114 ms: 210 verified asset files and 59 VTT cues. This is one sample, not a percentile claim. The existing user cache was not deleted. See [raw cache result](results/kf-cache-20260914.json).
 
 One bounded model-only probe at 33 seconds accepted five sentences with existing frame references. Visual inspection supported the person/laptop, caption and typing details, but the final three sentences redundantly described typing. This probe does not reproduce or clear the user's specific hallucinated answer: the original question, answer and timestamp are still needed. Frame ID validity alone is not proof of factuality, and semantic repetition remains an open release check.
+
+## Context correction (2026-09-14)
+
+The user's clarified context contract supersedes the earlier historical-frame-only restriction: include the video title, entire generated description script, complete conversation history, and T ± 4-second frames. The incremental route previously omitted both title and script, and its sentence gate could not accept script-based contextual explanations. These omissions are now corrected; the full details and live limitations are in [CONTEXT-UPDATE.md](CONTEXT-UPDATE.md). No-evidence refusal now applies when there are neither images nor usable title/script context; existing script context does not become verified visual evidence.
