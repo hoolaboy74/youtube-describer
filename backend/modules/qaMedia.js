@@ -8,6 +8,7 @@ const { mediaDiskBudget } = require('./mediaDiskBudget');
 const { extractFrames, extractFrameWindow } = require('./frameExtraction');
 const { FRAME_RADIUS_MS } = require('./qaContext');
 const { createSubtitleReader, parseVtt } = require('./qaSubtitles');
+const { getIsImpersonateAvailable } = require('../utils');
 const FRAME_VERSION = 'frames-v1', SUB_VERSION = 'subtitles-v1';
 const abortError = () => Object.assign(new Error('Q&A media canceled'), { name: 'AbortError' });
 async function checksum(file) {
@@ -26,31 +27,44 @@ function waitFor(promise, signal) {
     });
 }
 function createDefaultMediaAdapter({ backendRoot, getVideo, run = runMediaProcess }) {
-    async function commonArgs(directory) {
-        const args = ['--ignore-config','--no-playlist','--no-progress','--retries','0','--fragment-retries','0','--socket-timeout','15'];
+    async function commonArgs(directory, { useCookies = true } = {}) {
+        const args = ['--ignore-config','--no-playlist','--no-progress','--retries','0','--fragment-retries','0','--socket-timeout','15',
+            '--force-ipv4','--legacy-server-connect','--no-check-certificate','--plugin-dirs',path.join(backendRoot,'yt_dlp_plugins'),
+            '--remote-components','ejs:github','--js-runtimes','node'];
         const cookiesDir = path.join(backendRoot,'cookies');
         const cookies = await fs.readdir(cookiesDir).catch(() => []);
-        const selected = cookies.find(name => name.endsWith('_cookies.txt'));
-        if (selected) {
+        const selected = cookies.find(name => name.endsWith('_cookies.txt')) || (await fs.stat(path.join(backendRoot,'cookies.txt')).catch(()=>null) ? '../cookies.txt' : null);
+        if (useCookies && selected) {
+            const source = selected === '../cookies.txt' ? path.join(backendRoot,'cookies.txt') : path.join(cookiesDir,selected);
             const copy = path.join(directory,'cookies.txt');
-            await fs.copyFile(path.join(cookiesDir,selected),copy); args.push('--cookies',copy);
+            await fs.copyFile(source,copy); args.push('--cookies',copy);
         }
         if (process.env.YTDLP_PROXY) args.push('--proxy',process.env.YTDLP_PROXY);
+        if (getIsImpersonateAvailable()) args.push('--impersonate','safari');
         return args;
+    }
+    async function ytdlp(directory, args, options) {
+        try {
+            return await run('yt-dlp',[...await commonArgs(directory),...args],options);
+        } catch (error) {
+            // A stale account cookie must not make an otherwise public video
+            // unavailable. Retry once without copying or exposing the cookie.
+            if (error?.code !== 'MEDIA_EXIT') throw error;
+            return run('yt-dlp',[...await commonArgs(directory,{useCookies:false}),...args],options);
+        }
     }
     const format = 'bestvideo[height<=480][ext=mp4]';
     return {
         async full(videoId, directory, signal) {
             const file = path.join(directory,'source.mp4');
-            await run('yt-dlp',[...await commonArgs(directory),'-f','best[height<=480][ext=mp4][vcodec!=none][acodec!=none]/bestvideo[height<=480][ext=mp4]+bestaudio[ext=m4a]/bestvideo[height<=480][ext=mp4]','--merge-output-format','mp4','-o',file,`https://www.youtube.com/watch?v=${videoId}`],
+            await ytdlp(directory,['-f','best[height<=480][ext=mp4][vcodec!=none][acodec!=none]/bestvideo[height<=480][ext=mp4]+bestaudio[ext=m4a]/bestvideo[height<=480][ext=mp4]','--merge-output-format','mp4','-o',file,`https://www.youtube.com/watch?v=${videoId}`],
                 { needs: { download: 1, fullDownload: 1, ffmpeg: 1 }, signal, timeoutMs:180000, disk:{root:directory,maxBytes:1024**3} });
             return file;
         },
         async section(videoId, startMs, endMs, directory, signal) {
             // Probe the original source, rather than treating the section's first
             // packet as the source origin. Signed metadata never leaves memory.
-            const args = await commonArgs(directory);
-            const metadata = await run('yt-dlp',[...args,'-f',format,'--dump-single-json',`https://www.youtube.com/watch?v=${videoId}`],
+            const metadata = await ytdlp(directory,['-f',format,'--dump-single-json',`https://www.youtube.com/watch?v=${videoId}`],
                 { needs:{download:1}, priority:20, signal, timeoutMs:30000, maxOutputBytes:4*1024*1024 });
             const source = JSON.parse(metadata.stdout);
             if (source.protocol !== 'https' || !source.url || !/\.googlevideo\.com$/.test(new URL(source.url).hostname)) throw new Error('Section protocol not verified');
@@ -69,7 +83,7 @@ function createDefaultMediaAdapter({ backendRoot, getVideo, run = runMediaProces
         async subtitles(videoId,directory,signal,{forceDownload=false}={}) {
             const video = getVideo(videoId);
             const audioClassification = ['korean','foreign','mixed'].includes(video?.audio_language) ? video.audio_language : 'unknown';
-            await run('yt-dlp',[...await commonArgs(directory),'--skip-download','--write-sub','--write-auto-sub','--sub-lang','en,ko','--sub-format','vtt','-o',path.join(directory,'captions'),`https://www.youtube.com/watch?v=${videoId}`],
+            await ytdlp(directory,['--skip-download','--write-sub','--write-auto-sub','--sub-lang','en,ko','--sub-format','vtt','-o',path.join(directory,'captions'),`https://www.youtube.com/watch?v=${videoId}`],
                 {needs:{download:1},priority:20,signal,timeoutMs:45000,disk:{root:directory,maxBytes:32*1024*1024}});
             const files = (await fs.readdir(directory)).filter(f=>f.endsWith('.vtt'));
             const file = files.find(f=>audioClassification==='korean'?f.includes('.ko.'):f.includes('.en.')) || files[0];
@@ -112,7 +126,7 @@ function createQaMedia({ manager, adapter, log = message => logger.info(message)
         const timer=setInterval(()=>{try{manager.store.renew(lease);}catch{controller.abort();}},15000);timer.unref?.();
         report(videoId,'work_started',{version});
         try { const result = await fn(lease,controller.signal);report(videoId,'work_completed',{version});return result; }
-        catch(error) { report(videoId,'work_failed',{version,code: typeof error.code === 'string' && /^[A-Z_]+$/.test(error.code) ? error.code : 'CACHE_WORK_FAILED'});try { manager.store.transition(lease,'retryable_failed',{retryAfter:now()+60000,lastError:error.code||'cache-work-failed'}); } catch {} throw error; }
+        catch(error) { report(videoId,'work_failed',{version,code: typeof error.code === 'string' && /^[A-Z_]+$/.test(error.code) ? error.code : 'CACHE_WORK_FAILED', ...(Number.isInteger(error.exitCode) ? {exitCode:error.exitCode} : {})});try { manager.store.transition(lease,'retryable_failed',{retryAfter:now()+60000,lastError:error.code||'cache-work-failed'}); } catch {} throw error; }
         finally {clearInterval(timer);try{manager.store.release(lease);}catch{}}
     }
     async function rememberedSource(videoId) {
