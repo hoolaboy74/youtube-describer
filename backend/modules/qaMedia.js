@@ -11,6 +11,17 @@ const { createSubtitleReader, parseVtt } = require('./qaSubtitles');
 const { getIsImpersonateAvailable } = require('../utils');
 const FRAME_VERSION = 'frames-v1', SUB_VERSION = 'subtitles-v1';
 const abortError = () => Object.assign(new Error('Q&A media canceled'), { name: 'AbortError' });
+function classifyYtdlpFailure(error) {
+    const message = String(error?.stderr || error?.message || '').toLowerCase();
+    if (/sign in to confirm|not a bot|bot check|use --cookies/.test(message)) return 'YTDLP_AUTH_REQUIRED';
+    if (/http error 403|forbidden|access denied/.test(message)) return 'YTDLP_ACCESS_DENIED';
+    if (/requested format is not available|no video formats found/.test(message)) return 'YTDLP_FORMAT_UNAVAILABLE';
+    if (/impersonat|curl_cffi/.test(message)) return 'YTDLP_IMPERSONATION';
+    if (/javascript runtime|js runtime|deno|node/.test(message)) return 'YTDLP_JS_RUNTIME';
+    if (/plugin|pot provider|po token/.test(message)) return 'YTDLP_PLUGIN';
+    if (/timed out|network is unreachable|temporary failure|connection refused|name or service not known/.test(message)) return 'YTDLP_NETWORK';
+    return 'YTDLP_UNKNOWN';
+}
 async function checksum(file) {
     const hash = crypto.createHash('sha256');
     for await (const chunk of require('node:fs').createReadStream(file)) hash.update(chunk);
@@ -50,7 +61,12 @@ function createDefaultMediaAdapter({ backendRoot, getVideo, run = runMediaProces
             // A stale account cookie must not make an otherwise public video
             // unavailable. Retry once without copying or exposing the cookie.
             if (error?.code !== 'MEDIA_EXIT') throw error;
-            return run('yt-dlp',[...await commonArgs(directory,{useCookies:false}),...args],options);
+            try {
+                return await run('yt-dlp',[...await commonArgs(directory,{useCookies:false}),...args],options);
+            } catch (retryError) {
+                if (retryError?.code === 'MEDIA_EXIT') retryError.mediaFailure = classifyYtdlpFailure(retryError);
+                throw retryError;
+            }
         }
     }
     const format = 'bestvideo[height<=480][ext=mp4]';
@@ -126,7 +142,7 @@ function createQaMedia({ manager, adapter, log = message => logger.info(message)
         const timer=setInterval(()=>{try{manager.store.renew(lease);}catch{controller.abort();}},15000);timer.unref?.();
         report(videoId,'work_started',{version});
         try { const result = await fn(lease,controller.signal);report(videoId,'work_completed',{version});return result; }
-        catch(error) { report(videoId,'work_failed',{version,code: typeof error.code === 'string' && /^[A-Z_]+$/.test(error.code) ? error.code : 'CACHE_WORK_FAILED', ...(Number.isInteger(error.exitCode) ? {exitCode:error.exitCode} : {})});try { manager.store.transition(lease,'retryable_failed',{retryAfter:now()+60000,lastError:error.code||'cache-work-failed'}); } catch {} throw error; }
+        catch(error) { report(videoId,'work_failed',{version,code: typeof error.code === 'string' && /^[A-Z_]+$/.test(error.code) ? error.code : 'CACHE_WORK_FAILED', ...(Number.isInteger(error.exitCode) ? {exitCode:error.exitCode} : {}), ...(typeof error.mediaFailure === 'string' ? {mediaFailure:error.mediaFailure} : {})});try { manager.store.transition(lease,'retryable_failed',{retryAfter:now()+60000,lastError:error.code||'cache-work-failed'}); } catch {} throw error; }
         finally {clearInterval(timer);try{manager.store.release(lease);}catch{}}
     }
     async function rememberedSource(videoId) {
@@ -371,4 +387,4 @@ function createQaMedia({ manager, adapter, log = message => logger.info(message)
     };
     return service;
 }
-module.exports={createQaMedia,createDefaultMediaAdapter,FRAME_VERSION,SUB_VERSION,waitFor};
+module.exports={createQaMedia,createDefaultMediaAdapter,classifyYtdlpFailure,FRAME_VERSION,SUB_VERSION,waitFor};

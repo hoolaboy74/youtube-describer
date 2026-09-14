@@ -1,5 +1,5 @@
 const test=require('node:test');const assert=require('node:assert/strict');const fs=require('node:fs/promises');const os=require('node:os');const path=require('node:path');const Database=require('better-sqlite3');const sharp=require('sharp');
-const {createQaCacheManager}=require('../modules/qaCacheManager');const {createQaMedia,createDefaultMediaAdapter,FRAME_VERSION}=require('../modules/qaMedia');const {parseVtt}=require('../modules/qaSubtitles');
+const {createQaCacheManager}=require('../modules/qaCacheManager');const {createQaMedia,createDefaultMediaAdapter,classifyYtdlpFailure,FRAME_VERSION}=require('../modules/qaMedia');const {parseVtt}=require('../modules/qaSubtitles');
 const deferred=()=>{let resolve,reject;const promise=new Promise((a,b)=>{resolve=a;reject=b;});return{resolve,reject,promise};};
 async function setup(t){const root=await fs.mkdtemp(path.join(os.tmpdir(),'qa-media-'));const db=new Database(path.join(root,'test.db'));t.after(async()=>{db.close();await fs.rm(root,{recursive:true,force:true});});const manager=createQaCacheManager({db,root});const image=path.join(root,'frame.jpg');await sharp({create:{width:640,height:360,channels:3,background:'#123456'}}).jpeg().toFile(image);const frame=timestampMs=>({path:image,sourcePtsMs:timestampMs,originPtsMs:0,timestampMs,sourceKind:'keyframe'});return{root,manager,frame};}
 test('current window and VTT begin together and answer before blocked full warming; same-bucket requests share work',async t=>{const{manager,frame}=await setup(t);const full=deferred();const started=[];let sections=0;const service=createQaMedia({manager,adapter:{full:async()=>{started.push('full');return full.promise;},section:async()=>{sections++;started.push('window');return{file:'fake',originPtsMs:0};},subtitles:async()=>{started.push('vtt');return null;}},windowExtract:async()=>[frame(12000),frame(14000)],extract:async()=>({ready:true})});
@@ -172,4 +172,17 @@ test('media diagnostics retain an exit code but never process stderr',async t=>{
     await assert.rejects(service.ensureCurrentWindow('abcdefghijk',12500,20000),{code:'MEDIA_EXIT'});
     const line=logs.find(value=>value.includes('"event":"work_failed"'));
     assert.ok(line.includes('"exitCode":23'));assert.ok(!line.includes('signed-url-token'));
+});
+
+test('yt-dlp diagnostics classify safe failure categories without retaining raw stderr',()=>{
+    assert.equal(classifyYtdlpFailure({stderr:'ERROR: Sign in to confirm you are not a bot'}),'YTDLP_AUTH_REQUIRED');
+    assert.equal(classifyYtdlpFailure({stderr:'ERROR: Requested format is not available'}),'YTDLP_FORMAT_UNAVAILABLE');
+    assert.equal(classifyYtdlpFailure({stderr:'ERROR: HTTP Error 403: Forbidden'}),'YTDLP_ACCESS_DENIED');
+    assert.equal(classifyYtdlpFailure({stderr:'secret signed URL=abc'}),'YTDLP_UNKNOWN');
+});
+
+test('second yt-dlp failure reports only a classified reason',async t=>{
+    const root=await fs.mkdtemp(path.join(os.tmpdir(),'qa-ytdlp-failure-'));t.after(()=>fs.rm(root,{recursive:true,force:true}));
+    const adapter=createDefaultMediaAdapter({backendRoot:root,getVideo:()=>null,run:async()=>{throw Object.assign(new Error('failed'),{code:'MEDIA_EXIT',exitCode:1,stderr:'ERROR: Sign in to confirm you are not a bot'});}});
+    await assert.rejects(adapter.full('YmEnygA7pHc',root),error=>error.mediaFailure==='YTDLP_AUTH_REQUIRED'&&!String(error.mediaFailure).includes('confirm'));
 });
