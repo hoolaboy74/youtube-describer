@@ -21,16 +21,21 @@ async function createQaContext({ request, media, video = {} }) {
         const item = { id: `script-${index}`, kind: 'script', timestampMs: Math.round(line.timestamp * 1000), text: line.text, tag };
         evidence.set(item.id, item); scriptEvidence.push({ id: item.id, index, timestamp: line.timestamp });
     });
-    for (const frame of frames) {
-        const id = `frame-${frame.sourcePtsMs}`;
+    const pastFrames = frames.filter(frame => frame.timestampMs <= timestampMs);
+    const questionFrame = pastFrames.reduce((latest, frame) => !latest || frame.timestampMs > latest.timestampMs ? frame : latest, null);
+    const currentFrameId = questionFrame ? `frame-${frames.indexOf(questionFrame)}` : null;
+    const frameEvidence = [];
+    for (const [index, frame] of frames.entries()) {
+        const id = `frame-${index}`;
+        frameEvidence.push({ id, timestamp: frame.timestampMs / 1000, sourcePtsMs: frame.sourcePtsMs, isQuestionFrame: id === currentFrameId });
         evidence.set(id, { ...frame, id, kind: 'frame' });
-        imageParts.push({ text: JSON.stringify({ frameId: id, timestamp: frame.timestampMs / 1000, relationToQuestion: frame.timestampMs > timestampMs ? 'after' : 'at_or_before' }) },
+        imageParts.push({ text: JSON.stringify({ frameId: id, isQuestionFrame: id === currentFrameId, timestamp: frame.timestampMs / 1000, relationToQuestion: frame.timestampMs > timestampMs ? 'after' : 'at_or_before' }) },
             { inlineData: { mimeType: 'image/jpeg', data: (await fs.readFile(frame.path)).toString('base64') } });
     }
     for (const cue of cues) evidence.set(cue.id, { ...cue, kind: 'cue' });
     return { timestampMs, frameWindow, evidence, cues, imageParts, audioClassification: media.subtitles.audioClassification || 'unknown',
-        title, script, history: request.history, question: request.question,
-        promptData: JSON.stringify({ videoTitle: title, screenDescriptionScript: script, scriptEvidence,
+        title, script, currentFrameId, frameEvidence, history: request.history, question: request.question,
+        promptData: JSON.stringify({ videoTitle: title, screenDescriptionScript: script, scriptEvidence, frameEvidence, currentFrameId, allowedEvidenceIds: [...evidence.keys()],
             timestamp: request.timestamp, frameWindow, question: request.question, history: request.history, subtitleEvidence: cues }) };
 }
 module.exports = { createQaContext, FRAME_RADIUS_MS };

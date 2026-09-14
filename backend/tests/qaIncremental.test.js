@@ -65,7 +65,7 @@ test('a rejected candidate never reaches TTS and cancel suppresses a late unary 
     const image = await fixtureFrame(t);
     const store = createQaRequestStore(), { request } = store.accept(1, input()); const gate = deferred(), speaking = deferred(); let calls = 0;
     const run = createQaGeneration({ store, getVideo: () => ({ duration: 60 }), media: { prepare: async () => ({ frames: [{ path: image, timestampMs: 11000, sourcePtsMs: 11000 }], subtitles: { cues: [] } }) },
-        model: { generateContentStream: async () => ({ stream: (async function* () { yield { text: () => JSON.stringify(candidate()) + '\n' }; })(), response: Promise.resolve({}) }) },
+        model: { generateContentStream: async () => ({ stream: (async function* () { yield { text: () => JSON.stringify(candidate({ evidenceIds: ['missing'] })) + '\n' }; yield { text: () => JSON.stringify({ seq: 1, kind: 'explanation', evidenceIds: [], text: UNKNOWN }) + '\n' }; })(), response: Promise.resolve({}) }) },
         speech: { mp3: async text => { calls++; assert.equal(text, UNKNOWN); speaking.resolve(); await gate.promise; return Buffer.from('late'); } }, recordUsage: () => {} });
     const running = run(request); await speaking.promise; store.finish(request, 'canceled'); gate.resolve(); await running;
     assert.equal(calls, 1); assert.equal(request.audio.size, 0); assert.equal(request.events.at(-1).type, 'canceled');

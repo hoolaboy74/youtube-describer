@@ -2,7 +2,7 @@
 const { StringDecoder } = require('node:string_decoder');
 const { normalizeText } = require('./canonicalOutput');
 const { SEARCH_UNAVAILABLE, EXTERNAL_PREFIX } = require('./qaSearch');
-const POLICY_VERSION = 'qa-sentence-v3';
+const POLICY_VERSION = 'qa-sentence-v4';
 const UNKNOWN = '현재 화면에서 확인할 수 있는 정보가 부족합니다.';
 const EXPLANATIONS = new Set([SEARCH_UNAVAILABLE, UNKNOWN, '화면만으로는 알 수 없습니다.', '확인된 외국어 대사가 없어 번역할 수 없습니다.']);
 const compact = text => normalizeText(text).replace(/[^\p{L}\p{N}]/gu, '');
@@ -48,7 +48,7 @@ function validateSentence(candidate, context, accepted = []) {
             || evidence.some(value => value.kind !== 'cue' || !value.confirmed || !value.sourceLanguage
                 || ['ko', 'unknown'].includes(value.sourceLanguage.toLowerCase()) || value.sourceLanguage.toLowerCase().startsWith('ko-'))) return reject('translation-provenance');
     } else if (['visual', 'screen_text'].includes(candidate.kind)) {
-        if (!evidence.length || evidence.some(value => value.kind !== 'frame')) return reject('visual-evidence');
+        if (!evidence.some(value => value.kind === 'frame') || evidence.some(value => !['frame', 'script'].includes(value.kind))) return reject('visual-evidence');
     } else return reject('kind');
     const spoken = context.cues.filter(cue => cue.sourceLanguage === 'ko' || ['korean', 'mixed', 'unknown'].includes(context.audioClassification));
     if (spoken.some(cue => duplicate(text, cue.sourceText))) return reject('audible-duplicate');

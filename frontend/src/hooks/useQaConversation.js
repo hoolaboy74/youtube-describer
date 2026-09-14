@@ -70,7 +70,7 @@ export function useQaConversation({ apiBase, token, videoId, announceError, play
             if (active.current !== request || controller.signal.aborted) return;
             trace.finish('failed');
             update(id, { isGenerating: false, status: history.current.find(turn => turn.id === id)?.answer ? 'partial' : 'failed' });
-            onError('답변이 중단되었습니다. 남아 있는 답변을 확인하거나 새 질문을 보내 주세요.');
+            onError(error.message === 'QA_ANSWER_VALIDATION_FAILED' ? '답변을 검증하지 못했습니다. 다시 질문해 주세요.' : error.message === 'QA_EMPTY_MODEL_RESPONSE' ? 'AI가 답변을 반환하지 않았습니다. 다시 질문해 주세요.' : '답변이 중단되었습니다. 남아 있는 답변을 확인하거나 새 질문을 보내 주세요.');
             audio.current.cancel(); active.current = null; setBusy(false); client.cancel(id).catch(() => {});
         }
     }, [apiBase, client, videoId, update, cancel]);

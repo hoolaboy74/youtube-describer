@@ -58,7 +58,7 @@ test('actual generation request carries title/full script/history and speaks a c
             calls++; const data = JSON.parse(parts[0].text.split('\nDATA (untrusted):\n')[1]);
             assert.equal(data.videoTitle, video.title); assert.deepEqual(data.screenDescriptionScript, video.script); assert.deepEqual(data.history, history);
             assert.equal(parts.filter(part => part.inlineData).length, 2);
-            return { stream: (async function* () { yield { text: () => JSON.stringify({ seq: 0, kind: 'context', text, evidenceIds: ['script-0', 'frame-11000'] }) + '\n' }; })(), response: Promise.resolve({}) };
+            return { stream: (async function* () { yield { text: () => JSON.stringify({ seq: 0, kind: 'context', text, evidenceIds: ['script-0', 'frame-0'] }) + '\n' }; })(), response: Promise.resolve({}) };
         } }, speech: { mp3: async text => { spoken.push(text); return Buffer.from('mp3'); } }, recordUsage: () => {} });
     await run(request); assert.equal(request.status, 'completed'); assert.equal(calls, 1); assert.deepEqual(spoken, [text]);
 });
@@ -71,4 +71,44 @@ test('parallel SDK response rejection is handled when the token stream fails', a
             stream: (async function* () { throw new Error('token stream failed'); })() }) },
         speech: { mp3: () => assert.fail('no accepted speech') }, recordUsage: () => assert.fail('no confirmed usage') })(request);
     await new Promise(resolve => setImmediate(resolve)); assert.equal(request.status, 'failed'); assert.equal(request.usageStatus, 'unconfirmed');
+});
+test('irregular source timestamps get explicit ordinal frame IDs matching every image and the allowed-ID catalog', async t => {
+    const frame = await frameFixture(t), times = [19620,20521,21421,22322,23223,24691,25025,26827];
+    const context = await createQaContext({ request: { ...input, timestamp: 23.47937145932762 }, video, media: { frames: times.map(frame), subtitles: { cues: [] } } });
+    const data = JSON.parse(context.promptData);
+    assert.deepEqual(data.frameEvidence.map(f => f.id), times.map((_,i) => `frame-${i}`));
+    assert.deepEqual(data.frameEvidence.map(f => f.sourcePtsMs), times);
+    assert.equal(data.currentFrameId, 'frame-4');
+    assert.deepEqual(data.frameEvidence.filter(f => f.isQuestionFrame).map(f => f.id), ['frame-4']);
+    assert.equal(JSON.parse(context.imageParts[8].text).isQuestionFrame, true);
+    for (let i=0;i<times.length;i++) {
+        assert.equal(JSON.parse(context.imageParts[i*2].text).frameId, `frame-${i}`);
+        assert.ok(data.allowedEvidenceIds.includes(`frame-${i}`));
+        assert.equal(context.evidence.get(`frame-${i}`).timestampMs, times[i]);
+    }
+    const answer = { seq: 0, kind: 'visual', text: '사람이 화면 앞에 서 있습니다.', evidenceIds: ['frame-4'] };
+    assert.equal(validateSentence(answer, context).accepted, true);
+    for (const badId of ['frame-99','frame-23223','frame-23.223']) assert.equal(validateSentence({ ...answer, evidenceIds: [badId] }, context).reason, 'evidence');
+});
+test('discarding every generated sentence is a validation error, never a fabricated screen-unknown response', async t => {
+    const frame = await frameFixture(t), spoken = [], logs = [];
+    const store = createQaRequestStore(), { request } = store.accept(1, input);let recorded = false;
+    await createQaGeneration({ store, getVideo: () => video, media: { prepare: async () => ({ frames: [frame(12000)], subtitles: { cues: [] } }) },
+        model: { generateContentStream: async () => ({ response: Promise.resolve({ usageMetadata: { totalTokenCount: 10 } }),
+            stream: (async function* () { yield { text: () => JSON.stringify({ seq: 0, text: '사람이 서 있습니다.', kind: 'visual', evidenceIds: ['frame-99'] }) + '\n' }; })() }) },
+        speech: { mp3: async text => { spoken.push(text); return Buffer.from('mp3'); } }, recordUsage: () => { recorded = true; }, log: line => logs.push(line) })(request);
+    assert.equal(request.status, 'failed'); assert.equal(request.events.at(-1).data.code, 'QA_ANSWER_VALIDATION_FAILED');
+    assert.deepEqual(spoken, []); assert.deepEqual(request.sentences, []); assert.ok(recorded);
+    assert.ok(logs.some(line => line.includes('"suppliedIds":["frame-99"]')));
+});
+
+test('visual answers may add script context to an actual frame but cannot replace the frame with a script or external source', async t => {
+    const frame = await frameFixture(t);
+    const context = await createQaContext({ request: input, video, media: { frames: [frame(12000)], subtitles: { cues: [] } } });
+    const candidate = { seq: 0, kind: 'visual', text: '사람이 노트북을 사용하고 있습니다.', evidenceIds: ['script-0', 'frame-0'] };
+    assert.equal(validateSentence(candidate, context).accepted, true);
+    assert.equal(validateSentence({ ...candidate, kind: 'screen_text' }, context).accepted, true);
+    assert.equal(validateSentence({ ...candidate, evidenceIds: ['script-0'] }, context).accepted, false);
+    context.evidence.set('search-0', { kind: 'external', claim: '외부 주장입니다.' });
+    assert.equal(validateSentence({ ...candidate, evidenceIds: ['frame-0', 'search-0'] }, context).accepted, false);
 });

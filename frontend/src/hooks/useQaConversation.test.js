@@ -52,3 +52,12 @@ test('uses the player rate for initial speech, live changes and replay without r
     await act(async () => { await result.current.replay(result.current.turns[0].id); });
     expect(audio.prepare).toHaveBeenLastCalledWith(2.5); expect(client.audioTicket).toHaveBeenCalledTimes(1);
 });
+test('validation failures announce a response-validation problem once without claiming missing video evidence', async () => {
+    const announceError = jest.fn();
+    client.events.mockImplementation(async (path, options) => options.onEvent({ type: 'error', data: { code: 'QA_ANSWER_VALIDATION_FAILED' } }));
+    const { result } = renderHook(() => useQaConversation({ apiBase: '', token: 'token', videoId: 'abcdefghijk', announceError }));
+    await waitFor(() => expect(result.current.enabled).toBe(true));
+    await act(async () => { await result.current.ask({ question: '현재 화면을 설명해 주세요.', timestamp: 23.479 }); });
+    expect(announceError).toHaveBeenCalledTimes(1); expect(announceError).toHaveBeenCalledWith('답변을 검증하지 못했습니다. 다시 질문해 주세요.');
+    expect(result.current.turns[0].answer).toBe(''); expect(result.current.turns[0].status).toBe('failed');
+});

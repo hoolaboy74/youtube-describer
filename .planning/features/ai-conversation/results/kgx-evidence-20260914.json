@@ -1,0 +1,160 @@
+{
+  "videoId": "KGXW6nSyYDA",
+  "timestamp": 23.47937145932762,
+  "attempts": [
+    {
+      "videoId": "KGXW6nSyYDA",
+      "timestamp": 23.47937145932762,
+      "question": "현재 화면을 설명해 주세요.",
+      "scriptEntries": 98,
+      "frames": 8,
+      "durationMs": 2014,
+      "status": "completed",
+      "sentences": [
+        {
+          "seq": 0,
+          "text": "화면에는 노이즈 캔슬링 헤드폰 관련 시청자들의 다양한 질문과 의견들이 자막으로 나타납니다.",
+          "kind": "context",
+          "evidenceIds": [
+            "script-4",
+            "frame-4"
+          ],
+          "policyVersion": "qa-sentence-v3"
+        }
+      ],
+      "usage": {
+        "promptTokenCount": 25270,
+        "candidatesTokenCount": 142,
+        "totalTokenCount": 25412,
+        "promptTokensDetails": [
+          {
+            "modality": "IMAGE",
+            "tokenCount": 8624
+          },
+          {
+            "modality": "TEXT",
+            "tokenCount": 16646
+          }
+        ],
+        "serviceTier": "standard"
+      },
+      "modelCalls": 1,
+      "realTtsCalls": 0
+    },
+    {
+      "videoId": "KGXW6nSyYDA",
+      "timestamp": 23.47937145932762,
+      "question": "현재 화면을 설명해 주세요.",
+      "scriptEntries": 98,
+      "frames": 8,
+      "durationMs": 3539,
+      "status": "completed",
+      "sentences": [
+        {
+          "seq": 0,
+          "text": "현재 화면에서는 안경을 쓴 진행자가 흰색 상자를 들고 스튜디오 책상 앞에 앉아 이야기하고 있습니다.",
+          "kind": "visual",
+          "evidenceIds": [
+            "script-4",
+            "frame-1"
+          ],
+          "policyVersion": "qa-sentence-v4"
+        },
+        {
+          "seq": 1,
+          "text": "상자 측면에는 헤드폰 사진과 제품 사양이 인쇄되어 있습니다.",
+          "kind": "visual",
+          "evidenceIds": [
+            "script-5",
+            "frame-0"
+          ],
+          "policyVersion": "qa-sentence-v4"
+        },
+        {
+          "seq": 2,
+          "text": "화면 배경에는 주황색 조명이 비추는 스튜디오 공간과 스탠드 조명이 보입니다.",
+          "kind": "visual",
+          "evidenceIds": [
+            "script-4",
+            "frame-1"
+          ],
+          "policyVersion": "qa-sentence-v4"
+        }
+      ],
+      "usage": {
+        "promptTokenCount": 25289,
+        "candidatesTokenCount": 140,
+        "totalTokenCount": 25429,
+        "promptTokensDetails": [
+          {
+            "modality": "IMAGE",
+            "tokenCount": 8624
+          },
+          {
+            "modality": "TEXT",
+            "tokenCount": 16665
+          }
+        ],
+        "serviceTier": "standard"
+      },
+      "modelCalls": 1,
+      "realTtsCalls": 0
+    },
+    {
+      "videoId": "KGXW6nSyYDA",
+      "timestamp": 23.47937145932762,
+      "question": "현재 화면을 설명해 주세요.",
+      "scriptEntries": 98,
+      "frames": 8,
+      "durationMs": 2128,
+      "status": "completed",
+      "sentences": [
+        {
+          "seq": 0,
+          "text": "현재 화면은 파란색과 흰색이 섞인 배경 위에 '무선 노캔 헤드폰 추천 부탁드립니다!'와 같은 다양한 사용자들의 질문과 의견들이 여러 개의 하얀색 상자 형태로 나열되어 있는 모습입니다.",
+          "kind": "visual",
+          "evidenceIds": [
+            "script-0",
+            "frame-4"
+          ],
+          "policyVersion": "qa-sentence-v4"
+        },
+        {
+          "seq": 1,
+          "text": "이는 노이즈 캔슬링 헤드폰에 대한 대중의 높은 관심과 다양한 요구를 화면에 시각적으로 보여주는 연출입니다.",
+          "kind": "context",
+          "evidenceIds": [
+            "script-0",
+            "script-1",
+            "frame-4"
+          ],
+          "policyVersion": "qa-sentence-v4"
+        }
+      ],
+      "usage": {
+        "promptTokenCount": 25483,
+        "candidatesTokenCount": 135,
+        "totalTokenCount": 25618,
+        "promptTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 16859
+          },
+          {
+            "modality": "IMAGE",
+            "tokenCount": 8624
+          }
+        ],
+        "serviceTier": "standard"
+      },
+      "modelCalls": 1,
+      "realTtsCalls": 0
+    }
+  ],
+  "findings": [
+    "Ordinal IDs resolved without unknown-reference errors, but two mixed script/frame visual sentences were rejected.",
+    "Mixed evidence was accepted, but the answer described a prior shot as current.",
+    "Explicit currentFrameId focused the answer on the question-time comments graphic; visual spot-check matched."
+  ],
+  "limitations": "Three model-only probes with cached media, no real TTS. Not comprehensive factuality or latency evaluation. Original user response IDs were not logged and cannot be reconstructed."
+}
