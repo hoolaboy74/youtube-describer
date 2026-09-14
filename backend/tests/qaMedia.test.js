@@ -10,6 +10,11 @@ test('pipeline publishes before model completion and shares its source without a
 const{manager,frame,root}=await setup(t);const service=createQaMedia({manager,adapter:{full:()=>{throw new Error('duplicate full');}},extract:()=>{throw new Error('duplicate extraction');}});
 const pipeline=service.beginPipeline('abcdefghijk');const source=path.join(root,'source.mp4');await fs.writeFile(source,'fixture');const warming=service.ensureFullCache('abcdefghijk',4000);pipeline.ready(source);await pipeline.publish(frame(0));await pipeline.publish(frame(2000));pipeline.complete();await warming;await pipeline.finish();assert.equal(manager.store.job('abcdefghijk',FRAME_VERSION).state,'ready');assert.ok(await fs.stat(source));
 });
+
+test('generator pipeline publishes all frames through one durable cache lease',async t=>{
+const{manager,frame}=await setup(t),logs=[];const service=createQaMedia({manager,log:line=>logs.push(line)});const entry=service.beginPipeline('abcdefghijk');await entry.publish(frame(1000));await entry.publish(frame(2000));await entry.complete(3000);await entry.finish();
+assert.equal(logs.filter(line=>line.includes('"version":"pipeline-v1"')&&line.includes('"event":"work_started"')).length,1);assert.equal(logs.filter(line=>line.includes('"version":"pipeline-v1"')&&line.includes('"event":"work_completed"')).length,1);
+});
 test('complete source wins over a slow section and the section is canceled before its files are removed',async t=>{
 const{manager,frame,root}=await setup(t);const started=deferred();let aborted=false;const service=createQaMedia({manager,adapter:{section:async(id,start,end,dir,signal)=>{started.resolve();await new Promise((resolve,reject)=>signal.addEventListener('abort',()=>{aborted=true;reject(new Error('aborted'));},{once:true}));}},windowExtract:async options=>{assert.equal(options.section,false);return[frame(12000)];}});
 const pipeline=service.beginPipeline('abcdefghijk');const result=service.ensureCurrentWindow('abcdefghijk',12500,20000);await started.promise;pipeline.ready(path.join(root,'source.mp4'));assert.equal((await result).length,1);assert.equal(aborted,true);await pipeline.finish();
