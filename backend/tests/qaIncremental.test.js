@@ -71,6 +71,20 @@ test('cold media preparation does not consume the first-sentence deadline', asyn
     assert.ok(Date.now() - started >= 46_000);
     assert.equal(request.status, 'completed');
 });
+test('media preparation timeout keeps its actual reason in events and diagnostic logs',async t=>{
+    t.mock.timers.enable({apis:['setTimeout']});
+    const store=createQaRequestStore(),{request}=store.accept(1,input()),logs=[];
+    const running=createQaGeneration({store,getVideo:()=>({duration:60}),log:line=>logs.push(line),
+        media:{prepare:async(id,time,duration,{signal})=>new Promise((resolve,reject)=>{
+            signal.addEventListener('abort',()=>reject(Object.assign(new Error('aborted'),{name:'AbortError'})),{once:true});
+        })},model:{generateContentStream:()=>assert.fail('model called without evidence')},speech:{},recordUsage:()=>{}})(request);
+    t.mock.timers.tick(120000);
+    await running;
+    assert.equal(request.status,'failed');
+    assert.equal(request.events.at(-1).data.code,'QA_TOTAL_TIMEOUT');
+    assert.ok(logs.some(line=>line.includes('"event":"failed"')&&line.includes('QA_TOTAL_TIMEOUT')));
+    assert.ok(!logs.some(line=>line.includes('QA_GENERATION_FAILED')));
+});
 test('cancel suppresses a late unary result without rewriting the model sentence', async t => {
     const image = await fixtureFrame(t);
     const store = createQaRequestStore(), { request } = store.accept(1, input()); const gate = deferred(), speaking = deferred(); let calls = 0;

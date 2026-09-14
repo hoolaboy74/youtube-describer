@@ -24,7 +24,12 @@ function createQaGeneration({ store, media, model, speech, getVideo, recordUsage
         const { signal } = request.controller;
         const report = (event, details = {}) => log(`[QA-GENERATION] ${JSON.stringify({ videoId: request.input.videoId, requestId: request.input.requestId, event, ...details })}`);
         const timers = [];
-        const timeout = (ms, code) => { const timer = setTimeout(() => store.finish(request, 'error', { code }), ms); timer.unref?.(); timers.push(timer); return timer; };
+        let timeoutCode;
+        const timeout = (ms, code) => { const timer = setTimeout(() => {
+            timeoutCode = code;
+            report('timeout', { code });
+            store.finish(request, 'error', { code });
+        }, ms); timer.unref?.(); timers.push(timer); return timer; };
         timeout(120000, 'QA_TOTAL_TIMEOUT');
         // Media preparation may download the source and extract a cold window.
         // The first-answer SLA starts once evidence is ready, not at request
@@ -117,7 +122,7 @@ function createQaGeneration({ store, media, model, speech, getVideo, recordUsage
             if (ogg) { ogg.end(); await ogg.done; }
             signal.throwIfAborted(); store.finish(request, 'audio_done');
         } catch (error) {
-            report('failed', { code: error.message?.startsWith('QA_') ? error.message : 'QA_GENERATION_FAILED', errorType: /^[A-Za-z]+$/.test(error.name || '') ? error.name : 'Error' });
+            report('failed', { code: timeoutCode || (error.message?.startsWith('QA_') ? error.message : 'QA_GENERATION_FAILED'), errorType: /^[A-Za-z]+$/.test(error.name || '') ? error.name : 'Error' });
             if (!signal.aborted) store.finish(request, 'error', { code: error.message?.startsWith('QA_') ? error.message : 'QA_GENERATION_FAILED' });
         } finally {
             timers.forEach(clearTimeout); releaseModel?.();
