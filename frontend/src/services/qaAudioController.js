@@ -1,6 +1,7 @@
 const SILENCE = 'data:audio/wav;base64,UklGRiYAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQIAAAAAAA==';
 export function createQaAudioController({ audio = new Audio(), fetchImpl = fetch, onPlaying = () => {}, onError = () => {}, onDone = () => {} } = {}) {
     let epoch = 0, queue = [], current = null, fetching = false, finished = false, started = false, deferredError = null;
+    let playbackRate = 1;
     let abort = new AbortController(); const seen = new Set();
     const revoke = item => { if (item?.objectUrl) URL.revokeObjectURL(item.objectUrl); };
     function reset() {
@@ -9,7 +10,13 @@ export function createQaAudioController({ audio = new Audio(), fetchImpl = fetch
         revoke(current); current = null; queue = []; seen.clear(); fetching = false; finished = false; started = false; deferredError = null;
     }
     function checkDone() { if (finished && !current && !queue.length && !fetching) onDone(); }
+    function setPlaybackRate(rate) {
+        playbackRate = Number.isFinite(rate) && rate > 0 ? rate : 1;
+        audio.defaultPlaybackRate = playbackRate;
+        audio.playbackRate = playbackRate;
+    }
     function play(version) {
+        setPlaybackRate(playbackRate);
         audio.play().catch(() => { if (version === epoch) onError('답변 음성을 재생하려면 음성 재생 버튼을 눌러 주세요.'); });
     }
     async function pump() {
@@ -37,8 +44,9 @@ export function createQaAudioController({ audio = new Audio(), fetchImpl = fetch
         finally { if (version === epoch) { fetching = false; checkDone(); } }
     }
     return {
-        prepare(rate = 1) { reset(); audio.playbackRate = rate; audio.src = SILENCE; const version = epoch;
+        prepare(rate = 1) { reset(); setPlaybackRate(rate); audio.src = SILENCE; const version = epoch;
             audio.play().then(() => { if (version === epoch && !current) audio.pause(); }).catch(() => {}); },
+        setPlaybackRate,
         enqueue(seq, url, stream = false) { if (seen.has(seq)) return; seen.add(seq); queue.push({ seq, url, stream }); pump(); },
         complete() { finished = true; if (deferredError) onError(deferredError); checkDone(); },
         fallback() { if (started) return false; reset(); return true; },

@@ -8,7 +8,7 @@ let client, callbacks, audio, events, submitted;
 beforeEach(() => {
     let sequence = 0; Object.defineProperty(window, 'crypto', { configurable: true, value: { randomUUID: () => `request-${++sequence}` } }); events = undefined;
     chooseQaAudioMode.mockReturnValue('mp3');
-    audio = { prepare: jest.fn(), cancel: jest.fn(), enqueue: jest.fn(), complete: jest.fn(), resume: jest.fn() };
+    audio = { setPlaybackRate: jest.fn(), prepare: jest.fn(), cancel: jest.fn(), enqueue: jest.fn(), complete: jest.fn(), resume: jest.fn() };
     createQaAudioController.mockImplementation(options => { callbacks = options; return audio; });
     client = { config: jest.fn(async () => ({ incrementalSpeech: true })), presence: jest.fn(async () => {}), cancel: jest.fn(async () => {}),
         submit: jest.fn(async payload => { submitted = payload; return { eventsPath: '/events' }; }),
@@ -38,4 +38,17 @@ test('does not announce normal sentence or generation progress and waits for aud
     act(() => { events.onEvent({ type: 'sentence', data: { seq: 0, text: '답변입니다.' } }); events.onEvent({ type: 'generation_done', data: {} }); events.onEvent({ type: 'audio_done', data: {} }); });
     expect(result.current.busy).toBe(true); expect(announceError).not.toHaveBeenCalled();
     act(() => callbacks.onDone()); expect(result.current.busy).toBe(false);
+});
+
+test('uses the player rate for initial speech, live changes and replay without resetting history', async () => {
+    client.audioTicket = jest.fn(async () => ({ path: '/audio' }));
+    const { result, rerender } = renderHook(({ playbackRate }) => useQaConversation({ apiBase: '', token: 'token', videoId: 'abcdefghijk', announceError: jest.fn(), playbackRate }), { initialProps: { playbackRate: 1.5 } });
+    await waitFor(() => expect(result.current.enabled).toBe(true));
+    act(() => { result.current.ask({ question: '질문', timestamp: 12 }); });
+    await waitFor(() => expect(events).toBeDefined()); expect(audio.prepare).toHaveBeenLastCalledWith(1.5);
+    act(() => { events.onEvent({ type: 'sentence', data: { seq: 0, text: '답변입니다.' } }); });
+    rerender({ playbackRate: 2.5 }); expect(audio.setPlaybackRate).toHaveBeenLastCalledWith(2.5);
+    expect(result.current.turns[0].answer).toBe('답변입니다.'); expect(client.cancel).not.toHaveBeenCalled();
+    await act(async () => { await result.current.replay(result.current.turns[0].id); });
+    expect(audio.prepare).toHaveBeenLastCalledWith(2.5); expect(client.audioTicket).toHaveBeenCalledTimes(1);
 });

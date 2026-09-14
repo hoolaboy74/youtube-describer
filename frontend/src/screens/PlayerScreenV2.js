@@ -259,7 +259,7 @@ function PlayerScreenV2() {
             qaTimeoutRef.current = setTimeout(() => setQaPoliteAnnouncement(''), 3000);
         }, 100);
     }, []);
-    const incrementalQa = useQaConversation({ apiBase: API_BASE, token, videoId, announceError: announceQaPolite });
+    const incrementalQa = useQaConversation({ apiBase: API_BASE, token, videoId, announceError: announceQaPolite, playbackRate });
     const { cancel: cancelIncrementalQa } = incrementalQa;
     const incrementalQaEnabled = incrementalQa.enabled && legacyQaList.length === 0;
     const qaList = incrementalQaEnabled ? incrementalQa.turns : legacyQaList;
@@ -561,7 +561,7 @@ function PlayerScreenV2() {
         if (!question.trim() || !player || isQaLoading) return;
         if (incrementalQaEnabled) {
             player.pauseVideo(); audioPlayerRef.current?.pause(); setIsPlaying(false);
-            const payload = { question: question.trim(), timestamp: player.getCurrentTime(), playbackRate: playbackRateRef.current };
+            const payload = { question: question.trim(), timestamp: player.getCurrentTime() };
             setQuestion(''); inputRef.current?.focus();
             await incrementalQa.ask(payload); return;
         }
@@ -649,7 +649,7 @@ function PlayerScreenV2() {
                         const audioUrl = URL.createObjectURL(ttsResponse.data);
                         audioPlayer.onerror = null;
                         audioPlayer.src = audioUrl;
-                        audioPlayer.playbackRate = playbackRateRef.current || 1.3;
+                        audioPlayer.defaultPlaybackRate = audioPlayer.playbackRate = playbackRateRef.current || 1.2;
                         audioPlayer.volume = 1.0;
                         latencyTrace.audio(audioPlayer, 'mp3');
                         await audioPlayer.play();
@@ -670,7 +670,7 @@ function PlayerScreenV2() {
                         };
                         audioPlayer.onerror = startStreamFallback;
                         audioPlayer.src = `${API_BASE}${qaTtsStreamPath}`;
-                        audioPlayer.playbackRate = playbackRateRef.current || 1.3;
+                        audioPlayer.defaultPlaybackRate = audioPlayer.playbackRate = playbackRateRef.current || 1.2;
                         audioPlayer.volume = 1.0;
                         latencyTrace.audio(audioPlayer, 'ogg');
                         audioPlayer.play().catch(startStreamFallback);

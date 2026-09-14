@@ -29,3 +29,14 @@ test('an unplayed OGG can switch to MP3, but a partially played stream cannot re
     audio.onerror(); expect(onError).not.toHaveBeenCalled(); expect(controller.fallback()).toBe(true);
     controller.enqueue(0, '/mp3'); await flush(); audio.onplaying(); expect(controller.fallback()).toBe(false);
 });
+
+test.each([1.2, 1.5, 2, 2.5])('preserves the %sx preset across source resets, sentences, OGG fallback and resume', async rate => {
+    const { controller, audio } = setup();
+    Object.defineProperty(audio, 'src', { configurable: true, set() { audio.playbackRate = 1; } });
+    audio.load.mockImplementation(() => { audio.playbackRate = 1; });
+    controller.prepare(rate); controller.enqueue(-1, '/stream', true); await flush();
+    expect(audio.playbackRate).toBe(rate); expect(audio.defaultPlaybackRate).toBe(rate);
+    expect(controller.fallback()).toBe(true); controller.enqueue(0, '/first'); await flush(); expect(audio.playbackRate).toBe(rate);
+    controller.enqueue(1, '/second'); audio.onended(); await flush(); expect(audio.playbackRate).toBe(rate);
+    controller.setPlaybackRate(1.5); audio.playbackRate = 1; controller.resume(); expect(audio.playbackRate).toBe(1.5);
+});

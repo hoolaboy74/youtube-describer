@@ -3,11 +3,13 @@ import { createQaClient } from '../services/qaClient';
 import { createQaAudioController, chooseQaAudioMode } from '../services/qaAudioController';
 import { createQaLatencyTrace } from '../services/qaLatencyTrace';
 const uuid = () => window.crypto?.randomUUID?.() || `qa-${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
-export function useQaConversation({ apiBase, token, videoId, announceError }) {
+export function useQaConversation({ apiBase, token, videoId, announceError, playbackRate = 1.2 }) {
     const [enabled, setEnabled] = useState(false), [turns, setTurns] = useState([]), [busy, setBusy] = useState(false), [audioError, setAudioError] = useState('');
     const client = useMemo(() => createQaClient({ apiBase, token }), [apiBase, token]);
     const history = useRef([]), active = useRef(null), session = useRef(null), audio = useRef(null), mounted = useRef(true);
     const allowOgg = useRef(false);
+    const rate = useRef(playbackRate); rate.current = playbackRate;
+    useEffect(() => { audio.current?.setPlaybackRate(playbackRate); }, [playbackRate]);
     const announce = useRef(announceError); announce.current = announceError;
     const update = useCallback((id, patch) => {
         history.current = history.current.map(turn => turn.id === id ? { ...turn, ...patch } : turn);
@@ -30,7 +32,7 @@ export function useQaConversation({ apiBase, token, videoId, announceError }) {
         }).catch(() => {});
         return () => { mounted.current = false; controller.abort(); clearInterval(heartbeat); cancel(); client.presence(sessionId, videoId, false).catch(() => {}); };
     }, [client, videoId, cancel, token]);
-    const ask = useCallback(async ({ question, timestamp, playbackRate }) => {
+    const ask = useCallback(async ({ question, timestamp }) => {
         if (active.current || !question.trim()) return;
         const id = uuid(), controller = new AbortController();
         const audioMode = chooseQaAudioMode(window, { allowOgg: allowOgg.current }); let usingOgg = audioMode === 'ogg';
@@ -42,7 +44,7 @@ export function useQaConversation({ apiBase, token, videoId, announceError }) {
         const onError = message => { if (active.current !== request) return; setAudioError(message); if (!errorAnnounced) { errorAnnounced = true; announce.current(message); } };
         audio.current = createQaAudioController({ onPlaying: () => trace.playing(usingOgg ? 'ogg' : 'mp3'), onError,
             onDone: () => { if (active.current === request) { active.current = null; setBusy(false); } } });
-        audio.current.prepare(playbackRate);
+        audio.current.prepare(rate.current);
         history.current = [...history.current, { id, timestamp, question, answer: '', status: 'partial', isGenerating: true, seqs: [] }]; setTurns([...history.current]);
         try {
             const accepted = await client.submit({ requestId: id, sessionId: session.current, videoId, timestamp, question,
@@ -76,7 +78,7 @@ export function useQaConversation({ apiBase, token, videoId, announceError }) {
         cancel(); const turn = history.current.find(item => item.id === id); if (!turn) return;
         const controller = new AbortController(), request = { id, controller, replay: true }; active.current = request; setBusy(true); setAudioError('');
         audio.current = createQaAudioController({ onError: message => { if (active.current === request) { setAudioError(message); announce.current(message); } },
-            onDone: () => { if (active.current === request) { active.current = null; setBusy(false); } } }); audio.current.prepare();
+            onDone: () => { if (active.current === request) { active.current = null; setBusy(false); } } }); audio.current.prepare(rate.current);
         try { for (const seq of turn.seqs) { const grant = await client.audioTicket(id, seq, controller.signal); if (active.current !== request) return; audio.current.enqueue(seq, apiBase + grant.path); }
             audio.current.complete();
         } catch { if (active.current === request) { cancel(); setAudioError('다시 듣기 시간이 만료되었습니다. 새 질문을 보내 주세요.'); announce.current('다시 듣기 시간이 만료되었습니다. 새 질문을 보내 주세요.'); } }
