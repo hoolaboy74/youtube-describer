@@ -37,32 +37,43 @@ function waitFor(promise, signal) {
         promise.then(resolve,reject).finally(() => signal.removeEventListener('abort',abort));
     });
 }
-function createDefaultMediaAdapter({ backendRoot, getVideo, run = runMediaProcess }) {
-    async function commonArgs(directory, { useCookies = true } = {}) {
+function createDefaultMediaAdapter({ backendRoot, getVideo, run = runMediaProcess, pickCookie = paths => paths[Math.floor(Math.random() * paths.length)] }) {
+    async function availableCookies() {
+        const cookiesDir = path.join(backendRoot,'cookies');
+        const names = await fs.readdir(cookiesDir).catch(() => []);
+        const accountCookies = (await Promise.all(names.filter(name => name.endsWith('_cookies.txt')).map(async name => {
+            const file = path.join(cookiesDir,name);
+            try { return (await fs.stat(file)).size > 0 ? file : null; } catch { return null; }
+        }))).filter(Boolean);
+        if (accountCookies.length) return accountCookies;
+        const fallback = path.join(backendRoot,'cookies.txt');
+        try { return (await fs.stat(fallback)).size > 0 ? [fallback] : []; } catch { return []; }
+    }
+    async function commonArgs(directory, cookiePath) {
         const args = ['--ignore-config','--no-playlist','--no-progress','--retries','0','--fragment-retries','0','--socket-timeout','15',
             '--force-ipv4','--legacy-server-connect','--no-check-certificate','--plugin-dirs',path.join(backendRoot,'yt_dlp_plugins'),
             '--remote-components','ejs:github','--js-runtimes','node'];
-        const cookiesDir = path.join(backendRoot,'cookies');
-        const cookies = await fs.readdir(cookiesDir).catch(() => []);
-        const selected = cookies.find(name => name.endsWith('_cookies.txt')) || (await fs.stat(path.join(backendRoot,'cookies.txt')).catch(()=>null) ? '../cookies.txt' : null);
-        if (useCookies && selected) {
-            const source = selected === '../cookies.txt' ? path.join(backendRoot,'cookies.txt') : path.join(cookiesDir,selected);
+        if (cookiePath) {
             const copy = path.join(directory,'cookies.txt');
-            await fs.copyFile(source,copy); args.push('--cookies',copy);
+            await fs.copyFile(cookiePath,copy); args.push('--cookies',copy);
         }
         if (process.env.YTDLP_PROXY) args.push('--proxy',process.env.YTDLP_PROXY);
         if (getIsImpersonateAvailable()) args.push('--impersonate','safari');
         return args;
     }
     async function ytdlp(directory, args, options) {
+        const cookies = await availableCookies();
+        const selected = cookies.length ? pickCookie(cookies) : null;
         try {
-            return await run('yt-dlp',[...await commonArgs(directory),...args],options);
+            return await run('yt-dlp',[...await commonArgs(directory,selected),...args],options);
         } catch (error) {
-            // A stale account cookie must not make an otherwise public video
-            // unavailable. Retry once without copying or exposing the cookie.
+            // Retry a bot-blocked account with another account first. Public
+            // videos still get one no-cookie attempt when no alternative exists.
             if (error?.code !== 'MEDIA_EXIT') throw error;
+            const alternatives = cookies.filter(cookie => cookie !== selected);
+            const replacement = alternatives.length ? pickCookie(alternatives) : null;
             try {
-                return await run('yt-dlp',[...await commonArgs(directory,{useCookies:false}),...args],options);
+                return await run('yt-dlp',[...await commonArgs(directory,replacement),...args],options);
             } catch (retryError) {
                 if (retryError?.code === 'MEDIA_EXIT') retryError.mediaFailure = classifyYtdlpFailure(retryError);
                 throw retryError;
