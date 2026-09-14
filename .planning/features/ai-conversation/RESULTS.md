@@ -87,3 +87,14 @@ Controlled closed model records with the second record delayed three seconds, pr
 | Sentence MP3 | 826 ms | 3001 ms | Yes |
 
 Both completed; neither failure nor slow sample was discarded. This is one sequential cold-client OGG / subsequent MP3 sample, not a fair P50/P95 comparison or mobile audible playback measurement. The OGG implementation sends the first sentence before later TTS inputs, but that alone did not deliver first audio before the three-second model gate in this run. Browser defaults therefore remain sentence MP3. `QA_OGG_STREAMING_ENABLED=true` permits staging browser capability selection for further testing; it is not enabled by default.
+
+## 2026-09-14 warm-frame browser integration
+
+`qa_warm_browser_probe.js` exercised the production cache/context/policy/request/SSE/MP3 modules and browser audio controller with one real Gemini request, real TTS, and keyboard activation in headless Chrome 141. Local fixture MP4 supplied five independently extracted PTS frames from 116.016–119.620 s; question timestamp was 120 s. Subtitle state was explicitly absent for this isolated test.
+
+- Initial attempt timed out without phase diagnostics. It remains a failed attempt (`warm-browser-20260914-initial-failure.json`); usage is unconfirmed.
+- Diagnostic attempt: first accepted sentence 1858 ms, model done 2034 ms, first MP3 asset 3034 ms, actual `playing` 3049 ms. Raw report: `warm-browser-20260914.json`.
+- Accepted sentence: “실내 공간에 세 사람이 의자에 앉아 있습니다.” Inspection of the fixture frame supports this limited statement; this is not broad factuality evaluation.
+- This response contained one sentence, so audio did not precede model completion. The controlled delayed-second-sentence test separately proves that the code does not wait for the whole answer before starting synthesis. Neither observation establishes a P50/P95 target.
+
+No claim of physical-device audible playback, screen-reader usability, full subtitle context or representative latency is made. The first timeout is not excluded from the attempt history.
