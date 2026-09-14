@@ -3,7 +3,7 @@ const test = require('node:test'), assert = require('node:assert/strict');
 const fs = require('node:fs/promises'), path = require('node:path'), os = require('node:os');
 const { createQaContext } = require('../modules/qaContext');
 const { validateSentence } = require('../modules/qaSentencePolicy');
-const { createQaGeneration } = require('../modules/qaGeneration');
+const { createQaGeneration, classifyProviderFailure } = require('../modules/qaGeneration');
 const { createQaRequestStore } = require('../modules/qaRequestStore');
 const input = { requestId: 'context-request', sessionId: 'context-session', videoId: 'abcdefghijk', timestamp: 12,
     question: '그 사람이 뭘 하던 중이야?', history: [], audioMode: 'mp3' };
@@ -59,6 +59,17 @@ test('parallel SDK response rejection is handled when the token stream fails', a
             stream: (async function* () { throw new Error('token stream failed'); })() }) },
         speech: { mp3: () => assert.fail('no accepted speech') }, recordUsage: () => assert.fail('no confirmed usage') })(request);
     await new Promise(resolve => setImmediate(resolve)); assert.equal(request.status, 'failed'); assert.equal(request.usageStatus, 'unconfirmed');
+});
+test('provider failures are classified safely without retaining the provider message', async t => {
+    const frame = await frameFixture(t), logs = [];
+    const store = createQaRequestStore(), { request } = store.accept(1, input);
+    await createQaGeneration({ store, log: line => logs.push(line), getVideo: () => video, media: { prepare: async () => ({ frames: [frame(12000)], subtitles: { cues: [] } }) },
+        model: { generateContentStream: async () => { throw Object.assign(new Error('503 Service Unavailable: provider detail'), { status: 503 }); } },
+        speech: { mp3: () => assert.fail('no accepted speech') }, recordUsage: () => assert.fail('no confirmed usage') })(request);
+    const failure = logs.find(line => line.includes('"event":"failed"'));
+    assert.ok(failure.includes('"providerFailure":"PROVIDER_UNAVAILABLE"'));assert.ok(!failure.includes('provider detail'));
+    assert.equal(classifyProviderFailure({ message: 'HTTP 429 quota exceeded' }), 'PROVIDER_RATE_LIMITED');
+    assert.equal(classifyProviderFailure({ status: 403, message: 'secret token' }), 'PROVIDER_AUTH');
 });
 test('irregular source timestamps get explicit ordinal frame IDs matching every image and the allowed-ID catalog', async t => {
     const frame = await frameFixture(t), times = [19620,20521,21421,22322,23223,24691,25025,26827];
