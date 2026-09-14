@@ -26,7 +26,10 @@ function createQaGeneration({ store, media, model, speech, getVideo, recordUsage
         const timers = [];
         const timeout = (ms, code) => { const timer = setTimeout(() => store.finish(request, 'error', { code }), ms); timer.unref?.(); timers.push(timer); return timer; };
         timeout(120000, 'QA_TOTAL_TIMEOUT');
-        let first = timeout(45000, 'QA_FIRST_SENTENCE_TIMEOUT'), idle;
+        // Media preparation may download the source and extract a cold window.
+        // The first-answer SLA starts once evidence is ready, not at request
+        // acceptance, so a slow cache miss cannot abort before model I/O.
+        let first, idle;
         let audioChain = Promise.resolve(), ogg, releaseModel;
         request.effectiveAudioMode = request.input.audioMode;
         try {
@@ -37,6 +40,7 @@ function createQaGeneration({ store, media, model, speech, getVideo, recordUsage
             const context = await createQaContext({ request: request.input, media: prepared, video });
             signal.throwIfAborted();
             report('evidence_ready', { timestamp: request.input.timestamp, titlePresent: !!context.title, scriptEntries: context.script.length, historyTurns: context.history.length, frameTimesMs: [...context.evidence.values()].filter(item => item.kind === 'frame').map(item => item.timestampMs), cues: context.cues.length, subtitleState: prepared.subtitles.state || 'unknown', currentFrameId: context.currentFrameId, frameEvidence: context.frameEvidence });
+            first = timeout(45000, 'QA_FIRST_SENTENCE_TIMEOUT');
             function accept(candidate) {
                 signal.throwIfAborted();
                 if (request.sentences.length >= 64) throw new Error('QA_OUTPUT_LIMIT');

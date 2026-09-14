@@ -60,6 +60,17 @@ test('first accepted sentence is synthesized while the second model sentence is 
     gate.resolve(); await running; assert.equal(request.status, 'completed'); assert.equal(calls, 2); assert.equal(usage, 1);
     assert.deepEqual(request.events.map(e => e.id), request.events.map((_, i) => i + 1));
 });
+test('cold media preparation does not consume the first-sentence deadline', async t => {
+    const image = await fixtureFrame(t);
+    const store = createQaRequestStore(), { request } = store.accept(1, input());
+    const started = Date.now();
+    await createQaGeneration({ store, getVideo: () => ({ duration: 60 }),
+        media: { prepare: async () => { await new Promise(resolve => setTimeout(resolve, 46_000)); return { frames: [{ path: image, timestampMs: 11000, sourcePtsMs: 11000 }], subtitles: { cues: [] } }; } },
+        model: { generateContentStream: async () => ({ stream: (async function* () { yield { text: () => JSON.stringify({ seq: 0, text: '지금 화면에 빨간 상자가 보여요.' }) + '\n' }; })(), response: Promise.resolve({}) }) },
+        speech: { mp3: async () => Buffer.from('mp3') }, recordUsage: () => {} })(request);
+    assert.ok(Date.now() - started >= 46_000);
+    assert.equal(request.status, 'completed');
+});
 test('cancel suppresses a late unary result without rewriting the model sentence', async t => {
     const image = await fixtureFrame(t);
     const store = createQaRequestStore(), { request } = store.accept(1, input()); const gate = deferred(), speaking = deferred(); let calls = 0;
