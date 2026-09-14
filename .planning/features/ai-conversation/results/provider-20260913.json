@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "model": [
+    {
+      "mode": "jsonl",
+      "status": "passed",
+      "elapsedMs": 1128.5280830000002,
+      "firstRecordMs": 1008.7575830000001,
+      "parser": {
+        "count": 2,
+        "unfinishedTail": false
+      },
+      "usage": {
+        "promptTokenCount": 73,
+        "candidatesTokenCount": 59,
+        "totalTokenCount": 132,
+        "promptTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 73
+          }
+        ],
+        "serviceTier": "standard"
+      },
+      "searchQueries": 0,
+      "limitation": "Format/config compatibility only; no factuality, real search invocation or production TTS validation claim."
+    },
+    {
+      "mode": "schema-with-search-config",
+      "status": "passed",
+      "elapsedMs": 1013.843959,
+      "firstRecordMs": null,
+      "parser": null,
+      "usage": {
+        "promptTokenCount": 60,
+        "candidatesTokenCount": 70,
+        "totalTokenCount": 130,
+        "promptTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 60
+          }
+        ],
+        "serviceTier": "standard"
+      },
+      "searchQueries": 0,
+      "limitation": "Format/config compatibility only; no factuality, real search invocation or production TTS validation claim."
+    }
+  ],
+  "startedAt": "2026-09-13T12:45:24.109Z",
+  "budget": {
+    "modelCalls": 2,
+    "maxOutputTokensPerCall": 512,
+    "searchEnabledCalls": 1,
+    "speechCalls": 3,
+    "speechCharacters": 52,
+    "retries": 0
+  },
+  "speech": [
+    {
+      "mode": "mp3",
+      "seq": 0,
+      "status": "passed",
+      "elapsedMs": 918.0692909999998,
+      "bytes": 9984
+    },
+    {
+      "mode": "mp3",
+      "seq": 1,
+      "status": "passed",
+      "elapsedMs": 608.9255830000002,
+      "bytes": 8064
+    },
+    {
+      "mode": "ogg",
+      "status": "passed",
+      "firstByteMs": 207.54741699999977,
+      "secondInputMs": 3004.2334170000004,
+      "firstByteBeforeSecondInput": true,
+      "elapsedMs": 3413.571084,
+      "bytes": 18614
+    }
+  ],
+  "modelName": "gemini-3.5-flash-lite"
+}

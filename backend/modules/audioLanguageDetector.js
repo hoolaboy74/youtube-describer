@@ -1,4 +1,4 @@
-const { spawn, execSync } = require('child_process');
+const { runMediaProcess } = require('./mediaResourceLimiter');
 const fs = require('fs');
 const path = require('path');
 const logger = require('../logger');
@@ -8,45 +8,21 @@ const whisperModel = process.env.WHISPER_MODEL || '/home/chacha/whisper.cpp/mode
 const whisperThreads = process.env.WHISPER_THREADS || '2';
 const whisperTimeoutMs = parseInt(process.env.WHISPER_TIMEOUT_MS || '15000', 10);
 
-function runProcess(cmd, args, timeoutMs) {
-    return new Promise((resolve, reject) => {
-        const child = spawn(cmd, args);
-        let stderr = '';
-        
-        const timeout = setTimeout(() => {
-            child.kill();
-            reject(new Error(`${cmd} timed out after ${timeoutMs}ms`));
-        }, timeoutMs);
-
-        child.stderr.on('data', data => { stderr += data.toString(); });
-        child.on('close', code => {
-            clearTimeout(timeout);
-            if (code === 0) resolve();
-            else reject(new Error(`${cmd} 실패 (코드: ${code}). Stderr: ${stderr.substring(0, 300)}`));
-        });
-    });
+async function runProcess(cmd, args, timeoutMs) {
+    await runMediaProcess(cmd, args, { needs: { ffmpeg: 1 }, timeoutMs });
 }
 
-function runWhisperDetect(cmd, args, timeoutMs) {
-    return new Promise((resolve, reject) => {
-        const child = spawn(cmd, args);
-        let stderr = '';
-        
-        const timeout = setTimeout(() => {
-            child.kill();
-            reject(new Error(`${cmd} timed out after ${timeoutMs}ms`));
-        }, timeoutMs);
-
-        child.stderr.on('data', data => { stderr += data.toString(); });
-        child.on('close', code => {
-            clearTimeout(timeout);
-            // -dl 옵션은 성공 판별 시에도 중단 형태에 따라 종료 코드가 0이 아닐 수도 있으므로,
-            // stderr 스트림을 직접 파싱합니다.
-            const match = stderr.match(/auto-detected language:\s*([a-z]{2})/);
-            const lang = match ? match[1] : 'unknown';
-            resolve(lang);
-        });
-    });
+async function runWhisperDetect(cmd, args, timeoutMs) {
+    let stderr;
+    try {
+        ({ stderr } = await runMediaProcess(cmd, args, { needs: { whisper: 1 }, timeoutMs }));
+    } catch (error) {
+        // Whisper -dl can report a language with a nonzero exit. Timeouts and
+        // spawn failures still fail conservatively instead of parsing partial output.
+        if (error.code !== 'MEDIA_EXIT' || error.exitSignal) throw error;
+        stderr = error.stderr;
+    }
+    return stderr.match(/auto-detected language:\s*([a-z]{2})/)?.[1] || 'unknown';
 }
 
 /**
@@ -88,7 +64,7 @@ async function detectLanguage(tempVideoPath, totalDuration, requestHash) {
         await runProcess('ffmpeg', ffmpegArgs, 15000);
 
         // 2. Whisper 동시 3개 실행 (양자화 모델, 스레드 제한, -dl 언어 감지 조기 종료 옵션 적용)
-        logger.info(`[${requestHash}] Running 3 concurrent Whisper instances (threads: ${whisperThreads})`);
+        logger.info(`[${requestHash}] Running 3 Whisper samples with shared concurrency limit (threads: ${whisperThreads})`);
         const whisperPromises = sliceWavPaths.map((wavPath) => {
             const whisperArgs = [
                 '-m', whisperModel,
@@ -101,7 +77,10 @@ async function detectLanguage(tempVideoPath, totalDuration, requestHash) {
             return runWhisperDetect(whisperBin, whisperArgs, whisperTimeoutMs);
         });
 
-        const detectedLangs = await Promise.all(whisperPromises);
+        const outcomes = await Promise.allSettled(whisperPromises);
+        const failed = outcomes.find(outcome => outcome.status === 'rejected');
+        if (failed) throw failed.reason;
+        const detectedLangs = outcomes.map(outcome => outcome.value);
         logger.info(`[${requestHash}] Whisper detected languages: [${detectedLangs.join(', ')}]`);
 
         // 3. 언어 판정 분석

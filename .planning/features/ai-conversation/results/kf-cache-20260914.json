@@ -1,0 +1,19 @@
+{
+  "videoId": "KFjlKrrZpqc",
+  "currentReadyMs": 2396,
+  "fullReadyMs": 9114,
+  "firstFrames": [
+    29629,
+    30530,
+    31431,
+    32332
+  ],
+  "subtitleState": "ready",
+  "subtitleCues": 59,
+  "fullState": "ready",
+  "frames": 210,
+  "filesPresent": 210,
+  "cacheCondition": "isolated-empty",
+  "repetitions": 1,
+  "productionCacheDeleted": false
+}

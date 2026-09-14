@@ -1,0 +1,41 @@
+{
+  "kind": "headless-saved-audio-instrumentation",
+  "browser": "Chrome/141.0.7390.122",
+  "records": [
+    {
+      "schemaVersion": 1,
+      "requestId": "1b923c55-2e62-4a55-9227-e70855f1c3d0",
+      "implementation": "legacy",
+      "fixture": "saved-provider-audio",
+      "cacheState": "warm",
+      "device": "headless-chromium",
+      "run": "instrumentation-only",
+      "historyTurns": 0,
+      "timestamp": 0,
+      "audioMode": "mp3",
+      "status": "played",
+      "timings": {
+        "firstPlaying": 569.1000000014901
+      },
+      "elapsedMs": 569.2999999970198
+    },
+    {
+      "schemaVersion": 1,
+      "requestId": "5cfe97fd-0aa9-4c5c-98e1-4aa5c450c509",
+      "implementation": "legacy",
+      "fixture": "saved-provider-audio",
+      "cacheState": "warm",
+      "device": "headless-chromium",
+      "run": "instrumentation-only",
+      "historyTurns": 0,
+      "timestamp": 0,
+      "audioMode": "ogg",
+      "status": "played",
+      "timings": {
+        "firstPlaying": 62.399999998509884
+      },
+      "elapsedMs": 62.399999998509884
+    }
+  ],
+  "limitation": "Keyboard activation and real playing events with saved audio only; no production latency, mobile, screen reader or audible-output claim."
+}

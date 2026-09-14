@@ -8,8 +8,9 @@ console.log('Starting cache clearing process...');
 const backendDir = __dirname;
 const ttsCacheDir = path.join(backendDir, 'public', 'audio', 'tts_cache');
 const tempDir = path.join(backendDir, 'temp');
-const dbPath = path.join(backendDir, 'db', 'cache.db');
+const dbPath = process.env.YOUTUBE_DESCRIBER_DB_PATH ? path.resolve(process.env.YOUTUBE_DESCRIBER_DB_PATH) : path.join(backendDir, 'db', 'cache.db');
 const videoAudioDir = path.join(backendDir, 'public', 'audio');
+const qaCacheDir = path.resolve(process.env.QA_CACHE_ROOT || (process.env.YOUTUBE_DESCRIBER_DB_PATH ? path.join(path.dirname(dbPath), 'qa-cache') : path.join(backendDir, 'cache', 'qa')));
 
 // 1. Clear File System Caches
 console.log('Clearing file system caches...');
@@ -20,6 +21,10 @@ if (fs.existsSync(ttsCacheDir)) {
 if (fs.existsSync(tempDir)) {
     fs.rmSync(tempDir, { recursive: true, force: true });
     console.log('  - Deleted temp directory.');
+}
+if (fs.existsSync(qaCacheDir)) {
+    fs.rmSync(qaCacheDir, { recursive: true, force: true });
+    console.log('  - Deleted Q&A cache directory.');
 }
 if(fs.existsSync(videoAudioDir)) {
     const videoDirs = fs.readdirSync(videoAudioDir);
@@ -38,6 +43,9 @@ console.log('Clearing database tables...');
 try {
     if (fs.existsSync(dbPath)) {
         const db = new Database(dbPath);
+        for (const table of ['qa_frame_assets', 'qa_subtitle_assets', 'qa_cache_jobs']) {
+            if (db.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name=?").get(table)) db.exec(`DELETE FROM ${table}`);
+        }
         db.exec('DELETE FROM scripts;');
         db.exec('DELETE FROM videos;');
         db.exec('VACUUM;');

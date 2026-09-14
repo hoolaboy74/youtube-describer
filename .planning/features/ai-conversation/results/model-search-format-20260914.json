@@ -1,0 +1,107 @@
+{
+  "videoId": "RUY931euKn4",
+  "question": "이찬원의 학력에 대해 검색해",
+  "attempts": [
+    {
+      "videoId": "RUY931euKn4",
+      "timestamp": 21.59921444967307,
+      "question": "이찬원의 학력에 대해 검색해",
+      "scriptEntries": 92,
+      "frames": 8,
+      "durationMs": 3274,
+      "status": "completed",
+      "sentences": [
+        {
+          "seq": 0,
+          "text": "이찬원의 학력은 대구선원초등학교, 성곡중학교, 경원고등학교를 졸업하고 영남대학교 경제금융학부를 휴학 중인 것으로 알려져 있습니다.",
+          "policyVersion": "qa-format-v1"
+        }
+      ],
+      "search": {
+        "sentences": 1,
+        "usageStatus": "recorded",
+        "sources": []
+      },
+      "usage": {
+        "promptTokenCount": 22822,
+        "candidatesTokenCount": 52,
+        "totalTokenCount": 22874,
+        "cachedContentTokenCount": 7552,
+        "promptTokensDetails": [
+          {
+            "modality": "IMAGE",
+            "tokenCount": 8800
+          },
+          {
+            "modality": "TEXT",
+            "tokenCount": 14022
+          }
+        ],
+        "cacheTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 4640
+          },
+          {
+            "modality": "IMAGE",
+            "tokenCount": 2912
+          }
+        ],
+        "serviceTier": "standard"
+      },
+      "modelCalls": 1,
+      "realTtsCalls": 0
+    },
+    {
+      "videoId": "RUY931euKn4",
+      "timestamp": 21.59921444967307,
+      "question": "이찬원의 학력에 대해 검색해",
+      "scriptEntries": 92,
+      "frames": 8,
+      "durationMs": 8964,
+      "status": "completed",
+      "sentences": [
+        {
+          "seq": 0,
+          "text": "이찬원의 학력은 대구선원초등학교, 성곡중학교, 경원고등학교를 졸업하고 영남대학교 경제금융학부를 휴학 중인 것으로 알려져 있습니다.",
+          "policyVersion": "qa-format-v1"
+        }
+      ],
+      "search": {
+        "sentences": 1,
+        "usageStatus": "recorded",
+        "sources": []
+      },
+      "usage": {
+        "promptTokenCount": 22867,
+        "candidatesTokenCount": 52,
+        "totalTokenCount": 22919,
+        "cachedContentTokenCount": 7547,
+        "promptTokensDetails": [
+          {
+            "modality": "IMAGE",
+            "tokenCount": 8800
+          },
+          {
+            "modality": "TEXT",
+            "tokenCount": 14067
+          }
+        ],
+        "cacheTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 4643
+          },
+          {
+            "modality": "IMAGE",
+            "tokenCount": 2904
+          }
+        ],
+        "serviceTier": "standard"
+      },
+      "modelCalls": 1,
+      "realTtsCalls": 0
+    }
+  ],
+  "limitations": "Two bounded model-only calls with cached images and full script, empty history (original private three turns unavailable). Both returned answers but neither reported search queries or sources. This does not verify external search execution or the education facts. No real TTS or cache downloads."
+}

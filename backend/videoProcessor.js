@@ -5,8 +5,10 @@ const path = require('path');
 const util = require('util');
 const os = require('os');
 const { execFile, spawn, execSync } = require('child_process');
+const { spawnLimitedMedia } = require('./modules/mediaResourceLimiter');
+const { extractFrames } = require('./modules/frameExtraction');
 const db = require('./database');
-const { formatTime, preprocessVtt, isValidYoutubeUrl } = require('./utils');
+const { formatTime, preprocessVtt, isValidYoutubeUrl, getIsImpersonateAvailable } = require('./utils');
 const logger = require('./logger');
 const audioLanguageDetector = require('./modules/audioLanguageDetector');
 const { loadPolicyPrompt, POLICY_VERSION } = require('./modules/promptPolicy');
@@ -52,43 +54,10 @@ const API_KEY = process.env.GOOGLE_API_KEY;
 if (!API_KEY) {
   throw new Error("GOOGLE_API_KEY is not defined in the environment");
 }
-const MODEL_NAME = process.env.GEMINI_MODEL || "gemini-3.1-pro-preview";
+const MODEL_NAME = process.env.GEMINI_MODEL || "gemini-3.8-flash";
 const genAI = new GoogleGenerativeAI(API_KEY);
 const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY || API_KEY;
 const youtube = google.youtube({ version: 'v3', auth: YOUTUBE_API_KEY });
-const calculateApiCost = (modelName, promptTokenCount, candidatesTokenCount, totalTokenCount) => {
-    const promptTokens = promptTokenCount || 0;
-    const candidatesTokens = candidatesTokenCount || 0;
-    const totalTokens = totalTokenCount || (promptTokens + candidatesTokens);
-    
-    const modelLower = modelName ? modelName.toLowerCase() : "";
-    let inputRate = 1.25; // Default legacy pro rate (gemini-1.5-pro / gemini-2.5-pro)
-    let outputRate = 10.00;
-    let inputRateOverLimit = 2.50;
-    let outputRateOverLimit = 15.00;
-
-    if (modelLower.includes('3.1-pro')) {
-        inputRate = 2.00;
-        outputRate = 12.00;
-        inputRateOverLimit = 4.00;
-        outputRateOverLimit = 18.00;
-    } else if (modelLower.includes('3.5-flash')) {
-        inputRate = 1.50;
-        outputRate = 9.00;
-        inputRateOverLimit = 1.50;
-        outputRateOverLimit = 9.00;
-    } else if (modelLower.includes('1.5-flash')) {
-        inputRate = 0.075;
-        outputRate = 0.30;
-        inputRateOverLimit = 0.15;
-        outputRateOverLimit = 0.60;
-    }
-
-    const inputCost = (promptTokens / 1000000) * (totalTokens <= 200000 ? inputRate : inputRateOverLimit);
-    const outputCost = (candidatesTokens / 1000000) * (totalTokens <= 200000 ? outputRate : outputRateOverLimit);
-    const totalCost = inputCost + outputCost;
-    return isNaN(totalCost) ? 0 : totalCost;
-};
 
 const processingLocks = new Set();
 const timers = new Map();
@@ -180,153 +149,24 @@ const timeEnd = (label) => {
 /**
  * Parallel Keyframe Extraction using FFmpeg Time-Chunking
  */
-async function extractKeyframesHybrid({ tempVideoPath, tempVideoFilename, baseTempDir, totalDuration, requestHash, sseHandler }) {
-    if (!fs.existsSync(tempVideoPath)) {
-        throw new Error('Video file download failed or file not found.');
-    }
-
-    logger.info(`[${requestHash}] Starting hybrid keyframe extraction (duration: ${totalDuration}s)`);
-
-    // Step 1: Fast I-frame extraction with showinfo
-    // sse status update omitted for high-speed extraction
-    const rawTimestamps = await new Promise((resolve, reject) => {
-        const extractedTimestamps = [];
-        let chunkStderr = '';
-
-        const ffmpegArgs = [
-            '-loglevel', 'info',
-            '-skip_frame', 'nokey', // I-frame only decoding to reduce CPU load by 90%
-            '-i', tempVideoFilename,
-            '-vf', "fps=1/2,scale=640:-1,showinfo",
-            '-vsync', '0',
-            '-q:v', '5',
-            `frame_raw_%04d.jpg`
-        ];
-
-        const ffmpegProcess = spawn('ffmpeg', ffmpegArgs, { cwd: baseTempDir });
-
-        ffmpegProcess.stderr.on('data', (data) => {
-            const stderrChunk = data.toString();
-            chunkStderr += stderrChunk;
-            if (chunkStderr.length > 10000) {
-                chunkStderr = chunkStderr.substring(chunkStderr.length - 10000);
-            }
-            
-            const timeMatches = stderrChunk.matchAll(/pts_time:(\d+\.?\d*)/g);
-            for (const match of timeMatches) {
-                extractedTimestamps.push(parseFloat(match[1]));
-            }
-
-            // progress report omitted since extraction takes < 1.5 seconds
+async function extractKeyframesHybrid({ tempVideoPath, baseTempDir, totalDuration, requestHash, qaPipeline }) {
+    const result = await extractFrames({
+        inputPath: path.resolve(tempVideoPath),
+        outputDir: path.join(baseTempDir, 'source-frames'),
+        durationMs: Math.round(totalDuration * 1000),
+        onFrame: qaPipeline ? frame => qaPipeline.publish(frame).catch(() => {}) : undefined,
+    });
+    if (!result.ready) {
+        throw Object.assign(new Error('Frame coverage is incomplete'), {
+            code: 'FRAME_COVERAGE_INCOMPLETE', coverageHoles: result.coverageHoles,
         });
-
-        ffmpegProcess.on('error', (err) => reject(new Error(`ffmpeg spawn error: ${err.message}`)));
-        ffmpegProcess.on('close', (code) => {
-            if (code === 0 || chunkStderr.includes('Nothing was written into output file') || chunkStderr.includes('No filtered frames')) {
-                resolve(extractedTimestamps.sort((a, b) => a - b));
-            } else {
-                reject(new Error(`ffmpeg exited with code ${code}. Stderr: ${chunkStderr}`));
-            }
-        });
-    });
-
-    // Step 2: Gap Detection
-    logger.info(`[${requestHash}] Raw I-frame extraction complete. Detected ${rawTimestamps.length} frames. Scanning for gaps...`);
-    const gapTargetTimes = [];
-    for (let target = 0; target < totalDuration; target += 2) {
-        const closest = rawTimestamps.find(t => Math.abs(t - target) <= 1.0);
-        if (!closest) {
-            gapTargetTimes.push(target);
-        }
     }
-
-    // Step 3: Backfill Execution
-    if (gapTargetTimes.length > 0) {
-        logger.info(`[${requestHash}] Found ${gapTargetTimes.length} missing frame slots. Starting backfill (concurrency limit: 3)...`);
-        
-        const chunkLimit = 3;
-        for (let i = 0; i < gapTargetTimes.length; i += chunkLimit) {
-            const chunk = gapTargetTimes.slice(i, i + chunkLimit);
-            const chunkPromises = chunk.map((time, idx) => {
-                const globalIdx = i + idx;
-                return new Promise((resolveBackfill) => {
-                    const ffmpegArgs = [
-                        '-loglevel', 'quiet',
-                        '-ss', time.toFixed(3), // Fast Seeking
-                        '-i', tempVideoFilename,
-                        '-vf', "scale=640:-1",
-                        '-vframes', '1',
-                        '-q:v', '5',
-                        `frame_backfill_${globalIdx}_%04d.jpg`
-                    ];
-
-                    const ffmpegProcess = spawn('ffmpeg', ffmpegArgs, { cwd: baseTempDir });
-                    ffmpegProcess.on('error', (err) => {
-                        logger.warn(`[${requestHash}] Backfill spawn error for ${time}s (ignored): ${err.message}`);
-                        resolveBackfill(null);
-                    });
-                    ffmpegProcess.on('close', (code) => {
-                        if (code === 0) {
-                            resolveBackfill({ time, idx: globalIdx });
-                        } else {
-                            logger.warn(`[${requestHash}] Backfill failed for ${time}s (ignored) with code ${code}`);
-                            resolveBackfill(null);
-                        }
-                    });
-                });
-            });
-            await Promise.all(chunkPromises);
-        }
+    qaPipeline?.complete(Math.round(totalDuration * 1000));
+    for (const [index, frame] of result.frames.entries()) {
+        await fs.promises.rename(frame.path, path.join(baseTempDir, `frame-${String(index + 1).padStart(4, '0')}.jpg`));
     }
-
-    // Step 4: Re-index unified frames sequentially to frame-%04d.jpg & prepare return timestamps
-    const files = fs.readdirSync(baseTempDir);
-    const rawFiles = files.filter(f => f.startsWith('frame_raw_') && f.endsWith('.jpg')).sort();
-    const backfillFiles = files.filter(f => f.startsWith('frame_backfill_') && f.endsWith('.jpg')).sort();
-
-    // Map time to file paths for unified sorting
-    const unifiedList = [];
-    rawFiles.forEach((file, idx) => {
-        const t = rawTimestamps[idx] !== undefined ? rawTimestamps[idx] : idx * 2.0;
-        unifiedList.push({ file, time: t });
-    });
-
-    backfillFiles.forEach(file => {
-        const match = file.match(/frame_backfill_(\d+)_/);
-        if (match) {
-            const idx = parseInt(match[1], 10);
-            const t = gapTargetTimes[idx];
-            if (t !== undefined) {
-                unifiedList.push({ file, time: t });
-            }
-        }
-    });
-
-    // Chronological sorting
-    unifiedList.sort((a, b) => a.time - b.time);
-
-    const finalTimestamps = [];
-    unifiedList.forEach((item, index) => {
-        const srcPath = path.join(baseTempDir, item.file);
-        const dstFilename = `frame-${String(index + 1).padStart(4, '0')}.jpg`;
-        const dstPath = path.join(baseTempDir, dstFilename);
-
-        if (fs.existsSync(srcPath)) {
-            fs.renameSync(srcPath, dstPath);
-        }
-        finalTimestamps.push(item.time);
-    });
-
-    // Clean up remaining temp files just in case
-    const remainingTempFiles = fs.readdirSync(baseTempDir).filter(f => (f.startsWith('frame_raw_') || f.startsWith('frame_backfill_')) && f.endsWith('.jpg'));
-    for (const file of remainingTempFiles) {
-        try { fs.unlinkSync(path.join(baseTempDir, file)); } catch (e) {}
-    }
-
-    logger.info(`[${requestHash}] Hybrid extraction complete. Total frames unified: ${finalTimestamps.length}`);
-    // sse status update omitted for high-speed extraction
-
-    return finalTimestamps;
+    logger.info(`[${requestHash}] Extracted ${result.frames.length} frames with verified source PTS.`);
+    return result.frames.map(frame => frame.timestampMs / 1000);
 }
 
 // Helper to parse ISO 8601 duration
@@ -521,6 +361,7 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null, userId = nul
 
     const baseTempDir = path.join(__dirname, 'temp', videoId);
     let cookiePath = null;
+    let qaPipeline = null;
 
     try {
         const cachedData = db.getVideo(videoId);
@@ -533,6 +374,7 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null, userId = nul
         }
 
         await fs.promises.mkdir(baseTempDir, { recursive: true });
+        qaPipeline = db.getQaMedia().beginPipeline(videoId);
 
         logger.info(`[${requestHash}] Step 1: Starting initial data extraction...`);
         const extractionLabel = `[${requestHash}] Initial Data Extraction Time`;
@@ -611,159 +453,167 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null, userId = nul
         const tempVideoFilename = `${videoId}.mp4`;
         const tempVideoPath = path.join(baseTempDir, tempVideoFilename);
 
-        let downloadSuccess = false;
-        let downloadAttempt = 1;
-        let currentCookiePath = getRandomCookiePath();
-        const usedCookiePaths = []; // Track already attempted cookies to avoid duplicates
+        const downloadSource = async (signal) => {
+            let downloadSuccess = false;
+            let downloadAttempt = 1;
+            let currentCookiePath = getRandomCookiePath();
+            const usedCookiePaths = []; // Track already attempted cookies to avoid duplicates
+            const useImpersonate = getIsImpersonateAvailable();
+            const impersonateArgs = useImpersonate ? ['--impersonate', 'safari'] : [];
 
-        while (!downloadSuccess && downloadAttempt <= 2) {
-            const isRetry = downloadAttempt === 2;
-            
-            if (isRetry) {
-                logger.info(`[${requestHash}] Attempt 2: Cleaning up and retrying download...`);
-                if (sseHandler) sseHandler('status_update', { message: '대체 자격증명으로 우회 재시도 중...' });
-                
-                // Clean up any partial files from attempt 1 to ensure a fresh session
-                try {
-                    const files = await fs.promises.readdir(baseTempDir);
-                    for (const file of files) {
-                        await fs.promises.unlink(path.join(baseTempDir, file));
-                    }
-                } catch (cleanupErr) {
-                    logger.warn(`[${requestHash}] Minor error during retry cleanup: ${cleanupErr.message}`);
-                }
+            while (!downloadSuccess && downloadAttempt <= 2) {
+                const isRetry = downloadAttempt === 2;
 
-                // Record the failed cookie
-                if (currentCookiePath) {
-                    usedCookiePaths.push(currentCookiePath);
-                }
+                if (isRetry) {
+                    logger.info(`[${requestHash}] Attempt 2: Cleaning up and retrying download...`);
+                    if (sseHandler) sseHandler('status_update', { message: '대체 자격증명으로 우회 재시도 중...' });
 
-                // Select a new valid cookie excluding already attempted ones
-                const cookiesDir = path.join(__dirname, 'cookies');
-                let nextCookiePath = null;
-                if (fs.existsSync(cookiesDir)) {
-                    const cookieFiles = fs.readdirSync(cookiesDir)
-                        .filter(file => file.endsWith('_cookies.txt') && fs.statSync(path.join(cookiesDir, file)).size > 0)
-                        .map(file => path.join(cookiesDir, file))
-                        .filter(p => !usedCookiePaths.includes(p));
-                    
-                    if (cookieFiles.length > 0) {
-                        nextCookiePath = cookieFiles[Math.floor(Math.random() * cookieFiles.length)];
-                        logger.info(`[${requestHash}] Attempt 2: Selecting alternative cookie: ${path.basename(nextCookiePath)}`);
-                    } else {
-                        logger.warn(`[${requestHash}] Attempt 2: No alternative cookies available. Retrying without cookies.`);
-                    }
-                }
-                currentCookiePath = nextCookiePath;
-            }
-
-            const activeCookiePath = currentCookiePath;
-            const cookieArgs = activeCookiePath ? ['--cookies', activeCookiePath] : [];
-            
-            try {
-                await new Promise((resolve, reject) => {
-                    const ytdlpArgs = [
-                        '-f', 'best[height<=360][vcodec!=none][acodec!=none]/best[height<=360]',
-                        '-o', tempVideoFilename,
-                        '--force-ipv4',
-                        '--legacy-server-connect',
-                        '--no-check-certificate',
-                        '--plugin-dirs', path.join(__dirname, 'yt_dlp_plugins'),
-                        '--remote-components', 'ejs:github',
-                        '--js-runtimes', 'node',
-                        ...impersonateArgs,
-                        '--newline', 
-                        '--write-auto-sub',
-                        '--write-sub',
-                        '--sub-lang', 'ko,en',
-                        ...cookieArgs,
-                        ...proxyArgs,
-                        youtubeUrl
-                    ];
-
-                    const ytdlpPath = 'yt-dlp';
-                    logger.info(`[${requestHash}] Executing YT-DLP: ${ytdlpPath} ${ytdlpArgs.join(' ')}`);
-                    const downloadProcess = spawn(ytdlpPath, ytdlpArgs, { cwd: baseTempDir });
-                    let lastProgress = -1;
-                    let stdoutBuffer = '';
-                    let stderrData = '';
-
-                    downloadProcess.stdout.on('data', (data) => {
-                        const dataStr = data.toString();
-                        stdoutBuffer += dataStr;
-                        
-                        // Monitor for POT Provider challenge solving
-                        if (dataStr.includes('bgutil') || dataStr.includes('PO Token') || dataStr.includes('Generating a')) {
-                            logger.info(`[${requestHash}] YT-DLP POT provider: ${dataStr.trim()}`);
+                    // Clean up any partial files from attempt 1 to ensure a fresh session
+                    try {
+                        const files = await fs.promises.readdir(baseTempDir);
+                        for (const file of files) {
+                            await fs.promises.unlink(path.join(baseTempDir, file));
                         }
+                    } catch (cleanupErr) {
+                        logger.warn(`[${requestHash}] Minor error during retry cleanup: ${cleanupErr.message}`);
+                    }
 
-                        let match;
-                        while ((match = stdoutBuffer.match(/[\r\n]/))) {
-                            const lineEndIndex = match.index;
-                            const line = stdoutBuffer.substring(0, lineEndIndex);
-                            if (stdoutBuffer[lineEndIndex] === '\r' && stdoutBuffer[lineEndIndex + 1] === '\n') {
-                                stdoutBuffer = stdoutBuffer.substring(lineEndIndex + 2);
-                            } else {
-                                stdoutBuffer = stdoutBuffer.substring(lineEndIndex + 1);
+                    // Record the failed cookie
+                    if (currentCookiePath) {
+                        usedCookiePaths.push(currentCookiePath);
+                    }
+
+                    // Select a new valid cookie excluding already attempted ones
+                    const cookiesDir = path.join(__dirname, 'cookies');
+                    let nextCookiePath = null;
+                    if (fs.existsSync(cookiesDir)) {
+                        const cookieFiles = fs.readdirSync(cookiesDir)
+                            .filter(file => file.endsWith('_cookies.txt') && fs.statSync(path.join(cookiesDir, file)).size > 0)
+                            .map(file => path.join(cookiesDir, file))
+                            .filter(p => !usedCookiePaths.includes(p));
+
+                        if (cookieFiles.length > 0) {
+                            nextCookiePath = cookieFiles[Math.floor(Math.random() * cookieFiles.length)];
+                            logger.info(`[${requestHash}] Attempt 2: Selecting alternative cookie: ${path.basename(nextCookiePath)}`);
+                        } else {
+                            logger.warn(`[${requestHash}] Attempt 2: No alternative cookies available. Retrying without cookies.`);
+                        }
+                    }
+                    currentCookiePath = nextCookiePath;
+                }
+
+                const activeCookiePath = currentCookiePath;
+                const cookieArgs = activeCookiePath ? ['--cookies', activeCookiePath] : [];
+
+                try {
+                    await new Promise((resolve, reject) => {
+                        const ytdlpArgs = [
+                            '-f', 'best[height<=360][vcodec!=none][acodec!=none]/best[height<=360]',
+                            '-o', tempVideoFilename,
+                            '--force-ipv4',
+                            '--legacy-server-connect',
+                            '--no-check-certificate',
+                            '--plugin-dirs', path.join(__dirname, 'yt_dlp_plugins'),
+                            '--remote-components', 'ejs:github',
+                            '--js-runtimes', 'node',
+                            ...impersonateArgs,
+                            '--newline',
+                            '--write-auto-sub',
+                            '--write-sub',
+                            '--sub-lang', 'ko,en',
+                            ...cookieArgs,
+                            ...proxyArgs,
+                            youtubeUrl
+                        ];
+
+                        const ytdlpPath = 'yt-dlp';
+                        logger.info(`[${requestHash}] Executing YT-DLP: ${ytdlpPath} ${ytdlpArgs.join(' ')}`);
+                        const downloadProcess = spawnLimitedMedia(ytdlpPath, ytdlpArgs, { cwd: baseTempDir, signal, disk: { root: baseTempDir, maxBytes: 1024 ** 3 } }, { download: 1, fullDownload: 1, ffmpeg: 1 });
+                        let lastProgress = -1;
+                        let stdoutBuffer = '';
+                        let stderrData = '';
+
+                        downloadProcess.stdout.on('data', (data) => {
+                            const dataStr = data.toString();
+                            stdoutBuffer += dataStr;
+
+                            // Monitor for POT Provider challenge solving
+                            if (dataStr.includes('bgutil') || dataStr.includes('PO Token') || dataStr.includes('Generating a')) {
+                                logger.info(`[${requestHash}] YT-DLP POT provider: ${dataStr.trim()}`);
                             }
 
-                            if (line.includes('[download]') && line.includes('%')) {
-                                const match = line.match(/(\d+\.?\d*)%/);
-                                if (match) {
-                                    const progress = parseFloat(match[1]);
-                                    if (!isNaN(progress)) {
-                                        if (progress < lastProgress && progress < 5) lastProgress = -1;
-                                        if (Math.floor(progress) > lastProgress || progress === 100) {
-                                            lastProgress = Math.floor(progress);
-                                            if (sseHandler) sseHandler('status_update', { message: `${Math.round(progress)}%` });
+                            let match;
+                            while ((match = stdoutBuffer.match(/[\r\n]/))) {
+                                const lineEndIndex = match.index;
+                                const line = stdoutBuffer.substring(0, lineEndIndex);
+                                if (stdoutBuffer[lineEndIndex] === '\r' && stdoutBuffer[lineEndIndex + 1] === '\n') {
+                                    stdoutBuffer = stdoutBuffer.substring(lineEndIndex + 2);
+                                } else {
+                                    stdoutBuffer = stdoutBuffer.substring(lineEndIndex + 1);
+                                }
+
+                                if (line.includes('[download]') && line.includes('%')) {
+                                    const match = line.match(/(\d+\.?\d*)%/);
+                                    if (match) {
+                                        const progress = parseFloat(match[1]);
+                                        if (!isNaN(progress)) {
+                                            if (progress < lastProgress && progress < 5) lastProgress = -1;
+                                            if (Math.floor(progress) > lastProgress || progress === 100) {
+                                                lastProgress = Math.floor(progress);
+                                                if (sseHandler) sseHandler('status_update', { message: `${Math.round(progress)}%` });
+                                            }
                                         }
                                     }
                                 }
                             }
-                        }
-                    });
+                        });
 
-                    downloadProcess.stderr.on('data', (data) => {
-                        const dataStr = data.toString();
-                        stderrData += dataStr;
-                        if (dataStr.includes('bgutil') || dataStr.includes('PO Token') || dataStr.includes('Generating a')) {
-                            logger.info(`[${requestHash}] YT-DLP POT provider: ${dataStr.trim()}`);
-                        }
-                    });
-
-                    downloadProcess.on('close', (code) => {
-                        const hasVideo = fs.existsSync(tempVideoPath) && fs.statSync(tempVideoPath).size > 0;
-                        if (code === 0 || (hasVideo && stderrData.includes('subtitle'))) {
-                            resolve();
-                        } else {
-                            const stderrLower = stderrData.toLowerCase();
-                            const isBotError = stderrLower.includes('confirm you’re not a bot') || 
-                                               stderrLower.includes('cookies are no longer valid') || 
-                                               stderrLower.includes('http error 403') ||
-                                               stderrLower.includes('login required') ||
-                                               stderrLower.includes('sign in to confirm');
-                            if (downloadAttempt === 1 && isBotError && activeCookiePath) {
-                                const invalidPath = activeCookiePath + '.invalid';
-                                logger.warn(`[${requestHash}] Bot detected with cookie ${path.basename(activeCookiePath)}. Invalidating and retrying with alternative cookie...`);
-                                try { fs.renameSync(activeCookiePath, invalidPath); } catch (e) {}
-                                reject({ type: 'bot_detected', message: stderrData });
-                            } else {
-                                reject(new Error(`yt-dlp download failed with code ${code}. Stderr: ${stderrData}`));
+                        downloadProcess.stderr.on('data', (data) => {
+                            const dataStr = data.toString();
+                            stderrData += dataStr;
+                            if (dataStr.includes('bgutil') || dataStr.includes('PO Token') || dataStr.includes('Generating a')) {
+                                logger.info(`[${requestHash}] YT-DLP POT provider: ${dataStr.trim()}`);
                             }
-                        }
-                    });
+                        });
 
-                    downloadProcess.on('error', (err) => reject(new Error(`Failed to spawn yt-dlp: ${err.message}`)));
-                });
-                downloadSuccess = true;
-            } catch (err) {
-                if (err.type === 'bot_detected' && downloadAttempt === 1) {
-                    downloadAttempt++;
-                    continue;
+                        downloadProcess.on('close', (code) => {
+                            const hasVideo = fs.existsSync(tempVideoPath) && fs.statSync(tempVideoPath).size > 0;
+                            if (code === 0 || (hasVideo && stderrData.includes('subtitle'))) {
+                                resolve();
+                            } else {
+                                const stderrLower = stderrData.toLowerCase();
+                                const isBotError = stderrLower.includes('confirm you’re not a bot') ||
+                                                   stderrLower.includes('cookies are no longer valid') ||
+                                                   stderrLower.includes('http error 403') ||
+                                                   stderrLower.includes('login required') ||
+                                                   stderrLower.includes('sign in to confirm');
+                                if (downloadAttempt === 1 && isBotError && activeCookiePath) {
+                                    const invalidPath = activeCookiePath + '.invalid';
+                                    logger.warn(`[${requestHash}] Bot detected with cookie ${path.basename(activeCookiePath)}. Invalidating and retrying with alternative cookie...`);
+                                    try { fs.renameSync(activeCookiePath, invalidPath); } catch (e) {}
+                                    reject({ type: 'bot_detected', message: stderrData });
+                                } else {
+                                    reject(new Error(`yt-dlp download failed with code ${code}. Stderr: ${stderrData}`));
+                                }
+                            }
+                        });
+
+                        downloadProcess.on('error', (err) => reject(new Error(`Failed to spawn yt-dlp: ${err.message}`)));
+                    });
+                    downloadSuccess = true;
+                } catch (err) {
+                    if (err.type === 'bot_detected' && downloadAttempt === 1) {
+                        downloadAttempt++;
+                        continue;
+                    }
+                    throw err;
                 }
-                throw err;
             }
-        }
+
+        };
+        if (qaPipeline) await qaPipeline.withSource(tempVideoPath, downloadSource);
+        else await downloadSource();
+        qaPipeline?.ready(tempVideoPath);
 
         // Update filesize after download
         if (fs.existsSync(tempVideoPath)) {
@@ -778,6 +628,7 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null, userId = nul
         const [allTimestamps, audioLanguage] = await Promise.all([
             extractKeyframesHybrid({
                 tempVideoPath,
+                qaPipeline,
                 tempVideoFilename,
                 baseTempDir,
                 totalDuration,
@@ -790,14 +641,17 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null, userId = nul
         // Load only a source-language dialogue track. For foreign/unknown audio,
         // a Korean VTT is commonly YouTube's translated caption track, not
         // evidence of Korean speech, so it must never win over the original VTT.
+        const potentialSubtitles = fs.readdirSync(baseTempDir).filter(f => f.endsWith('.vtt'));
         const subtitleSelection = selectDialogueSubtitle(
-            fs.readdirSync(baseTempDir).filter(f => f.endsWith('.vtt')),
+            potentialSubtitles,
             audioLanguage
         );
         let dialogueTrack = [];
+        let selectedSubtitlePath = null;
         if (subtitleSelection) {
+            selectedSubtitlePath = path.join(baseTempDir, subtitleSelection.file);
             dialogueTrack = parseVttToDialogueTrack(
-                path.join(baseTempDir, subtitleSelection.file),
+                selectedSubtitlePath,
                 subtitleSelection.sourceLanguage,
                 subtitleSelection
             );
@@ -806,6 +660,11 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null, userId = nul
             logger.info(`[${requestHash}] No usable original-language subtitles found for ${audioLanguage}; dialogue track is empty.`);
         }
 
+        // Publish downloaded captions to the same durable store used by Q&A.
+        // A filename alone does not prove original speech provenance.
+        const qaSubtitlePath = selectedSubtitlePath || (potentialSubtitles[0] ? path.join(baseTempDir, potentialSubtitles[0]) : null);
+        await db.getQaMedia().publishSubtitles(videoId, qaSubtitlePath, { audioClassification: audioLanguage, provenance: 'unknown' })
+            .catch(() => logger.warn(`[${requestHash}] Q&A subtitle cache publication failed; on-demand retry remains available.`));
         timeEnd(extractionLabel);
         logger.info(`[${requestHash}] Initial data extraction complete. Title: ${videoTitle}, Total Frames: ${allTimestamps.length}, Dialogue Count: ${dialogueTrack.length}`);
         
@@ -877,12 +736,15 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null, userId = nul
         const finalResponse = await result.response;
         const usageMetadata = finalResponse.usageMetadata;
         if (usageMetadata) {
-            const promptTokenCount = usageMetadata.promptTokenCount || 0;
-            const candidatesTokenCount = usageMetadata.candidatesTokenCount || 0;
-            const totalTokenCount = usageMetadata.totalTokenCount || (promptTokenCount + candidatesTokenCount);
-            const cost = calculateApiCost(MODEL_NAME, promptTokenCount, candidatesTokenCount, totalTokenCount);
-            db.addApiCost({ videoId, model_used: MODEL_NAME, image_tokens: promptTokenCount, text_tokens: candidatesTokenCount, cost: isNaN(cost) ? 0 : cost });
-            logger.info(`[${requestHash}] Logged API cost: ${(isNaN(cost) ? 0 : cost).toFixed(6)} USD`);
+            const recordedCost = db.recordGeminiUsage({
+                videoId,
+                requestType: 'description',
+                modelName: MODEL_NAME,
+                usageMetadata
+            });
+            logger.info(`[${requestHash}] Logged API cost: ${recordedCost.totalCost.toFixed(6)} USD`);
+        } else {
+            logger.error(`[${requestHash}] Gemini returned no usage metadata; no unverifiable cost was recorded.`);
         }
 
         timeEnd(aiLabel);
@@ -938,6 +800,7 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null, userId = nul
             sseHandler('backend_error', errorPayload);
         }
     } finally {
+        await qaPipeline?.finish();
         if (fs.existsSync(baseTempDir)) {
             await fs.promises.rm(baseTempDir, { recursive: true, force: true });
         }
@@ -966,6 +829,7 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
 
     const baseTempDir = path.join(__dirname, 'temp', videoId);
     let cookiePath = null;
+    let qaPipeline = null;
 
     try {
         const cachedData = db.getVideo(videoId);
@@ -975,6 +839,7 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
         }
 
         await fs.promises.mkdir(baseTempDir, { recursive: true });
+        qaPipeline = db.getQaMedia().beginPipeline(videoId);
 
         const videoResponse = await youtube.videos.list({
             part: 'snippet,contentDetails,status',
@@ -999,126 +864,133 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
         const extractionLabel = `[${requestHash}] Initial Data Extraction Time`;
         time(extractionLabel);
 
-        let downloadSuccess = false;
-        let downloadAttempt = 1;
-        let currentCookiePath = getRandomCookiePath();
-        const usedCookiePaths = []; // Track already attempted cookies to avoid duplicates
+        const downloadSource = async (signal) => {
+            let downloadSuccess = false;
+            let downloadAttempt = 1;
+            let currentCookiePath = getRandomCookiePath();
+            const usedCookiePaths = []; // Track already attempted cookies to avoid duplicates
+            const useImpersonate = getIsImpersonateAvailable();
+            const impersonateArgs = useImpersonate ? ['--impersonate', 'safari'] : [];
 
-        while (!downloadSuccess && downloadAttempt <= 2) {
-            const isRetry = downloadAttempt === 2;
-            
-            if (isRetry) {
-                logger.info(`[${requestHash}] Attempt 2: Cleaning up and retrying batch download...`);
+            while (!downloadSuccess && downloadAttempt <= 2) {
+                const isRetry = downloadAttempt === 2;
+                if (isRetry) {
+                    logger.info(`[${requestHash}] Attempt 2: Cleaning up and retrying batch download...`);
 
-                // Clean up any partial files from attempt 1 to ensure a fresh session
-                try {
-                    const files = await fs.promises.readdir(baseTempDir);
-                    for (const file of files) {
-                        await fs.promises.unlink(path.join(baseTempDir, file));
-                    }
-                } catch (cleanupErr) {
-                    logger.warn(`[${requestHash}] Minor error during batch retry cleanup: ${cleanupErr.message}`);
-                }
-
-                // Record the failed cookie
-                if (currentCookiePath) {
-                    usedCookiePaths.push(currentCookiePath);
-                }
-
-                // Select a new valid cookie excluding already attempted ones
-                const cookiesDir = path.join(__dirname, 'cookies');
-                let nextCookiePath = null;
-                if (fs.existsSync(cookiesDir)) {
-                    const cookieFiles = fs.readdirSync(cookiesDir)
-                        .filter(file => file.endsWith('_cookies.txt') && fs.statSync(path.join(cookiesDir, file)).size > 0)
-                        .map(file => path.join(cookiesDir, file))
-                        .filter(p => !usedCookiePaths.includes(p));
-                    
-                    if (cookieFiles.length > 0) {
-                        nextCookiePath = cookieFiles[Math.floor(Math.random() * cookieFiles.length)];
-                        logger.info(`[${requestHash}] Attempt 2: Selecting alternative cookie (batch): ${path.basename(nextCookiePath)}`);
-                    } else {
-                        logger.warn(`[${requestHash}] Attempt 2: No alternative cookies available. Retrying without cookies.`);
-                    }
-                }
-                currentCookiePath = nextCookiePath;
-            }
-
-            const activeCookiePath = currentCookiePath;
-            const cookieArgs = activeCookiePath ? ['--cookies', activeCookiePath] : [];
-
-            try {
-                await new Promise((resolve, reject) => {
-                    const ytdlpArgs = [
-                        '-f', 'best[height<=360][vcodec!=none][acodec!=none]/best[height<=360]',
-                        '-o', tempVideoFilename,
-                        '--force-ipv4',
-                        '--legacy-server-connect',
-                        '--no-check-certificate',
-                        '--plugin-dirs', path.join(__dirname, 'yt_dlp_plugins'),
-                        '--remote-components', 'ejs:github',
-                        '--js-runtimes', 'node',
-                        ...impersonateArgs,
-                        '--no-progress',
-                        '--write-auto-sub',
-                        '--write-auto-sub',
-                        '--write-sub',
-                        '--sub-lang', 'ko,en',
-                        ...cookieArgs,
-                        ...proxyArgs,
-                        youtubeUrl
-                    ];
-
-                    const ytdlpPath = 'yt-dlp';
-                    logger.info(`[${requestHash}] Executing YT-DLP: ${ytdlpPath} ${ytdlpArgs.join(' ')}`);
-                    const downloadProcess = spawn(ytdlpPath, ytdlpArgs, { cwd: baseTempDir });
-                    let stderrData = '';
-
-                    downloadProcess.stdout.on('data', (data) => {
-                        const dataStr = data.toString();
-                        if (dataStr.includes('bgutil') || dataStr.includes('PO Token') || dataStr.includes('Generating a')) {
-                            logger.info(`[${requestHash}] YT-DLP POT provider (batch): ${dataStr.trim()}`);
+                    // Clean up any partial files from attempt 1 to ensure a fresh session
+                    try {
+                        const files = await fs.promises.readdir(baseTempDir);
+                        for (const file of files) {
+                            await fs.promises.unlink(path.join(baseTempDir, file));
                         }
-                    });
+                    } catch (cleanupErr) {
+                        logger.warn(`[${requestHash}] Minor error during batch retry cleanup: ${cleanupErr.message}`);
+                    }
 
-                    downloadProcess.stderr.on('data', (data) => {
-                        const dataStr = data.toString();
-                        stderrData += dataStr;
-                        if (dataStr.includes('bgutil') || dataStr.includes('PO Token') || dataStr.includes('Generating a')) {
-                            logger.info(`[${requestHash}] YT-DLP POT provider (batch): ${dataStr.trim()}`);
-                        }
-                    });
+                    // Record the failed cookie
+                    if (currentCookiePath) {
+                        usedCookiePaths.push(currentCookiePath);
+                    }
 
-                    downloadProcess.on('close', (code) => {
-                        const hasVideo = fs.existsSync(tempVideoPath) && fs.statSync(tempVideoPath).size > 0;
-                        if (code === 0 || (hasVideo && stderrData.includes('subtitle'))) {
-                            resolve();
+                    // Select a new valid cookie excluding already attempted ones
+                    const cookiesDir = path.join(__dirname, 'cookies');
+                    let nextCookiePath = null;
+                    if (fs.existsSync(cookiesDir)) {
+                        const cookieFiles = fs.readdirSync(cookiesDir)
+                            .filter(file => file.endsWith('_cookies.txt') && fs.statSync(path.join(cookiesDir, file)).size > 0)
+                            .map(file => path.join(cookiesDir, file))
+                            .filter(p => !usedCookiePaths.includes(p));
+
+                        if (cookieFiles.length > 0) {
+                            nextCookiePath = cookieFiles[Math.floor(Math.random() * cookieFiles.length)];
+                            logger.info(`[${requestHash}] Attempt 2: Selecting alternative cookie (batch): ${path.basename(nextCookiePath)}`);
                         } else {
-                            const isBotError = stderrData.includes('confirm you’re not a bot') || 
-                                               stderrData.includes('cookies are no longer valid') || 
-                                               stderrData.includes('HTTP Error 403');
-                            if (downloadAttempt === 1 && isBotError && activeCookiePath) {
-                                const invalidPath = activeCookiePath + '.invalid';
-                                logger.warn(`[${requestHash}] Bot detected in batch with cookie ${path.basename(activeCookiePath)}. Invalidating and retrying with alternative cookie...`);
-                                try { fs.renameSync(activeCookiePath, invalidPath); } catch (e) {}
-                                reject({ type: 'bot_detected', message: stderrData });
-                            } else {
-                                reject(new Error(`yt-dlp batch download failed with code ${code}. Stderr: ${stderrData}`));
-                            }
+                            logger.warn(`[${requestHash}] Attempt 2: No alternative cookies available. Retrying without cookies.`);
                         }
-                    });
-
-                    downloadProcess.on('error', (err) => reject(new Error(`Failed to spawn yt-dlp in batch: ${err.message}`)));
-                });
-                downloadSuccess = true;
-            } catch (err) {
-                if (err.type === 'bot_detected' && downloadAttempt === 1) {
-                    downloadAttempt++;
-                    continue;
+                    }
+                    currentCookiePath = nextCookiePath;
                 }
-                throw err;
+
+                const activeCookiePath = currentCookiePath;
+                const cookieArgs = activeCookiePath ? ['--cookies', activeCookiePath] : [];
+
+                try {
+                    await new Promise((resolve, reject) => {
+                        const ytdlpArgs = [
+                            '-f', 'best[height<=360][vcodec!=none][acodec!=none]/best[height<=360]',
+                            '-o', tempVideoFilename,
+                            '--force-ipv4',
+                            '--legacy-server-connect',
+                            '--no-check-certificate',
+                            '--plugin-dirs', path.join(__dirname, 'yt_dlp_plugins'),
+                            '--remote-components', 'ejs:github',
+                            '--js-runtimes', 'node',
+                            ...impersonateArgs,
+                            '--no-progress',
+                            '--write-auto-sub',
+                            '--write-auto-sub',
+                            '--write-sub',
+                            '--sub-lang', 'ko,en',
+                            ...cookieArgs,
+                            ...proxyArgs,
+                            youtubeUrl
+                        ];
+
+                        const ytdlpPath = 'yt-dlp';
+                        logger.info(`[${requestHash}] Executing YT-DLP: ${ytdlpPath} ${ytdlpArgs.join(' ')}`);
+                        const downloadProcess = spawnLimitedMedia(ytdlpPath, ytdlpArgs, { cwd: baseTempDir, signal, disk: { root: baseTempDir, maxBytes: 1024 ** 3 } }, { download: 1, fullDownload: 1, ffmpeg: 1 });
+                        let stderrData = '';
+
+                        downloadProcess.stdout.on('data', (data) => {
+                            const dataStr = data.toString();
+                            if (dataStr.includes('bgutil') || dataStr.includes('PO Token') || dataStr.includes('Generating a')) {
+                                logger.info(`[${requestHash}] YT-DLP POT provider (batch): ${dataStr.trim()}`);
+                            }
+                        });
+
+                        downloadProcess.stderr.on('data', (data) => {
+                            const dataStr = data.toString();
+                            stderrData += dataStr;
+                            if (dataStr.includes('bgutil') || dataStr.includes('PO Token') || dataStr.includes('Generating a')) {
+                                logger.info(`[${requestHash}] YT-DLP POT provider (batch): ${dataStr.trim()}`);
+                            }
+                        });
+
+                        downloadProcess.on('close', (code) => {
+                            const hasVideo = fs.existsSync(tempVideoPath) && fs.statSync(tempVideoPath).size > 0;
+                            if (code === 0 || (hasVideo && stderrData.includes('subtitle'))) {
+                                resolve();
+                            } else {
+                                const isBotError = stderrData.includes('confirm you’re not a bot') ||
+                                                   stderrData.includes('cookies are no longer valid') ||
+                                                   stderrData.includes('HTTP Error 403');
+                                if (downloadAttempt === 1 && isBotError && activeCookiePath) {
+                                    const invalidPath = activeCookiePath + '.invalid';
+                                    logger.warn(`[${requestHash}] Bot detected in batch with cookie ${path.basename(activeCookiePath)}. Invalidating and retrying with alternative cookie...`);
+                                    try { fs.renameSync(activeCookiePath, invalidPath); } catch (e) {}
+                                    reject({ type: 'bot_detected', message: stderrData });
+                                } else {
+                                    reject(new Error(`yt-dlp batch download failed with code ${code}. Stderr: ${stderrData}`));
+                                }
+                            }
+                        });
+
+                        downloadProcess.on('error', (err) => reject(new Error(`Failed to spawn yt-dlp in batch: ${err.message}`)));
+                    });
+                    downloadSuccess = true;
+                } catch (err) {
+                    if (err.type === 'bot_detected' && downloadAttempt === 1) {
+                        downloadAttempt++;
+                        continue;
+                    }
+                    throw err;
+                }
             }
-        }
+
+        };
+        if (qaPipeline) await qaPipeline.withSource(tempVideoPath, downloadSource);
+        else await downloadSource();
+        qaPipeline?.ready(tempVideoPath);
 
         // Update filesize after download
         if (fs.existsSync(tempVideoPath)) {
@@ -1131,6 +1003,7 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
         const [allTimestamps, audioLanguage] = await Promise.all([
             extractKeyframesHybrid({
                 tempVideoPath,
+                qaPipeline,
                 tempVideoFilename,
                 baseTempDir,
                 totalDuration,
@@ -1141,14 +1014,17 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
         ]);
 
         // Keep batch subtitle selection identical to the interactive path.
+        const potentialSubtitles = fs.readdirSync(baseTempDir).filter(f => f.endsWith('.vtt'));
         const subtitleSelection = selectDialogueSubtitle(
-            fs.readdirSync(baseTempDir).filter(f => f.endsWith('.vtt')),
+            potentialSubtitles,
             audioLanguage
         );
         let dialogueTrack = [];
+        let selectedSubtitlePath = null;
         if (subtitleSelection) {
+            selectedSubtitlePath = path.join(baseTempDir, subtitleSelection.file);
             dialogueTrack = parseVttToDialogueTrack(
-                path.join(baseTempDir, subtitleSelection.file),
+                selectedSubtitlePath,
                 subtitleSelection.sourceLanguage,
                 subtitleSelection
             );
@@ -1157,6 +1033,11 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
             logger.info(`[${requestHash}] No usable original-language subtitles found for ${audioLanguage} (batch); dialogue track is empty.`);
         }
 
+        // Publish downloaded captions to the same durable store used by Q&A.
+        // A filename alone does not prove original speech provenance.
+        const qaSubtitlePath = selectedSubtitlePath || (potentialSubtitles[0] ? path.join(baseTempDir, potentialSubtitles[0]) : null);
+        await db.getQaMedia().publishSubtitles(videoId, qaSubtitlePath, { audioClassification: audioLanguage, provenance: 'unknown' })
+            .catch(() => logger.warn(`[${requestHash}] Q&A subtitle cache publication failed; on-demand retry remains available.`));
         timeEnd(extractionLabel);
         logger.info(`[${requestHash}] Initial data extraction complete. Title: ${videoTitle}, Total Frames: ${allTimestamps.length}, Dialogue Count: ${dialogueTrack.length}`);
 
@@ -1197,12 +1078,15 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
 
         const usageMetadata = result.response.usageMetadata;
         if (usageMetadata) {
-            const promptTokenCount = usageMetadata.promptTokenCount || 0;
-            const candidatesTokenCount = usageMetadata.candidatesTokenCount || 0;
-            const totalTokenCount = usageMetadata.totalTokenCount || (promptTokenCount + candidatesTokenCount);
-            const cost = calculateApiCost(MODEL_NAME, promptTokenCount, candidatesTokenCount, totalTokenCount);
-            db.addApiCost({ videoId, model_used: MODEL_NAME, image_tokens: promptTokenCount, text_tokens: candidatesTokenCount, cost: isNaN(cost) ? 0 : cost });
-            logger.info(`[${requestHash}] Logged API cost for batch: ${(isNaN(cost) ? 0 : cost).toFixed(6)} USD`);
+            const recordedCost = db.recordGeminiUsage({
+                videoId,
+                requestType: 'description',
+                modelName: MODEL_NAME,
+                usageMetadata
+            });
+            logger.info(`[${requestHash}] Logged API cost for batch: ${recordedCost.totalCost.toFixed(6)} USD`);
+        } else {
+            logger.error(`[${requestHash}] Gemini returned no usage metadata for batch processing; no unverifiable cost was recorded.`);
         }
         
         if (result.response.promptFeedback && result.response.promptFeedback.blockReason) {
@@ -1247,6 +1131,7 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
             }
         }
     } finally {
+        await qaPipeline?.finish();
         if (fs.existsSync(baseTempDir)) {
             await fs.promises.rm(baseTempDir, { recursive: true, force: true });
         }

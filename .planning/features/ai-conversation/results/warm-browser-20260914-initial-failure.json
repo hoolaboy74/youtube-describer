@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 1,
+  "status": "failed",
+  "error": { "name": "TimeoutError", "code": null },
+  "phase": "unknown",
+  "usage": null,
+  "limitation": "Initial probe lacked phase diagnostics and timed out. Kept as a failed attempt; model-call completion and cost are unconfirmed, not assumed zero."
+}

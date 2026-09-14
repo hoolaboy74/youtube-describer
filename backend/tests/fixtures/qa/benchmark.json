@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "media": [
+    { "id": "dense-cfr", "duration": 24, "gop": 20, "offset": 0, "vfr": false },
+    { "id": "sparse-cfr", "duration": 24, "gop": 80, "offset": 0, "vfr": false },
+    { "id": "sparse-vfr-offset", "duration": 24, "gop": 40, "offset": 7, "vfr": true }
+  ],
+  "endToEndMatrix": {
+    "durationSeconds": [300, 900, 1800],
+    "positions": ["start", "middle", "end"],
+    "keyframes": ["dense", "sparse"],
+    "subtitles": ["ready", "absent", "retryable_failed"],
+    "cacheStates": ["cold", "warming", "warm"],
+    "historyTurns": [1, 10, 50],
+    "audioModes": ["ogg", "mp3"],
+    "devices": ["iphone-safari-voiceover", "android-chrome-talkback", "desktop-chrome-nvda"],
+    "repetitionsPerCell": 5,
+    "status": "manual-fixture-selection-and-real-device-runs-required"
+  },
+  "questions": [
+    { "id": "current-scene", "text": "지금 화면에 무엇이 보이나요?" },
+    { "id": "follow-up", "text": "방금 설명한 물체는 화면 어디에 있나요?" },
+    { "id": "screen-text", "text": "지금 화면에서 확인되는 글자를 알려 주세요." },
+    { "id": "seek-back", "text": "이 시점에 보이는 것만 설명해 주세요." }
+  ]
+}

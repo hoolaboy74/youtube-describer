@@ -1,0 +1,26 @@
+{
+  "status": "completed",
+  "elapsedMs": 6849.161999999999,
+  "bytes": 51848355,
+  "probe": {
+    "programs": [],
+    "stream_groups": [],
+    "streams": [
+      {
+        "codec_name": "av1",
+        "codec_type": "video",
+        "width": 854,
+        "height": 480,
+        "start_time": "0.000000"
+      },
+      {
+        "codec_name": "aac",
+        "codec_type": "audio",
+        "start_time": "0.000000"
+      }
+    ],
+    "format": {
+      "duration": "1040.021769"
+    }
+  }
+}

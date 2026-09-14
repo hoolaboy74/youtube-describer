@@ -1,0 +1,279 @@
+{
+  "schemaVersion": 1,
+  "kind": "local-synthetic-media",
+  "environment": {
+    "node": "v24.7.0",
+    "platform": "darwin/arm64",
+    "ffmpeg": {
+      "status": "passed",
+      "version": "ffmpeg version 8.0 Copyright (c) 2000-2025 the FFmpeg developers",
+      "error": null
+    },
+    "ffprobe": {
+      "status": "passed",
+      "version": "ffprobe version 8.0 Copyright (c) 2007-2025 the FFmpeg developers",
+      "error": null
+    },
+    "yt-dlp": {
+      "status": "failed",
+      "version": null,
+      "error": "ImportError: You are using an unsupported version of Python. Only Python versions 3.10 and above are supported by yt-dlp"
+    },
+    "@google/generative-ai": "0.24.1",
+    "@google-cloud/text-to-speech": "6.3.0"
+  },
+  "results": [
+    {
+      "fixture": "dense-cfr",
+      "mode": "legacy-fps",
+      "status": "passed",
+      "elapsedMs": 52.049417000000005,
+      "sourcePts": [
+        0,
+        2,
+        4,
+        6,
+        8,
+        10,
+        12,
+        14,
+        16,
+        18,
+        20,
+        22
+      ],
+      "outputPts": [
+        0,
+        2,
+        4,
+        6,
+        8,
+        10,
+        12,
+        14,
+        16,
+        18,
+        20
+      ],
+      "inventedPts": [],
+      "coverageHoles": [
+        22
+      ],
+      "sourceCoverageHoles": [],
+      "exactSourceMatch": false
+    },
+    {
+      "fixture": "dense-cfr",
+      "mode": "source-pts",
+      "status": "passed",
+      "elapsedMs": 52.377999999999986,
+      "sourcePts": [
+        0,
+        2,
+        4,
+        6,
+        8,
+        10,
+        12,
+        14,
+        16,
+        18,
+        20,
+        22
+      ],
+      "outputPts": [
+        0,
+        2,
+        4,
+        6,
+        8,
+        10,
+        12,
+        14,
+        16,
+        18,
+        20,
+        22
+      ],
+      "inventedPts": [],
+      "coverageHoles": [],
+      "sourceCoverageHoles": [],
+      "exactSourceMatch": true
+    },
+    {
+      "fixture": "sparse-cfr",
+      "mode": "legacy-fps",
+      "status": "passed",
+      "elapsedMs": 50.547041999999976,
+      "sourcePts": [
+        0,
+        8,
+        16
+      ],
+      "outputPts": [
+        0,
+        2,
+        4,
+        6,
+        8,
+        10,
+        12,
+        14
+      ],
+      "inventedPts": [
+        2,
+        4,
+        6,
+        10,
+        12,
+        14
+      ],
+      "coverageHoles": [
+        16,
+        18,
+        20,
+        22
+      ],
+      "sourceCoverageHoles": [
+        2,
+        4,
+        6,
+        10,
+        12,
+        14,
+        18,
+        20,
+        22
+      ],
+      "exactSourceMatch": false
+    },
+    {
+      "fixture": "sparse-cfr",
+      "mode": "source-pts",
+      "status": "passed",
+      "elapsedMs": 49.579207999999994,
+      "sourcePts": [
+        0,
+        8,
+        16
+      ],
+      "outputPts": [
+        0,
+        8,
+        16
+      ],
+      "inventedPts": [],
+      "coverageHoles": [
+        2,
+        4,
+        6,
+        10,
+        12,
+        14,
+        18,
+        20,
+        22
+      ],
+      "sourceCoverageHoles": [
+        2,
+        4,
+        6,
+        10,
+        12,
+        14,
+        18,
+        20,
+        22
+      ],
+      "exactSourceMatch": true
+    },
+    {
+      "fixture": "sparse-vfr-offset",
+      "mode": "legacy-fps",
+      "status": "passed",
+      "elapsedMs": 52.63270899999998,
+      "sourcePts": [
+        7,
+        15
+      ],
+      "outputPts": [
+        8,
+        10,
+        12,
+        14
+      ],
+      "inventedPts": [
+        8,
+        10,
+        12,
+        14
+      ],
+      "coverageHoles": [
+        17,
+        19,
+        21,
+        23,
+        25,
+        27,
+        29
+      ],
+      "sourceCoverageHoles": [
+        9,
+        11,
+        13,
+        17,
+        19,
+        21,
+        23,
+        25,
+        27,
+        29
+      ],
+      "exactSourceMatch": false
+    },
+    {
+      "fixture": "sparse-vfr-offset",
+      "mode": "source-pts",
+      "status": "passed",
+      "elapsedMs": 48.63287500000001,
+      "sourcePts": [
+        7,
+        15
+      ],
+      "outputPts": [
+        7,
+        15
+      ],
+      "inventedPts": [],
+      "coverageHoles": [
+        9,
+        11,
+        13,
+        17,
+        19,
+        21,
+        23,
+        25,
+        27,
+        29
+      ],
+      "sourceCoverageHoles": [
+        9,
+        11,
+        13,
+        17,
+        19,
+        21,
+        23,
+        25,
+        27,
+        29
+      ],
+      "exactSourceMatch": true
+    }
+  ],
+  "limitations": [
+    "Extraction to null sink measures PTS, not JPEG disk throughput or YouTube download latency.",
+    "No browser playback, provider latency or production performance claim."
+  ]
+}

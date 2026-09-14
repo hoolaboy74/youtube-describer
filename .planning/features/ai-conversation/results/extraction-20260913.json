@@ -1,0 +1,12 @@
+{
+  "durationMs": 1040000,
+  "ready": true,
+  "frames": 524,
+  "keyframes": 233,
+  "backfills": 291,
+  "coverageHoles": [],
+  "failedTargets": [],
+  "elapsedMs": 13764.568083,
+  "first": 0,
+  "last": 1038004
+}

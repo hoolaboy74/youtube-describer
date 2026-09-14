@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "at": "2026-09-13T23:51:42.674Z",
+  "budget": {
+    "modelCalls": 0,
+    "downloadCalls": 0,
+    "ttsCalls": 3,
+    "retries": 0
+  },
+  "results": [
+    {
+      "audioMode": "ogg",
+      "effectiveAudioMode": "ogg",
+      "status": "completed",
+      "firstAudioMs": 3462.530333,
+      "secondInputMs": 3002.22775,
+      "generationDoneMs": 3005.863208,
+      "firstAudioBeforeSecondInput": false,
+      "events": [
+        "accepted",
+        "sentence",
+        "sentence",
+        "generation_done",
+        "audio_done"
+      ],
+      "error": null
+    },
+    {
+      "audioMode": "mp3",
+      "effectiveAudioMode": "mp3",
+      "status": "completed",
+      "firstAudioMs": 825.5914170000005,
+      "secondInputMs": 3000.9160420000007,
+      "generationDoneMs": 3001.9802500000005,
+      "firstAudioBeforeSecondInput": true,
+      "events": [
+        "accepted",
+        "sentence",
+        "sentence_audio",
+        "sentence",
+        "generation_done",
+        "sentence_audio",
+        "audio_done"
+      ],
+      "error": null
+    }
+  ],
+  "limitation": "Controlled model, real TTS bytes; not a scene-factuality, end-to-end latency or audible mobile result."
+}

@@ -41,6 +41,16 @@ function preprocessVtt(vttContent) {
         .trim();
 }
 
+let isImpersonateAvailable = false;
+
+function setIsImpersonateAvailable(val) {
+    isImpersonateAvailable = !!val;
+}
+
+function getIsImpersonateAvailable() {
+    return isImpersonateAvailable;
+}
+
 const YOUTUBE_URL_REGEX = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/(watch\?v=|embed\/|v\/|live\/|shorts\/|)([\w-]+)([?&].*)?$/;
 function isValidYoutubeUrl(url) {
     return YOUTUBE_URL_REGEX.test(url);
@@ -256,5 +266,7 @@ module.exports = {
     hashPassword,
     verifyPassword,
     verifySiloamMember,
-    verifyCardOCR
+    verifyCardOCR,
+    setIsImpersonateAvailable,
+    getIsImpersonateAvailable
 };

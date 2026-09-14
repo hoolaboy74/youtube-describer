@@ -10,10 +10,14 @@ const {
     hashPassword, 
     verifyPassword, 
     verifySiloamMember, 
-    verifyCardOCR 
+    verifyCardOCR
 } = require('./utils');
 const logger = require('./logger');
 const { findAcceptedTtsEvent } = require('./modules/ttsPolicy');
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+const { execFile } = require('child_process');
+const { extractGoogleSearchQueryCount } = require('./modules/geminiCost');
+const { createQaTtsStore } = require('./modules/qaTtsStore');
 
 // JWT 기반 세션 관리 설정
 const jwt = require('jsonwebtoken');
@@ -25,9 +29,45 @@ const router = express.Router();
 // Use 'rest' fallback only if custom CA certs are present (local dev environment)
 const ttsClientOptions = process.env.NODE_EXTRA_CA_CERTS ? { fallback: 'rest' } : {};
 const ttsClient = new TextToSpeechClient(ttsClientOptions);
+// REST fallback is compatible with one-shot MP3 synthesis but cannot perform
+// bidirectional streaming. Keep a separate gRPC client for Chirp streaming.
+const streamingTtsClient = new TextToSpeechClient();
 const audioCacheDir = path.join(__dirname, 'public', 'audio');
+const qaTtsStore = createQaTtsStore();
+const QA_MODEL_NAME = process.env.QA_MODEL_NAME || 'gemini-3.5-flash-lite';
 
 const YouTube = require('youtube-sr').default;
+
+function cleanQaAnswer(text) {
+    return String(text || '')
+        .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+        .replace(/https?:\/\/[^\s]+/g, '')
+        .replace(/\[\d+\]/g, '')
+        .replace(/[\*\_\#\`\-\>\+\=\[\]\{\}]/g, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+}
+
+function writeQaStreamEvent(res, event, payload) {
+    if (!res.writableEnded) {
+        res.write(`event: ${event}\ndata: ${JSON.stringify(payload)}\n\n`);
+    }
+}
+
+// Do not expose raw partial model output. Send only complete sentences after
+// applying the same plain-text cleanup as the final Q&A answer.
+function takeCompletedQaSentences(text) {
+    let lastBoundary = 0;
+    const boundaryPattern = /[.!?。！？]+(?:\s+|$)/g;
+    let match;
+    while ((match = boundaryPattern.exec(text)) !== null) {
+        lastBoundary = match.index + match[0].length;
+    }
+    return {
+        completed: text.slice(0, lastBoundary),
+        remaining: text.slice(lastBoundary)
+    };
+}
 
 // 전역 API 추적 미들웨어: 회원/비회원 식별 및 DB 적재
 function trackApiRequest(req, res, next) {
@@ -59,7 +99,7 @@ function trackApiRequest(req, res, next) {
             userId,
             guestId,
             ip,
-            apiPath: req.path
+            apiPath: req.path.replace(/^(\/qa\/audio\/)[^/]+$/, '$1[redacted]')
         });
     } catch (err) {
         logger.error('[Tracker] Failed to record API request:', err.message);
@@ -253,6 +293,107 @@ function createTtsHandler({ database = db, client = ttsClient, cacheRoot = audio
     };
 }
 
+// Q&A answers are not canonical video-script events. Keep their TTS contract
+// separate and accept only a short-lived server-issued answer ID, never an
+// arbitrary client-supplied text payload.
+function createQaTtsHandler({ store = qaTtsStore, client = ttsClient, cacheRoot = audioCacheDir } = {}) {
+    return async (req, res) => {
+        try {
+            const answer = store.get({ id: req.body?.qaTtsId, userId: req.user?.id });
+            if (!answer) {
+                return res.status(422).json({ error: 'A current server-issued Q&A answer is required' });
+            }
+
+            const voiceName = 'ko-KR-Chirp3-HD-Sulafat';
+            const hash = crypto.createHash('sha256')
+                .update(`qa:${voiceName}:ko-KR:MP3:${answer.text}`)
+                .digest('hex');
+            const cacheDirPath = path.join(cacheRoot, 'qa_tts_cache', hash.substring(0, 2), hash.substring(2, 4));
+            const audioFilePath = path.join(cacheDirPath, `${hash}.mp3`);
+
+            if (fs.existsSync(audioFilePath)) {
+                return res.sendFile(audioFilePath);
+            }
+
+            await fs.promises.mkdir(cacheDirPath, { recursive: true });
+            const [ttsResponse] = await client.synthesizeSpeech({
+                input: { text: answer.text },
+                voice: { languageCode: 'ko-KR', name: voiceName },
+                audioConfig: { audioEncoding: 'MP3' },
+            });
+            await fs.promises.writeFile(audioFilePath, ttsResponse.audioContent, 'binary');
+            res.set('Content-Type', 'audio/mpeg');
+            res.send(ttsResponse.audioContent);
+        } catch (error) {
+            logger.error('Q&A TTS API Error:', error);
+            res.status(500).json({ error: 'Failed to synthesize Q&A speech' });
+        }
+    };
+}
+
+function createQaTtsStreamHandler({ store = qaTtsStore, client = streamingTtsClient } = {}) {
+    return (req, res) => {
+        const answer = store.getByStreamTicket({ ticket: req.params.ticket });
+        if (!answer) {
+            return res.status(422).json({ error: 'A current Q&A audio stream ticket is required' });
+        }
+        if (typeof client.streamingSynthesize !== 'function') {
+            return res.status(503).json({ error: 'Streaming speech is unavailable' });
+        }
+
+        const voiceName = 'ko-KR-Chirp3-HD-Sulafat';
+        const startedAt = Date.now();
+        let firstAudioAt = null;
+        let completed = false;
+        let speechStream;
+        try {
+            speechStream = client.streamingSynthesize();
+            res.status(200).set({
+                'Content-Type': 'audio/ogg; codecs=opus',
+                'Cache-Control': 'no-store, no-transform',
+                'X-Accel-Buffering': 'no',
+                'Referrer-Policy': 'no-referrer'
+            });
+            res.flushHeaders?.();
+
+            speechStream.on('data', (response) => {
+                const audioContent = response.audioContent;
+                if (!audioContent || res.writableEnded) return;
+                if (firstAudioAt === null) firstAudioAt = Date.now();
+                res.write(audioContent);
+            });
+            speechStream.on('error', (error) => {
+                logger.error('Q&A streaming TTS API Error:', error);
+                if (!res.writableEnded) res.end();
+            });
+            speechStream.on('end', () => {
+                completed = true;
+                logger.info(
+                    `[QA-TTS] Streamed answer (First audio: ${firstAudioAt ? firstAudioAt - startedAt : -1}ms, ` +
+                    `Total: ${Date.now() - startedAt}ms).`
+                );
+                if (!res.writableEnded) res.end();
+            });
+            res.on('close', () => {
+                if (!completed && speechStream && !speechStream.destroyed) speechStream.destroy();
+            });
+
+            speechStream.write({
+                streamingConfig: {
+                    voice: { languageCode: 'ko-KR', name: voiceName },
+                    streamingAudioConfig: { audioEncoding: 'OGG_OPUS' }
+                }
+            });
+            speechStream.write({ input: { text: answer.text } });
+            speechStream.end();
+        } catch (error) {
+            logger.error('Q&A streaming TTS setup error:', error);
+            if (!res.headersSent) return res.status(500).json({ error: 'Failed to start Q&A speech stream' });
+            res.end();
+        }
+    };
+}
+
 router.post('/tts', createTtsHandler());
 
 // 인증 미들웨어: 로그인 완료된 회원만 허용 (시각장애인 여부 상관없음)
@@ -283,6 +424,38 @@ function requireAuth(req, res, next) {
         return res.status(401).json({ error: '인증 세션이 만료되었습니다. 다시 로그인해 주십시오.' });
     }
 }
+
+// New Q&A remains opt-in while browser and policy release checks run.
+const { createQaRequestStore } = require('./modules/qaRequestStore');
+const { createQaRouter } = require('./modules/qaRoutes');
+const { createQaGeneration } = require('./modules/qaGeneration');
+const { createQaModel } = require('./modules/qaSearch');
+const { createQaSpeech } = require('./modules/qaSpeech');
+const incrementalQaReceipts = db.getQaRequestReceipts();
+const incrementalQaStore = createQaRequestStore({ receipts: incrementalQaReceipts });
+const incrementalQaSpeech = createQaSpeech({ client: ttsClient, streamingClient: streamingTtsClient });
+let incrementalQaRun;
+const qaMaintenance = setInterval(() => {
+    incrementalQaStore.sweep();
+    db.getQaMedia().cleanupJobs().catch(() => {});
+}, 60000);
+qaMaintenance.unref();
+router.use('/qa', createQaRouter({ auth: requireAuth, store: incrementalQaStore, manager: () => db.getQaCacheManager(),
+    synthesizeSentence: (text, signal) => incrementalQaSpeech.mp3(text, signal),
+    run: request => {
+        if (!incrementalQaRun) incrementalQaRun = createQaGeneration({ store: incrementalQaStore, media: db.getQaMedia(), getVideo: db.getVideo,
+            model: createQaModel(new GoogleGenerativeAI(process.env.GOOGLE_API_KEY), QA_MODEL_NAME),
+            speech: incrementalQaSpeech,
+            recordUsage: (request, response) => incrementalQaReceipts.record(request, response.usageMetadata, () => db.recordGeminiUsage({ videoId: request.input.videoId, userId: request.userId,
+                requestType: 'qa', modelName: QA_MODEL_NAME, usageMetadata: response.usageMetadata,
+                searchQueries: extractGoogleSearchQueryCount(response) })),
+        });
+        return incrementalQaRun(request);
+    },
+}));
+
+router.post('/qa-tts', requireAuth, createQaTtsHandler());
+router.get('/qa-tts-stream/:ticket', createQaTtsStreamHandler());
 
 // 인증 미들웨어: 로그인 완료 및 시각장애인으로 인증된 회원만 허용
 function requireBlindAuth(req, res, next) {
@@ -401,6 +574,214 @@ router.post('/batch-process', (req, res) => {
     processVideoBatch(videoId, youtubeUrl).catch(err => {
         logger.error(`[batch-${videoId.substring(0,8)}] Unhandled error in batch processing:`, err);
     });
+});
+
+// Initialize Gemini API for Q&A
+const API_KEY = process.env.GOOGLE_API_KEY;
+const genAI = API_KEY ? new GoogleGenerativeAI(API_KEY) : null;
+
+// --- VIDEO Q&A API ENDPOINT ---
+router.post('/video-qa', requireAuth, async (req, res) => {
+    const requestStartedAt = Date.now();
+    const wantsStream = req.accepts(['text/event-stream', 'json']) === 'text/event-stream';
+    const { videoId, timestamp, question, history } = req.body;
+    if (!videoId || timestamp === undefined || !question) {
+        return res.status(400).json({ error: 'videoId, timestamp, and question are required.' });
+    }
+
+    if (!genAI) {
+        return res.status(500).json({ error: 'Gemini API key is not configured.' });
+    }
+
+    try {
+        const targetTime = Number(timestamp);
+        if (!/^[A-Za-z0-9_-]{11}$/.test(videoId) || !Number.isFinite(targetTime) || targetTime < 0) return res.status(400).json({ error: 'Invalid video ID or timestamp.' });
+        
+        // 1. Get video record to check if it exists and fetch title
+        const videoData = db.getVideo(videoId);
+        if (!videoData) {
+            return res.status(404).json({ error: 'Video script data not found in DB.' });
+        }
+        if (!videoData.duration || targetTime >= videoData.duration) return res.status(400).json({ error: 'Timestamp is outside the video.' });
+        const videoTitle = videoData.title;
+
+        // 2. Fetch adjacent script context and generate global outline from DB
+        let scriptContext = '';
+        let globalOutline = '';
+        if (videoData.script && Array.isArray(videoData.script)) {
+            // 2.1. Adjacent context (T - 120s to T + 45s asymmetric window)
+            const contextLines = videoData.script.filter(line => {
+                const diff = targetTime - line.timestamp;
+                return diff >= -45 && diff <= 120;
+            });
+            scriptContext = contextLines.map(line => `[${line.timestamp}초] ${line.text}`).join('\n');
+
+            // 2.2. Global outline (approx. 60-second intervals)
+            const outlineLines = [];
+            let lastSampledTime = -999;
+            for (const line of videoData.script) {
+                if (line.timestamp >= lastSampledTime + 60) {
+                    outlineLines.push(`[${Math.round(line.timestamp)}초] ${line.text}`);
+                    lastSampledTime = line.timestamp;
+                }
+            }
+            globalOutline = outlineLines.join('\n');
+        }
+
+        // Both Q&A transports share the durable video-ID cache and bounded extraction.
+        const media = await db.getQaMedia().prepare(videoId, Math.floor(targetTime * 1000), Math.round(videoData.duration * 1000));
+        const selectedFrames = media.frames;
+        const fromCache = media.fromCache;
+        const dialogueContext = media.subtitles.cues
+            .filter(cue => cue.start >= Math.max(0, targetTime - 4) && cue.end <= targetTime + 4)
+            .map(cue => `[${cue.start}초] ${cue.sourceText}`).join('\n');
+        const imageParts = [];
+        for (const frame of selectedFrames) {
+            imageParts.push({ inlineData: { data: (await fs.promises.readFile(frame.path)).toString('base64'), mimeType: 'image/jpeg' } });
+            imageParts.push({ text: `Timestamp of this frame: [${frame.timestampMs / 1000}s]` });
+        }
+
+        // Never let legacy fallback generate scene claims from a title/history alone.
+        if (!imageParts.some(part => part.inlineData)) throw new Error('QA_VISUAL_EVIDENCE_UNAVAILABLE');
+
+        // 6. Build prompt and invoke Gemini with Google Search tool
+        let historyContext = '';
+        if (history && Array.isArray(history) && history.length > 0) {
+            historyContext = 'Previous Conversation History (Use this for context if the user asks follow-up questions):\n' +
+                history.map(item => `User: ${item.question}\nAI Assistant: ${item.answer}`).join('\n\n') + '\n\n';
+        }
+
+        const systemPrompt = `You are a smart assistive AI companion for a visually impaired user watching YouTube videos. 
+The user paused the video at [${Math.round(targetTime)}s] to ask a question.
+Provide a clear, detailed, and helpful answer in Korean.
+Since the user cannot see, focus on describing visual elements, reading any text visible on the screen, or clarifying actions occurring in the video.
+Make sure your tone is polite and professional.
+
+[CRITICAL REQUIREMENT]
+1. Do NOT use any Markdown formatting, symbols, syntax, or links. (Do NOT use asterisks like **, *, hashes like #, underscores, backticks, bullet dashes, or blockquotes). The visually impaired user uses a screen reader which will read out every punctuation mark, which is very annoying. Generate the response in strictly plain, natural conversational Korean text only.
+2. Do NOT spoil or describe any events, scripts, or details occurring AFTER the current timestamp [${Math.round(targetTime)}s]. The user is currently watching the video at this exact moment; revealing future story or visual details will ruin their experience.
+3. Only answer questions directly related to this video (its title, script context, visual frames, or narrative). If the user asks something completely unrelated to the video, politely decline and state that you can only answer questions related to the current video.
+4. If you use the Google Search tool, ONLY search for information directly relevant to the video's content, context, subjects, or concepts mentioned in the video. Do NOT search for unrelated external topics.
+5. Do NOT include any source links, URLs, citations, footnotes, or website references (e.g. "[1]", "(source: www.example.com)", links like "[text](url)") in your response. The answer must be a single natural conversational text without quoting where the information came from.
+6. Use the "Actual Dialogue / Subtitles" context to answer questions about what characters/narrators said at or around the current timestamp (e.g. "방금 뭐라고 했어?", "주인공 대사가 뭐야?").
+
+Video Title: "${videoTitle}"
+
+Video Global Outline (Brief chronological summary of the entire video):
+${globalOutline || '(No outline available)'}
+
+Script Context around the paused timestamp (T - 120s ~ T + 45s):
+${scriptContext || '(No script context available)'}
+
+Actual Dialogue / Subtitles spoken in the video around this timestamp (T - 4s ~ T + 4s):
+${dialogueContext || '(No dialogue/subtitles available around this time)'}
+
+${historyContext}User's Question: "${question}"`;
+
+        const modelStartedAt = Date.now();
+        const model = genAI.getGenerativeModel({ 
+            model: QA_MODEL_NAME,
+            tools: [{ googleSearch: {} }]
+        });
+        let providerResponse;
+        let rawAnswer = '';
+        if (wantsStream) {
+            res.status(200);
+            res.set({
+                'Content-Type': 'text/event-stream; charset=utf-8',
+                'Cache-Control': 'no-cache, no-transform',
+                Connection: 'keep-alive',
+                'X-Accel-Buffering': 'no'
+            });
+            res.flushHeaders?.();
+            writeQaStreamEvent(res, 'meta', { timestamp: targetTime, fromCache });
+
+            const streamResult = await model.generateContentStream([systemPrompt, ...imageParts]);
+            let pendingText = '';
+            for await (const chunk of streamResult.stream) {
+                if (!chunk.text) continue;
+                const delta = chunk.text();
+                rawAnswer += delta;
+                pendingText += delta;
+                const { completed, remaining } = takeCompletedQaSentences(pendingText);
+                pendingText = remaining;
+                const safeText = cleanQaAnswer(completed);
+                if (safeText) writeQaStreamEvent(res, 'delta', { text: `${safeText} ` });
+            }
+            const finalPartial = cleanQaAnswer(pendingText);
+            if (finalPartial) writeQaStreamEvent(res, 'delta', { text: finalPartial });
+            providerResponse = await streamResult.response;
+        } else {
+            const result = await model.generateContent([systemPrompt, ...imageParts]);
+            providerResponse = result.response;
+            rawAnswer = providerResponse.text();
+        }
+        const modelElapsedMs = Date.now() - modelStartedAt;
+        const answer = cleanQaAnswer(rawAnswer);
+
+        // Persist the provider-reported token usage and actual Google Search
+        // queries together, so the detailed ledger and the daily user summary
+        // cannot drift apart.
+        try {
+            const usage = providerResponse.usageMetadata;
+            if (usage) {
+                const searchQueries = extractGoogleSearchQueryCount(providerResponse);
+                const recordedCost = db.recordGeminiUsage({
+                    videoId,
+                    userId: req.user.id,
+                    requestType: 'qa',
+                    modelName: QA_MODEL_NAME,
+                    usageMetadata: usage,
+                    searchQueries
+                });
+                logger.info(`[QA-COST] Recorded $${recordedCost.totalCost.toFixed(6)} for ${videoId}.`);
+            } else {
+                logger.error(`[QA-COST-ERROR] Gemini returned no usage metadata for ${videoId}; no unverifiable cost was recorded.`);
+            }
+        } catch (costErr) {
+            logger.error(`[QA-COST-ERROR] Failed to save Q&A API cost:`, costErr);
+        }
+
+        const dialogueTexts = dialogueContext
+            .split('\n')
+            .map(line => line.replace(/^\[[^\]]+\]\s*/, '').trim())
+            .filter(Boolean);
+        const qaTtsId = qaTtsStore.issue({
+            userId: req.user.id,
+            text: answer,
+            dialogueTexts
+        });
+        const qaTtsStreamTicket = qaTtsId
+            ? qaTtsStore.issueStreamTicket({ id: qaTtsId, userId: req.user.id })
+            : null;
+
+        // 7. Output result
+        logger.info(
+            `[QA-${videoId.substring(0,8)}] Answered question at ${targetTime}s ` +
+            `(Source: ${fromCache ? 'cache' : 'on-demand'}, Model: ${QA_MODEL_NAME}, ` +
+            `Frames: ${selectedFrames.length}, Model: ${modelElapsedMs}ms, Total: ${Date.now() - requestStartedAt}ms).`
+        );
+        const responsePayload = {
+            answer,
+            timestamp: targetTime,
+            fromCache,
+            qaTtsId,
+            qaTtsStreamPath: qaTtsStreamTicket ? `/api/qa-tts-stream/${qaTtsStreamTicket}` : null
+        };
+        if (wantsStream) {
+            writeQaStreamEvent(res, 'done', responsePayload);
+            return res.end();
+        }
+        res.json(responsePayload);
+
+    } catch (err) {
+        logger.error(`Q&A endpoint failed for videoId ${videoId}:`, err);
+        if (wantsStream && res.headersSent) {
+            writeQaStreamEvent(res, 'error', { error: 'Failed to process video Q&A.' });
+            return res.end();
+        }
+        res.status(500).json({ error: 'Failed to process video Q&A.' });
+    }
 });
 
 // --- COMMENTS API ENDPOINTS ---
@@ -1776,3 +2157,8 @@ router.get('/sitemap', (req, res) => {
 
 module.exports = router;
 module.exports.createTtsHandler = createTtsHandler;
+module.exports.createQaTtsHandler = createQaTtsHandler;
+module.exports.createQaTtsStreamHandler = createQaTtsStreamHandler;
+module.exports.cleanQaAnswer = cleanQaAnswer;
+module.exports.takeCompletedQaSentences = takeCompletedQaSentences;
+module.exports.writeQaStreamEvent = writeQaStreamEvent;

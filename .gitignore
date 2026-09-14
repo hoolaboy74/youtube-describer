@@ -22,11 +22,18 @@ backend/cookies/
 backend/public/frames/
 backend/public/subtitles/
 backend/public/audio/
+backend/cache/qa/
 backend/*.mp4
 backend/*.webm
+backend/*.mp4
+backend/*.mp3
 backend/*.m4a
+backend/*.nosub
 **/__pycache__/
 *.pyc
+*.webm
+*.mp4
+*.mp3
 
 # Audit & Stats reports
 user_audit/

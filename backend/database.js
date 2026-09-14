@@ -3,6 +3,13 @@ const fs = require('fs');
 const Database = require('better-sqlite3');
 const logger = require('./logger');
 const crypto = require('crypto');
+const { migrateQaCache } = require('./modules/qaCacheStore');
+const { createQaCacheManager } = require('./modules/qaCacheManager');
+const {
+  GOOGLE_SEARCH_FREE_QUERIES_PER_MONTH,
+  billingMonth,
+  calculateGeminiCost
+} = require('./modules/geminiCost');
 
 const dbDir = path.join(__dirname, 'db');
 if (!fs.existsSync(dbDir)) {
@@ -14,6 +21,29 @@ const dbPath = process.env.YOUTUBE_DESCRIBER_DB_PATH
   : path.join(dbDir, 'cache.db');
 const db = new Database(dbPath);
 db.pragma('journal_mode = WAL');
+let qaCacheManager;
+let qaMedia;
+let qaRequestReceipts;
+function getQaRequestReceipts() {
+  if (!qaRequestReceipts) qaRequestReceipts = require('./modules/qaRequestReceipts').createQaRequestReceipts(db);
+  return qaRequestReceipts;
+}
+function getQaMedia() {
+  if (!qaMedia) {
+    const { createQaMedia, createDefaultMediaAdapter } = require('./modules/qaMedia');
+    qaMedia = createQaMedia({ manager: getQaCacheManager(), adapter: createDefaultMediaAdapter({ backendRoot: __dirname, getVideo }) });
+  }
+  return qaMedia;
+}
+function getQaCacheManager() {
+  if (!qaCacheManager) {
+    const root = process.env.QA_CACHE_ROOT || (process.env.YOUTUBE_DESCRIBER_DB_PATH
+      ? path.join(path.dirname(dbPath), 'qa-cache')
+      : path.join(__dirname, 'cache', 'qa'));
+    qaCacheManager = createQaCacheManager({ db, root });
+  }
+  return qaCacheManager;
+}
 
 // DB 초기화: 테이블 생성
 function init() {
@@ -155,6 +185,74 @@ function init() {
       cost REAL NOT NULL,
       createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (videoId) REFERENCES videos (videoId) ON DELETE SET NULL
+    )
+  `);
+
+  // qa_user_daily_costs 테이블: 사용자별 일일 Q&A API 비용 누적 저장
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS qa_user_daily_costs (
+      userId INTEGER NOT NULL,
+      videoId TEXT NOT NULL,
+      logDate TEXT NOT NULL,
+      queryCount INTEGER DEFAULT 1,
+      promptTokens INTEGER DEFAULT 0,
+      completionTokens INTEGER DEFAULT 0,
+      totalCost REAL NOT NULL,
+      updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+      PRIMARY KEY (userId, videoId, logDate),
+      FOREIGN KEY (userId) REFERENCES users (id) ON DELETE SET NULL,
+      FOREIGN KEY (videoId) REFERENCES videos (videoId) ON DELETE CASCADE
+    )
+  `);
+
+  // Keep the original columns for legacy reports, then add a complete cost
+  // breakdown without dropping historical cost rows.
+  const apiCostColumns = [
+    ['request_type', "TEXT NOT NULL DEFAULT 'description'"],
+    ['userId', 'TEXT'],
+    ['input_tokens', 'INTEGER NOT NULL DEFAULT 0'],
+    ['output_tokens', 'INTEGER NOT NULL DEFAULT 0'],
+    ['thinking_tokens', 'INTEGER NOT NULL DEFAULT 0'],
+    ['cached_tokens', 'INTEGER NOT NULL DEFAULT 0'],
+    ['tool_tokens', 'INTEGER NOT NULL DEFAULT 0'],
+    ['search_queries', 'INTEGER NOT NULL DEFAULT 0'],
+    ['input_cost', 'REAL NOT NULL DEFAULT 0'],
+    ['output_cost', 'REAL NOT NULL DEFAULT 0'],
+    ['cached_cost', 'REAL NOT NULL DEFAULT 0'],
+    ['tool_cost', 'REAL NOT NULL DEFAULT 0'],
+    ['search_cost', 'REAL NOT NULL DEFAULT 0'],
+    ['pricing_version', 'TEXT']
+  ];
+  for (const [column, definition] of apiCostColumns) {
+    try {
+      db.prepare(`SELECT ${column} FROM api_costs LIMIT 1`).get();
+    } catch (error) {
+      logger.info(`Adding ${column} column to api_costs table...`);
+      db.exec(`ALTER TABLE api_costs ADD COLUMN ${column} ${definition}`);
+    }
+  }
+
+  const qaCostColumns = [
+    ['thinkingTokens', 'INTEGER NOT NULL DEFAULT 0'],
+    ['cachedTokens', 'INTEGER NOT NULL DEFAULT 0'],
+    ['toolTokens', 'INTEGER NOT NULL DEFAULT 0'],
+    ['searchQueries', 'INTEGER NOT NULL DEFAULT 0'],
+    ['searchCost', 'REAL NOT NULL DEFAULT 0']
+  ];
+  for (const [column, definition] of qaCostColumns) {
+    try {
+      db.prepare(`SELECT ${column} FROM qa_user_daily_costs LIMIT 1`).get();
+    } catch (error) {
+      logger.info(`Adding ${column} column to qa_user_daily_costs table...`);
+      db.exec(`ALTER TABLE qa_user_daily_costs ADD COLUMN ${column} ${definition}`);
+    }
+  }
+
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS gemini_monthly_grounding_usage (
+      billingMonth TEXT PRIMARY KEY,
+      searchQueries INTEGER NOT NULL DEFAULT 0,
+      updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
     )
   `);
 
@@ -357,6 +455,8 @@ function init() {
   db.exec(`CREATE INDEX IF NOT EXISTS idx_api_requests_created_at ON api_requests(createdAt)`);
   db.exec(`CREATE INDEX IF NOT EXISTS idx_api_requests_ip ON api_requests(ip)`);
 
+  migrateQaCache(db);
+  getQaCacheManager().reconcile();
   logger.info('Database initialized successfully.');
 }
 
@@ -748,8 +848,12 @@ function deleteComment(commentId) {
 
 // 영상 삭제 (관련 스크립트와 댓글은 ON DELETE CASCADE로 자동 삭제됨)
 function deleteVideo(videoId) {
-  const result = db.prepare('DELETE FROM videos WHERE videoId = ?').run(videoId);
-  return result;
+  return db.transaction(() => {
+    for (const table of ['qa_frame_assets', 'qa_subtitle_assets', 'qa_cache_jobs']) {
+      db.prepare(`DELETE FROM ${table} WHERE videoId = ?`).run(videoId);
+    }
+    return db.prepare('DELETE FROM videos WHERE videoId = ?').run(videoId);
+  })();
 }
 
 // --- Admin Page Functions ---
@@ -804,6 +908,122 @@ function addApiCost({ videoId, model_used, image_tokens, text_tokens, cost }) {
         'INSERT INTO api_costs (videoId, model_used, image_tokens, text_tokens, cost) VALUES (?, ?, ?, ?, ?)'
     ).run(videoId, model_used, image_tokens, text_tokens, cost);
     return result.lastInsertRowid;
+}
+
+function upsertQaCost({
+  userId,
+  videoId,
+  logDate,
+  promptTokens,
+  completionTokens,
+  thinkingTokens = 0,
+  cachedTokens = 0,
+  toolTokens = 0,
+  searchQueries = 0,
+  searchCost = 0,
+  cost
+}) {
+    const result = db.prepare(`
+        INSERT INTO qa_user_daily_costs (
+          userId, videoId, logDate, queryCount, promptTokens, completionTokens,
+          thinkingTokens, cachedTokens, toolTokens, searchQueries, searchCost, totalCost
+        )
+        VALUES (?, ?, ?, 1, ?, ?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT(userId, videoId, logDate) DO UPDATE SET
+            queryCount = queryCount + 1,
+            promptTokens = promptTokens + excluded.promptTokens,
+            completionTokens = completionTokens + excluded.completionTokens,
+            thinkingTokens = thinkingTokens + excluded.thinkingTokens,
+            cachedTokens = cachedTokens + excluded.cachedTokens,
+            toolTokens = toolTokens + excluded.toolTokens,
+            searchQueries = searchQueries + excluded.searchQueries,
+            searchCost = searchCost + excluded.searchCost,
+            totalCost = totalCost + excluded.totalCost,
+            updatedAt = CURRENT_TIMESTAMP
+    `).run(
+      userId, videoId, logDate, promptTokens, completionTokens,
+      thinkingTokens, cachedTokens, toolTokens, searchQueries, searchCost, cost
+    );
+    return result.changes > 0;
+}
+
+// Persist one provider call, including the free-tier Search allowance, in a
+// single SQLite transaction. Every new cost therefore reaches api_costs and
+// Q&A retains its per-user daily quota summary.
+function recordGeminiUsage({
+  videoId,
+  userId = null,
+  requestType,
+  modelName,
+  usageMetadata,
+  searchQueries = 0,
+  occurredAt = new Date()
+}) {
+  const timestamp = occurredAt instanceof Date ? occurredAt : new Date(occurredAt);
+  if (Number.isNaN(timestamp.getTime())) {
+    throw new Error('A valid cost-record timestamp is required.');
+  }
+  const normalizedSearchQueries = Math.max(0, Math.floor(Number(searchQueries) || 0));
+
+  const persist = db.transaction(() => {
+    let billableSearchQueries = 0;
+    if (normalizedSearchQueries > 0) {
+      const month = billingMonth(timestamp);
+      const previous = db.prepare(
+        'SELECT searchQueries FROM gemini_monthly_grounding_usage WHERE billingMonth = ?'
+      ).get(month)?.searchQueries || 0;
+      billableSearchQueries = Math.max(0, previous + normalizedSearchQueries - GOOGLE_SEARCH_FREE_QUERIES_PER_MONTH)
+        - Math.max(0, previous - GOOGLE_SEARCH_FREE_QUERIES_PER_MONTH);
+      db.prepare(`
+        INSERT INTO gemini_monthly_grounding_usage (billingMonth, searchQueries)
+        VALUES (?, ?)
+        ON CONFLICT(billingMonth) DO UPDATE SET
+          searchQueries = searchQueries + excluded.searchQueries,
+          updatedAt = CURRENT_TIMESTAMP
+      `).run(month, normalizedSearchQueries);
+    }
+
+    const cost = calculateGeminiCost({
+      modelName,
+      usageMetadata,
+      billableSearchQueries,
+      occurredAt: timestamp
+    });
+    const result = db.prepare(`
+      INSERT INTO api_costs (
+        videoId, model_used, image_tokens, text_tokens, cost, request_type, userId,
+        input_tokens, output_tokens, thinking_tokens, cached_tokens, tool_tokens,
+        search_queries, input_cost, output_cost, cached_cost, tool_cost, search_cost,
+        pricing_version, createdAt
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `).run(
+      videoId || null, modelName, cost.promptTokens, cost.completionTokens, cost.totalCost,
+      requestType, userId, cost.inputTokens, cost.outputTokens, cost.thinkingTokens,
+      cost.cachedTokens, cost.toolTokens, normalizedSearchQueries, cost.inputCost,
+      cost.outputCost, cost.cachedCost, cost.toolCost, cost.searchCost, cost.version,
+      timestamp.toISOString()
+    );
+
+    if (requestType === 'qa') {
+      upsertQaCost({
+        userId,
+        videoId,
+        logDate: timestamp.toLocaleDateString('sv-SE', { timeZone: 'Asia/Seoul' }),
+        promptTokens: cost.promptTokens,
+        completionTokens: cost.completionTokens,
+        thinkingTokens: cost.thinkingTokens,
+        cachedTokens: cost.cachedTokens,
+        toolTokens: cost.toolTokens,
+        searchQueries: normalizedSearchQueries,
+        searchCost: cost.searchCost,
+        cost: cost.totalCost
+      });
+    }
+
+    return { ...cost, id: result.lastInsertRowid, billableSearchQueries };
+  });
+
+  return persist();
 }
 
 // API 비용 목록 조회
@@ -1580,6 +1800,9 @@ function saveApiRequest({ userId, guestId, ip, apiPath }) {
 
 module.exports = {
   init,
+  getQaCacheManager,
+  getQaMedia,
+  getQaRequestReceipts,
   saveApiRequest,
   getSitemapData,
   createUser,
@@ -1618,6 +1841,8 @@ module.exports = {
   listDonations,
   deleteDonation,
   addApiCost,
+  recordGeminiUsage,
+  upsertQaCost,
   listApiCosts,
   getAggregatedCosts,
   listAllVideosForAdmin,
