@@ -115,3 +115,35 @@ test('missing generator captions do not create a permanent no-subtitle marker',a
     await service.publishSubtitles('94L2Z6Xyoxc',null);
     assert.equal((await service.ensureSubtitles('94L2Z6Xyoxc')).state,'ready');assert.equal(downloads,1);
 });
+
+test('failed section falls back to the shared source without waiting for full-frame extraction',async t=>{
+    const {manager,frame}=await setup(t);
+    const downloadGate=deferred(), sectionFailed=deferred(), fullGate=deferred();
+    let downloads=0, fullCompleted=false;
+    const logs=[];
+    const service=createQaMedia({manager,log:line=>logs.push(line),adapter:{
+        section:async()=>{sectionFailed.resolve();throw Object.assign(new Error('section unavailable'),{code:'MEDIA_EXIT'});},
+        full:async(id,dir)=>{downloads++;await downloadGate.promise;const file=path.join(dir,'source.mp4');await fs.writeFile(file,'shared source');return file;},
+        subtitles:async()=>null,
+    },extract:async({onFrame})=>{
+        await fullGate.promise;
+        for(let ms=0;ms<20000;ms+=2000)await onFrame(frame(ms));
+        fullCompleted=true;return{ready:true};
+    },windowExtract:async({inputPath})=>{
+        assert.equal(await fs.readFile(inputPath,'utf8'),'shared source');
+        return Array.from({length:9},(_,i)=>frame(5000+i*1000));
+    }});
+    const preparing=service.prepare('YmEnygA7pHc',8664,20000,{warm:true});
+    let timer;
+    try {
+        await sectionFailed.promise;downloadGate.resolve();
+        const result=await Promise.race([preparing,new Promise((_,reject)=>{timer=setTimeout(()=>reject(new Error('current window waited for full cache')),2000);})]);
+        assert.equal(fullCompleted,false);
+        assert.ok(result.frames.some(f=>f.timestampMs<=8664));
+        assert.equal(downloads,1);
+        assert.ok(logs.some(line=>line.includes('window_source_fallback')));
+    } finally {
+        clearTimeout(timer);downloadGate.resolve();fullGate.resolve();
+        await preparing.catch(()=>{});await service.ensureFullCache('YmEnygA7pHc',20000);
+    }
+});

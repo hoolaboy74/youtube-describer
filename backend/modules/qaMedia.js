@@ -289,7 +289,14 @@ function createQaMedia({ manager, adapter, log = message => logger.info(message)
                                     else section=winner.section;
                                 } finally {sourceEvents.removeListener(videoId,onSource);}
                             }
-                            catch { if(taskSignal.aborted)throw abortError();await service.ensureFullCache(videoId,durationMs);source=await rememberedSource(videoId);if(!source)return; }
+                            catch (error) {
+                                if(taskSignal.aborted)throw abortError();
+                                report(videoId,'window_source_fallback',{code: /^[A-Z_]+$/.test(error.code || '') ? error.code : 'SECTION_UNAVAILABLE'});
+                                // Only the downloaded source is needed for a small window.
+                                // Waiting for full-cache extraction here serializes the
+                                // first answer behind every keyframe and backfill.
+                                source ||= await getSource(videoId,lease,taskSignal);
+                            }
                         }
                         if(source&&!reading){source.readers++;reading=true;}
                         const end=Math.min(durationMs-1,(bucket+1)*10000+FRAME_RADIUS_MS-1);
