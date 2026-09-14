@@ -992,6 +992,9 @@ router.post('/video-qa', requireAuth, async (req, res) => {
             }
         }
 
+        // Never let legacy fallback generate scene claims from a title/history alone.
+        if (!imageParts.some(part => part.inlineData)) throw new Error('QA_VISUAL_EVIDENCE_UNAVAILABLE');
+
         // 6. Build prompt and invoke Gemini with Google Search tool
         let historyContext = '';
         if (history && Array.isArray(history) && history.length > 0) {

@@ -45,7 +45,7 @@ function createQaRequestStore({ now = Date.now, ttlMs = 600000, ticketTtlMs = 60
         if (type !== 'audio_done') { request.controller.abort(); for (const [key, ticket] of tickets) if (ticket.requestId === request.input.requestId) tickets.delete(key); }
     }
     return { session, get, emit, finish, sweep,
-        markModelStarted(request) { receipts?.started(request); },
+        markModelStarted(request) { receipts?.started(request); request.usageStatus = 'unconfirmed'; },
         putAudio(request, seq, bytes) {
             const size = entry => [...entry.audio.values()].reduce((sum, value) => sum + value.length, 0);
             if (request.controller.signal.aborted) throw fail('QA_CANCELED');
@@ -65,7 +65,7 @@ function createQaRequestStore({ now = Date.now, ttlMs = 600000, ticketTtlMs = 60
             }
             if (requests.size >= maxRequests || [...requests.values()].filter(r => r.userId === userId && r.terminalAt === null).length >= 2) throw fail('QA_BUSY', 429);
             const request = { userId, input, fingerprint, status: 'active', terminalAt: null, controller: new AbortController(),
-                events: [], sentences: [], audio: new Map(), emitter: new EventEmitter(), usageStatus: 'unconfirmed' };
+                events: [], sentences: [], audio: new Map(), emitter: new EventEmitter(), usageStatus: 'not_started' };
             try { receipts?.save(request); } catch (error) { if (error.code?.startsWith('SQLITE_CONSTRAINT')) throw fail('QA_REQUEST_CONFLICT', 409); throw error; }
             requests.set(input.requestId, request); emit(request, 'accepted', { requestId: input.requestId, audioMode: input.audioMode });
             return { request, created: true };

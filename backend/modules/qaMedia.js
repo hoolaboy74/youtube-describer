@@ -2,6 +2,7 @@
 const fs = require('node:fs/promises');
 const path = require('node:path');
 const crypto = require('node:crypto');
+const logger = require('../logger');
 const { runMediaProcess } = require('./mediaResourceLimiter');
 const { mediaDiskBudget } = require('./mediaDiskBudget');
 const { extractFrames, extractFrameWindow } = require('./frameExtraction');
@@ -79,7 +80,9 @@ function createDefaultMediaAdapter({ backendRoot, getVideo, run = runMediaProces
         },
     };
 }
-function createQaMedia({ manager, adapter, now = Date.now, extract = extractFrames, windowExtract = extractFrameWindow }) {
+function createQaMedia({ manager, adapter, log = message => logger.info(message), now = Date.now, extract = extractFrames, windowExtract = extractFrameWindow }) {
+    // Log only identifiers/states, never questions, signed URLs or raw process stderr.
+    const report = (videoId, event, details = {}) => log(`[QA-MEDIA] ${JSON.stringify({ videoId, event, ...details })}`);
     const rawJobs = new Map(), fullJobs = new Map(), windowJobs = new Map(), subtitleJobs = new Map(), sources = new Map(), pipeline = new Map();
     const reader = createSubtitleReader(manager);
     const sourceEvents = new (require('node:events').EventEmitter)();
@@ -103,8 +106,9 @@ function createQaMedia({ manager, adapter, now = Date.now, extract = extractFram
     async function owned(videoId,version,fn) {
         const controller=new AbortController();const lease=await leaseFor(videoId,version,controller.signal);if(!lease)return;
         const timer=setInterval(()=>{try{manager.store.renew(lease);}catch{controller.abort();}},15000);timer.unref?.();
-        try { return await fn(lease,controller.signal); }
-        catch(error) { try { manager.store.transition(lease,'retryable_failed',{retryAfter:now()+60000,lastError:error.code||'cache-work-failed'}); } catch {} throw error; }
+        report(videoId,'work_started',{version});
+        try { const result = await fn(lease,controller.signal);report(videoId,'work_completed',{version});return result; }
+        catch(error) { report(videoId,'work_failed',{version,code: typeof error.code === 'string' && /^[A-Z_]+$/.test(error.code) ? error.code : 'CACHE_WORK_FAILED'});try { manager.store.transition(lease,'retryable_failed',{retryAfter:now()+60000,lastError:error.code||'cache-work-failed'}); } catch {} throw error; }
         finally {clearInterval(timer);try{manager.store.release(lease);}catch{}}
     }
     async function rememberedSource(videoId) {
@@ -250,7 +254,8 @@ function createQaMedia({ manager, adapter, now = Date.now, extract = extractFram
             priorities.set(videoId,timestampMs);
             let frames=current(videoId,timestampMs);
             const freshness=manager.store.job(videoId,FRAME_VERSION)?.state==='ready'?2000:1000;
-            if(frames.length && timestampMs-frames.at(-1).timestampMs<=freshness)return frames;
+            if(frames.length && timestampMs-frames.at(-1).timestampMs<=freshness){report(videoId,'window_hit',{timestampMs,frames:frames.length});return frames;}
+            report(videoId,'window_miss',{timestampMs});
             const bucket=Math.floor(timestampMs/10000);const key=videoId+':'+bucket;
             if(!windowJobs.has(key)) {
                 const task=owned(videoId,`window-v1-${bucket}`,async(lease,taskSignal)=>{
@@ -286,15 +291,16 @@ function createQaMedia({ manager, adapter, now = Date.now, extract = extractFram
         async ensureSubtitles(videoId,{signal}={}) {
             const existing=manager.store.subtitle(videoId,SUB_VERSION);
             if(existing && (existing.state==='ready'||existing.retryAfter>now())) {
-                try { return await reader(videoId,SUB_VERSION); } catch { manager.invalidateSubtitle(videoId,SUB_VERSION); }
+                try { const result=await reader(videoId,SUB_VERSION);report(videoId,'subtitle_hit',{state:result.state,cues:result.cues.length});return result; } catch { manager.invalidateSubtitle(videoId,SUB_VERSION); }
             }
             if(!subtitleJobs.has(videoId)) {
+                report(videoId,'subtitle_miss');
                 const task=owned(videoId,SUB_VERSION,async(lease,taskSignal)=>{
                     const dir=await directory(videoId,'subtitles');
                     try {const result=await adapter.subtitles(videoId,dir,taskSignal);
                         if(result){parseVtt(await fs.readFile(result.file,'utf8'),result.metadata);await manager.publishSubtitle(lease,result.file,result.metadata);}
-                        else manager.subtitleUnavailable(lease,'absent');
-                    }catch(error){if(taskSignal.aborted||error.code==='STALE_CACHE_LEASE')throw error;manager.subtitleUnavailable(lease,'retryable_failed');}
+                        else {manager.subtitleUnavailable(lease,'absent');report(videoId,'subtitle_absent');}
+                    }catch(error){if(taskSignal.aborted||error.code==='STALE_CACHE_LEASE')throw error;manager.subtitleUnavailable(lease,'retryable_failed');report(videoId,'subtitle_failed',{code:'SUBTITLE_DOWNLOAD_OR_VALIDATION_FAILED'});}
                     finally{await fs.rm(dir,{recursive:true,force:true});}
                 });
                 subtitleJobs.set(videoId,task);task.catch(()=>{}).finally(()=>subtitleJobs.delete(videoId));
@@ -306,8 +312,9 @@ function createQaMedia({ manager, adapter, now = Date.now, extract = extractFram
             if(referenceId)manager.touchReference(videoId,FRAME_VERSION,referenceId);
             const subtitles=service.ensureSubtitles(videoId,{signal});
             const frames=service.ensureCurrentWindow(videoId,timestampMs,durationMs,{signal});
-            if(warm)service.ensureFullCache(videoId,durationMs).catch(()=>{});
-            const values=await Promise.all([frames,subtitles]);return {frames:values[0].map(frame=>({...frame,path:manager.assetPath(frame.relativePath)})),subtitles:values[1]};
+            report(videoId,'prepare',{timestampMs,warm,cacheRoot:manager.root});
+            if(warm)service.ensureFullCache(videoId,durationMs).catch(()=>report(videoId,'warming_failed'));
+            const values=await Promise.all([frames,subtitles]);report(videoId,'prepared',{frames:values[0].length,subtitleState:values[1].state,cues:values[1].cues.length});return {frames:values[0].map(frame=>({...frame,path:manager.assetPath(frame.relativePath)})),subtitles:values[1]};
         },
     };
     return service;

@@ -9,6 +9,12 @@ const input = extra => ({ requestId: 'request-123', sessionId: 'session-123', vi
 const candidate = extra => ({ seq: 0, text: '빨간 상자가 보입니다.', kind: 'visual', evidenceIds: ['frame-1'], ...extra });
 const context = extra => ({ timestampMs: 12000, evidence: new Map([['frame-1', { kind: 'frame', timestampMs: 11000 }]]), cues: [], audioClassification: 'unknown', ...extra });
 const deferred = () => { let resolve; const promise = new Promise(a => { resolve = a; }); return { promise, resolve }; };
+async function fixtureFrame(t) {
+    const fs = require('node:fs/promises'), path = require('node:path'), os = require('node:os');
+    const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'qa-evidence-')); t.after(() => fs.rm(dir, { recursive: true, force: true }));
+    const image = path.join(dir, 'frame.jpg'); await require('sharp')({ create: { width: 640, height: 360, channels: 3, background: '#ff0000' } }).jpeg().toFile(image);
+    return image;
+}
 test('request idempotency, owner isolation, whole history, cancellation and expiring capabilities', () => {
     let now = 0; const store = createQaRequestStore({ now: () => now, ttlMs: 1000, ticketTtlMs: 100 });
     const history = Array.from({ length: 50 }, (_, i) => ({ requestId: `previous-${i}`, timestamp: 30 + i, question: '원문  ' + i, answer: '부분 답변\n', status: 'partial' }));
@@ -44,19 +50,21 @@ test('backward seek preserves future conversation verbatim but excludes future v
     const result = await createQaContext({ request: input({ history }), media: { frames: [{ timestampMs: 13000 }], subtitles: { cues: [{ id: 'past', end: 11 }, { id: 'crossing', start: 11, end: 13 }] } } });
     assert.deepEqual(result.history, history); assert.deepEqual([...result.evidence.keys()], ['past']);
 });
-test('first accepted sentence is synthesized while the second model sentence is still blocked', async () => {
+test('first accepted sentence is synthesized while the second model sentence is still blocked', async t => {
+    const image = await fixtureFrame(t);
     const store = createQaRequestStore(), { request } = store.accept(1, input());
     const gate = deferred(), spoken = deferred(); let usage = 0, calls = 0;
-    const run = createQaGeneration({ store, getVideo: () => ({ duration: 60 }), media: { prepare: async () => ({ frames: [], subtitles: { cues: [] } }) },
+    const run = createQaGeneration({ store, getVideo: () => ({ duration: 60 }), media: { prepare: async () => ({ frames: [{ path: image, timestampMs: 11000, sourcePtsMs: 11000 }], subtitles: { cues: [] } }) },
         model: { generateContentStream: async () => ({ stream: (async function* () { yield { text: () => JSON.stringify({ seq: 0, text: UNKNOWN, kind: 'explanation', evidenceIds: [] }) + '\n' }; await gate.promise; yield { text: () => JSON.stringify({ seq: 1, text: '화면만으로는 알 수 없습니다.', kind: 'explanation', evidenceIds: [] }) + '\n' }; })(), response: Promise.resolve({ usageMetadata: { totalTokenCount: 10 } }) }) },
         speech: { mp3: async text => { calls++; spoken.resolve(text); return Buffer.from('mp3'); } }, recordUsage: () => { usage++; } });
     const running = run(request); assert.equal(await spoken.promise, UNKNOWN); assert.equal(request.events.some(e => e.type === 'generation_done'), false);
     gate.resolve(); await running; assert.equal(request.status, 'completed'); assert.equal(calls, 2); assert.equal(usage, 1);
     assert.deepEqual(request.events.map(e => e.id), request.events.map((_, i) => i + 1));
 });
-test('a rejected candidate never reaches TTS and cancel suppresses a late unary result', async () => {
+test('a rejected candidate never reaches TTS and cancel suppresses a late unary result', async t => {
+    const image = await fixtureFrame(t);
     const store = createQaRequestStore(), { request } = store.accept(1, input()); const gate = deferred(), speaking = deferred(); let calls = 0;
-    const run = createQaGeneration({ store, getVideo: () => ({ duration: 60 }), media: { prepare: async () => ({ frames: [], subtitles: { cues: [] } }) },
+    const run = createQaGeneration({ store, getVideo: () => ({ duration: 60 }), media: { prepare: async () => ({ frames: [{ path: image, timestampMs: 11000, sourcePtsMs: 11000 }], subtitles: { cues: [] } }) },
         model: { generateContentStream: async () => ({ stream: (async function* () { yield { text: () => JSON.stringify(candidate()) + '\n' }; })(), response: Promise.resolve({}) }) },
         speech: { mp3: async text => { calls++; assert.equal(text, UNKNOWN); speaking.resolve(); await gate.promise; return Buffer.from('late'); } }, recordUsage: () => {} });
     const running = run(request); await speaking.promise; store.finish(request, 'canceled'); gate.resolve(); await running;
@@ -75,4 +83,14 @@ test('OGG failure before bytes falls back per sentence, but failure after bytes 
 test('a fully closed final JSON record is accepted at EOF even without a trailing newline', () => {
     const seen = [], parser = createSentenceParser(value => seen.push(value)); parser.push(JSON.stringify(candidate()));
     assert.equal(seen.length, 0); assert.deepEqual(parser.end(), { count: 1, unfinished: false }); assert.equal(seen[0].text, candidate().text);
+});
+
+test('no visual evidence never invokes a model even with invented past answers and subtitles', async () => {
+    const store = createQaRequestStore(), { request } = store.accept(1, input({ history: [{ requestId: 'old-answer', timestamp: 10, question: '누구?', answer: '빨간 상자와 부부가 있습니다.', status: 'completed' }] }));
+    const spoken = [];
+    const run = createQaGeneration({ store, getVideo: () => ({ duration: 60 }),
+        media: { prepare: async () => ({ frames: [], subtitles: { cues: [{ id: 'cue-0', end: 11, sourceText: '상자가 있습니다.' }] } }) },
+        model: { generateContentStream: () => assert.fail('ungrounded model call') },
+        speech: { mp3: async text => { spoken.push(text); return Buffer.from('mp3'); } }, recordUsage: () => assert.fail('no model usage') });
+    await run(request); assert.equal(request.status, 'completed'); assert.deepEqual(spoken, [UNKNOWN]); assert.equal(request.usageStatus, 'not_started');
 });

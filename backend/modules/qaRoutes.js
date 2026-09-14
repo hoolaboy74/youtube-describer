@@ -1,12 +1,13 @@
 'use strict';
 const express = require('express');
+const { cacheWarmingEnabled } = require('./qaConfig');
 function createQaRouter({ auth, store, run, manager, synthesizeSentence, enabled = () => process.env.QA_INCREMENTAL_SPEECH_ENABLED === 'true' }) {
     const router = express.Router();
     const wrap = fn => (req, res, next) => Promise.resolve().then(() => fn(req, res)).catch(error => {
         if (res.headersSent) return res.destroy();
         res.status(error.status || 500).json({ code: error.code || 'QA_REQUEST_FAILED' });
     });
-    router.get('/config', auth, (req, res) => res.json({ incrementalSpeech: enabled(), oggStreaming: process.env.QA_OGG_STREAMING_ENABLED === 'true', cacheWarming: process.env.QA_CACHE_WARMING_ENABLED === 'true' }));
+    router.get('/config', auth, (req, res) => res.json({ incrementalSpeech: enabled(), oggStreaming: process.env.QA_OGG_STREAMING_ENABLED === 'true', cacheWarming: cacheWarmingEnabled() }));
     router.use((req, res, next) => enabled() ? next() : res.status(404).json({ code: 'QA_DISABLED' }));
     const owned = req => store.get(req.params.id, req.user.id);
     router.post('/requests', auth, wrap((req, res) => {

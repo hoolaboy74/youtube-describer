@@ -17,6 +17,10 @@ async function main() {
     const { createQaGeneration } = req('./modules/qaGeneration');
     const { createQaSpeech } = req('./modules/qaSpeech');
     const { UNKNOWN } = req('./modules/qaSentencePolicy');
+    // Keep the controlled model path reachable through the no-frame guard.
+    // This synthetic image is never sent to a real model.
+    const image = path.join(directory, 'synthetic-frame.jpg');
+    await req('sharp')({ create: { width: 640, height: 360, channels: 3, background: '#000000' } }).jpeg().toFile(image);
     const client = new TextToSpeechClient(); const results = [];
     try {
         for (const audioMode of ['ogg', 'mp3']) {
@@ -28,7 +32,7 @@ async function main() {
             request.emitter.on('audio', () => request.ogg.output.on('data', bytes => { firstAudioMs ??= performance.now() - started; chunks.push(bytes); }));
             request.emitter.on('event', event => { if (event.type === 'sentence_audio') firstAudioMs ??= performance.now() - started; if (event.type === 'generation_done') generationDoneMs = performance.now() - started; });
             const record = (seq, text) => JSON.stringify({ seq, text, kind: 'explanation', evidenceIds: [] }) + '\n';
-            await createQaGeneration({ store, getVideo: () => ({ duration: 60 }), media: { prepare: async () => ({ frames: [], subtitles: { cues: [] } }) },
+            await createQaGeneration({ store, getVideo: () => ({ duration: 60 }), media: { prepare: async () => ({ frames: [{ path: image, sourcePtsMs: 11000, timestampMs: 11000 }], subtitles: { cues: [] } }) },
                 model: { generateContentStream: async () => ({ stream: (async function* () {
                     yield { text: () => record(0, UNKNOWN) }; await new Promise(resolve => setTimeout(resolve, 3000));
                     secondInputMs = performance.now() - started; yield { text: () => record(1, '화면만으로는 알 수 없습니다.') };

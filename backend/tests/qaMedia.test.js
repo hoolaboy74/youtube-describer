@@ -40,3 +40,12 @@ test('completed two-second-grid caches do not re-extract ordinary questions betw
 const{manager,frame}=await setup(t);const lease=manager.store.claim('abcdefghijk',FRAME_VERSION,'test');manager.store.transition(lease,'extracting');await manager.publishFrame(lease,frame(0));await manager.publishFrame(lease,frame(2000));manager.markReady(lease,4000);
 const service=createQaMedia({manager,adapter:{section:()=>{throw new Error('warm cache unexpectedly downloaded');}}});const frames=await service.ensureCurrentWindow('abcdefghijk',3500,4000);assert.equal(frames.at(-1).timestampMs,2000);
 });
+
+test('cold-cache diagnostics expose work and subtitle failure without leaking process secrets',async t=>{
+const {manager,frame}=await setup(t);const logs=[];
+const service=createQaMedia({manager,log:line=>logs.push(line),adapter:{section:async()=>({file:'fixture',originPtsMs:0}),subtitles:async()=>{throw new Error('secret signed URL and cookies');}},windowExtract:async()=>[frame(12000)]});
+const result=await service.prepare('abcdefghijk',12500,20000,{warm:false});assert.equal(result.subtitles.state,'retryable_failed');
+for(const event of ['window_miss','subtitle_miss','subtitle_failed','prepared']) assert.ok(logs.some(line=>line.includes(`"event":"${event}"`)));
+assert.ok(logs.some(line=>line.includes(manager.root)));assert.ok(!logs.join('').includes('secret signed'));
+await service.ensureCurrentWindow('abcdefghijk',12500,20000);assert.ok(logs.some(line=>line.includes('window_hit')));
+});
