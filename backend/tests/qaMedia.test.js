@@ -162,6 +162,8 @@ test('default downloader retries a failed cookie request without exposing its co
     assert.equal(await fs.readFile(output,'utf8'),'video');assert.equal(calls.length,2);
     assert.ok(calls[0].includes('--cookies'));assert.ok(!calls[1].includes('--cookies'));
     assert.ok(calls[0].includes('--force-ipv4'));assert.ok(calls[0].includes('--js-runtimes'));
+    assert.equal(calls[0][calls[0].indexOf('-f')+1],'bestvideo[height<=360][ext=mp4]/best[height<=360][ext=mp4]');
+    assert.ok(!calls[0].includes('--merge-output-format'));
     assert.ok(!calls.flat().join(' ').includes('secret-cookie'));
 });
 

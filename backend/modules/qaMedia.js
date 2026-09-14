@@ -80,12 +80,14 @@ function createDefaultMediaAdapter({ backendRoot, getVideo, run = runMediaProces
             }
         }
     }
-    const format = 'bestvideo[height<=480][ext=mp4]';
+    // Q&A only needs visual evidence. Match the generator's 360p ceiling and
+    // avoid downloading/merging an audio track that this path never reads.
+    const format = 'bestvideo[height<=360][ext=mp4]/best[height<=360][ext=mp4]';
     return {
         async full(videoId, directory, signal) {
             const file = path.join(directory,'source.mp4');
-            await ytdlp(directory,['-f','best[height<=480][ext=mp4][vcodec!=none][acodec!=none]/bestvideo[height<=480][ext=mp4]+bestaudio[ext=m4a]/bestvideo[height<=480][ext=mp4]','--merge-output-format','mp4','-o',file,`https://www.youtube.com/watch?v=${videoId}`],
-                { needs: { download: 1, fullDownload: 1, ffmpeg: 1 }, signal, timeoutMs:180000, disk:{root:directory,maxBytes:1024**3} });
+            await ytdlp(directory,['-f',format,'-o',file,`https://www.youtube.com/watch?v=${videoId}`],
+                { needs: { download: 1, fullDownload: 1 }, signal, timeoutMs:180000, disk:{root:directory,maxBytes:1024**3} });
             return file;
         },
         async section(videoId, startMs, endMs, directory, signal) {
