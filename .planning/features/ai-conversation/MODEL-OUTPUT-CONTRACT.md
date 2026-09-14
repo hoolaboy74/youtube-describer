@@ -25,3 +25,8 @@ Regression tests cover unchanged noun phrases, English text, relationship/causal
 Two bounded real-model calls used RUY931euKn4, 92 complete description entries, eight checksum-verified local frames and “이찬원의 학력에 대해 검색해”. Both answered successfully without content deletion. Neither reported web search queries or sources, including after stronger explicit-search prompt guidance. Thus actual search execution and the returned education facts are **not verified** by these samples. The caller supplied empty history because the original three private turns were unavailable. No real TTS, cache deletion, downloads or production-ledger writes. [Raw results](results/model-search-format-20260914.json).
 
 Restart the backend and reload the frontend. No push or environment changes accompany this implementation.
+
+
+## Viewing companion tone — 2026-09-14
+
+The Q&A prompt now frames the conversation as watching a video together with a considerate friend. Answers use relaxed Korean 해요체, respond directly, and avoid habitual greetings, praise, question repetition or paternalistic explanations. Frame/script/context terminology and internal field names stay internal unless the user explicitly asks about the processing or materials. Uncertainty is expressed conversationally and specifically, without inventing a reason for poor visibility. Examples illustrate tone only and must not supply scene facts. Search limitations remain honest. This changes prompting only: no answer text replacement/filtering, schema change, canonical description-policy change or search routing change.
