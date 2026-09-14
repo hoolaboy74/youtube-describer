@@ -90,7 +90,12 @@ function createQaMedia({ manager, adapter, log = message => logger.info(message)
     sourceEvents.setMaxListeners(0);
     const priorities = new Map();
     const workRoot = path.join(manager.root,'jobs');
-    const idFolder = id => crypto.createHash('sha256').update(id).digest('hex');
+    const legacyIdFolder = id => crypto.createHash('sha256').update(id).digest('hex');
+    const idFolder = id => {
+        if (typeof id !== 'string' || !/^[A-Za-z0-9_-]+$/.test(id)) throw new Error('Invalid cache video ID');
+        return id;
+    };
+    const idFolders = id => [idFolder(id), legacyIdFolder(id)];
     async function directory(videoId, kind) { const parent=path.join(workRoot,idFolder(videoId));await fs.mkdir(parent,{recursive:true}); return fs.mkdtemp(path.join(parent,kind+'-')); }
     async function leaseFor(videoId, version, signal) {
         const deadline=now()+180000;
@@ -114,15 +119,18 @@ function createQaMedia({ manager, adapter, log = message => logger.info(message)
     }
     async function rememberedSource(videoId) {
         if(sources.has(videoId))return sources.get(videoId);
-        const manifest=path.join(workRoot,idFolder(videoId),'source.json');
-        try {
-            const data=JSON.parse(await fs.readFile(manifest,'utf8'));
-            if(data.sourceVersion!=='av-v1')return null;
-            const file=manager.assetPath(data.relativePath);
-            const stat=await fs.stat(file);
-            if(stat.size!==data.bytes || await checksum(file)!==data.checksum) return null;
-            const source={file,owned:true,readers:0,manifest};sources.set(videoId,source);return source;
-        } catch{return null;}
+        for (const name of idFolders(videoId)) {
+            const manifest=path.join(workRoot,name,'source.json');
+            try {
+                const data=JSON.parse(await fs.readFile(manifest,'utf8'));
+                if(data.sourceVersion!=='av-v1')continue;
+                const file=manager.assetPath(data.relativePath);
+                const stat=await fs.stat(file);
+                if(stat.size!==data.bytes || await checksum(file)!==data.checksum) continue;
+                const source={file,owned:true,readers:0,manifest};sources.set(videoId,source);return source;
+            } catch {}
+        }
+        return null;
     }
     async function materialize(source, target) {
         if(path.resolve(source)===path.resolve(target))return;
@@ -174,9 +182,9 @@ function createQaMedia({ manager, adapter, log = message => logger.info(message)
     const service = {
         FRAME_VERSION, SUB_VERSION,
         async cleanupJobs({ ttlMs = 3600000 } = {}) {
-            const activeIds = manager.store.db.prepare('SELECT DISTINCT videoId FROM qa_cache_jobs WHERE leaseUntil>?').all(now()).map(row=>idFolder(row.videoId));
-            for(const id of pipeline.keys())activeIds.push(idFolder(id));
-            for(const [id,source] of sources)if(source.readers)activeIds.push(idFolder(id));
+            const activeIds = manager.store.db.prepare('SELECT DISTINCT videoId FROM qa_cache_jobs WHERE leaseUntil>?').all(now()).flatMap(row=>idFolders(row.videoId));
+            for(const id of pipeline.keys())activeIds.push(...idFolders(id));
+            for(const [id,source] of sources)if(source.readers)activeIds.push(...idFolders(id));
             const active=new Set(activeIds);
             for(const entry of await fs.readdir(workRoot,{withFileTypes:true}).catch(()=>[])) {
                 if(entry.name.startsWith('.expired-')) { await fs.rm(path.join(workRoot,entry.name),{recursive:true,force:true});continue; }
@@ -188,7 +196,7 @@ function createQaMedia({ manager, adapter, log = message => logger.info(message)
                         const tombstone=path.join(workRoot,`.expired-${crypto.randomUUID()}`);
                         const moved=manager.store.db.transaction(()=>{
                             const live=manager.store.db.prepare('SELECT DISTINCT videoId FROM qa_cache_jobs WHERE leaseUntil>?').all(now());
-                            if(live.some(row=>idFolder(row.videoId)===entry.name)||[...pipeline.keys()].some(id=>idFolder(id)===entry.name))return false;
+                            if(live.some(row=>idFolders(row.videoId).includes(entry.name))||[...pipeline.keys()].some(id=>idFolders(id).includes(entry.name)))return false;
                             try { require('node:fs').renameSync(file,tombstone);return true; } catch(error) { if(error.code==='ENOENT')return false;throw error; }
                         }).immediate();
                         if(moved)await fs.rm(tombstone,{recursive:true,force:true});

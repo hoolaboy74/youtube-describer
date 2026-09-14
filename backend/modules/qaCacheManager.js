@@ -12,7 +12,11 @@ function createQaCacheManager({ db, root, now = Date.now }) {
     root = path.resolve(root);
     fs.mkdirSync(path.join(root, '.pending'), { recursive: true });
     const digest = value => crypto.createHash('sha256').update(value).digest('hex');
-    const folder = (videoId, version) => path.join('assets', digest(`${videoId}\0${version}`));
+    const legacyFolder = (videoId, version) => path.join('assets', digest(`${videoId}\0${version}`));
+    const folder = (videoId, version, kind) => {
+        if (![videoId, version].every(value => typeof value === 'string' && /^[A-Za-z0-9_-]+$/.test(value))) throw new Error('Invalid cache path component');
+        return path.join('assets', videoId, kind, version);
+    };
     const absolute = relative => {
         if (typeof relative !== 'string' || path.isAbsolute(relative)) throw new Error('Invalid cache asset path');
         const file = path.resolve(root, relative);
@@ -62,7 +66,7 @@ function createQaCacheManager({ db, root, now = Date.now }) {
             try {
                 const { info } = await sharp(staged.bytes, { failOn: 'warning' }).raw().toBuffer({ resolveWithObject: true });
                 if (info.width < 1 || info.height < 1 || (frame.sourceKind !== 'legacy' && info.width !== 640)) throw new Error('Invalid frame dimensions');
-                const relativePath = path.join(folder(lease.videoId, assetVersion), `${frame.sourcePtsMs}-${staged.checksum}.jpg`);
+                const relativePath = path.join(folder(lease.videoId, assetVersion, 'frames'), `${frame.sourcePtsMs}-${staged.checksum}.jpg`);
                 return store.fenced(lease, () => {
                     fs.mkdirSync(path.dirname(absolute(relativePath)), { recursive: true });
                     fs.renameSync(staged.file, absolute(relativePath));
@@ -81,7 +85,7 @@ function createQaCacheManager({ db, root, now = Date.now }) {
             const staged = await stage(inputPath, 16 * 1024 * 1024);
             try {
                 if (!/^\uFEFF?WEBVTT(?:[ \t].*)?\r?\n/.test(staged.bytes.toString('utf8'))) throw new Error('Invalid VTT asset');
-                const relativePath = path.join(folder(lease.videoId, lease.cacheVersion), `${staged.checksum}.vtt`);
+                const relativePath = path.join(folder(lease.videoId, lease.cacheVersion, 'subtitles'), `${staged.checksum}.vtt`);
                 store.fenced(lease, () => {
                     fs.mkdirSync(path.dirname(absolute(relativePath)), { recursive: true });
                     fs.renameSync(staged.file, absolute(relativePath));
@@ -198,7 +202,7 @@ function createQaCacheManager({ db, root, now = Date.now }) {
                     report.resetSubtitles++;
                 }
                 for (const job of db.prepare('SELECT * FROM qa_cache_jobs').all()) {
-                    if (job.leaseUntil > now()) { activeFolders.add(folder(job.videoId, job.cacheVersion)); continue; }
+                    if (job.leaseUntil > now()) { activeFolders.add(path.join('assets', job.videoId)); activeFolders.add(legacyFolder(job.videoId, job.cacheVersion)); continue; }
                     if (job.owner || damaged.has(`${job.videoId}\0${job.cacheVersion}`)) {
                         db.prepare("UPDATE qa_cache_jobs SET state='queued',owner=NULL,leaseUntil=0,fencingToken=fencingToken+1,retryAfter=0 WHERE videoId=? AND cacheVersion=?").run(job.videoId, job.cacheVersion);
                         report.recoveredJobs++;

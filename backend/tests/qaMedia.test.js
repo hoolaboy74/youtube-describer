@@ -74,3 +74,24 @@ test('dense cached windows retain the nearest past frame and hit on repeated que
     }
     assert.equal(logs.filter(line=>line.includes('window_hit')).length,2);
 });
+
+
+test('restart can read a source manifest from the historical hashed job directory',async t=>{
+    const {manager,frame,root}=await setup(t);
+    const id='94L2Z6Xyoxc';
+    const first=createQaMedia({manager,adapter:{full:async(id,dir)=>{
+        assert.ok(dir.includes('/jobs/'+id+'/'));
+        const file=path.join(dir,'source.mp4');await fs.writeFile(file,'source');return file;
+    }},extract:async()=>{throw new Error('injected failure');}});
+    await assert.rejects(first.ensureFullCache(id,20000));
+    const old=require('crypto').createHash('sha256').update(id).digest('hex');
+    const newDir=path.join(root,'jobs',id),oldDir=path.join(root,'jobs',old);
+    await fs.rename(newDir,oldDir);
+    const manifest=path.join(oldDir,'source.json');const data=JSON.parse(await fs.readFile(manifest,'utf8'));
+    data.relativePath=data.relativePath.replace('jobs/'+id+'/','jobs/'+old+'/');
+    await fs.writeFile(manifest,JSON.stringify(data));
+    const restarted=createQaMedia({manager,adapter:{section:()=>{throw new Error('unexpected download');}},windowExtract:async({inputPath})=>{
+        assert.equal(await fs.readFile(inputPath,'utf8'),'source');return[frame(12000)];
+    }});
+    assert.equal((await restarted.ensureCurrentWindow(id,12500,20000)).length,1);
+});

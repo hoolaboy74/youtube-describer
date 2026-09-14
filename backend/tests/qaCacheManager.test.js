@@ -155,3 +155,31 @@ test('corrupt persisted frames are not returned as current-question evidence', a
     fs.writeFileSync(path.join(root, asset.relativePath), 'damaged');
     assert.deepEqual(manager.framesBefore('video', 'pts-v1', 1000), []);
 });
+
+
+test('readable paths include video ID and asset type; historical hashed assets still survive restart', async t => {
+    const {manager,db,dir,root,advance}=fixture(t);
+    const lease=manager.store.claim('94L2Z6Xyoxc','frames-v1','worker');
+    const asset=await manager.publishFrame(lease,await image(dir));
+    assert.ok(asset.relativePath.startsWith('assets/94L2Z6Xyoxc/frames/frames-v1/'));
+    manager.store.release(lease);
+    const subLease=manager.store.claim('94L2Z6Xyoxc','subtitles-v1','worker');
+    const vtt=path.join(dir,'captions.vtt');fs.writeFileSync(vtt,'WEBVTT\n\n');
+    const sub=await manager.publishSubtitle(subLease,vtt);
+    assert.ok(sub.relativePath.startsWith('assets/94L2Z6Xyoxc/subtitles/subtitles-v1/'));
+    manager.store.release(subLease);
+    const oldPath=path.join('assets',require('crypto').createHash('sha256').update('94L2Z6Xyoxc\0frames-v1').digest('hex'),path.basename(asset.relativePath));
+    fs.mkdirSync(path.dirname(path.join(root,oldPath)),{recursive:true});
+    fs.renameSync(path.join(root,asset.relativePath),path.join(root,oldPath));
+    db.prepare('UPDATE qa_frame_assets SET relativePath=? WHERE videoId=?').run(oldPath,'94L2Z6Xyoxc');
+    advance(3600001);
+    manager.reconcile();
+    assert.equal(manager.framesBefore('94L2Z6Xyoxc','frames-v1',1000)[0].relativePath,oldPath);
+    assert.ok(fs.existsSync(path.join(root,sub.relativePath)));
+});
+
+test('cache path components cannot escape the asset root',async t=>{
+    const {manager,dir}=fixture(t);
+    const lease=manager.store.claim('video','frames-v1','worker');
+    await assert.rejects(manager.publishFrame(lease,await image(dir),'../escape'),/Invalid cache path component/);
+});
