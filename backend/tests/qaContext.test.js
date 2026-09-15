@@ -3,7 +3,7 @@ const test = require('node:test'), assert = require('node:assert/strict');
 const fs = require('node:fs/promises'), path = require('node:path'), os = require('node:os');
 const { createQaContext } = require('../modules/qaContext');
 const { validateSentence } = require('../modules/qaSentencePolicy');
-const { createQaGeneration, classifyProviderFailure } = require('../modules/qaGeneration');
+const { createQaGeneration, classifyProviderFailure, PROMPT } = require('../modules/qaGeneration');
 const { createQaRequestStore } = require('../modules/qaRequestStore');
 const input = { requestId: 'context-request', sessionId: 'context-session', videoId: 'abcdefghijk', timestamp: 12,
     question: '그 사람이 뭘 하던 중이야?', history: [], audioMode: 'mp3' };
@@ -70,6 +70,11 @@ test('provider failures are classified safely without retaining the provider mes
     assert.ok(failure.includes('"providerFailure":"PROVIDER_UNAVAILABLE"'));assert.ok(!failure.includes('provider detail'));
     assert.equal(classifyProviderFailure({ message: 'HTTP 429 quota exceeded' }), 'PROVIDER_RATE_LIMITED');
     assert.equal(classifyProviderFailure({ status: 403, message: 'secret token' }), 'PROVIDER_AUTH');
+});
+test('Q&A policy blocks unrelated answers and searches before considering a search request', () => {
+    assert.match(PROMPT, /이 대화는 이 영상에 관한 대화입니다/);
+    assert.match(PROMPT, /연결이 확인되지 않는.*답하지 말고 검색도 하지 마세요/);
+    assert.match(PROMPT, /사용자가 검색을 명시적으로 요청해도 이 원칙은 같습니다/);
 });
 test('irregular source timestamps get explicit ordinal frame IDs matching every image and the allowed-ID catalog', async t => {
     const frame = await frameFixture(t), times = [19620,20521,21421,22322,23223,24691,25025,26827];
