@@ -59,7 +59,7 @@ test('Korean and mixed audio prefer Korean source VTT', () => {
     assert.equal(selectMixedEnglishReferenceSubtitle(files, 'korean'), null);
 });
 
-test('mixed VTT marks only independently aligned English speech as foreign', () => {
+test('mixed VTT keeps foreign marking as diagnostics without blocking aligned model translations', () => {
     const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'youtube-describer-vtt-'));
     const koreanVttPath = path.join(directory, 'video.ko.vtt');
     const englishVttPath = path.join(directory, 'video.en.vtt');
@@ -111,17 +111,16 @@ test('mixed VTT marks only independently aligned English speech as foreign', () 
         assert.equal(dialogueTrack[2].sourceLanguage, 'ko');
         assert.equal(dialogueTrack[1].foreign, undefined);
         assert.equal(dialogueTrack[3].foreign, undefined);
-        assert.equal(result.accepted.length, 1);
-        assert.equal(result.accepted[0].timestamp, 4);
-        assert.equal(result.accepted[0].provenance.dialogueInterval.foreign, true);
-        assert.equal(result.quarantined.length, 1);
-        assert.ok(result.quarantined[0].validationReasons.includes('UNCERTAIN_MIXED_INTERVAL'));
+        assert.equal(result.accepted.length, 2);
+        assert.deepEqual(result.accepted.map(event => event.timestamp), [2, 4]);
+        assert.equal(result.accepted[1].provenance.dialogueInterval.foreign, true);
+        assert.equal(result.quarantined.length, 0);
     } finally {
         fs.rmSync(directory, { recursive: true, force: true });
     }
 });
 
-test('mixed English-looking captions remain non-translatable without an aligned reference', () => {
+test('mixed VTT captions remain translatable when their confirmed timed context lacks an aligned reference', () => {
     const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'youtube-describer-vtt-'));
     const koreanVttPath = path.join(directory, 'video.ko.vtt');
     try {
@@ -145,19 +144,21 @@ test('mixed English-looking captions remain non-translatable without an aligned 
         });
 
         assert.equal(dialogueTrack[0].foreign, undefined);
-        assert.equal(result.accepted.length, 0);
-        assert.equal(result.quarantined.length, 1);
-        assert.ok(result.quarantined[0].validationReasons.includes('UNCERTAIN_MIXED_INTERVAL'));
+        assert.equal(result.accepted.length, 1);
+        assert.equal(result.accepted[0].ttsEligible, true);
+        assert.equal(result.quarantined.length, 0);
     } finally {
         fs.rmSync(directory, { recursive: true, force: true });
     }
 });
 
-test('mixed-language policy restricts translations to confirmed foreign intervals', () => {
-    const prompt = fs.readFileSync(path.join(__dirname, 'prompt_template_codex_v2.txt'), 'utf8');
-    assert.match(prompt, /foreign: true.*확인된 비한국어 발화/s);
-    assert.match(prompt, /한국어와 영어가 함께 섞인 항목은 번역하지 마십시오/);
-    assert.match(prompt, /시작보다 앞당기지 마십시오/);
+test('mixed-language prompts do not use VTT foreign metadata as the sole translation gate', () => {
+    for (const filename of ['prompt_template_codex_v2.txt', 'prompt_template_writer_v13.txt']) {
+        const prompt = fs.readFileSync(path.join(__dirname, filename), 'utf8');
+        assert.match(prompt, /foreign: true.*유용한 근거.*유일한 제외 기준/s);
+        assert.match(prompt, /실제 한국어 발화.*번역하지 마십시오/);
+        assert.match(prompt, /시작보다 앞당기지 (?:마십시오|않는)/);
+    }
 });
 
 test('foreign translation provenance matches a timestamp inside a fractional VTT cue', () => {
@@ -271,7 +272,7 @@ test('WebVTT cue settings and whitespace lines preserve the first dialogue cue',
     }
 });
 
-test('mixed audio does not treat Korean source cues as foreign translation evidence', () => {
+test('mixed audio retains Korean VTT provenance without blocking a model translation', () => {
     const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'youtube-describer-vtt-'));
     const vttPath = path.join(directory, 'video.ko.vtt');
     try {
@@ -294,9 +295,11 @@ test('mixed audio does not treat Korean source cues as foreign translation evide
             frameEvidence: []
         });
 
-        assert.equal(result.accepted.length, 0);
-        assert.equal(result.quarantined.length, 1);
-        assert.ok(result.quarantined[0].validationReasons.includes('UNCERTAIN_MIXED_INTERVAL'));
+        assert.equal(dialogueTrack[0].sourceLanguage, 'ko');
+        assert.equal(dialogueTrack[0].foreign, undefined);
+        assert.equal(result.accepted.length, 1);
+        assert.equal(result.accepted[0].ttsEligible, true);
+        assert.equal(result.quarantined.length, 0);
     } finally {
         fs.rmSync(directory, { recursive: true, force: true });
     }
