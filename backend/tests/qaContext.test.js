@@ -76,6 +76,10 @@ test('Q&A policy blocks unrelated answers and searches before considering a sear
     assert.match(PROMPT, /연결이 확인되지 않는.*답하지 말고 검색도 하지 마세요/);
     assert.match(PROMPT, /사용자가 검색을 명시적으로 요청해도 이 원칙은 같습니다/);
 });
+test('Q&A policy prioritizes a complete explanation over a short answer when needed', () => {
+    assert.match(PROMPT, /답변을 짧게 만드는 것 자체를 우선하지 마세요/);
+    assert.match(PROMPT, /이해에 충분한 길이로 차근차근 설명/);
+});
 test('irregular source timestamps get explicit ordinal frame IDs matching every image and the allowed-ID catalog', async t => {
     const frame = await frameFixture(t), times = [19620,20521,21421,22322,23223,24691,25025,26827];
     const context = await createQaContext({ request: { ...input, timestamp: 23.47937145932762 }, video, media: { frames: times.map(frame), subtitles: { cues: [] } } });
