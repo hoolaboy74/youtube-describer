@@ -12,7 +12,8 @@ process.env.GOOGLE_API_KEY = process.env.GOOGLE_API_KEY || 'test-key';
 const {
     canonicalizeModelOutput,
     parseVttToDialogueTrack,
-    selectDialogueSubtitle
+    selectDialogueSubtitle,
+    selectMixedEnglishReferenceSubtitle
 } = require('./videoProcessor');
 
 test('foreign and unknown audio prefer original English VTT over Korean translated VTT', () => {
@@ -54,6 +55,109 @@ test('Korean and mixed audio prefer Korean source VTT', () => {
     assert.equal(selectDialogueSubtitle(files, 'korean').file, 'video.ko.vtt');
     assert.equal(selectDialogueSubtitle(files, 'mixed').file, 'video.ko.vtt');
     assert.equal(selectDialogueSubtitle(['video.en.vtt'], 'mixed'), null);
+    assert.equal(selectMixedEnglishReferenceSubtitle(files, 'mixed'), 'video.en.vtt');
+    assert.equal(selectMixedEnglishReferenceSubtitle(files, 'korean'), null);
+});
+
+test('mixed VTT marks only independently aligned English speech as foreign', () => {
+    const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'youtube-describer-vtt-'));
+    const koreanVttPath = path.join(directory, 'video.ko.vtt');
+    const englishVttPath = path.join(directory, 'video.en.vtt');
+    try {
+        fs.writeFileSync(koreanVttPath, [
+            'WEBVTT',
+            '',
+            '00:00:00.000 --> 00:00:02.000',
+            '한국어 진행자의 질문입니다.',
+            '',
+            '00:00:02.000 --> 00:00:03.100',
+            '한국어 질문입니다. This answer starts here.',
+            '',
+            '00:00:03.100 --> 00:00:06.000',
+            'This answer starts here and continues in English.',
+            '',
+            '00:00:06.000 --> 00:00:08.000',
+            '아이폰 iPhone 17을 소개합니다.',
+            ''
+        ].join('\n'));
+        fs.writeFileSync(englishVttPath, [
+            'WEBVTT',
+            '',
+            '00:00:03.100 --> 00:00:06.000',
+            'This answer starts here and continues in English.',
+            ''
+        ].join('\n'));
+
+        const englishReference = parseVttToDialogueTrack(englishVttPath, 'en', {
+            sourceRole: 'mixed_language_reference'
+        });
+        const dialogueTrack = parseVttToDialogueTrack(koreanVttPath, 'ko', {
+            sourceRole: 'original_dialogue',
+            mixedEnglishReferenceTrack: englishReference
+        });
+        const result = canonicalizeModelOutput([
+            '[2][trans] 한국어 질문을 다시 읽으면 안 됩니다.',
+            '[4][trans] 이 답변은 여기서 시작해 영어로 이어집니다.'
+        ].join('\n'), {
+            duration: 20,
+            audioLanguage: 'mixed',
+            dialogueTrack,
+            dialogueTimestampTolerance: 1,
+            frameEvidence: []
+        });
+
+        assert.equal(dialogueTrack.filter(interval => interval.foreign).length, 1);
+        assert.equal(dialogueTrack[2].foreign, true);
+        assert.equal(dialogueTrack[2].sourceLanguage, 'ko');
+        assert.equal(dialogueTrack[1].foreign, undefined);
+        assert.equal(dialogueTrack[3].foreign, undefined);
+        assert.equal(result.accepted.length, 1);
+        assert.equal(result.accepted[0].timestamp, 4);
+        assert.equal(result.accepted[0].provenance.dialogueInterval.foreign, true);
+        assert.equal(result.quarantined.length, 1);
+        assert.ok(result.quarantined[0].validationReasons.includes('UNCERTAIN_MIXED_INTERVAL'));
+    } finally {
+        fs.rmSync(directory, { recursive: true, force: true });
+    }
+});
+
+test('mixed English-looking captions remain non-translatable without an aligned reference', () => {
+    const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'youtube-describer-vtt-'));
+    const koreanVttPath = path.join(directory, 'video.ko.vtt');
+    try {
+        fs.writeFileSync(koreanVttPath, [
+            'WEBVTT',
+            '',
+            '00:00:03.000 --> 00:00:06.000',
+            'This may be an unverified English caption.',
+            ''
+        ].join('\n'));
+        const dialogueTrack = parseVttToDialogueTrack(koreanVttPath, 'ko', {
+            sourceRole: 'original_dialogue',
+            mixedEnglishReferenceTrack: []
+        });
+        const result = canonicalizeModelOutput('[4][trans] 확인되지 않은 영어 자막을 번역하면 안 됩니다.', {
+            duration: 20,
+            audioLanguage: 'mixed',
+            dialogueTrack,
+            dialogueTimestampTolerance: 1,
+            frameEvidence: []
+        });
+
+        assert.equal(dialogueTrack[0].foreign, undefined);
+        assert.equal(result.accepted.length, 0);
+        assert.equal(result.quarantined.length, 1);
+        assert.ok(result.quarantined[0].validationReasons.includes('UNCERTAIN_MIXED_INTERVAL'));
+    } finally {
+        fs.rmSync(directory, { recursive: true, force: true });
+    }
+});
+
+test('mixed-language policy restricts translations to confirmed foreign intervals', () => {
+    const prompt = fs.readFileSync(path.join(__dirname, 'prompt_template_codex_v2.txt'), 'utf8');
+    assert.match(prompt, /foreign: true.*확인된 비한국어 발화/s);
+    assert.match(prompt, /한국어와 영어가 함께 섞인 항목은 번역하지 마십시오/);
+    assert.match(prompt, /시작보다 앞당기지 마십시오/);
 });
 
 test('foreign translation provenance matches a timestamp inside a fractional VTT cue', () => {

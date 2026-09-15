@@ -650,10 +650,22 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null, userId = nul
         let selectedSubtitlePath = null;
         if (subtitleSelection) {
             selectedSubtitlePath = path.join(baseTempDir, subtitleSelection.file);
+            const mixedEnglishReferencePath = selectMixedEnglishReferenceSubtitle(
+                potentialSubtitles,
+                audioLanguage
+            );
+            const mixedEnglishReferenceTrack = mixedEnglishReferencePath
+                ? parseVttToDialogueTrack(mixedEnglishReferencePath, 'en', {
+                    sourceRole: 'mixed_language_reference'
+                })
+                : [];
             dialogueTrack = parseVttToDialogueTrack(
                 selectedSubtitlePath,
                 subtitleSelection.sourceLanguage,
-                subtitleSelection
+                {
+                    ...subtitleSelection,
+                    mixedEnglishReferenceTrack
+                }
             );
             logger.info(`[${requestHash}] ${subtitleSelection.logLabel}: ${subtitleSelection.file}`);
         } else {
@@ -1023,10 +1035,22 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
         let selectedSubtitlePath = null;
         if (subtitleSelection) {
             selectedSubtitlePath = path.join(baseTempDir, subtitleSelection.file);
+            const mixedEnglishReferencePath = selectMixedEnglishReferenceSubtitle(
+                potentialSubtitles,
+                audioLanguage
+            );
+            const mixedEnglishReferenceTrack = mixedEnglishReferencePath
+                ? parseVttToDialogueTrack(mixedEnglishReferencePath, 'en', {
+                    sourceRole: 'mixed_language_reference'
+                })
+                : [];
             dialogueTrack = parseVttToDialogueTrack(
                 selectedSubtitlePath,
                 subtitleSelection.sourceLanguage,
-                subtitleSelection
+                {
+                    ...subtitleSelection,
+                    mixedEnglishReferenceTrack
+                }
             );
             logger.info(`[${requestHash}] ${subtitleSelection.logLabel} (batch): ${subtitleSelection.file}`);
         } else {
@@ -1174,7 +1198,50 @@ function parseVttToDialogueTrack(vttPath, sourceLang, options = {}) {
     if (currentItem && currentItem.sourceText) {
         track.push(currentItem);
     }
-    return track;
+    return options.mixedEnglishReferenceTrack
+        ? annotateConfirmedMixedEnglishIntervals(track, options.mixedEnglishReferenceTrack)
+        : track;
+}
+
+function englishWordCount(text) {
+    return (String(text || '').match(/[A-Za-z]+(?:['’][A-Za-z]+)*/g) || []).length;
+}
+
+function isEnglishSpeechCandidate(text) {
+    const value = String(text || '').trim();
+    // A product name, acronym, or a single English interjection in a Korean
+    // sentence is not sufficient proof of a foreign-language speech interval.
+    return value.length > 0 &&
+        !/[가-힣]/.test(value) &&
+        englishWordCount(value) >= 4;
+}
+
+function intervalsOverlap(left, right) {
+    return Number(left.start) < Number(right.end) && Number(right.start) < Number(left.end);
+}
+
+function hasAlignedEnglishReference(interval, referenceTrack) {
+    if (!isEnglishSpeechCandidate(interval.sourceText) || !Array.isArray(referenceTrack)) return false;
+    return referenceTrack.some(reference => (
+        intervalsOverlap(interval, reference) &&
+        isEnglishSpeechCandidate(reference.sourceText) &&
+        getSimilarity(interval.sourceText, reference.sourceText) >= 0.9
+    ));
+}
+
+function annotateConfirmedMixedEnglishIntervals(track, referenceTrack) {
+    return track.map(interval => {
+        if (!hasAlignedEnglishReference(interval, referenceTrack)) return interval;
+        return {
+            ...interval,
+            // The Korean-primary VTT can contain raw English speech. It is
+            // eligible only when a time-aligned English VTT independently
+            // confirms the same complete English caption.
+            foreign: true,
+            detectedLanguage: 'en',
+            sourceRole: 'confirmed_mixed_foreign_dialogue'
+        };
+    });
 }
 
 function subtitleMatchesLanguage(filename, language) {
@@ -1221,6 +1288,14 @@ function selectDialogueSubtitle(potentialSubtitles, audioLanguage) {
             ? 'mixed video: loaded English source subtitles'
             : 'foreign/unknown video: loaded English source subtitles'
     } : null;
+}
+
+function selectMixedEnglishReferenceSubtitle(potentialSubtitles, audioLanguage) {
+    if (String(audioLanguage || '').toLowerCase() !== 'mixed') return null;
+    const subtitles = Array.isArray(potentialSubtitles)
+        ? potentialSubtitles.filter(file => typeof file === 'string' && file.toLowerCase().endsWith('.vtt'))
+        : [];
+    return subtitles.find(file => subtitleMatchesLanguage(file, 'en')) || null;
 }
 
 function parseTimestamp(timeStr) {
@@ -1271,6 +1346,7 @@ module.exports = {
     extractKeyframesHybrid,
     parseVttToDialogueTrack,
     selectDialogueSubtitle,
+    selectMixedEnglishReferenceSubtitle,
     getSimilarity,
     canonicalizeModelOutput,
     publishCanonicalOutput
