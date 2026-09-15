@@ -310,9 +310,6 @@ function validateCandidate(candidate, context = {}) {
         if (!AUDIO_LANGUAGES.has(language)) addReason(reasons, 'INVALID_AUDIO_LANGUAGE');
         else if (language === 'korean') addReason(reasons, 'TRANSLATION_NOT_ALLOWED_KOREAN');
         else if (language === 'unknown') addReason(reasons, 'TRANSLATION_NOT_ALLOWED_UNKNOWN');
-        else if (language === 'mixed' && sourceInterval && !isConfirmedForeignInterval(sourceInterval)) {
-            addReason(reasons, 'UNCERTAIN_MIXED_INTERVAL');
-        }
         if (sourceInterval && !sourceInterval.confirmed && language === 'foreign') {
             addReason(reasons, 'UNCONFIRMED_FOREIGN_INTERVAL');
         }
@@ -344,7 +341,6 @@ function validateCandidate(candidate, context = {}) {
     } else {
         const quarantineReasons = new Set([
             'DIALOGUE_DUPLICATE',
-            'UNCERTAIN_MIXED_INTERVAL',
             'UNCONFIRMED_FOREIGN_INTERVAL',
             'UNCONFIRMED_DIALOGUE',
             'TRANSLATION_NOT_NEEDED',
@@ -355,14 +351,6 @@ function validateCandidate(candidate, context = {}) {
         event.ttsEligible = false;
     }
     return event;
-}
-
-function isConfirmedForeignInterval(interval) {
-    if (!interval || !interval.confirmed) return false;
-    if (interval.foreign === true) return true;
-    const language = interval.sourceLanguage;
-    return typeof language === 'string' &&
-        !['ko', 'korean', 'unknown', 'undetermined'].includes(language);
 }
 
 function validateEvents(candidates, context = {}) {

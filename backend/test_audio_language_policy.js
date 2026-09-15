@@ -81,11 +81,11 @@ test('keeps a confirmed foreign dialogue translation eligible even when its Kore
     assert.equal(event.legacyVerbosity, 'translation');
 });
 
-test('translates only the confirmed foreign interval in mixed audio', () => {
+test('accepts confirmed, time-aligned mixed-audio translations despite VTT language metadata', () => {
     const fixtures = [
         ['en', 'accepted', null],
-        ['ko', 'quarantined', 'UNCERTAIN_MIXED_INTERVAL'],
-        ['unknown', 'quarantined', 'UNCERTAIN_MIXED_INTERVAL']
+        ['ko', 'accepted', null],
+        ['unknown', 'accepted', null]
     ];
     for (const [sourceLanguage, status, reason] of fixtures) {
         const event = trans('mixed', dialogue(sourceLanguage));
