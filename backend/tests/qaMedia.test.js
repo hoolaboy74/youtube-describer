@@ -207,3 +207,20 @@ test('second yt-dlp failure reports only a classified reason',async t=>{
     const adapter=createDefaultMediaAdapter({backendRoot:root,getVideo:()=>null,run:async()=>{throw Object.assign(new Error('failed'),{code:'MEDIA_EXIT',exitCode:1,stderr:'ERROR: Sign in to confirm you are not a bot'});}});
     await assert.rejects(adapter.full('YmEnygA7pHc',root),error=>error.mediaFailure==='YTDLP_AUTH_REQUIRED'&&!String(error.mediaFailure).includes('confirm'));
 });
+
+test('opening summaries use only a verified cached window and never start media work', async t => {
+    const { manager, frame } = await setup(t); const id = 'abcdefghijk';
+    const calls = { section: 0, full: 0, subtitles: 0, extract: 0 };
+    const service = createQaMedia({ manager, adapter: {
+        section: async () => { calls.section++; }, full: async () => { calls.full++; }, subtitles: async () => { calls.subtitles++; },
+    }, extract: async () => { calls.extract++; return { ready: true }; } });
+    await assert.rejects(service.prepareCacheOnly(id, 12500, 20000), { code: 'QA_OPENING_SUMMARY_CACHE_MISS' });
+    assert.deepEqual(calls, { section: 0, full: 0, subtitles: 0, extract: 0 });
+    const lease = manager.store.claim(id, FRAME_VERSION, 'opening-test');
+    for (let ms = 8000; ms <= 16000; ms += 1000) await manager.publishFrame(lease, frame(ms));
+    manager.store.release(lease);
+    const result = await service.prepareCacheOnly(id, 12500, 20000);
+    assert.ok(result.frames.some(value => value.timestampMs <= 12500));
+    assert.equal(result.subtitles.state, 'unknown');
+    assert.deepEqual(calls, { section: 0, full: 0, subtitles: 0, extract: 0 });
+});

@@ -46,19 +46,30 @@ function createQaGeneration({ store, media, model, speech, getVideo, recordUsage
         // acceptance, so a slow cache miss cannot abort before model I/O.
         let first, idle;
         let audioChain = Promise.resolve(), ogg, releaseModel;
+        const maxSentences = request.input.kind === 'opening-summary' ? 3 : 64;
+        let summaryLimitReached = false;
         request.effectiveAudioMode = request.input.audioMode;
         try {
             const video = getVideo(request.input.videoId);
             if (!video?.duration || request.input.timestamp >= video.duration) throw new Error('QA_VIDEO_UNAVAILABLE');
-            const prepared = await media.prepare(request.input.videoId, Math.floor(request.input.timestamp * 1000), Math.round(video.duration * 1000),
-                { signal, warm: cacheWarmingEnabled(), referenceId: request.input.sessionId });
+            const timestampMs = Math.floor(request.input.timestamp * 1000), durationMs = Math.round(video.duration * 1000);
+            const prepared = request.input.kind === 'opening-summary'
+                ? await media.prepareCacheOnly(request.input.videoId, timestampMs, durationMs)
+                : await media.prepare(request.input.videoId, timestampMs, durationMs, { signal, warm: cacheWarmingEnabled(), referenceId: request.input.sessionId });
             const context = await createQaContext({ request: request.input, media: prepared, video });
             signal.throwIfAborted();
             report('evidence_ready', { timestamp: request.input.timestamp, titlePresent: !!context.title, scriptEntries: context.script.length, historyTurns: context.history.length, frameTimesMs: [...context.evidence.values()].filter(item => item.kind === 'frame').map(item => item.timestampMs), cues: context.cues.length, subtitleState: prepared.subtitles.state || 'unknown', currentFrameId: context.currentFrameId, frameEvidence: context.frameEvidence });
             first = timeout(45000, 'QA_FIRST_SENTENCE_TIMEOUT');
             function accept(candidate) {
                 signal.throwIfAborted();
-                if (request.sentences.length >= 64) throw new Error('QA_OUTPUT_LIMIT');
+                if (request.sentences.length >= maxSentences) {
+                    // The opening turn is deliberately a compact orientation,
+                    // not an unbounded answer. Ignore the fourth completed
+                    // record and stop consuming the provider stream below so
+                    // it can never become an event or TTS input.
+                    if (request.input.kind === 'opening-summary') { summaryLimitReached = true; return; }
+                    throw new Error('QA_OUTPUT_LIMIT');
+                }
                 const result = validateSentence(candidate, context, request.sentences);
                 if (!result.accepted) {
                     report('answer_format_invalid', { reason: result.reason });
@@ -108,6 +119,7 @@ function createQaGeneration({ store, media, model, speech, getVideo, recordUsage
                 const grounding = chunk.candidates?.[0]?.groundingMetadata;
                 if (grounding && (grounding.webSearchQueries?.length || grounding.groundingChunks?.length)) streamGrounding = grounding;
                 parser.push(chunk.text());
+                if (summaryLimitReached) break;
             }
             const parsed = parser.end();
             const response = await finalResponse;

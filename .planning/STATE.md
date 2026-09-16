@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-08-24)
 Phase: 01 (canonical-output-provenance-v2-policy) — EXECUTING
 Plan: 2 of 2
 Status: Phase complete — ready for verification
-Last activity: 2026-08-25
+Last activity: 2026-09-16 - Completed quick task 260916-mvw: cache-gated AI conversation opening summary
 
 Progress: [██████████] 100%
 
@@ -74,6 +74,12 @@ None yet.
 
 - Exact chunk target behavior, resource budgets, timing guard bands, and evaluation thresholds remain measurement questions for later phases.
 - Worker topology (in-process loop versus API plus worker process) must be selected using local SQLite/load and restart evidence.
+
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 260916-mvw | Cache-gated AI conversation opening summary | 2026-09-16 | 8bc6af6 | [260916-mvw-ai-q-a-ai](./quick/260916-mvw-ai-q-a-ai/) |
 
 ## Deferred Items
 

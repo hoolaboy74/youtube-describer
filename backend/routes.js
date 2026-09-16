@@ -441,6 +441,7 @@ const qaMaintenance = setInterval(() => {
 }, 60000);
 qaMaintenance.unref();
 router.use('/qa', createQaRouter({ auth: requireAuth, store: incrementalQaStore, manager: () => db.getQaCacheManager(),
+    media: () => db.getQaMedia(), getVideo: db.getVideo,
     synthesizeSentence: (text, signal) => incrementalQaSpeech.mp3(text, signal),
     run: request => {
         if (!incrementalQaRun) incrementalQaRun = createQaGeneration({ store: incrementalQaStore, media: db.getQaMedia(), getVideo: db.getVideo,

@@ -3,10 +3,13 @@ const crypto = require('node:crypto');
 const { EventEmitter } = require('node:events');
 const fail = (code, status = 400) => Object.assign(new Error(code), { code, status });
 const idValid = value => typeof value === 'string' && /^[A-Za-z0-9_-]{8,128}$/.test(value);
+const OPENING_SUMMARY_QUESTION = '현재 화면과 상황을 짧게 설명해 주세요.';
 function validateRequest(body) {
+    const openingSummary = body?.kind === 'opening-summary';
     if (!body || !idValid(body.requestId) || !idValid(body.sessionId) || !/^[A-Za-z0-9_-]{11}$/.test(body.videoId)
-        || !Number.isFinite(body.timestamp) || body.timestamp < 0 || typeof body.question !== 'string' || !body.question.trim()
-        || body.question.length > 4000 || !['mp3', 'ogg'].includes(body.audioMode) || !Array.isArray(body.history)) throw fail('QA_INVALID_REQUEST');
+        || !Number.isFinite(body.timestamp) || body.timestamp < 0 || !['mp3', 'ogg'].includes(body.audioMode) || !Array.isArray(body.history)
+        || (!openingSummary && (typeof body.question !== 'string' || !body.question.trim() || body.question.length > 4000))
+        || (openingSummary && Object.hasOwn(body, 'question'))) throw fail('QA_INVALID_REQUEST');
     for (const turn of body.history) {
         if (!turn || !idValid(turn.requestId) || !Number.isFinite(turn.timestamp) || turn.timestamp < 0
             || typeof turn.question !== 'string' || typeof turn.answer !== 'string'
@@ -15,7 +18,8 @@ function validateRequest(body) {
     // Reject explicitly rather than silently truncating a long conversation.
     if (Buffer.byteLength(JSON.stringify(body)) > 512 * 1024) throw fail('QA_CONTEXT_TOO_LARGE', 413);
     return structuredClone({ requestId: body.requestId, sessionId: body.sessionId, videoId: body.videoId,
-        timestamp: body.timestamp, question: body.question, history: body.history, audioMode: body.audioMode });
+        timestamp: body.timestamp, question: openingSummary ? OPENING_SUMMARY_QUESTION : body.question, history: body.history,
+        audioMode: body.audioMode, kind: openingSummary ? 'opening-summary' : 'question' });
 }
 function createQaRequestStore({ now = Date.now, ttlMs = 600000, ticketTtlMs = 60000, maxRequests = 200, receipts } = {}) {
     const requests = new Map(), sessions = new Map(), tickets = new Map();
@@ -78,4 +82,4 @@ function createQaRequestStore({ now = Date.now, ttlMs = 600000, ticketTtlMs = 60
         audioGrant(ticket) { sweep(); const grant = tickets.get(ticket); const request = grant && requests.get(grant.requestId); return request ? { request, seq: grant.seq } : null; },
     };
 }
-module.exports = { createQaRequestStore, validateRequest, fail };
+module.exports = { createQaRequestStore, validateRequest, fail, OPENING_SUMMARY_QUESTION };

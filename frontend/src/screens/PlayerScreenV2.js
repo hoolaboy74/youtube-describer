@@ -260,7 +260,7 @@ function PlayerScreenV2() {
         }, 100);
     }, []);
     const incrementalQa = useQaConversation({ apiBase: API_BASE, token, videoId, announceError: announceQaPolite, playbackRate });
-    const { cancel: cancelIncrementalQa } = incrementalQa;
+    const { cancel: cancelIncrementalQa, startOpeningSummary, sceneSummary } = incrementalQa;
     const incrementalQaEnabled = incrementalQa.enabled && legacyQaList.length === 0;
     const qaList = incrementalQaEnabled ? incrementalQa.turns : legacyQaList;
     const isQaLoading = incrementalQaEnabled ? incrementalQa.busy : legacyQaLoading;
@@ -361,6 +361,8 @@ function PlayerScreenV2() {
             return;
         }
 
+        // Capture once, synchronously, before opening work can race playback.
+        const openingTimestamp = player.getCurrentTime();
         const isVideoPlaying = player.getPlayerState() === 1;
         const isAudioPlaying = audioPlayerRef.current && !audioPlayerRef.current.paused && !audioPlayerRef.current.ended;
         const currentlyPlaying = isVideoPlaying || isAudioPlaying;
@@ -401,8 +403,9 @@ function PlayerScreenV2() {
         }
         
         setIsQaModalOpen(true);
-        if (!incrementalQaEnabled) announceQaPolite('질문 하세요');
-    }, [player, announceQaPolite, user, incrementalQaEnabled]);
+        if (incrementalQaEnabled) startOpeningSummary({ timestamp: openingTimestamp });
+        else if (!incrementalQaEnabled) announceQaPolite('질문 하세요');
+    }, [player, announceQaPolite, user, incrementalQaEnabled, startOpeningSummary]);
 
     // Close QA Modal, stop TTS, and resume video playback
     const handleCloseQaModal = useCallback(() => {
@@ -1413,6 +1416,20 @@ function PlayerScreenV2() {
                                     </button>
                                 </div>
 
+                                {incrementalQaEnabled && sceneSummary && <section aria-label="현재 장면 요약" style={{
+                                    padding: '14px 24px',
+                                    backgroundColor: '#eef6ff',
+                                    borderBottom: '1px solid #cfe3f6'
+                                }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', alignItems: 'baseline' }}>
+                                        <strong style={{ color: '#124c7c' }}>현재 장면 요약</strong>
+                                        <span style={{ fontSize: '0.8rem', color: '#46657d' }}>{formatTime(sceneSummary.timestamp)}</span>
+                                    </div>
+                                    <p style={{ margin: '6px 0 0', color: '#1f3548', lineHeight: '1.5' }}>
+                                        {sceneSummary.answer || (sceneSummary.status === 'failed' ? '현재 장면 요약을 만들지 못했습니다.' : '현재 장면을 확인하고 있습니다.')}
+                                    </p>
+                                </section>}
+
                                 {/* Modal Body (Chat History) */}
                                 <div style={{
                                     flex: 1,
@@ -1444,7 +1461,6 @@ function PlayerScreenV2() {
                                     ) : (
                                         qaList.map((qa) => (
                                             <div key={qa.id} style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                                {/* User Question Bubble */}
                                                 <div style={{
                                                     alignSelf: 'flex-end',
                                                     maxWidth: '85%',

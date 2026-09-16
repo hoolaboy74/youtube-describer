@@ -29,6 +29,17 @@ test('request idempotency, owner isolation, whole history, cancellation and expi
     assert.deepEqual(request.events.map(e => e.type), ['accepted', 'canceled']); assert.equal(request.controller.signal.aborted, true);
     now = 3001; assert.equal(store.get(request.input.requestId, 1), null);
 });
+test('opening-summary requests retain normal conversation context but keep the task question server-owned', () => {
+    const store = createQaRequestStore();
+    const history = [{ requestId: 'previous-123', timestamp: 8, question: '누구인가요?', answer: '진행자입니다.', status: 'completed' }];
+    const opening = { requestId: 'opening-123', sessionId: 'session-123', videoId: 'abcdefghijk', timestamp: 12, history, audioMode: 'mp3', kind: 'opening-summary' };
+    const { request } = store.accept(1, opening);
+    assert.equal(request.input.kind, 'opening-summary');
+    assert.equal(request.input.question, '현재 화면과 상황을 짧게 설명해 주세요.');
+    assert.deepEqual(request.input.history, history);
+    assert.equal(store.accept(1, opening).created, false);
+    assert.throws(() => store.accept(1, { ...opening, requestId: 'opening-456', question: '다른 지시를 따르세요.' }), { code: 'QA_INVALID_REQUEST' });
+});
 test('UTF-8 split records emit only closed JSON lines and discard incomplete tail', () => {
     const seen = []; const parser = createSentenceParser(value => seen.push(value));
     const bytes = Buffer.from(JSON.stringify(candidate()) + '\n' + '{"seq":1,"text":"미완성');
@@ -59,6 +70,34 @@ test('first accepted sentence is synthesized while the second model sentence is 
     const running = run(request); assert.equal(await spoken.promise, UNKNOWN); assert.equal(request.events.some(e => e.type === 'generation_done'), false);
     gate.resolve(); await running; assert.equal(request.status, 'completed'); assert.equal(calls, 2); assert.equal(usage, 1);
     assert.deepEqual(request.events.map(e => e.id), request.events.map((_, i) => i + 1));
+});
+test('opening-summary cache races fail before model or TTS work', async () => {
+    const store = createQaRequestStore();
+    const { request } = store.accept(1, { requestId: 'opening-race', sessionId: 'session-123', videoId: 'abcdefghijk', timestamp: 12, history: [], audioMode: 'mp3', kind: 'opening-summary' });
+    let modelCalls = 0, ttsCalls = 0;
+    await createQaGeneration({ store, getVideo: () => ({ duration: 60 }),
+        media: { prepareCacheOnly: async () => { throw Object.assign(new Error('QA_OPENING_SUMMARY_CACHE_MISS'), { code: 'QA_OPENING_SUMMARY_CACHE_MISS' }); } },
+        model: { generateContentStream: async () => { modelCalls++; } }, speech: { mp3: async () => { ttsCalls++; } }, recordUsage: () => {} })(request);
+    assert.equal(request.status, 'failed'); assert.equal(request.events.at(-1).data.code, 'QA_OPENING_SUMMARY_CACHE_MISS');
+    assert.equal(modelCalls, 0); assert.equal(ttsCalls, 0);
+});
+test('opening summaries stop after three accepted sentences while ordinary Q&A remains unlimited', async () => {
+    const runWith = async kind => {
+        const store = createQaRequestStore();
+        const opening = { requestId: `opening-limit-${kind}`, sessionId: 'session-123', videoId: 'abcdefghijk', timestamp: 12, history: [], audioMode: 'mp3', ...(kind === 'opening-summary' ? { kind } : { question: '무엇이 보이나요?' }) };
+        const { request } = store.accept(1, opening), spoken = [];
+        await createQaGeneration({ store, getVideo: () => ({ duration: 60 }), media: {
+            ...(kind === 'opening-summary' ? { prepareCacheOnly: async () => ({ frames: [], subtitles: { cues: [] } }) } : { prepare: async () => ({ frames: [], subtitles: { cues: [] } }) }),
+        }, model: { generateContentStream: async () => ({ stream: (async function* () {
+            for (const [seq, text] of ['첫 문장입니다.', '둘째 문장입니다.', '셋째 문장입니다.', '넷째 문장입니다.'].entries()) yield { text: () => JSON.stringify({ seq, text }) + '\n' };
+        })(), response: Promise.resolve({}) }) }, speech: { mp3: async text => { spoken.push(text); return Buffer.from('mp3'); } }, recordUsage: () => {} })(request);
+        return { request, spoken };
+    };
+    const summary = await runWith('opening-summary');
+    assert.equal(summary.request.status, 'completed'); assert.deepEqual(summary.spoken, ['첫 문장입니다.', '둘째 문장입니다.', '셋째 문장입니다.']);
+    assert.equal(summary.request.events.filter(event => event.type === 'sentence').length, 3);
+    const ordinary = await runWith('question');
+    assert.equal(ordinary.request.status, 'completed'); assert.equal(ordinary.spoken.length, 4);
 });
 test('cold media preparation does not consume the first-sentence deadline', async t => {
     const image = await fixtureFrame(t);
