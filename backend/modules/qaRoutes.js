@@ -1,7 +1,7 @@
 'use strict';
 const express = require('express');
 const { cacheWarmingEnabled } = require('./qaConfig');
-function createQaRouter({ auth, store, run, manager, synthesizeSentence, enabled = () => process.env.QA_INCREMENTAL_SPEECH_ENABLED === 'true' }) {
+function createQaRouter({ auth, store, run, manager, media, getVideo, synthesizeSentence, enabled = () => process.env.QA_INCREMENTAL_SPEECH_ENABLED === 'true' }) {
     const router = express.Router();
     const wrap = fn => (req, res, next) => Promise.resolve().then(() => fn(req, res)).catch(error => {
         if (res.headersSent) return res.destroy();
@@ -10,6 +10,13 @@ function createQaRouter({ auth, store, run, manager, synthesizeSentence, enabled
     router.get('/config', auth, (req, res) => res.json({ incrementalSpeech: enabled(), oggStreaming: process.env.QA_OGG_STREAMING_ENABLED === 'true', cacheWarming: cacheWarmingEnabled() }));
     router.use((req, res, next) => enabled() ? next() : res.status(404).json({ code: 'QA_DISABLED' }));
     const owned = req => store.get(req.params.id, req.user.id);
+    router.post('/opening-summary-eligibility', auth, wrap(async (req, res) => {
+        const { videoId, timestamp } = req.body || {};
+        const video = /^[A-Za-z0-9_-]{11}$/.test(videoId || '') && Number.isFinite(timestamp) && timestamp >= 0 ? getVideo(videoId) : null;
+        if (!video?.duration) return res.status(400).json({ code: 'QA_INVALID_REQUEST' });
+        try { await media().prepareCacheOnly(videoId, Math.floor(timestamp * 1000), Math.round(video.duration * 1000)); res.json({ available: true }); }
+        catch (error) { if (error.code === 'QA_OPENING_SUMMARY_CACHE_MISS') return res.json({ available: false }); throw error; }
+    }));
     router.post('/requests', auth, wrap((req, res) => {
         const { request, created } = store.accept(req.user.id, req.body);
         res.status(202).json({ requestId: request.input.requestId, eventsPath: `/api/qa/requests/${request.input.requestId}/events`,
