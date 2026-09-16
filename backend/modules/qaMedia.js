@@ -428,6 +428,30 @@ function createQaMedia({ manager, adapter, log = message => logger.info(message)
             if(warm)service.ensureFullCache(videoId,durationMs).catch(()=>report(videoId,'warming_failed'));
             const values=await Promise.all([frames,subtitles]);report(videoId,'prepared',{frames:values[0].length,subtitleState:values[1].state,cues:values[1].cues.length});return {fromCache,frames:values[0].map(frame=>({...frame,path:manager.assetPath(frame.relativePath)})),subtitles:values[1]};
         },
+        // This deliberately does not share prepare(): prepare may acquire a
+        // lease, download media, extract frames, fetch captions, or schedule a
+        // warm-up.  Opening a chat must never make a cold video wait.
+        async prepareCacheOnly(videoId, timestampMs, durationMs) {
+            if(!/^[A-Za-z0-9_-]{11}$/.test(videoId)||!Number.isSafeInteger(timestampMs)||timestampMs<0||!Number.isSafeInteger(durationMs)||durationMs<=0||timestampMs>=durationMs) {
+                throw Object.assign(new Error('QA_OPENING_SUMMARY_CACHE_MISS'), { code: 'QA_OPENING_SUMMARY_CACHE_MISS' });
+            }
+            const miss = () => { throw Object.assign(new Error('QA_OPENING_SUMMARY_CACHE_MISS'), { code: 'QA_OPENING_SUMMARY_CACHE_MISS' }); };
+            const frames = current(videoId, timestampMs, durationMs, true);
+            if (!windowReady(videoId, frames, timestampMs, durationMs, true)) miss();
+            let subtitles;
+            try { subtitles = await reader(videoId, SUB_VERSION); } catch { miss(); }
+            try {
+                // Make corrupted frame assets an eligibility miss before the
+                // context builder can access them. No cache state is mutated.
+                const verified = await Promise.all(frames.map(async frame => {
+                    const file = manager.assetPath(frame.relativePath);
+                    const stat = await fs.stat(file);
+                    if (!stat.isFile() || (frame.checksum && await checksum(file) !== frame.checksum)) throw new Error('invalid frame');
+                    return { ...frame, path: file };
+                }));
+                return { fromCache: true, frames: verified, subtitles };
+            } catch { miss(); }
+        },
     };
     return service;
 }
