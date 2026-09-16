@@ -5,7 +5,7 @@ const { createQaContext } = require('./qaContext');
 const logger = require('../logger');
 const { qaProviderLimiter } = require('./qaSpeech');
 const { searchMetadata } = require('./qaSearch');
-const OPENING_SUMMARY_SUFFIX = `\n신뢰된 작업 지시: 이것은 사용자가 입력한 질문이 아니라 대화창을 열 때의 현재 장면 요약입니다. currentFrameId와 그 주변 실제 프레임만으로 지금 화면을 한두 개의 짧은 한국어 존댓말 문장으로 설명하세요. 검색을 하지 말고, 근거 없는 인물 신원·관계·감정·의도·원인·장소, 들리는 한국어 대사, 자막 번역을 만들지 마세요.`;
+const OPENING_SUMMARY_SUFFIX = `\n신뢰된 작업 지시: 이것은 사용자가 입력한 질문이 아니라 대화창을 열 때의 현재 장면 요약입니다. currentFrameId와 그 주변 실제 프레임만으로 지금 화면을 최대 세 개의 짧은 한국어 존댓말 문장으로 설명하세요. 검색을 하지 말고, 근거 없는 인물 신원·관계·감정·의도·원인·장소, 들리는 한국어 대사, 자막 번역을 만들지 마세요.`;
 function classifyProviderFailure(error) {
     const status = Number(error?.status || error?.response?.status || error?.cause?.status);
     const message = String(error?.message || '').toLowerCase();
@@ -47,7 +47,7 @@ function createQaGeneration({ store, media, model, speech, getVideo, recordUsage
         // acceptance, so a slow cache miss cannot abort before model I/O.
         let first, idle;
         let audioChain = Promise.resolve(), ogg, releaseModel;
-        const maxSentences = request.input.kind === 'opening-summary' ? 2 : 64;
+        const maxSentences = request.input.kind === 'opening-summary' ? 3 : 64;
         let summaryLimitReached = false;
         request.effectiveAudioMode = request.input.audioMode;
         try {
@@ -65,7 +65,7 @@ function createQaGeneration({ store, media, model, speech, getVideo, recordUsage
                 signal.throwIfAborted();
                 if (request.sentences.length >= maxSentences) {
                     // The opening turn is deliberately a compact orientation,
-                    // not an unbounded answer. Ignore the third completed
+                    // not an unbounded answer. Ignore the fourth completed
                     // record and stop consuming the provider stream below so
                     // it can never become an event or TTS input.
                     if (request.input.kind === 'opening-summary') { summaryLimitReached = true; return; }

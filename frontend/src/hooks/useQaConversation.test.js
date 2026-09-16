@@ -16,14 +16,28 @@ beforeEach(() => {
         events: jest.fn(async (path, options) => { events = options; await new Promise(() => {}); }) };
     createQaClient.mockReturnValue(client);
 });
-test('starts an AI-only opening summary only after an available cache probe', async () => {
+test('keeps an available opening summary outside chat history', async () => {
     client.openingSummaryEligibility.mockResolvedValue({ available: true });
     const { result } = renderHook(() => useQaConversation({ apiBase: '', token: 'token', videoId: 'abcdefghijk', announceError: jest.fn() }));
     await waitFor(() => expect(result.current.enabled).toBe(true));
     await act(async () => { await result.current.startOpeningSummary({ timestamp: 12.5 }); });
     expect(client.openingSummaryEligibility).toHaveBeenCalledWith('abcdefghijk', 12.5, expect.any(AbortSignal));
     expect(submitted).toMatchObject({ kind: 'opening-summary', timestamp: 12.5, history: [] });
-    expect(submitted.question).toBeUndefined(); expect(result.current.turns[0].openingSummary).toBe(true);
+    expect(submitted.question).toBeUndefined(); expect(result.current.turns).toEqual([]);
+    expect(result.current.sceneSummary).toMatchObject({ timestamp: 12.5, isGenerating: true });
+});
+test('refreshes the current-scene summary even after a prior conversation turn', async () => {
+    client.openingSummaryEligibility.mockResolvedValue({ available: true });
+    const { result } = renderHook(() => useQaConversation({ apiBase: '', token: 'token', videoId: 'abcdefghijk', announceError: jest.fn() }));
+    await waitFor(() => expect(result.current.enabled).toBe(true));
+    act(() => { result.current.ask({ question: '첫 질문', timestamp: 5 }); });
+    await waitFor(() => expect(events).toBeDefined());
+    act(() => { events.onEvent({ type: 'audio_done', data: {} }); callbacks.onDone(); });
+    act(() => { result.current.startOpeningSummary({ timestamp: 25 }); });
+    await waitFor(() => expect(result.current.sceneSummary?.timestamp).toBe(25));
+    expect(client.openingSummaryEligibility).toHaveBeenCalledWith('abcdefghijk', 25, expect.any(AbortSignal));
+    expect(result.current.turns).toHaveLength(1);
+    expect(result.current.sceneSummary).toMatchObject({ timestamp: 25, isGenerating: true });
 });
 test('preserves canceled partial history and ignores callbacks after close', async () => {
     const announceError = jest.fn(); const { result, unmount } = renderHook(() => useQaConversation({ apiBase: '', token: 'token', videoId: 'abcdefghijk', announceError }));

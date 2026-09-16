@@ -4,9 +4,9 @@ import { createQaAudioController, chooseQaAudioMode } from '../services/qaAudioC
 import { createQaLatencyTrace } from '../services/qaLatencyTrace';
 const uuid = () => window.crypto?.randomUUID?.() || `qa-${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
 export function useQaConversation({ apiBase, token, videoId, announceError, playbackRate = 1.2 }) {
-    const [enabled, setEnabled] = useState(false), [turns, setTurns] = useState([]), [busy, setBusy] = useState(false), [audioError, setAudioError] = useState('');
+    const [enabled, setEnabled] = useState(false), [turns, setTurns] = useState([]), [sceneSummary, setSceneSummary] = useState(null), [busy, setBusy] = useState(false), [audioError, setAudioError] = useState('');
     const client = useMemo(() => createQaClient({ apiBase, token }), [apiBase, token]);
-    const history = useRef([]), active = useRef(null), openingProbe = useRef(null), session = useRef(null), audio = useRef(null), mounted = useRef(true);
+    const history = useRef([]), currentSummary = useRef(null), active = useRef(null), openingProbe = useRef(null), session = useRef(null), audio = useRef(null), mounted = useRef(true);
     const allowOgg = useRef(false);
     const rate = useRef(playbackRate); rate.current = playbackRate;
     useEffect(() => { audio.current?.setPlaybackRate(playbackRate); }, [playbackRate]);
@@ -32,16 +32,21 @@ export function useQaConversation({ apiBase, token, videoId, announceError, play
         history.current = history.current.map(turn => turn.id === id ? { ...turn, ...patch } : turn);
         if (mounted.current) setTurns([...history.current]);
     }, []);
+    const updateSummary = useCallback((id, patch) => {
+        if (currentSummary.current?.id !== id) return;
+        currentSummary.current = { ...currentSummary.current, ...patch };
+        if (mounted.current) setSceneSummary(currentSummary.current);
+    }, []);
     const cancel = useCallback(() => {
         openingProbe.current?.abort(); openingProbe.current = null;
         const request = active.current; active.current = null; audio.current?.cancel(); stopWaitingSpeech();
         if (request) { request.controller.abort(); request.trace?.finish('canceled'); if (!request.replay) client.cancel(request.id).catch(() => {});
-            const turn = history.current.find(item => item.id === request.id);
-            if (turn?.isGenerating) update(request.id, { isGenerating: false, status: 'canceled' }); }
+            if (request.openingSummary) { currentSummary.current = null; if (mounted.current) setSceneSummary(null); }
+            else { const turn = history.current.find(item => item.id === request.id); if (turn?.isGenerating) update(request.id, { isGenerating: false, status: 'canceled' }); } }
         if (mounted.current) setBusy(false);
     }, [client, stopWaitingSpeech, update]);
     useEffect(() => {
-        mounted.current = true; const controller = new AbortController(); session.current = uuid(); history.current = []; setTurns([]); setEnabled(false); setBusy(false);
+        mounted.current = true; const controller = new AbortController(); session.current = uuid(); history.current = []; currentSummary.current = null; setTurns([]); setSceneSummary(null); setEnabled(false); setBusy(false);
         let heartbeat; const sessionId = session.current;
         if (token) client.config(controller.signal).then(config => {
             if (controller.signal.aborted) return; setEnabled(config.incrementalSpeech); allowOgg.current = config.oggStreaming === true;
@@ -55,7 +60,7 @@ export function useQaConversation({ apiBase, token, videoId, announceError, play
         const id = uuid(), controller = new AbortController();
         const audioMode = chooseQaAudioMode(window, { allowOgg: allowOgg.current }); let usingOgg = audioMode === 'ogg';
         const payloadHistory = history.current.map(turn => ({ requestId: turn.id, timestamp: turn.timestamp, question: turn.question, answer: turn.answer, status: turn.status }));
-        const request = { id, controller }; active.current = request; setBusy(true); setAudioError('');
+        const request = { id, controller, openingSummary }; active.current = request; setBusy(true); setAudioError('');
         if (!openingSummary) speakWaiting();
         const trace = createQaLatencyTrace({ requestId: id, timestamp, historyTurns: payloadHistory.length, implementation: 'incremental' });
         request.trace = trace;
@@ -64,7 +69,8 @@ export function useQaConversation({ apiBase, token, videoId, announceError, play
         audio.current = createQaAudioController({ onPlaying: () => { stopWaitingSpeech(); trace.playing(usingOgg ? 'ogg' : 'mp3'); }, onError,
             onDone: () => { if (active.current === request) { active.current = null; setBusy(false); } } });
         audio.current.prepare(rate.current);
-        history.current = [...history.current, { id, timestamp, question: openingSummary ? '' : question, answer: '', status: 'partial', isGenerating: true, seqs: [], openingSummary }]; setTurns([...history.current]);
+        if (openingSummary) { currentSummary.current = { id, timestamp, answer: '', status: 'partial', isGenerating: true, seqs: [] }; setSceneSummary(currentSummary.current); }
+        else { history.current = [...history.current, { id, timestamp, question, answer: '', status: 'partial', isGenerating: true, seqs: [] }]; setTurns([...history.current]); }
         try {
             const accepted = await client.submit(openingSummary
                 ? { requestId: id, sessionId: session.current, videoId, timestamp, history: [], audioMode, kind: 'opening-summary' }
@@ -73,35 +79,40 @@ export function useQaConversation({ apiBase, token, videoId, announceError, play
             if (accepted.audioPath) audio.current.enqueue(-1, apiBase + accepted.audioPath, true);
             await client.events(accepted.eventsPath, { signal: controller.signal, onEvent: event => {
                 if (active.current !== request) return;
-                const turn = history.current.find(value => value.id === id);
-                if (event.type === 'sentence' && !turn.seqs.includes(event.data.seq)) {
-                    trace.mark('firstText'); update(id, { answer: [turn.answer, event.data.text].filter(Boolean).join(' '), seqs: [...turn.seqs, event.data.seq], sources: [...new Map([...(turn.sources || []), ...(event.data.sources || [])].map(source => [source.url, source])).values()] });
+                const item = openingSummary ? currentSummary.current : history.current.find(value => value.id === id);
+                if (event.type === 'sentence' && item && !item.seqs.includes(event.data.seq)) {
+                    const patch = { answer: [item.answer, event.data.text].filter(Boolean).join(' '), seqs: [...item.seqs, event.data.seq] };
+                    trace.mark('firstText'); if (openingSummary) updateSummary(id, patch); else update(id, { ...patch, sources: [...new Map([...(item.sources || []), ...(event.data.sources || [])].map(source => [source.url, source])).values()] });
                 }
                 if (event.type === 'sentence_audio') {
                     if (usingOgg) { if (!audio.current.fallback()) throw new Error('QA_PARTIAL_STREAM_INTERRUPTED'); usingOgg = false; }
                     audio.current.enqueue(event.data.seq, apiBase + event.data.path);
                 }
-                if (event.type === 'generation_done') { trace.mark('generationDone'); update(id, { sources: event.data.sources || turn.sources || [], ...(event.data.searchSuggestions ? { searchSuggestions: event.data.searchSuggestions } : {}) }); }
-                if (event.type === 'audio_done') { stopWaitingSpeech(); update(id, { isGenerating: false, status: 'completed' }); audio.current.complete(); }
+                if (event.type === 'generation_done') { trace.mark('generationDone'); if (!openingSummary) update(id, { sources: event.data.sources || item?.sources || [], ...(event.data.searchSuggestions ? { searchSuggestions: event.data.searchSuggestions } : {}) }); }
+                if (event.type === 'audio_done') { stopWaitingSpeech(); if (openingSummary) updateSummary(id, { isGenerating: false, status: 'completed' }); else update(id, { isGenerating: false, status: 'completed' }); audio.current.complete(); }
                 if (event.type === 'error') throw new Error(event.data.code);
                 if (event.type === 'canceled') cancel();
             } });
         } catch (error) {
             if (active.current !== request || controller.signal.aborted) return;
             trace.finish('failed');
-            update(id, { isGenerating: false, status: history.current.find(turn => turn.id === id)?.answer ? 'partial' : 'failed' });
             if (openingSummary && error.message === 'QA_OPENING_SUMMARY_CACHE_MISS') {
-                history.current = history.current.filter(turn => turn.id !== id); setTurns([...history.current]);
-            } else onError(error.message === 'QA_ANSWER_FORMAT_INVALID' ? '답변 형식을 읽지 못했습니다. 다시 질문해 주세요.' : error.message === 'QA_EMPTY_MODEL_RESPONSE' ? 'AI가 답변을 반환하지 않았습니다. 다시 질문해 주세요.' : '답변이 중단되었습니다. 남아 있는 답변을 확인하거나 새 질문을 보내 주세요.');
+                currentSummary.current = null; setSceneSummary(null);
+            } else {
+                if (openingSummary) updateSummary(id, { isGenerating: false, status: currentSummary.current?.answer ? 'partial' : 'failed' });
+                else update(id, { isGenerating: false, status: history.current.find(turn => turn.id === id)?.answer ? 'partial' : 'failed' });
+                onError(error.message === 'QA_ANSWER_FORMAT_INVALID' ? '답변 형식을 읽지 못했습니다. 다시 질문해 주세요.' : error.message === 'QA_EMPTY_MODEL_RESPONSE' ? 'AI가 답변을 반환하지 않았습니다. 다시 질문해 주세요.' : '답변이 중단되었습니다. 남아 있는 답변을 확인하거나 새 질문을 보내 주세요.');
+            }
             audio.current.cancel(); stopWaitingSpeech(); active.current = null; setBusy(false); client.cancel(id).catch(() => {});
         }
-    }, [apiBase, client, playbackRate, speakWaiting, stopWaitingSpeech, videoId, update, cancel]);
+    }, [apiBase, client, speakWaiting, stopWaitingSpeech, videoId, update, updateSummary, cancel]);
     const startOpeningSummary = useCallback(async ({ timestamp }) => {
-        if (!enabled || history.current.length || active.current || openingProbe.current) return;
+        if (!enabled || active.current || openingProbe.current) return;
+        currentSummary.current = null; setSceneSummary(null);
         const controller = new AbortController(); openingProbe.current = controller;
         try {
             const result = await client.openingSummaryEligibility(videoId, timestamp, controller.signal);
-            if (!controller.signal.aborted && result.available && !history.current.length) void ask({ timestamp, openingSummary: true });
+            if (!controller.signal.aborted && result.available) void ask({ timestamp, openingSummary: true });
         } catch { /* Cache probes are optional; preserve the existing empty conversation. */ }
         finally { if (openingProbe.current === controller) openingProbe.current = null; }
     }, [ask, client, enabled, videoId]);
@@ -114,5 +125,5 @@ export function useQaConversation({ apiBase, token, videoId, announceError, play
             audio.current.complete();
         } catch { if (active.current === request) { cancel(); setAudioError('다시 듣기 시간이 만료되었습니다. 새 질문을 보내 주세요.'); announce.current('다시 듣기 시간이 만료되었습니다. 새 질문을 보내 주세요.'); } }
     }, [apiBase, client, cancel]);
-    return { enabled, turns, busy, audioError, ask, startOpeningSummary, cancel, replay, resume: () => audio.current?.resume() };
+    return { enabled, turns, sceneSummary, busy, audioError, ask, startOpeningSummary, cancel, replay, resume: () => audio.current?.resume() };
 }
