@@ -11,9 +11,19 @@ beforeEach(() => {
     audio = { setPlaybackRate: jest.fn(), prepare: jest.fn(), cancel: jest.fn(), enqueue: jest.fn(), complete: jest.fn(), resume: jest.fn() };
     createQaAudioController.mockImplementation(options => { callbacks = options; return audio; });
     client = { config: jest.fn(async () => ({ incrementalSpeech: true })), presence: jest.fn(async () => {}), cancel: jest.fn(async () => {}),
+        openingSummaryEligibility: jest.fn(async () => ({ available: false })),
         submit: jest.fn(async payload => { submitted = payload; return { eventsPath: '/events' }; }),
         events: jest.fn(async (path, options) => { events = options; await new Promise(() => {}); }) };
     createQaClient.mockReturnValue(client);
+});
+test('starts an AI-only opening summary only after an available cache probe', async () => {
+    client.openingSummaryEligibility.mockResolvedValue({ available: true });
+    const { result } = renderHook(() => useQaConversation({ apiBase: '', token: 'token', videoId: 'abcdefghijk', announceError: jest.fn() }));
+    await waitFor(() => expect(result.current.enabled).toBe(true));
+    await act(async () => { await result.current.startOpeningSummary({ timestamp: 12.5 }); });
+    expect(client.openingSummaryEligibility).toHaveBeenCalledWith('abcdefghijk', 12.5, expect.any(AbortSignal));
+    expect(submitted).toMatchObject({ kind: 'opening-summary', timestamp: 12.5, history: [] });
+    expect(submitted.question).toBeUndefined(); expect(result.current.turns[0].openingSummary).toBe(true);
 });
 test('preserves canceled partial history and ignores callbacks after close', async () => {
     const announceError = jest.fn(); const { result, unmount } = renderHook(() => useQaConversation({ apiBase: '', token: 'token', videoId: 'abcdefghijk', announceError }));

@@ -7,6 +7,7 @@ export function createQaClient({ apiBase, token, fetchImpl = fetch }) {
         return response.status === 204 ? null : response.json();
     };
     return { config: signal => json('/api/qa/config', undefined, signal),
+        openingSummaryEligibility: (videoId, timestamp, signal) => json('/api/qa/opening-summary-eligibility', { videoId, timestamp }, signal),
         submit: (body, signal) => json('/api/qa/requests', body, signal),
         cancel: id => json(`/api/qa/requests/${id}/cancel`, {}),
         presence: (sessionId, videoId, active) => json(`/api/qa/sessions/${sessionId}/presence`, { videoId, active }),

@@ -260,7 +260,7 @@ function PlayerScreenV2() {
         }, 100);
     }, []);
     const incrementalQa = useQaConversation({ apiBase: API_BASE, token, videoId, announceError: announceQaPolite, playbackRate });
-    const { cancel: cancelIncrementalQa } = incrementalQa;
+    const { cancel: cancelIncrementalQa, startOpeningSummary } = incrementalQa;
     const incrementalQaEnabled = incrementalQa.enabled && legacyQaList.length === 0;
     const qaList = incrementalQaEnabled ? incrementalQa.turns : legacyQaList;
     const isQaLoading = incrementalQaEnabled ? incrementalQa.busy : legacyQaLoading;
@@ -361,6 +361,8 @@ function PlayerScreenV2() {
             return;
         }
 
+        // Capture once, synchronously, before opening work can race playback.
+        const openingTimestamp = player.getCurrentTime();
         const isVideoPlaying = player.getPlayerState() === 1;
         const isAudioPlaying = audioPlayerRef.current && !audioPlayerRef.current.paused && !audioPlayerRef.current.ended;
         const currentlyPlaying = isVideoPlaying || isAudioPlaying;
@@ -401,8 +403,9 @@ function PlayerScreenV2() {
         }
         
         setIsQaModalOpen(true);
-        if (!incrementalQaEnabled) announceQaPolite('질문 하세요');
-    }, [player, announceQaPolite, user, incrementalQaEnabled]);
+        if (incrementalQaEnabled && incrementalQa.turns.length === 0) startOpeningSummary({ timestamp: openingTimestamp });
+        else if (!incrementalQaEnabled) announceQaPolite('질문 하세요');
+    }, [player, announceQaPolite, user, incrementalQaEnabled, incrementalQa.turns.length, startOpeningSummary]);
 
     // Close QA Modal, stop TTS, and resume video playback
     const handleCloseQaModal = useCallback(() => {
@@ -1444,8 +1447,8 @@ function PlayerScreenV2() {
                                     ) : (
                                         qaList.map((qa) => (
                                             <div key={qa.id} style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                                {/* User Question Bubble */}
-                                                <div style={{
+                                                {/* Automatic summaries have no synthetic user question. */}
+                                                {!qa.openingSummary && <div style={{
                                                     alignSelf: 'flex-end',
                                                     maxWidth: '85%',
                                                     display: 'flex',
@@ -1484,7 +1487,7 @@ function PlayerScreenV2() {
                                                     }}>
                                                         {qa.question}
                                                     </div>
-                                                </div>
+                                                </div>}
 
                                                 {/* AI Answer Bubble */}
                                                 <div style={{
@@ -1495,7 +1498,7 @@ function PlayerScreenV2() {
                                                     alignItems: 'flex-start',
                                                     gap: '4px'
                                                 }}>
-                                                    <span style={{ fontSize: '0.75rem', color: '#888', fontWeight: '600' }}>AI 비서</span>
+                                                    <span style={{ fontSize: '0.75rem', color: '#888', fontWeight: '600' }}>{qa.openingSummary ? '현재 장면 요약' : 'AI 비서'}</span>
                                                     {incrementalQaEnabled && qa.answer && !qa.isGenerating && <button onClick={() => { player?.pauseVideo(); audioPlayerRef.current?.pause(); incrementalQa.replay(qa.id); }} aria-label={`${formatTime(qa.timestamp)} 질문 답변 다시 듣기`}>다시 듣기</button>}
                                                     <div style={{
                                                         backgroundColor: '#ffffff',
