@@ -38,6 +38,7 @@ test('refreshes the current-scene summary even after a prior conversation turn',
     expect(client.openingSummaryEligibility).toHaveBeenCalledWith('abcdefghijk', 25, expect.any(AbortSignal));
     expect(result.current.turns).toHaveLength(1);
     expect(result.current.sceneSummary).toMatchObject({ timestamp: 25, isGenerating: true });
+    expect(submitted.history).toHaveLength(1);
 });
 test('preserves canceled partial history and ignores callbacks after close', async () => {
     const announceError = jest.fn(); const { result, unmount } = renderHook(() => useQaConversation({ apiBase: '', token: 'token', videoId: 'abcdefghijk', announceError }));

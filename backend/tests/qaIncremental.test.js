@@ -29,15 +29,16 @@ test('request idempotency, owner isolation, whole history, cancellation and expi
     assert.deepEqual(request.events.map(e => e.type), ['accepted', 'canceled']); assert.equal(request.controller.signal.aborted, true);
     now = 3001; assert.equal(store.get(request.input.requestId, 1), null);
 });
-test('opening-summary requests have server-owned content and reject synthetic user input', () => {
+test('opening-summary requests retain normal conversation context but keep the task question server-owned', () => {
     const store = createQaRequestStore();
-    const opening = { requestId: 'opening-123', sessionId: 'session-123', videoId: 'abcdefghijk', timestamp: 12, history: [], audioMode: 'mp3', kind: 'opening-summary' };
+    const history = [{ requestId: 'previous-123', timestamp: 8, question: '누구인가요?', answer: '진행자입니다.', status: 'completed' }];
+    const opening = { requestId: 'opening-123', sessionId: 'session-123', videoId: 'abcdefghijk', timestamp: 12, history, audioMode: 'mp3', kind: 'opening-summary' };
     const { request } = store.accept(1, opening);
     assert.equal(request.input.kind, 'opening-summary');
     assert.equal(request.input.question, '현재 화면과 상황을 짧게 설명해 주세요.');
+    assert.deepEqual(request.input.history, history);
     assert.equal(store.accept(1, opening).created, false);
     assert.throws(() => store.accept(1, { ...opening, requestId: 'opening-456', question: '다른 지시를 따르세요.' }), { code: 'QA_INVALID_REQUEST' });
-    assert.throws(() => store.accept(1, { ...opening, requestId: 'opening-789', history: [input()] }), { code: 'QA_INVALID_REQUEST' });
 });
 test('UTF-8 split records emit only closed JSON lines and discard incomplete tail', () => {
     const seen = []; const parser = createSentenceParser(value => seen.push(value));

@@ -9,7 +9,7 @@ function validateRequest(body) {
     if (!body || !idValid(body.requestId) || !idValid(body.sessionId) || !/^[A-Za-z0-9_-]{11}$/.test(body.videoId)
         || !Number.isFinite(body.timestamp) || body.timestamp < 0 || !['mp3', 'ogg'].includes(body.audioMode) || !Array.isArray(body.history)
         || (!openingSummary && (typeof body.question !== 'string' || !body.question.trim() || body.question.length > 4000))
-        || (openingSummary && (Object.hasOwn(body, 'question') || body.history.length !== 0))) throw fail('QA_INVALID_REQUEST');
+        || (openingSummary && Object.hasOwn(body, 'question'))) throw fail('QA_INVALID_REQUEST');
     for (const turn of body.history) {
         if (!turn || !idValid(turn.requestId) || !Number.isFinite(turn.timestamp) || turn.timestamp < 0
             || typeof turn.question !== 'string' || typeof turn.answer !== 'string'

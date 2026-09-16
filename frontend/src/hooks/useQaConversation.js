@@ -73,7 +73,7 @@ export function useQaConversation({ apiBase, token, videoId, announceError, play
         else { history.current = [...history.current, { id, timestamp, question, answer: '', status: 'partial', isGenerating: true, seqs: [] }]; setTurns([...history.current]); }
         try {
             const accepted = await client.submit(openingSummary
-                ? { requestId: id, sessionId: session.current, videoId, timestamp, history: [], audioMode, kind: 'opening-summary' }
+                ? { requestId: id, sessionId: session.current, videoId, timestamp, history: payloadHistory, audioMode, kind: 'opening-summary' }
                 : { requestId: id, sessionId: session.current, videoId, timestamp, question, history: payloadHistory, audioMode }, controller.signal);
             if (active.current !== request) return;
             if (accepted.audioPath) audio.current.enqueue(-1, apiBase + accepted.audioPath, true);
