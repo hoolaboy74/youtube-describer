@@ -45,12 +45,14 @@ completed: 2026-09-16
 - `cd backend && node --test tests/qaMedia.test.js` — 23 passed.
 - `cd frontend && CI=true npm test -- --watchAll=false src/hooks/useQaConversation.test.js` — 6 passed.
 - `cd frontend && npm run build` — passed (existing exhaustive-deps and Browserslist warnings remain).
+- `cd backend && node --test --test-name-pattern='opening-summary' tests/qaIncremental.test.js tests/qaRoutes.test.js` — 3 passed (immutable request contract, cache-race no model/TTS, and authenticated eligibility miss).
 - `node --check` passed for all changed backend modules.
 
 ## Deviations from Plan
 
 - The planned `PlayerScreenV2.test.js` does not exist in this repository; focused hook coverage verifies cache hit submission and AI-only turn metadata instead.
 - The combined backend incremental/routes test command did not complete within the local 30-second command window after existing tests had begun; the isolated media suite and syntax checks completed successfully.
+- The opening-summary mode currently shares the ordinary parser's 64-sentence ceiling. Enforcing the product's one-to-two-sentence output limit requires a small `qaGeneration.js` policy change; it is intentionally not made in this test-only corrective task.
 
 ## Next Phase Readiness
 

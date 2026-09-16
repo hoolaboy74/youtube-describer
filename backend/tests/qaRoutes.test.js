@@ -23,6 +23,20 @@ test('HTTP acceptance is idempotent, events replay without a new job and audio i
     const grant = await (await post('/requests/request-123/audio', { seq: 0 })).json();
     assert.equal(await (await fetch(`http://127.0.0.1:${server.address().port}` + grant.path)).text(), 'mp3');
 });
+test('opening-summary eligibility is authenticated, validates input, and reports cache misses without generation', async t => {
+    let cacheCalls = 0, runCalls = 0;
+    const app = express(); app.use(express.json()); app.use('/api/qa', createQaRouter({ store: createQaRequestStore(), enabled: () => true,
+        auth: (req, res, next) => { if (!req.headers.authorization) return res.status(401).end(); req.user = { id: req.headers.authorization }; next(); },
+        getVideo: () => ({ duration: 60 }), media: () => ({ prepareCacheOnly: async () => { cacheCalls++; throw Object.assign(new Error('QA_OPENING_SUMMARY_CACHE_MISS'), { code: 'QA_OPENING_SUMMARY_CACHE_MISS' }); } }),
+        manager: () => ({}), run: async () => { runCalls++; } }));
+    const server = app.listen(0, '127.0.0.1'); await once(server, 'listening'); t.after(() => { server.closeAllConnections(); server.close(); });
+    const url = `http://127.0.0.1:${server.address().port}/api/qa/opening-summary-eligibility`;
+    const post = (value, headers = {}) => fetch(url, { method: 'POST', headers: { 'content-type': 'application/json', ...headers }, body: JSON.stringify(value) });
+    assert.equal((await post({ videoId: 'abcdefghijk', timestamp: 12 })).status, 401);
+    assert.equal((await post({ videoId: 'bad', timestamp: 12 }, { authorization: 'owner' })).status, 400);
+    const response = await post({ videoId: 'abcdefghijk', timestamp: 12 }, { authorization: 'owner' });
+    assert.deepEqual(await response.json(), { available: false }); assert.equal(cacheCalls, 1); assert.equal(runCalls, 0);
+});
 test('continuous TTS produces bytes after the first input before end and releases its permit', async () => {
     const limiter = createMediaResourceLimiter({ tts: 1 }); const rpc = new EventEmitter(); const writes = [];
     rpc.destroy = () => {}; rpc.write = value => { writes.push(value); if (value.input) rpc.emit('data', { audioContent: Buffer.from('ogg-byte') }); return true; };

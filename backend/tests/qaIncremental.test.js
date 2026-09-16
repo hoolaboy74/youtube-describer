@@ -29,6 +29,16 @@ test('request idempotency, owner isolation, whole history, cancellation and expi
     assert.deepEqual(request.events.map(e => e.type), ['accepted', 'canceled']); assert.equal(request.controller.signal.aborted, true);
     now = 3001; assert.equal(store.get(request.input.requestId, 1), null);
 });
+test('opening-summary requests have server-owned content and reject synthetic user input', () => {
+    const store = createQaRequestStore();
+    const opening = { requestId: 'opening-123', sessionId: 'session-123', videoId: 'abcdefghijk', timestamp: 12, history: [], audioMode: 'mp3', kind: 'opening-summary' };
+    const { request } = store.accept(1, opening);
+    assert.equal(request.input.kind, 'opening-summary');
+    assert.equal(request.input.question, '현재 화면과 상황을 짧게 설명해 주세요.');
+    assert.equal(store.accept(1, opening).created, false);
+    assert.throws(() => store.accept(1, { ...opening, requestId: 'opening-456', question: '다른 지시를 따르세요.' }), { code: 'QA_INVALID_REQUEST' });
+    assert.throws(() => store.accept(1, { ...opening, requestId: 'opening-789', history: [input()] }), { code: 'QA_INVALID_REQUEST' });
+});
 test('UTF-8 split records emit only closed JSON lines and discard incomplete tail', () => {
     const seen = []; const parser = createSentenceParser(value => seen.push(value));
     const bytes = Buffer.from(JSON.stringify(candidate()) + '\n' + '{"seq":1,"text":"미완성');
@@ -59,6 +69,16 @@ test('first accepted sentence is synthesized while the second model sentence is 
     const running = run(request); assert.equal(await spoken.promise, UNKNOWN); assert.equal(request.events.some(e => e.type === 'generation_done'), false);
     gate.resolve(); await running; assert.equal(request.status, 'completed'); assert.equal(calls, 2); assert.equal(usage, 1);
     assert.deepEqual(request.events.map(e => e.id), request.events.map((_, i) => i + 1));
+});
+test('opening-summary cache races fail before model or TTS work', async () => {
+    const store = createQaRequestStore();
+    const { request } = store.accept(1, { requestId: 'opening-race', sessionId: 'session-123', videoId: 'abcdefghijk', timestamp: 12, history: [], audioMode: 'mp3', kind: 'opening-summary' });
+    let modelCalls = 0, ttsCalls = 0;
+    await createQaGeneration({ store, getVideo: () => ({ duration: 60 }),
+        media: { prepareCacheOnly: async () => { throw Object.assign(new Error('QA_OPENING_SUMMARY_CACHE_MISS'), { code: 'QA_OPENING_SUMMARY_CACHE_MISS' }); } },
+        model: { generateContentStream: async () => { modelCalls++; } }, speech: { mp3: async () => { ttsCalls++; } }, recordUsage: () => {} })(request);
+    assert.equal(request.status, 'failed'); assert.equal(request.events.at(-1).data.code, 'QA_OPENING_SUMMARY_CACHE_MISS');
+    assert.equal(modelCalls, 0); assert.equal(ttsCalls, 0);
 });
 test('cold media preparation does not consume the first-sentence deadline', async t => {
     const image = await fixtureFrame(t);
