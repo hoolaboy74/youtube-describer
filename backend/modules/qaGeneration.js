@@ -47,6 +47,8 @@ function createQaGeneration({ store, media, model, speech, getVideo, recordUsage
         // acceptance, so a slow cache miss cannot abort before model I/O.
         let first, idle;
         let audioChain = Promise.resolve(), ogg, releaseModel;
+        const maxSentences = request.input.kind === 'opening-summary' ? 2 : 64;
+        let summaryLimitReached = false;
         request.effectiveAudioMode = request.input.audioMode;
         try {
             const video = getVideo(request.input.videoId);
@@ -61,7 +63,14 @@ function createQaGeneration({ store, media, model, speech, getVideo, recordUsage
             first = timeout(45000, 'QA_FIRST_SENTENCE_TIMEOUT');
             function accept(candidate) {
                 signal.throwIfAborted();
-                if (request.sentences.length >= 64) throw new Error('QA_OUTPUT_LIMIT');
+                if (request.sentences.length >= maxSentences) {
+                    // The opening turn is deliberately a compact orientation,
+                    // not an unbounded answer. Ignore the third completed
+                    // record and stop consuming the provider stream below so
+                    // it can never become an event or TTS input.
+                    if (request.input.kind === 'opening-summary') { summaryLimitReached = true; return; }
+                    throw new Error('QA_OUTPUT_LIMIT');
+                }
                 const result = validateSentence(candidate, context, request.sentences);
                 if (!result.accepted) {
                     report('answer_format_invalid', { reason: result.reason });
@@ -111,6 +120,7 @@ function createQaGeneration({ store, media, model, speech, getVideo, recordUsage
                 const grounding = chunk.candidates?.[0]?.groundingMetadata;
                 if (grounding && (grounding.webSearchQueries?.length || grounding.groundingChunks?.length)) streamGrounding = grounding;
                 parser.push(chunk.text());
+                if (summaryLimitReached) break;
             }
             const parsed = parser.end();
             const response = await finalResponse;
