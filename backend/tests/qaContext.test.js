@@ -86,6 +86,9 @@ test('Q&A policy uses related web search to verify facts that make an answer com
     assert.match(PROMPT, /사용자가 명시적으로 검색을 요청하면 반드시 googleSearch 도구를 호출/);
     assert.match(PROMPT, /화면·대사·장면만으로 충분히 답할 수 있으면 검색하지 마세요/);
 });
+test('Q&A policy never exposes internal evidence identifiers', () => {
+    assert.match(PROMPT, /대괄호 안의 해시.*내부 ID.*절대로 답변에 포함하지 마세요/);
+});
 test('irregular source timestamps get explicit ordinal frame IDs matching every image and the allowed-ID catalog', async t => {
     const frame = await frameFixture(t), times = [19620,20521,21421,22322,23223,24691,25025,26827];
     const context = await createQaContext({ request: { ...input, timestamp: 23.47937145932762 }, video, media: { frames: times.map(frame), subtitles: { cues: [] } } });
