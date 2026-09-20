@@ -1,7 +1,7 @@
 'use strict';
 const test = require('node:test'), assert = require('node:assert/strict');
 const { createQaRequestStore } = require('../modules/qaRequestStore');
-const { validateSentence, createSentenceParser, UNKNOWN } = require('../modules/qaSentencePolicy');
+const { validateSentence, removeInternalReferences, createSentenceParser, UNKNOWN } = require('../modules/qaSentencePolicy');
 const { createQaContext } = require('../modules/qaContext');
 const { createQaGeneration } = require('../modules/qaGeneration');
 const input = extra => ({ requestId: 'request-123', sessionId: 'session-123', videoId: 'abcdefghijk', timestamp: 12,
@@ -53,6 +53,13 @@ test('answer validation checks transport format without filtering wording, evide
         assert.equal(result.accepted, true); assert.equal(result.sentence.text, text);
     }
     for (const value of [{ seq: 0, text: null }, { seq: -1, text: '답변' }, { seq: 0, text: '' }, { seq: 0, text: '\u0000' }, { seq: 0, text: 'a'.repeat(8193) }]) assert.equal(validateSentence(value, context()).accepted, false);
+});
+test('answer validation removes opaque internal evidence references before display and speech', () => {
+    const hash = '9a2e7b6dc91bd78a0b31479783357bc31eaf9e116a559b42b868cd1dee6de6ff';
+    assert.equal(removeInternalReferences(`인물이 보입니다. [${hash}]`), '인물이 보입니다.');
+    const result = validateSentence({ seq: 0, text: `인물이 보입니다. [${hash}]` }, context());
+    assert.equal(result.accepted, true);
+    assert.equal(result.sentence.text, '인물이 보입니다.');
 });
 
 test('backward seek preserves future conversation verbatim but excludes video outside the requested nearby window', async () => {

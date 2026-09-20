@@ -40,6 +40,7 @@ const YouTube = require('youtube-sr').default;
 
 function cleanQaAnswer(text) {
     return String(text || '')
+        .replace(/\[(?:[a-f0-9]{32,}|(?:frame|script|cue|video-title)-[^\]]+)\]/gi, '')
         .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
         .replace(/https?:\/\/[^\s]+/g, '')
         .replace(/\[\d+\]/g, '')
