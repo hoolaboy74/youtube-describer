@@ -6,6 +6,12 @@ const sharp = require('sharp');
 const { StringDecoder } = require('node:string_decoder');
 const { runMediaProcess } = require('./mediaResourceLimiter');
 
+// Source PTS is rounded to milliseconds.  A 30fps source can therefore turn
+// an intended 2s boundary into 2033ms after a seek/backfill, which is still
+// fully covered at the selected sampling cadence.
+const COVERAGE_GAP_MS = 2000;
+const PTS_ROUNDING_HEADROOM_MS = 100;
+
 // Buffer lines across arbitrary stderr chunks; never derive PTS from file order.
 function createShowinfoParser() {
     const decoder = new StringDecoder('utf8');
@@ -40,12 +46,12 @@ function findCoverageHoles(frames, durationMs) {
     }
     if (points[0] > 1000) {
         holes.push(0);
-        for (let t = 1500; points[0] - (t - 1500) > 2000; t += 1500) holes.push(t);
+        for (let t = 1500; points[0] - (t - 1500) > COVERAGE_GAP_MS + PTS_ROUNDING_HEADROOM_MS; t += 1500) holes.push(t);
     }
     // Leave seek/PTS rounding headroom while enforcing actual adjacent gaps.
     for (let i = 0; i < points.length; i++) {
         const end = i + 1 < points.length ? points[i + 1] : durationMs;
-        for (let t = points[i]; end - t > 2000;) {
+        for (let t = points[i]; end - t > COVERAGE_GAP_MS + PTS_ROUNDING_HEADROOM_MS;) {
             t += 1500;
             holes.push(t);
         }
