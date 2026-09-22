@@ -17,6 +17,9 @@ test('coverage measures adjacent gaps and video boundaries', () => {
     assert.deepEqual(findCoverageHoles([{ timestampMs: 0 }, { timestampMs: 8000 }], 10000), [1500, 3000, 4500, 6000]);
     assert.deepEqual(findCoverageHoles([{ timestampMs: 1000 }, { timestampMs: 3000 }], 4000), []);
     assert.deepEqual(findCoverageHoles([{ timestampMs: 1000 }, { timestampMs: 4000 }], 5000), [2500]);
+    // 30fps source PTS can quantize a 2s boundary to 2033ms after seek.
+    assert.equal(findCoverageHoles([{ timestampMs: 4100 }, { timestampMs: 6133 }], 7000).includes(5600), false);
+    assert.equal(findCoverageHoles([{ timestampMs: 4100 }, { timestampMs: 6201 }], 7000).includes(5600), true);
     assert.deepEqual(findCoverageHoles([{ timestampMs: 1500 }], 5000), [0, 3000]);
     assert.deepEqual(findCoverageHoles([{ timestampMs: 5000 }], 6000), [0, 1500, 3000]);
 });
