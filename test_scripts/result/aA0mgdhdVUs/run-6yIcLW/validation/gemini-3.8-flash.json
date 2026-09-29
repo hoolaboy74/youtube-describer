@@ -1,0 +1,990 @@
+{
+  "events": [
+    {
+      "id": "3e5f8e4f39fff4ce9ab5f885c11856556a1389002bebcefb29ecb408d087fbc9",
+      "timestamp": 2,
+      "text": "경성이 분리수거장에서 상자를 접어 정리합니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-2",
+            "timestamp": 2
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[2][v1] 경성이 분리수거장에서 상자를 접어 정리합니다."
+    },
+    {
+      "id": "209fe80fff757e007939721cd314c6cae351ca8d4bb81fdf9fc1403e27154127",
+      "timestamp": 18,
+      "text": "코인 세탁소에서 경성이 빨래 바구니 옆에 앉아 만화책을 봅니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-18",
+            "timestamp": 18
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[18][v1] 코인 세탁소에서 경성이 빨래 바구니 옆에 앉아 만화책을 봅니다."
+    },
+    {
+      "id": "2d1056bcf5d327097984b475084e3bf77c49bc6b0fa135f7f80d4cf7f6991be4",
+      "timestamp": 30,
+      "text": "자막 건조시간 4:37",
+      "tag": "txt",
+      "legacyVerbosity": "text",
+      "provenance": {
+        "kind": "screen_text",
+        "frameEvidence": [
+          {
+            "id": "frame-30",
+            "timestamp": 30
+          }
+        ],
+        "visibleTextEvidence": "자막 건조시간 4:37",
+        "source": "gemini_multimodal_frame"
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[30][txt] 자막 건조시간 4:37"
+    },
+    {
+      "id": "fa6548ef5f9c0e69a1a34af0ae3b065c3e59d2dbe25208263c0edbe58c38bc42",
+      "timestamp": 56,
+      "text": "경성이 꺼낸 옷의 냄새를 맡아보더니 기다리는 남자의 눈치를 봅니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-56",
+            "timestamp": 56
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[56][v2] 경성이 꺼낸 옷의 냄새를 맡아보더니 기다리는 남자의 눈치를 봅니다."
+    },
+    {
+      "id": "7046b3a6eab5abcb2d11aadeac7955b75cc577253c42b3ec36915e9fdbc47763",
+      "timestamp": 88,
+      "text": "아파트 엘리베이터 앞에 경성이 서 있고,세탁소에서 마주친 남자가 다가옵니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-88",
+            "timestamp": 88
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[88][v1] 아파트 엘리베이터 앞에 경성이 서 있고, 세탁소에서 마주친 남자가 다가옵니다."
+    },
+    {
+      "id": "deee4e5e8a717172c8bad332405cd69f70dc5d1c54e4a14e65a3c14931b23f3e",
+      "timestamp": 136,
+      "text": "밤거리에서 경성이 가로수에 목줄이 묶인 검은 강아지를 발견합니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-136",
+            "timestamp": 136
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[136][v1] 밤거리에서 경성이 가로수에 목줄이 묶인 검은 강아지를 발견합니다."
+    },
+    {
+      "id": "6eed0974f7c4574599d41358bdb4aa935e420908f8a8399157cbe8101d9bac20",
+      "timestamp": 174,
+      "text": "차에서 내린 남자가 다가옵니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-174",
+            "timestamp": 174
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[174][v1] 차에서 내린 남자가 다가옵니다."
+    },
+    {
+      "id": "6d3590e062b593cd9071e99151665868898442d35234829e25eff8416be42dc0",
+      "timestamp": 274,
+      "text": "자막 강아지 주인 찾습니다",
+      "tag": "txt",
+      "legacyVerbosity": "text",
+      "provenance": {
+        "kind": "screen_text",
+        "frameEvidence": [
+          {
+            "id": "frame-274",
+            "timestamp": 274
+          }
+        ],
+        "visibleTextEvidence": "자막 강아지 주인 찾습니다",
+        "source": "gemini_multimodal_frame"
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[274][txt] 자막 강아지 주인 찾습니다"
+    },
+    {
+      "id": "c57e472de1598581a0e97e9559569a966a6083fdba1d3b5d2c8a12bd6a11284c",
+      "timestamp": 304,
+      "text": "화재경보음이 울리자 경성이 천장을 올려다봅니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-304",
+            "timestamp": 304
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[304][v2] 화재경보음이 울리자 경성이 천장을 올려다봅니다."
+    },
+    {
+      "id": "7a294834323352919ae0d0ced702b8ef18a52d15016760701f52d7437de255cf",
+      "timestamp": 336,
+      "text": "카페에서 경성과 친구가 앉아 있는 가운데 손님들이 들어옵니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-336",
+            "timestamp": 336
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[336][v1] 카페에서 경성과 친구가 앉아 있는 가운데 손님들이 들어옵니다."
+    },
+    {
+      "id": "a6f5f4c662f8f73ad46e21aa3939ba06ec2b8f455824813a5f584164a8fbf0ca",
+      "timestamp": 372,
+      "text": "경성이 손님들에게 다가가 자리를 바꿔주겠다고 말합니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-372",
+            "timestamp": 372
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[372][v2] 경성이 손님들에게 다가가 자리를 바꿔주겠다고 말합니다."
+    },
+    {
+      "id": "5847ca5cca38e3f0d918b5d8662eaeb7786001894b5dd744da9453485b632ff9",
+      "timestamp": 410,
+      "text": "경성과 친구가 좁은 원형 테이블로 자리를 옮깁니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-410",
+            "timestamp": 410
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[410][v2] 경성과 친구가 좁은 원형 테이블로 자리를 옮깁니다."
+    },
+    {
+      "id": "c7805e14df5819c666707ed7c11b59212c461561d5d03050cecdfe07bee0fa3a",
+      "timestamp": 432,
+      "text": "거리에서 경성이 친구들을 만나 인사합니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-432",
+            "timestamp": 432
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[432][v1] 거리에서 경성이 친구들을 만나 인사합니다."
+    },
+    {
+      "id": "816d2deadfbb67df690a8bd4e49c510958acba3b5166d32793390f1ca2b8e34b",
+      "timestamp": 452,
+      "text": "친구의 새 집에서 경성이 두루마리 휴지를 들고 들어옵니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-452",
+            "timestamp": 452
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[452][v1] 친구의 새 집에서 경성이 두루마리 휴지를 들고 들어옵니다."
+    },
+    {
+      "id": "e48b79d54244bd6ed6e7ab0eb8ae9f22e62cad0c545b0650b2059fc453773afc",
+      "timestamp": 486,
+      "text": "경성이 국자를 들고 사람들에게 음식을 덜어줍니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-486",
+            "timestamp": 486
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[486][v2] 경성이 국자를 들고 사람들에게 음식을 덜어줍니다."
+    },
+    {
+      "id": "4669666a264a569cb55c959cfc560a7bb93c49ea740fcad54b8005fdf8b30c01",
+      "timestamp": 524,
+      "text": "택시 뒷좌석에서 경성이 지친 표정으로 기대앉습니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-524",
+            "timestamp": 524
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[524][v2] 택시 뒷좌석에서 경성이 지친 표정으로 기대앉습니다."
+    },
+    {
+      "id": "a1c450c0d6c8d3ac8fe50f7e00e374d142b7f8fcfd9a87aba0eb5d221d24f95a",
+      "timestamp": 556,
+      "text": "지하 주차장을 걷던 경성이 비상등이 켜진 차를 보고 차주에게 전화합니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-556",
+            "timestamp": 556
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[556][v1] 지하 주차장을 걷던 경성이 비상등이 켜진 차를 보고 차주에게 전화합니다."
+    },
+    {
+      "id": "538fe55a112678660ee05666850be3c15b8059363265159e265a517414dac90c",
+      "timestamp": 580,
+      "text": "열린 엘리베이터 안에서 같은 층 남자를 마주칩니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-580",
+            "timestamp": 580
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[580][v1] 열린 엘리베이터 안에서 같은 층 남자를 마주칩니다."
+    },
+    {
+      "id": "30ebb795456c012a562ff0bf073ba47fab7610794943a46778b08ec463e13cd1",
+      "timestamp": 620,
+      "text": "남자가 손에 든 사탕을 건넵니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-620",
+            "timestamp": 620
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[620][v2] 남자가 손에 든 사탕을 건넵니다."
+    },
+    {
+      "id": "ec3ae52afada2b619654a6fc6f8577099e6044cbca48c2d894ebe63acee4e544",
+      "timestamp": 636,
+      "text": "복도를 걸어가던 남자가 뒤돌아서 경성에게 말을 겁니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-636",
+            "timestamp": 636
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[636][v2] 복도를 걸어가던 남자가 뒤돌아서 경성에게 말을 겁니다."
+    },
+    {
+      "id": "96d95617a7620d70cfe59d71f26c0b80909904410963001c6fecff5ad4ea4ab0",
+      "timestamp": 670,
+      "text": "편한 옷차림으로 갈아입은 두 사람이 밤거리에서 만납니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-670",
+            "timestamp": 670
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[670][v1] 편한 옷차림으로 갈아입은 두 사람이 밤거리에서 만납니다."
+    },
+    {
+      "id": "6b60a4e4913a54fb5f6a8d56c018139ca2a8f8e36c474ecd42136f6fcb27f596",
+      "timestamp": 678,
+      "text": "자막 멤버십에 가입하시면 \"우리가 몰랐던 이야기 동국편 마지막 에피소드\" [ep.03 가난지심]을 감상하실 수 있습니다.",
+      "tag": "txt",
+      "legacyVerbosity": "text",
+      "provenance": {
+        "kind": "screen_text",
+        "frameEvidence": [
+          {
+            "id": "frame-678",
+            "timestamp": 678
+          }
+        ],
+        "visibleTextEvidence": "자막 멤버십에 가입하시면 \"우리가 몰랐던 이야기 동국편 마지막 에피소드\" [ep.03 가난지심]을 감상하실 수 있습니다.",
+        "source": "gemini_multimodal_frame"
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[678][txt] 자막 멤버십에 가입하시면 \"우리가 몰랐던 이야기 동국편 마지막 에피소드\" [Ep.03 가난지심]을 감상하실 수 있습니다."
+    }
+  ],
+  "accepted": [
+    {
+      "id": "3e5f8e4f39fff4ce9ab5f885c11856556a1389002bebcefb29ecb408d087fbc9",
+      "timestamp": 2,
+      "text": "경성이 분리수거장에서 상자를 접어 정리합니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-2",
+            "timestamp": 2
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[2][v1] 경성이 분리수거장에서 상자를 접어 정리합니다."
+    },
+    {
+      "id": "209fe80fff757e007939721cd314c6cae351ca8d4bb81fdf9fc1403e27154127",
+      "timestamp": 18,
+      "text": "코인 세탁소에서 경성이 빨래 바구니 옆에 앉아 만화책을 봅니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-18",
+            "timestamp": 18
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[18][v1] 코인 세탁소에서 경성이 빨래 바구니 옆에 앉아 만화책을 봅니다."
+    },
+    {
+      "id": "2d1056bcf5d327097984b475084e3bf77c49bc6b0fa135f7f80d4cf7f6991be4",
+      "timestamp": 30,
+      "text": "자막 건조시간 4:37",
+      "tag": "txt",
+      "legacyVerbosity": "text",
+      "provenance": {
+        "kind": "screen_text",
+        "frameEvidence": [
+          {
+            "id": "frame-30",
+            "timestamp": 30
+          }
+        ],
+        "visibleTextEvidence": "자막 건조시간 4:37",
+        "source": "gemini_multimodal_frame"
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[30][txt] 자막 건조시간 4:37"
+    },
+    {
+      "id": "fa6548ef5f9c0e69a1a34af0ae3b065c3e59d2dbe25208263c0edbe58c38bc42",
+      "timestamp": 56,
+      "text": "경성이 꺼낸 옷의 냄새를 맡아보더니 기다리는 남자의 눈치를 봅니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-56",
+            "timestamp": 56
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[56][v2] 경성이 꺼낸 옷의 냄새를 맡아보더니 기다리는 남자의 눈치를 봅니다."
+    },
+    {
+      "id": "7046b3a6eab5abcb2d11aadeac7955b75cc577253c42b3ec36915e9fdbc47763",
+      "timestamp": 88,
+      "text": "아파트 엘리베이터 앞에 경성이 서 있고,세탁소에서 마주친 남자가 다가옵니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-88",
+            "timestamp": 88
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[88][v1] 아파트 엘리베이터 앞에 경성이 서 있고, 세탁소에서 마주친 남자가 다가옵니다."
+    },
+    {
+      "id": "deee4e5e8a717172c8bad332405cd69f70dc5d1c54e4a14e65a3c14931b23f3e",
+      "timestamp": 136,
+      "text": "밤거리에서 경성이 가로수에 목줄이 묶인 검은 강아지를 발견합니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-136",
+            "timestamp": 136
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[136][v1] 밤거리에서 경성이 가로수에 목줄이 묶인 검은 강아지를 발견합니다."
+    },
+    {
+      "id": "6eed0974f7c4574599d41358bdb4aa935e420908f8a8399157cbe8101d9bac20",
+      "timestamp": 174,
+      "text": "차에서 내린 남자가 다가옵니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-174",
+            "timestamp": 174
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[174][v1] 차에서 내린 남자가 다가옵니다."
+    },
+    {
+      "id": "6d3590e062b593cd9071e99151665868898442d35234829e25eff8416be42dc0",
+      "timestamp": 274,
+      "text": "자막 강아지 주인 찾습니다",
+      "tag": "txt",
+      "legacyVerbosity": "text",
+      "provenance": {
+        "kind": "screen_text",
+        "frameEvidence": [
+          {
+            "id": "frame-274",
+            "timestamp": 274
+          }
+        ],
+        "visibleTextEvidence": "자막 강아지 주인 찾습니다",
+        "source": "gemini_multimodal_frame"
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[274][txt] 자막 강아지 주인 찾습니다"
+    },
+    {
+      "id": "c57e472de1598581a0e97e9559569a966a6083fdba1d3b5d2c8a12bd6a11284c",
+      "timestamp": 304,
+      "text": "화재경보음이 울리자 경성이 천장을 올려다봅니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-304",
+            "timestamp": 304
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[304][v2] 화재경보음이 울리자 경성이 천장을 올려다봅니다."
+    },
+    {
+      "id": "7a294834323352919ae0d0ced702b8ef18a52d15016760701f52d7437de255cf",
+      "timestamp": 336,
+      "text": "카페에서 경성과 친구가 앉아 있는 가운데 손님들이 들어옵니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-336",
+            "timestamp": 336
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[336][v1] 카페에서 경성과 친구가 앉아 있는 가운데 손님들이 들어옵니다."
+    },
+    {
+      "id": "a6f5f4c662f8f73ad46e21aa3939ba06ec2b8f455824813a5f584164a8fbf0ca",
+      "timestamp": 372,
+      "text": "경성이 손님들에게 다가가 자리를 바꿔주겠다고 말합니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-372",
+            "timestamp": 372
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[372][v2] 경성이 손님들에게 다가가 자리를 바꿔주겠다고 말합니다."
+    },
+    {
+      "id": "5847ca5cca38e3f0d918b5d8662eaeb7786001894b5dd744da9453485b632ff9",
+      "timestamp": 410,
+      "text": "경성과 친구가 좁은 원형 테이블로 자리를 옮깁니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-410",
+            "timestamp": 410
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[410][v2] 경성과 친구가 좁은 원형 테이블로 자리를 옮깁니다."
+    },
+    {
+      "id": "c7805e14df5819c666707ed7c11b59212c461561d5d03050cecdfe07bee0fa3a",
+      "timestamp": 432,
+      "text": "거리에서 경성이 친구들을 만나 인사합니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-432",
+            "timestamp": 432
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[432][v1] 거리에서 경성이 친구들을 만나 인사합니다."
+    },
+    {
+      "id": "816d2deadfbb67df690a8bd4e49c510958acba3b5166d32793390f1ca2b8e34b",
+      "timestamp": 452,
+      "text": "친구의 새 집에서 경성이 두루마리 휴지를 들고 들어옵니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-452",
+            "timestamp": 452
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[452][v1] 친구의 새 집에서 경성이 두루마리 휴지를 들고 들어옵니다."
+    },
+    {
+      "id": "e48b79d54244bd6ed6e7ab0eb8ae9f22e62cad0c545b0650b2059fc453773afc",
+      "timestamp": 486,
+      "text": "경성이 국자를 들고 사람들에게 음식을 덜어줍니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-486",
+            "timestamp": 486
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[486][v2] 경성이 국자를 들고 사람들에게 음식을 덜어줍니다."
+    },
+    {
+      "id": "4669666a264a569cb55c959cfc560a7bb93c49ea740fcad54b8005fdf8b30c01",
+      "timestamp": 524,
+      "text": "택시 뒷좌석에서 경성이 지친 표정으로 기대앉습니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-524",
+            "timestamp": 524
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[524][v2] 택시 뒷좌석에서 경성이 지친 표정으로 기대앉습니다."
+    },
+    {
+      "id": "a1c450c0d6c8d3ac8fe50f7e00e374d142b7f8fcfd9a87aba0eb5d221d24f95a",
+      "timestamp": 556,
+      "text": "지하 주차장을 걷던 경성이 비상등이 켜진 차를 보고 차주에게 전화합니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-556",
+            "timestamp": 556
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[556][v1] 지하 주차장을 걷던 경성이 비상등이 켜진 차를 보고 차주에게 전화합니다."
+    },
+    {
+      "id": "538fe55a112678660ee05666850be3c15b8059363265159e265a517414dac90c",
+      "timestamp": 580,
+      "text": "열린 엘리베이터 안에서 같은 층 남자를 마주칩니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-580",
+            "timestamp": 580
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[580][v1] 열린 엘리베이터 안에서 같은 층 남자를 마주칩니다."
+    },
+    {
+      "id": "30ebb795456c012a562ff0bf073ba47fab7610794943a46778b08ec463e13cd1",
+      "timestamp": 620,
+      "text": "남자가 손에 든 사탕을 건넵니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-620",
+            "timestamp": 620
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[620][v2] 남자가 손에 든 사탕을 건넵니다."
+    },
+    {
+      "id": "ec3ae52afada2b619654a6fc6f8577099e6044cbca48c2d894ebe63acee4e544",
+      "timestamp": 636,
+      "text": "복도를 걸어가던 남자가 뒤돌아서 경성에게 말을 겁니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-636",
+            "timestamp": 636
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[636][v2] 복도를 걸어가던 남자가 뒤돌아서 경성에게 말을 겁니다."
+    },
+    {
+      "id": "96d95617a7620d70cfe59d71f26c0b80909904410963001c6fecff5ad4ea4ab0",
+      "timestamp": 670,
+      "text": "편한 옷차림으로 갈아입은 두 사람이 밤거리에서 만납니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-670",
+            "timestamp": 670
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[670][v1] 편한 옷차림으로 갈아입은 두 사람이 밤거리에서 만납니다."
+    },
+    {
+      "id": "6b60a4e4913a54fb5f6a8d56c018139ca2a8f8e36c474ecd42136f6fcb27f596",
+      "timestamp": 678,
+      "text": "자막 멤버십에 가입하시면 \"우리가 몰랐던 이야기 동국편 마지막 에피소드\" [ep.03 가난지심]을 감상하실 수 있습니다.",
+      "tag": "txt",
+      "legacyVerbosity": "text",
+      "provenance": {
+        "kind": "screen_text",
+        "frameEvidence": [
+          {
+            "id": "frame-678",
+            "timestamp": 678
+          }
+        ],
+        "visibleTextEvidence": "자막 멤버십에 가입하시면 \"우리가 몰랐던 이야기 동국편 마지막 에피소드\" [ep.03 가난지심]을 감상하실 수 있습니다.",
+        "source": "gemini_multimodal_frame"
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[678][txt] 자막 멤버십에 가입하시면 \"우리가 몰랐던 이야기 동국편 마지막 에피소드\" [Ep.03 가난지심]을 감상하실 수 있습니다."
+    }
+  ],
+  "quarantined": [],
+  "rejected": [],
+  "reasons": [],
+  "policyVersion": "codex-v2"
+}

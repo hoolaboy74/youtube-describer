@@ -1,0 +1,15 @@
+{
+  "lineCount": 100,
+  "invalidLineCount": 0,
+  "timestampsSorted": true,
+  "timestampsInRange": true,
+  "timestampsWithoutInputFrame": [],
+  "usage": {
+    "input_tokens": 164420,
+    "cached_input_tokens": 0,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 2211,
+    "reasoning_output_tokens": 45
+  },
+  "toolCallCount": 0
+}

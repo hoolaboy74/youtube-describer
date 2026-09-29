@@ -1,0 +1,25 @@
+{
+  "path": "/Users/chacha/src/youtube-describer-test/test_scripts/result/lnUHSWhQ-UI/asset/lnUHSWhQ-UI.mp4",
+  "size": 22256871,
+  "sha256": "6f8608ffb8b54dda72410d3494d173dd44f5251792c4c0433b8feb2c58967303",
+  "file": {
+    "name": "files/xkpd2bep5nun",
+    "displayName": "compare-lnUHSWhQ-UI.mp4",
+    "mimeType": "video/mp4",
+    "sizeBytes": "22256871",
+    "createTime": "2026-09-09T04:33:23.596069Z",
+    "updateTime": "2026-09-09T04:33:45.332808Z",
+    "expirationTime": "2026-09-11T04:33:22.603799732Z",
+    "sha256Hash": "NmY4NjA4ZmZiOGI1NGRkYTcyNDEwZDM0OTRkMTczZGQ0NGY1MjUxNzkyYzRjMDQzM2I4ZmViMmM1ODk2NzMwMw==",
+    "uri": "https://generativelanguage.googleapis.com/v1beta/files/xkpd2bep5nun",
+    "state": "ACTIVE",
+    "videoMetadata": {
+      "videoDuration": "630s"
+    },
+    "source": "UPLOADED"
+  },
+  "uploadAndProcessingMs": 26293,
+  "fps": 1,
+  "mediaResolution": "MEDIA_RESOLUTION_LOW",
+  "audioIncluded": true
+}

@@ -1,0 +1,8 @@
+Error: [GoogleGenerativeAI Error]: Error fetching from https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-pro-preview:streamGenerateContent?alt=sse: [503 Service Unavailable] Deadline expired before operation could complete.
+    at handleResponseNotOk (/Users/chacha/src/youtube-describer-test/backend/node_modules/@google/generative-ai/dist/index.js:434:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async makeRequest (/Users/chacha/src/youtube-describer-test/backend/node_modules/@google/generative-ai/dist/index.js:403:9)
+    at async generateContentStream (/Users/chacha/src/youtube-describer-test/backend/node_modules/@google/generative-ai/dist/index.js:862:22)
+    at async runGemini (/Users/chacha/src/youtube-describer-test/test_scripts/compare_model.js:497:18)
+    at async Promise.allSettled (index 0)
+    at async main (/Users/chacha/src/youtube-describer-test/test_scripts/compare_model.js:723:23)

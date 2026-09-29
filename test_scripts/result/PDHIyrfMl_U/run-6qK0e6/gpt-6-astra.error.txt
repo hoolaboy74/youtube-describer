@@ -1,0 +1,5 @@
+Error: OpenAI 429: {"error":{"message":"You have no credits remaining. Add credits to continue using the API at https://platform.openai.com/settings/organization/billing/.","type":"insufficient_quota","param":null,"code":"credit_balance_exhausted"}}
+    at runOpenAI (/Users/chacha/src/youtube-describer/test_scripts/compare_model.js:570:30)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async Promise.allSettled (index 0)
+    at async main (/Users/chacha/src/youtube-describer/test_scripts/compare_model.js:735:23)

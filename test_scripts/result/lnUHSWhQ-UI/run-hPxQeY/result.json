@@ -1,0 +1,46 @@
+{
+  "workDir": "/Users/chacha/src/youtube-describer-test/test_scripts/result/lnUHSWhQ-UI/run-hPxQeY",
+  "videoId": "lnUHSWhQ-UI",
+  "title": "내향적인 아이의 첫 심부름ㅣ아직 세상이 살만한 이유(feat.감동/대견/기특 주의)",
+  "frameCount": 316,
+  "dialogueCount": 249,
+  "audioLanguage": "mixed",
+  "models": [
+    {
+      "provider": "gemini",
+      "requestedModel": "gemini-3.8-flash",
+      "outputFile": "gemini-3.8-flash.txt",
+      "model": "gemini-3.8-flash",
+      "durationMs": 52705,
+      "text": "[64][v1] 식탁에 앉은 리후가 밥을 먹으며 아빠와 이야기를 나눕니다.\n[238][v1] 작은 가방을 멘 리후에게 아빠가 카드를 건넵니다.\n[268][v1] 리후가 현관문을 열고 복도로 나섭니다.\n[278][v2] 아빠가 문틈 사이로 엘리베이터 앞에 선 리후를 지켜봅니다.\n[304][v1] 리후가 엘리베이터 안에서 휴대전화로 자신을 촬영합니다.\n[364][v1] 아파트 밖으로 나온 리후가 높은 건물 위를 올려다봅니다.\n[388][v1] 편의점에 들어선 리후가 주변을 두리번거립니다.\n[424][v1] 어른 한 명이 다가와 아이스크림을 꺼내 건넵니다.\n[470][v1] 편의점 밖으로 나온 리후가 미소를 지으며 달리기 시작합니다.\n[484][v1] 아파트 위에서 내려다보는 시점으로, 작은 리후가 길을 따라 뛰어옵니다.\n[502][v2] 아파트 공동현관에 도착한 리후가 도어록에 손을 뻗습니다.\n[534][v1] 엘리베이터를 타고 올라가며 긴장한 표정으로 서 있습니다.\n[572][v1] 집 현관문이 열리고 리후가 환하게 웃으며 들어옵니다.\n[578][v2] 아이스크림이 든 가방을 들어 보이며 자랑스레 말합니다.\n[610][v2] 리후가 아빠 품에 꼭 안깁니다.",
+      "usage": {
+        "promptTokenCount": 109851,
+        "candidatesTokenCount": 403,
+        "totalTokenCount": 111286,
+        "promptTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 29903
+          },
+          {
+            "modality": "IMAGE",
+            "tokenCount": 79948
+          }
+        ],
+        "thoughtsTokenCount": 1032,
+        "serviceTier": "standard"
+      },
+      "summary": {
+        "lines": 15,
+        "tagged": 15,
+        "tags": {
+          "v1": 11,
+          "v2": 4,
+          "v3": 0,
+          "txt": 0,
+          "trans": 0
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "workDir": "/Users/chacha/src/youtube-describer-test/test_scripts/result/lnUHSWhQ-UI/run-Cz6pxv",
+  "videoId": "lnUHSWhQ-UI",
+  "title": "내향적인 아이의 첫 심부름ㅣ아직 세상이 살만한 이유(feat.감동/대견/기특 주의)",
+  "frameCount": 316,
+  "dialogueCount": 249,
+  "audioLanguage": "mixed",
+  "models": [
+    {
+      "provider": "openai",
+      "requestedModel": "gpt-5.6-luna",
+      "errorFile": "gpt-5.6-luna.error.txt",
+      "error": "Error: OpenAI 429: {\"error\":{\"message\":\"You have no credits remaining. Add credits to continue using the API at https://platform.openai.com/settings/organization/billing/.\",\"type\":\"insufficient_quota\",\"param\":null,\"code\":\"credit_balance_exhausted\"}}\n    at runOpenAI (/Users/chacha/src/youtube-describer-test/test_scripts/compare_model.js:455:30)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async Promise.allSettled (index 0)\n    at async main (/Users/chacha/src/youtube-describer-test/test_scripts/compare_model.js:607:23)"
+    },
+    {
+      "provider": "openai",
+      "requestedModel": "gpt-5.6-sol",
+      "errorFile": "gpt-5.6-sol.error.txt",
+      "error": "Error: OpenAI 429: {\"error\":{\"message\":\"You have no credits remaining. Add credits to continue using the API at https://platform.openai.com/settings/organization/billing/.\",\"type\":\"insufficient_quota\",\"param\":null,\"code\":\"credit_balance_exhausted\"}}\n    at runOpenAI (/Users/chacha/src/youtube-describer-test/test_scripts/compare_model.js:455:30)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async Promise.allSettled (index 1)\n    at async main (/Users/chacha/src/youtube-describer-test/test_scripts/compare_model.js:607:23)"
+    }
+  ]
+}

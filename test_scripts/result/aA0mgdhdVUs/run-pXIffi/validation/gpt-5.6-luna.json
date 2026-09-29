@@ -1,0 +1,5070 @@
+{
+  "events": [
+    {
+      "id": "47cd80918867d1cfdf1e4690fe823f085e2e5ed8c20785c65629f6a68485040d",
+      "timestamp": 2,
+      "text": "한 여성이 상자와 포장용품을 정리합니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-2",
+            "timestamp": 2
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[2][v1] 한 여성이 상자와 포장용품을 정리합니다."
+    },
+    {
+      "id": "45c7f1e4f36e8abeed89ef26f986b64e72649f218472ae8918fbe27ece6fbea5",
+      "timestamp": 6,
+      "text": "세탁물 상자와 열린 포장 상자 곁에 한 여성이 서 있습니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-6",
+            "timestamp": 6
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[6][v2] 세탁물 상자와 열린 포장 상자 곁에 한 여성이 서 있습니다."
+    },
+    {
+      "id": "0cb32a721067128ffe0672a28abfddfbc32af494f5a04b385c1f8c8704d50ed8",
+      "timestamp": 8,
+      "text": "여성이 아래를 내려다보며 정리할 물건을 살핍니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-8",
+            "timestamp": 8
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[8][v2] 여성이 아래를 내려다보며 정리할 물건을 살핍니다."
+    },
+    {
+      "id": "360345aebf3c3c7ea74e8a80daaede6636106b6f4d365e906c6a747427171078",
+      "timestamp": 16,
+      "text": "대형 세탁기와 건조기가 놓인 셀프 빨래방입니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-16",
+            "timestamp": 16
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[16][v1] 대형 세탁기와 건조기가 놓인 셀프 빨래방입니다."
+    },
+    {
+      "id": "76c703fd7f42230cbe29f81861d04aa8e75f444fa6b6617a27d53c55da73769d",
+      "timestamp": 18,
+      "text": "창가에서 한 여성이 잡지를 읽고,남성이 앞을 지나갑니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-18",
+            "timestamp": 18
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[18][v2] 창가에서 한 여성이 잡지를 읽고, 남성이 앞을 지나갑니다."
+    },
+    {
+      "id": "315a87805d60a994a834e8e3ffed4ed2452d5732b4ea6a80eb5c636511f2e302",
+      "timestamp": 24,
+      "text": "여성은 잡지를 든 채 남성을 바라보며 미소 짓습니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-24",
+            "timestamp": 24
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[24][v2] 여성은 잡지를 든 채 남성을 바라보며 미소 짓습니다."
+    },
+    {
+      "id": "b85ac2b352d7e624c86c993dd3cb47cae3bad9e4111f3fdd820e7cbdbb6676ac",
+      "timestamp": 32,
+      "text": "남성이 빨래방 출입구 앞에 서 있습니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-32",
+            "timestamp": 32
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[32][v1] 남성이 빨래방 출입구 앞에 서 있습니다."
+    },
+    {
+      "id": "688ca22ef2039a1052fe3afed9dc17c881528d2798d5b3ffbd01b026da6d5b0e",
+      "timestamp": 40,
+      "text": "여성이 세탁기 앞에서 빨래를 꺼냅니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-40",
+            "timestamp": 40
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[40][v1] 여성이 세탁기 앞에서 빨래를 꺼냅니다."
+    },
+    {
+      "id": "c6ada9086ce2a943e39e2a6e4a8aaa15276f1429ef79167b354a19ea276aae0f",
+      "timestamp": 42,
+      "text": "여성의 손에 검은 옷가지가 들려 있습니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-42",
+            "timestamp": 42
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[42][v2] 여성의 손에 검은 옷가지가 들려 있습니다."
+    },
+    {
+      "id": "2c2dba67f5c8c12903f09597571385e947b15d87b5e4d5ad547d8c4e11dfea64",
+      "timestamp": 48,
+      "text": "안경 쓴 남성이 빨래 바구니를 들고 세탁기 앞에 앉아 있습니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-48",
+            "timestamp": 48
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[48][v1] 안경 쓴 남성이 빨래 바구니를 들고 세탁기 앞에 앉아 있습니다."
+    },
+    {
+      "id": "fa4cba87d353eab5fdb9535ccc275838e2864e48430891380a59ab7cb3a5e4f5",
+      "timestamp": 54,
+      "text": "여성이 세탁기 쪽에서 나오며 남성 쪽을 바라봅니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-54",
+            "timestamp": 54
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[54][v2] 여성이 세탁기 쪽에서 나오며 남성 쪽을 바라봅니다."
+    },
+    {
+      "id": "d64470d1149a3fff1848c7aa1defb46299db190df7eda69fae87f3270e8545d9",
+      "timestamp": 56,
+      "text": "여성은 여러 옷가지를 한꺼번에 품에 안고 있습니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-56",
+            "timestamp": 56
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[56][v2] 여성은 여러 옷가지를 한꺼번에 품에 안고 있습니다."
+    },
+    {
+      "id": "7b89eb3996c2f5f8b12e011be36648c5f034703122726a32a0843f22a0041beb",
+      "timestamp": 62,
+      "text": "여성은 빨래를 들고 세탁기 앞에 서고,뒤쪽 남성은 휴대전화를 사용합니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-62",
+            "timestamp": 62
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[62][v2] 여성은 빨래를 들고 세탁기 앞에 서고, 뒤쪽 남성은 휴대전화를 사용합니다."
+    },
+    {
+      "id": "b9ccc160f2928f03fced6a23f69cfdffd8ddacf47e223e14cc4f7b77f553948a",
+      "timestamp": 64,
+      "text": "남성이 팔짱을 낀 채 휴대전화 통화를 하며 웃습니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-64",
+            "timestamp": 64
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[64][v2] 남성이 팔짱을 낀 채 휴대전화 통화를 하며 웃습니다."
+    },
+    {
+      "id": "1495b6461a877c17cf3a0f8e6ebf93ec93eb74a8c99f53736f1c68b6fdd4212c",
+      "timestamp": 76,
+      "text": "여성이 검은 옷가지를 안고 빨래방 안을 지나갑니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-76",
+            "timestamp": 76
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[76][v2] 여성이 검은 옷가지를 안고 빨래방 안을 지나갑니다."
+    },
+    {
+      "id": "5bfd6ed9ce7a9716acbbfb90061cfdb487e69dab8d14e54e6b8b3c5082cad7f3",
+      "timestamp": 78,
+      "text": "남성이 세탁기 앞에서 빨래 바구니를 들고 있습니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-78",
+            "timestamp": 78
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[78][v1] 남성이 세탁기 앞에서 빨래 바구니를 들고 있습니다."
+    },
+    {
+      "id": "ea85af3030544301a5b5f6abd8febfb6223971e87b46c376a5d75c1b057e9f49",
+      "timestamp": 86,
+      "text": "두 사람이 빨래방을 나와 복도로 이동합니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-86",
+            "timestamp": 86
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[86][v1] 두 사람이 빨래방을 나와 복도로 이동합니다."
+    },
+    {
+      "id": "5f1d3d1b2257069e1b17171486ba8b3a0868585a793c28226edc9d0fe80750d6",
+      "timestamp": 88,
+      "text": "여성이 빨래 바구니를 밀며 복도를 지나고,남성이 앞장섭니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-88",
+            "timestamp": 88
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[88][v1] 여성이 빨래 바구니를 밀며 복도를 지나고, 남성이 앞장섭니다."
+    },
+    {
+      "id": "7f044ac3e9aae9925b1419ae20dc7d6817324a63d609eec4add8e84ff479bfbf",
+      "timestamp": 90,
+      "text": "남성이 엘리베이터 앞에 혼자 서 있습니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-90",
+            "timestamp": 90
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[90][v1] 남성이 엘리베이터 앞에 혼자 서 있습니다."
+    },
+    {
+      "id": "ebd7d646d7326bee11fd387d3d7b1c22ab2f3a0060d1694c4da001f200a7235d",
+      "timestamp": 94,
+      "text": "여성이 엘리베이터 안쪽 벽에 기대 서 있습니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-94",
+            "timestamp": 94
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[94][v2] 여성이 엘리베이터 안쪽 벽에 기대 서 있습니다."
+    },
+    {
+      "id": "bb8e6b4943fcd56326389ad14317b7799477be49a98ce81f060b0c1af4897361",
+      "timestamp": 96,
+      "text": "두 사람이 안내문이 붙은 엘리베이터 안에 마주 서 있습니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-96",
+            "timestamp": 96
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[96][v1] 두 사람이 안내문이 붙은 엘리베이터 안에 마주 서 있습니다."
+    },
+    {
+      "id": "92ac6b197324373670d86d25c0f7217238bc25eb2478b815713c8643bc21be2e",
+      "timestamp": 100,
+      "text": "여성은 엘리베이터 안에서 남성을 바라봅니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-100",
+            "timestamp": 100
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[100][v2] 여성은 엘리베이터 안에서 남성을 바라봅니다."
+    },
+    {
+      "id": "81c6c9b7938cc43e042300e0f354040812b528a8a1b35e4f7976862c37436bb0",
+      "timestamp": 108,
+      "text": "여성이 고개를 들어 위쪽을 살핍니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-108",
+            "timestamp": 108
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[108][v2] 여성이 고개를 들어 위쪽을 살핍니다."
+    },
+    {
+      "id": "87b14d7f778a27780c09c39f11a75c2ee7d9c92638cc6577339a5bf7d075c083",
+      "timestamp": 114,
+      "text": "남성이 여성 쪽을 바라보며 말합니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-114",
+            "timestamp": 114
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[114][v2] 남성이 여성 쪽을 바라보며 말합니다."
+    },
+    {
+      "id": "2de8f0a929a14da384e69bc42f062961c1a75438369744b7df17cf91cd7cd350",
+      "timestamp": 130,
+      "text": "여성이 입술을 다문 채 미소 짓습니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-130",
+            "timestamp": 130
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[130][v2] 여성이 입술을 다문 채 미소 짓습니다."
+    },
+    {
+      "id": "6f5b86487d8d524473a705dbaa96a30e2bd11d74d78773cad8328d539f5be96d",
+      "timestamp": 136,
+      "text": "밤의 상가 앞에서 한 여성이 휴대전화를 보며 걷습니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-136",
+            "timestamp": 136
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[136][v1] 밤의 상가 앞에서 한 여성이 휴대전화를 보며 걷습니다."
+    },
+    {
+      "id": "1a464d83258576a859ace8a224a032abd71d62752bc4b8e679b3d44cbc7d09c5",
+      "timestamp": 140,
+      "text": "검은 곱슬털 강아지가 나무 아래 화단에 앉아 있습니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-140",
+            "timestamp": 140
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[140][v1] 검은 곱슬털 강아지가 나무 아래 화단에 앉아 있습니다."
+    },
+    {
+      "id": "14f5263f7da54199c1430a56c6ce0d7ca08aaa2c21446077c743f51e3c614f66",
+      "timestamp": 142,
+      "text": "강아지가 화단 가장자리를 따라 움직이고,옆에 사람의 다리가 보입니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-142",
+            "timestamp": 142
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[142][v2] 강아지가 화단 가장자리를 따라 움직이고, 옆에 사람의 다리가 보입니다."
+    },
+    {
+      "id": "b1e46c55f1e5dbfb5c404120dcf798aa02a00e175238189ea7cd259f222cd99f",
+      "timestamp": 146,
+      "text": "여성이 강아지 쪽으로 몸을 숙여 살핍니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-146",
+            "timestamp": 146
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[146][v2] 여성이 강아지 쪽으로 몸을 숙여 살핍니다."
+    },
+    {
+      "id": "74de1f03ac50a1c9a313253ee759b1648a797bc40bfedba3b7f570bb257a6bba",
+      "timestamp": 152,
+      "text": "여성이 휴대전화로 강아지와 관련된 내용을 확인합니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-152",
+            "timestamp": 152
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[152][v1] 여성이 휴대전화로 강아지와 관련된 내용을 확인합니다."
+    },
+    {
+      "id": "635804ebe3c2a98b0e2ac1a8d8d26f9f2f6bd7367556f333abe3d3a0f55ab0fb",
+      "timestamp": 160,
+      "text": "흰색 차량 안에 남성이 앉아 밖을 바라봅니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-160",
+            "timestamp": 160
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[160][v2] 흰색 차량 안에 남성이 앉아 밖을 바라봅니다."
+    },
+    {
+      "id": "bfae3877ca32cb5a09db8ed651da166d2645365d394495630ea6e062bc33a60e",
+      "timestamp": 164,
+      "text": "여성이 강아지 곁에 앉아 강아지를 살핍니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-164",
+            "timestamp": 164
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[164][v1] 여성이 강아지 곁에 앉아 강아지를 살핍니다."
+    },
+    {
+      "id": "643b67812845c97e84d4d6f554703e8f8199e8c3a9dc31aae0a8e750e1e23d74",
+      "timestamp": 166,
+      "text": "화단 주변으로 노란 줄이 길게 이어져 있습니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-166",
+            "timestamp": 166
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[166][v2] 화단 주변으로 노란 줄이 길게 이어져 있습니다."
+    },
+    {
+      "id": "95e910532475224228ab5f9f9e327a555036efe120d7f95eefaccd10e98f27d8",
+      "timestamp": 172,
+      "text": "흰 옷을 입은 남성이 강아지 쪽을 바라봅니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-172",
+            "timestamp": 172
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[172][v2] 흰 옷을 입은 남성이 강아지 쪽을 바라봅니다."
+    },
+    {
+      "id": "deea9d2243f8b3da47a46715a6629f6bd7b8037d78d3f5bd0192afc5b949fe6b",
+      "timestamp": 180,
+      "text": "여성이 앉은 옆에 남성이 서 있습니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-180",
+            "timestamp": 180
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[180][v1] 여성이 앉은 옆에 남성이 서 있습니다."
+    },
+    {
+      "id": "e1adfca4d37c7038cda6b1a490abe19bdb244215d0217fb668f170413e9f3060",
+      "timestamp": 184,
+      "text": "두 사람이 강아지 곁에 함께 앉아 있습니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-184",
+            "timestamp": 184
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[184][v1] 두 사람이 강아지 곁에 함께 앉아 있습니다."
+    },
+    {
+      "id": "218a1c7c54d5a66bed2b459d45b8431f5c2397ea1aa6198fe45061c152e90817",
+      "timestamp": 206,
+      "text": "여성이 남성을 바라보며 서서 이야기합니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-206",
+            "timestamp": 206
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[206][v2] 여성이 남성을 바라보며 서서 이야기합니다."
+    },
+    {
+      "id": "2bd97c37e14f5754413d3a98a47ef3cbd8ed07b7073cc24c04d1e1ba786c10e9",
+      "timestamp": 208,
+      "text": "강아지가 여성의 다리 곁에 서 있습니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-208",
+            "timestamp": 208
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[208][v1] 강아지가 여성의 다리 곁에 서 있습니다."
+    },
+    {
+      "id": "1975e0dd66adb9256b7aa501c75a853e1721b0a0026072280f743796dbba6c20",
+      "timestamp": 210,
+      "text": "남성이 강아지 쪽을 내려다봅니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-210",
+            "timestamp": 210
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[210][v2] 남성이 강아지 쪽을 내려다봅니다."
+    },
+    {
+      "id": "e22efee5b2520af3b8da0c980bbd871e964922f693872946c9e0b7a91538ebe5",
+      "timestamp": 212,
+      "text": "남성이 차도 옆에서 여성에게 말을 겁니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-212",
+            "timestamp": 212
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[212][v1] 남성이 차도 옆에서 여성에게 말을 겁니다."
+    },
+    {
+      "id": "47ade2ee0c9f5c7db8a4e8a7ed84803baa70e276e67501c5a327f7edcb1a8a9f",
+      "timestamp": 216,
+      "text": "여성은 남성을 바라보며 환하게 웃습니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-216",
+            "timestamp": 216
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[216][v2] 여성은 남성을 바라보며 환하게 웃습니다."
+    },
+    {
+      "id": "a000c768c3935fd277d0875de8cbc4a138ddae81ca44a45c9c4fe856c0938ddc",
+      "timestamp": 222,
+      "text": "남성이 야간 도로에서 차를 운전합니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-222",
+            "timestamp": 222
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[222][v1] 남성이 야간 도로에서 차를 운전합니다."
+    },
+    {
+      "id": "dc7820f36085477191a3659fd3dc0306f9038bce852569ee3b393fb972588938",
+      "timestamp": 228,
+      "text": "조수석의 여성이 휴대전화를 든 채 운전자를 바라봅니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-228",
+            "timestamp": 228
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[228][v2] 조수석의 여성이 휴대전화를 든 채 운전자를 바라봅니다."
+    },
+    {
+      "id": "350938219239f57c17e70f975a5c071316056d24d6b77f22b2c75fb8a0bcbc6f",
+      "timestamp": 236,
+      "text": "운전자가 웃으며 옆자리 여성을 돌아봅니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-236",
+            "timestamp": 236
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[236][v2] 운전자가 웃으며 옆자리 여성을 돌아봅니다."
+    },
+    {
+      "id": "ea6405299b9bc864c43e6967b12cc906f75d9186d9a72ae1480de1b482eb384d",
+      "timestamp": 238,
+      "text": "여성이 휴대전화를 든 채 정면을 바라봅니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-238",
+            "timestamp": 238
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[238][v2] 여성이 휴대전화를 든 채 정면을 바라봅니다."
+    },
+    {
+      "id": "5dec359bf14c0fe516688b0993cfe8821f28679045b738114e96d30b66173d78",
+      "timestamp": 248,
+      "text": "여성은 입술을 다문 채 차창 밖을 바라봅니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-248",
+            "timestamp": 248
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[248][v2] 여성은 입술을 다문 채 차창 밖을 바라봅니다."
+    },
+    {
+      "id": "77b545e44d787d2b3cd8c33d0670e0f3a7af9c5b4bbea3226c0c2529725fe206",
+      "timestamp": 256,
+      "text": "여성이 눈을 감고 미소 짓습니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-256",
+            "timestamp": 256
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[256][v2] 여성이 눈을 감고 미소 짓습니다."
+    },
+    {
+      "id": "e29dba1268aed0de671accd90a7de0502bef332b93c8c14fc100c399e933e4fa",
+      "timestamp": 260,
+      "text": "운전자가 앞을 바라보며 운전합니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-260",
+            "timestamp": 260
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[260][v2] 운전자가 앞을 바라보며 운전합니다."
+    },
+    {
+      "id": "329d7082b6a3f4229c8b89dc7ff467a6ad2555b7d5810c446d878d76499f8989",
+      "timestamp": 264,
+      "text": "장면이 집 안으로 바뀌고,여성이 회색 잠옷 차림으로 앉아 있습니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-264",
+            "timestamp": 264
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[264][v1] 장면이 집 안으로 바뀌고, 여성이 회색 잠옷 차림으로 앉아 있습니다."
+    },
+    {
+      "id": "a90023b23a13a20d9d18232390e9142a258a83de28d69545473143144f262d09",
+      "timestamp": 270,
+      "text": "여성이 현관 앞에 앉아 휴대전화를 확인합니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-270",
+            "timestamp": 270
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[270][v1] 여성이 현관 앞에 앉아 휴대전화를 확인합니다."
+    },
+    {
+      "id": "64ca41fa8598309cfbb62f46878bec6e49b2767f13ff079b7007d3e51209c281",
+      "timestamp": 272,
+      "text": "여성은 휴대전화 화면을 스크롤합니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-272",
+            "timestamp": 272
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[272][v2] 여성은 휴대전화 화면을 스크롤합니다."
+    },
+    {
+      "id": "0a38e8a8bf09c983ff55dc2f2fcca644370973e25c2a417d2facedb663e0d58b",
+      "timestamp": 274,
+      "text": "휴대전화 화면에 강아지 사진과 게시글들이 이어집니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-274",
+            "timestamp": 274
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[274][v1] 휴대전화 화면에 강아지 사진과 게시글들이 이어집니다."
+    },
+    {
+      "id": "d39ac615eb67592033e2f4f4dcd6871c8fd6eb734a8041a23c7cfd648b4dc5aa",
+      "timestamp": 286,
+      "text": "여성이 휴대전화 자판을 누르며 메시지를 작성합니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-286",
+            "timestamp": 286
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[286][v2] 여성이 휴대전화 자판을 누르며 메시지를 작성합니다."
+    },
+    {
+      "id": "e73d55e7e8477e682b7a5ae74bf54434b91d5e959fc1b8cd62f6fe59d5ae5954",
+      "timestamp": 288,
+      "text": "휴대전화 대화창에 주황색 메시지가 표시됩니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-288",
+            "timestamp": 288
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[288][v2] 휴대전화 대화창에 주황색 메시지가 표시됩니다."
+    },
+    {
+      "id": "c78efe6678d5d5e862fcf957ce18e24c230c4d34534dba9a938f5806c965a697",
+      "timestamp": 298,
+      "text": "여성이 휴대전화를 들고 위쪽을 바라봅니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-298",
+            "timestamp": 298
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[298][v2] 여성이 휴대전화를 들고 위쪽을 바라봅니다."
+    },
+    {
+      "id": "982eb6a52cee2949e03d8c33a85192dbff8c442e0d83b4519ef5efb4e01f7d8c",
+      "timestamp": 308,
+      "text": "여성이 현관 앞에서 파란 봉투를 묶습니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-308",
+            "timestamp": 308
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[308][v1] 여성이 현관 앞에서 파란 봉투를 묶습니다."
+    },
+    {
+      "id": "604e02cb21aab4c1a5d06b0afb1cc1ae3a2d7cee62bd1b9a449faf3f07aef3ce",
+      "timestamp": 312,
+      "text": "여성이 고개를 돌려 현관 쪽을 바라봅니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-312",
+            "timestamp": 312
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[312][v2] 여성이 고개를 돌려 현관 쪽을 바라봅니다."
+    },
+    {
+      "id": "5c0ee788abb97b5d0642b84e07c562fdb637a67720656173d9275721f45cac34",
+      "timestamp": 324,
+      "text": "여성이 휴대전화를 보며 미소 짓습니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-324",
+            "timestamp": 324
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[324][v2] 여성이 휴대전화를 보며 미소 짓습니다."
+    },
+    {
+      "id": "c4f27b039c46dbad2294de151f4535db66615ebe69df15d7de83347b4313a03d",
+      "timestamp": 332,
+      "text": "여러 사람이 카페 안으로 들어옵니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-332",
+            "timestamp": 332
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[332][v1] 여러 사람이 카페 안으로 들어옵니다."
+    },
+    {
+      "id": "7bdb6fc49f8343d37547dfc5af04486d50e54af522cd69a5560cdc27faa326cd",
+      "timestamp": 338,
+      "text": "일행이 카페 안쪽의 빈자리를 둘러봅니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-338",
+            "timestamp": 338
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[338][v1] 일행이 카페 안쪽의 빈자리를 둘러봅니다."
+    },
+    {
+      "id": "3e60b3c4f895da48fa55b04207e4eda9c6c49006b57e40ee6ff01bf460852661",
+      "timestamp": 340,
+      "text": "한 여성이 자리에 앉은 일행에게 손짓하며 이야기합니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-340",
+            "timestamp": 340
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[340][v2] 한 여성이 자리에 앉은 일행에게 손짓하며 이야기합니다."
+    },
+    {
+      "id": "77a6f7b84b8bc3da6d7d2548f6fb21da444285cc940b7219399318796d0e832a",
+      "timestamp": 344,
+      "text": "네 사람이 창가 테이블에 모여 앉아 있습니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-344",
+            "timestamp": 344
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[344][v1] 네 사람이 창가 테이블에 모여 앉아 있습니다."
+    },
+    {
+      "id": "80c59afd23b75646098a006c50aa5d76c31a8e6139b43193da244f64beb49d8f",
+      "timestamp": 348,
+      "text": "한 여성이 카페 안으로 들어와 일행 쪽으로 다가갑니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-348",
+            "timestamp": 348
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[348][v2] 한 여성이 카페 안으로 들어와 일행 쪽으로 다가갑니다."
+    },
+    {
+      "id": "dda373462249b498b3a28bb83c7ff9553e74329764f2527bc22cfebf33b59e2e",
+      "timestamp": 358,
+      "text": "창가 쪽 테이블에 노트북과 음료가 놓여 있습니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-358",
+            "timestamp": 358
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[358][v1] 창가 쪽 테이블에 노트북과 음료가 놓여 있습니다."
+    },
+    {
+      "id": "df1330b50ac325405ac53ccc975dcc5cfe733a8993b276fb80e8a09955b36e41",
+      "timestamp": 366,
+      "text": "두 여성이 테이블 쪽으로 다가갑니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-366",
+            "timestamp": 366
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[366][v2] 두 여성이 테이블 쪽으로 다가갑니다."
+    },
+    {
+      "id": "b4895b327f7c4df0b561920ba50f27f40e691d5573e6e6651730f576a79f8f4f",
+      "timestamp": 370,
+      "text": "한 여성이 일행 사이에서 빈자리를 가리킵니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-370",
+            "timestamp": 370
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[370][v2] 한 여성이 일행 사이에서 빈자리를 가리킵니다."
+    },
+    {
+      "id": "7e2f8f9502edd2bd75ca206be3a648f7516317c7a233451b66811e0967a297f3",
+      "timestamp": 378,
+      "text": "흰색 상의를 입은 여성이 친구 쪽으로 몸을 기울여 이야기합니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-378",
+            "timestamp": 378
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[378][v2] 흰색 상의를 입은 여성이 친구 쪽으로 몸을 기울여 이야기합니다."
+    },
+    {
+      "id": "eef83ccde81375d603b89a339380b1478964eef2d533c9df11dc1162031ba2f6",
+      "timestamp": 386,
+      "text": "테이블에 앉은 일행이 휴대전화를 함께 들여다봅니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-386",
+            "timestamp": 386
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[386][v1] 테이블에 앉은 일행이 휴대전화를 함께 들여다봅니다."
+    },
+    {
+      "id": "3f90c0eac72d6efd2ef1d391b40fe1b3e28ece009bd267a1ddeb160b232ff137",
+      "timestamp": 394,
+      "text": "두 여성이 입구 쪽을 바라봅니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-394",
+            "timestamp": 394
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[394][v2] 두 여성이 입구 쪽을 바라봅니다."
+    },
+    {
+      "id": "1f93634193d8609be1c49097a0d719f2e901a105b1b5372337422e832fd68ebf",
+      "timestamp": 398,
+      "text": "흰색 상의를 입은 여성이 크게 웃습니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-398",
+            "timestamp": 398
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[398][v2] 흰색 상의를 입은 여성이 크게 웃습니다."
+    },
+    {
+      "id": "042007ae9dbc3e1e010ea2c23f05d59505460b183b8fc457e7e246267c9b6332",
+      "timestamp": 408,
+      "text": "테이블에 앉은 여성이 맞은편 사람을 향해 손을 듭니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-408",
+            "timestamp": 408
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[408][v2] 테이블에 앉은 여성이 맞은편 사람을 향해 손을 듭니다."
+    },
+    {
+      "id": "089f6906f6b29aa3bcc191835cf4bb911799a885fc90248c13a00b04b33ac47c",
+      "timestamp": 410,
+      "text": "한 여성이 팔을 높이 들어 천장을 가리킵니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-410",
+            "timestamp": 410
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[410][v1] 한 여성이 팔을 높이 들어 천장을 가리킵니다."
+    },
+    {
+      "id": "015e286dca93a2ff02a7ade05b8e85df3f3642837cf68d35ed49e5e877ed59b3",
+      "timestamp": 414,
+      "text": "여성이 투명한 물병을 들고 주변을 바라봅니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-414",
+            "timestamp": 414
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[414][v2] 여성이 투명한 물병을 들고 주변을 바라봅니다."
+    },
+    {
+      "id": "c235175e12ee88dbf8828521198a71d877d4cd802429fc94a7bca0ed823512cc",
+      "timestamp": 418,
+      "text": "여성이 옆자리 사람을 보며 환하게 웃습니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-418",
+            "timestamp": 418
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[418][v2] 여성이 옆자리 사람을 보며 환하게 웃습니다."
+    },
+    {
+      "id": "075aa3e1f4ca9302e88f69e4435e2b4cd4846f491bc166ad4fe4c9babf96131f",
+      "timestamp": 444,
+      "text": "장면이 작은 아파트 내부로 바뀌고,사람들이 현관으로 들어옵니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-444",
+            "timestamp": 444
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[444][v1] 장면이 작은 아파트 내부로 바뀌고, 사람들이 현관으로 들어옵니다."
+    },
+    {
+      "id": "770fbd5824227e1c99dfa6c904fea9b69c4dbc73b081b1f1a30bb1388afd32ef",
+      "timestamp": 446,
+      "text": "침대와 주방이 한 공간에 이어진 아파트 안으로 일행이 들어옵니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-446",
+            "timestamp": 446
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[446][v1] 침대와 주방이 한 공간에 이어진 아파트 안으로 일행이 들어옵니다."
+    },
+    {
+      "id": "33277e386bf2e84de3515ee701673f4a9bd624ce4e72e20db49e0023353b88ad",
+      "timestamp": 450,
+      "text": "한 남성이 커다란 휴지 묶음을 들고 이동합니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-450",
+            "timestamp": 450
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[450][v2] 한 남성이 커다란 휴지 묶음을 들고 이동합니다."
+    },
+    {
+      "id": "0b3d3f089a9dfd6d59735fb9ea4b6791244ea3fe78f2241a892fed116e38ca7d",
+      "timestamp": 456,
+      "text": "소파에 앉은 남성이 한쪽을 가리킵니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-456",
+            "timestamp": 456
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[456][v2] 소파에 앉은 남성이 한쪽을 가리킵니다."
+    },
+    {
+      "id": "ba3fde6ef9a190bf8ea9a11091ef6609a090789b45406506d7ac9284ac437add",
+      "timestamp": 458,
+      "text": "흰색 상의를 입은 여성이 창가에 서서 미소 짓습니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-458",
+            "timestamp": 458
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[458][v2] 흰색 상의를 입은 여성이 창가에 서서 미소 짓습니다."
+    },
+    {
+      "id": "417f30db213fe2d2bd03d30e1d4db078b7ab714575f1b77fb290318c53322643",
+      "timestamp": 468,
+      "text": "테이블 위에 여러 개의 음식 용기와 종이컵이 놓입니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-468",
+            "timestamp": 468
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[468][v1] 테이블 위에 여러 개의 음식 용기와 종이컵이 놓입니다."
+    },
+    {
+      "id": "c82820493affe86c2b909d4d754c2c7613491e005418682fe8398cd620b80449",
+      "timestamp": 472,
+      "text": "여성이 다른 사람의 손을 잡으며 자신이 하겠다는 듯 나섭니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-472",
+            "timestamp": 472
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[472][v2] 여성이 다른 사람의 손을 잡으며 자신이 하겠다는 듯 나섭니다."
+    },
+    {
+      "id": "19ac9da0780e6391f25e3b5f5e6d44a6519cb660450a5ccad141be77d5e3c882",
+      "timestamp": 478,
+      "text": "여러 사람이 테이블에 둘러앉아 음식을 나눕니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-478",
+            "timestamp": 478
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[478][v1] 여러 사람이 테이블에 둘러앉아 음식을 나눕니다."
+    },
+    {
+      "id": "e2f4ceedfefd9d7f29ef1435a8dd57ebfcce98bb73acaad2c5c7770780318910",
+      "timestamp": 482,
+      "text": "한 여성이 음식 용기의 뚜껑을 엽니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-482",
+            "timestamp": 482
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[482][v2] 한 여성이 음식 용기의 뚜껑을 엽니다."
+    },
+    {
+      "id": "51cc7de456b1ada997b49dc336fbe7e579b47f3cdf31d009c0030fc0f9afe1ec",
+      "timestamp": 484,
+      "text": "남성이 숟가락으로 음식을 들어 보이고,두 여성이 식사합니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-484",
+            "timestamp": 484
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[484][v2] 남성이 숟가락으로 음식을 들어 보이고, 두 여성이 식사합니다."
+    },
+    {
+      "id": "894afa22fbd446eab9f553deb12ced9dc961a5245299748e5c2ae8346c1bae37",
+      "timestamp": 486,
+      "text": "한 여성이 큰 용기에서 음식을 떠서 건넵니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-486",
+            "timestamp": 486
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[486][v1] 한 여성이 큰 용기에서 음식을 떠서 건넵니다."
+    },
+    {
+      "id": "83366545af39c959d83f48bb0f70f8b304d3f92734aea801782933009fcdd68b",
+      "timestamp": 492,
+      "text": "여성이 테이블 건너편으로 손을 뻗어 음식을 받으려 합니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-492",
+            "timestamp": 492
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[492][v2] 여성이 테이블 건너편으로 손을 뻗어 음식을 받으려 합니다."
+    },
+    {
+      "id": "59d88df8fbf369c4c6536108b626bca6fe6991b4b7ef50b2130edf83ded63fcb",
+      "timestamp": 498,
+      "text": "여성이 작은 그릇을 들고 음식을 덜어 줍니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-498",
+            "timestamp": 498
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[498][v2] 여성이 작은 그릇을 들고 음식을 덜어 줍니다."
+    },
+    {
+      "id": "af7c14e92a1f4c1f845ab2153fa307b7fee151e51433d6a6dde7b8a150c0574b",
+      "timestamp": 504,
+      "text": "남성이 그릇과 젓가락을 들고 벽에 기대 앉아 있습니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-504",
+            "timestamp": 504
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[504][v1] 남성이 그릇과 젓가락을 들고 벽에 기대 앉아 있습니다."
+    },
+    {
+      "id": "27b8e0941ec0f3bb7d9abf4e16d2642e1d1a50c6fa9c30f6344f105213801a38",
+      "timestamp": 510,
+      "text": "두 여성이 서로를 바라보며 이야기를 나눕니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-510",
+            "timestamp": 510
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[510][v2] 두 여성이 서로를 바라보며 이야기를 나눕니다."
+    },
+    {
+      "id": "6cd77ddea0b58540f69bf5bb2b2b12dc420d64578cfe00a8eb1af200b85a6528",
+      "timestamp": 514,
+      "text": "여성이 젓가락으로 음식을 먹습니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-514",
+            "timestamp": 514
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[514][v2] 여성이 젓가락으로 음식을 먹습니다."
+    },
+    {
+      "id": "7875510c532e6f8c321a0b2474a3fa6220d8c07b511ee23d353ec2a03de372c3",
+      "timestamp": 518,
+      "text": "여성이 소파에 앉아 정면을 바라봅니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-518",
+            "timestamp": 518
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[518][v2] 여성이 소파에 앉아 정면을 바라봅니다."
+    },
+    {
+      "id": "0e3e1af448689beca368157626b8f67d802540cea97eb8bcefdfea874910f2d8",
+      "timestamp": 524,
+      "text": "차 안의 여성이 눈을 감고 고개를 뒤로 젖힙니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-524",
+            "timestamp": 524
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[524][v2] 차 안의 여성이 눈을 감고 고개를 뒤로 젖힙니다."
+    },
+    {
+      "id": "f73a8071bff175d28b6c3d92d29da52fc0f6fdcee7bb0db44c78194e27e73d28",
+      "timestamp": 540,
+      "text": "남성이 차를 운전하며 도로를 달립니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-540",
+            "timestamp": 540
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[540][v1] 남성이 차를 운전하며 도로를 달립니다."
+    },
+    {
+      "id": "e034e24f0fff29625b33a8fdd04cb27d425699de9c9850ed59f0d89a601b1717",
+      "timestamp": 550,
+      "text": "여성이 가방을 메고 건물 복도를 걸어갑니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-550",
+            "timestamp": 550
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[550][v1] 여성이 가방을 메고 건물 복도를 걸어갑니다."
+    },
+    {
+      "id": "33e345376c42355fbb4e4f430ef1de27fdd3e9d15776cfb94c5373e573ebe130",
+      "timestamp": 554,
+      "text": "여성이 차량과 오토바이가 주차된 지하 주차장을 지나갑니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-554",
+            "timestamp": 554
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[554][v1] 여성이 차량과 오토바이가 주차된 지하 주차장을 지나갑니다."
+    },
+    {
+      "id": "15acc98329ff0a9bafae78821476e6eaa4f44ec770d753a028326d244dd9315a",
+      "timestamp": 558,
+      "text": "여성이 휴대전화를 귀에 대고 통화합니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-558",
+            "timestamp": 558
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[558][v2] 여성이 휴대전화를 귀에 대고 통화합니다."
+    },
+    {
+      "id": "459a1e649344fc7e6f889747dc9257e2e099cce7d031f036609d07caecb24039",
+      "timestamp": 564,
+      "text": "여성이 통화하며 주차장 통로를 걷습니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-564",
+            "timestamp": 564
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[564][v2] 여성이 통화하며 주차장 통로를 걷습니다."
+    },
+    {
+      "id": "837d59fed93b3f8a78796ca68a4885ee10a4e1dd97e882dd919edf5b5e83fdea",
+      "timestamp": 570,
+      "text": "여성이 엘리베이터 안으로 들어갑니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-570",
+            "timestamp": 570
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[570][v1] 여성이 엘리베이터 안으로 들어갑니다."
+    },
+    {
+      "id": "72aac84bd06692305859d4cb78158ddbe6a5366acad9cb07d1cca1820bc7db60",
+      "timestamp": 574,
+      "text": "여성이 엘리베이터에서 내려 복도로 나옵니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-574",
+            "timestamp": 574
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[574][v1] 여성이 엘리베이터에서 내려 복도로 나옵니다."
+    },
+    {
+      "id": "112cdcfbc97063e4cf302cebf057ab15f2dd2bf3cb209c4c09028cbc8f49770c",
+      "timestamp": 578,
+      "text": "여성이 열린 엘리베이터 쪽으로 몸을 돌립니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-578",
+            "timestamp": 578
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[578][v2] 여성이 열린 엘리베이터 쪽으로 몸을 돌립니다."
+    },
+    {
+      "id": "2458f1b69315654e48c0941a4fd91838ab37b5a0c506b7ed4efaedc8a612cbbc",
+      "timestamp": 580,
+      "text": "배낭을 멘 남성이 엘리베이터에서 내립니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-580",
+            "timestamp": 580
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[580][v1] 배낭을 멘 남성이 엘리베이터에서 내립니다."
+    },
+    {
+      "id": "d237f9729a8bd283ce4c39205ae674b0967a5cf789f132568b6a547dc4c74d68",
+      "timestamp": 584,
+      "text": "여성이 고개를 들어 엘리베이터 위쪽을 살핍니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-584",
+            "timestamp": 584
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[584][v2] 여성이 고개를 들어 엘리베이터 위쪽을 살핍니다."
+    },
+    {
+      "id": "5b1572294d4fbbe2c8bd64e5379322016a1a248d70e7172f67afc80eecb224df",
+      "timestamp": 590,
+      "text": "여성이 입술을 내밀고 주변을 둘러봅니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-590",
+            "timestamp": 590
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[590][v2] 여성이 입술을 내밀고 주변을 둘러봅니다."
+    },
+    {
+      "id": "9f7a298bf787dfcd0f64b2a5e3b7cccde4a7a8530472fc46e296bfc01e077f72",
+      "timestamp": 594,
+      "text": "남성이 여성을 바라보며 미소 짓습니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-594",
+            "timestamp": 594
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[594][v2] 남성이 여성을 바라보며 미소 짓습니다."
+    },
+    {
+      "id": "e4cfc2e7261446b08a9560691012d597b5fe771a5f727b079590546499675479",
+      "timestamp": 598,
+      "text": "여성이 활짝 웃으며 남성을 바라봅니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-598",
+            "timestamp": 598
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[598][v2] 여성이 활짝 웃으며 남성을 바라봅니다."
+    },
+    {
+      "id": "24b4eafb8e6cadae9f642bef699c03f88465a866746114b70b275a82e51edea8",
+      "timestamp": 600,
+      "text": "남성이 배낭을 멘 채 여성을 올려다봅니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-600",
+            "timestamp": 600
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[600][v2] 남성이 배낭을 멘 채 여성을 올려다봅니다."
+    },
+    {
+      "id": "e32d5719bfeb2430fed2a918f7955abbd8b7c2b355efde2b4394bae2b1b11fbd",
+      "timestamp": 618,
+      "text": "남성이 손에 든 작은 물건을 눈앞에 들어 보입니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-618",
+            "timestamp": 618
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[618][v1] 남성이 손에 든 작은 물건을 눈앞에 들어 보입니다."
+    },
+    {
+      "id": "cd7cd97a415ad0252d83310463cd4e7b6a0787b513437a8799e9fc80cdcb8b89",
+      "timestamp": 624,
+      "text": "여성이 작은 물건을 바라보며 웃습니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-624",
+            "timestamp": 624
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[624][v2] 여성이 작은 물건을 바라보며 웃습니다."
+    },
+    {
+      "id": "d640f386cae43606fc69d87545dce2b14bed65e59c461250c6cdbdc57614db63",
+      "timestamp": 630,
+      "text": "여성이 한 손으로 문을 잡아 열어 줍니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-630",
+            "timestamp": 630
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[630][v2] 여성이 한 손으로 문을 잡아 열어 줍니다."
+    },
+    {
+      "id": "f3bcf393d177860a508d3c5cfab76e051fd9c4ac7e16a2d3ebb42d81ac8365e7",
+      "timestamp": 632,
+      "text": "여성은 복도에서 멀어지는 남성을 바라봅니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-632",
+            "timestamp": 632
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[632][v1] 여성은 복도에서 멀어지는 남성을 바라봅니다."
+    },
+    {
+      "id": "5ef356a0baf9d79ea7a0cccc28e798d0b3a2fe5f1d58d2a187c01bc420f63f0c",
+      "timestamp": 636,
+      "text": "남성이 복도 끝에서 뒤돌아 여성을 바라봅니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-636",
+            "timestamp": 636
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[636][v1] 남성이 복도 끝에서 뒤돌아 여성을 바라봅니다."
+    },
+    {
+      "id": "3d5642f554fbd90bf4a45477829418ba557b34839e62d72dffa9dc87b4648dd1",
+      "timestamp": 650,
+      "text": "남성이 여성을 향해 복도를 걸어옵니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-650",
+            "timestamp": 650
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[650][v2] 남성이 여성을 향해 복도를 걸어옵니다."
+    },
+    {
+      "id": "54a7e8d798a0d60dade3d6544241526495e946d7101c278d8f70e493c30a2d53",
+      "timestamp": 654,
+      "text": "여성이 손짓하며 남성을 부릅니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-654",
+            "timestamp": 654
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[654][v2] 여성이 손짓하며 남성을 부릅니다."
+    },
+    {
+      "id": "ad90695909eba0f38a7eb34257039a2c4c6db638e72d9d41f0eb894dcf185950",
+      "timestamp": 664,
+      "text": "불이 켜진 긴 복도가 비어 있습니다.",
+      "tag": "v3",
+      "legacyVerbosity": "v3",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-664",
+            "timestamp": 664
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[664][v3] 불이 켜진 긴 복도가 비어 있습니다."
+    },
+    {
+      "id": "c2248d16ae462d35359898e5e5c42492b4de6fec3526a4600cde381a94668330",
+      "timestamp": 668,
+      "text": "밤길에서 두 사람이 나란히 서서 이야기합니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-668",
+            "timestamp": 668
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[668][v1] 밤길에서 두 사람이 나란히 서서 이야기합니다."
+    }
+  ],
+  "accepted": [
+    {
+      "id": "47cd80918867d1cfdf1e4690fe823f085e2e5ed8c20785c65629f6a68485040d",
+      "timestamp": 2,
+      "text": "한 여성이 상자와 포장용품을 정리합니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-2",
+            "timestamp": 2
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[2][v1] 한 여성이 상자와 포장용품을 정리합니다."
+    },
+    {
+      "id": "45c7f1e4f36e8abeed89ef26f986b64e72649f218472ae8918fbe27ece6fbea5",
+      "timestamp": 6,
+      "text": "세탁물 상자와 열린 포장 상자 곁에 한 여성이 서 있습니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-6",
+            "timestamp": 6
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[6][v2] 세탁물 상자와 열린 포장 상자 곁에 한 여성이 서 있습니다."
+    },
+    {
+      "id": "0cb32a721067128ffe0672a28abfddfbc32af494f5a04b385c1f8c8704d50ed8",
+      "timestamp": 8,
+      "text": "여성이 아래를 내려다보며 정리할 물건을 살핍니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-8",
+            "timestamp": 8
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[8][v2] 여성이 아래를 내려다보며 정리할 물건을 살핍니다."
+    },
+    {
+      "id": "360345aebf3c3c7ea74e8a80daaede6636106b6f4d365e906c6a747427171078",
+      "timestamp": 16,
+      "text": "대형 세탁기와 건조기가 놓인 셀프 빨래방입니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-16",
+            "timestamp": 16
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[16][v1] 대형 세탁기와 건조기가 놓인 셀프 빨래방입니다."
+    },
+    {
+      "id": "76c703fd7f42230cbe29f81861d04aa8e75f444fa6b6617a27d53c55da73769d",
+      "timestamp": 18,
+      "text": "창가에서 한 여성이 잡지를 읽고,남성이 앞을 지나갑니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-18",
+            "timestamp": 18
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[18][v2] 창가에서 한 여성이 잡지를 읽고, 남성이 앞을 지나갑니다."
+    },
+    {
+      "id": "315a87805d60a994a834e8e3ffed4ed2452d5732b4ea6a80eb5c636511f2e302",
+      "timestamp": 24,
+      "text": "여성은 잡지를 든 채 남성을 바라보며 미소 짓습니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-24",
+            "timestamp": 24
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[24][v2] 여성은 잡지를 든 채 남성을 바라보며 미소 짓습니다."
+    },
+    {
+      "id": "b85ac2b352d7e624c86c993dd3cb47cae3bad9e4111f3fdd820e7cbdbb6676ac",
+      "timestamp": 32,
+      "text": "남성이 빨래방 출입구 앞에 서 있습니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-32",
+            "timestamp": 32
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[32][v1] 남성이 빨래방 출입구 앞에 서 있습니다."
+    },
+    {
+      "id": "688ca22ef2039a1052fe3afed9dc17c881528d2798d5b3ffbd01b026da6d5b0e",
+      "timestamp": 40,
+      "text": "여성이 세탁기 앞에서 빨래를 꺼냅니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-40",
+            "timestamp": 40
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[40][v1] 여성이 세탁기 앞에서 빨래를 꺼냅니다."
+    },
+    {
+      "id": "c6ada9086ce2a943e39e2a6e4a8aaa15276f1429ef79167b354a19ea276aae0f",
+      "timestamp": 42,
+      "text": "여성의 손에 검은 옷가지가 들려 있습니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-42",
+            "timestamp": 42
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[42][v2] 여성의 손에 검은 옷가지가 들려 있습니다."
+    },
+    {
+      "id": "2c2dba67f5c8c12903f09597571385e947b15d87b5e4d5ad547d8c4e11dfea64",
+      "timestamp": 48,
+      "text": "안경 쓴 남성이 빨래 바구니를 들고 세탁기 앞에 앉아 있습니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-48",
+            "timestamp": 48
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[48][v1] 안경 쓴 남성이 빨래 바구니를 들고 세탁기 앞에 앉아 있습니다."
+    },
+    {
+      "id": "fa4cba87d353eab5fdb9535ccc275838e2864e48430891380a59ab7cb3a5e4f5",
+      "timestamp": 54,
+      "text": "여성이 세탁기 쪽에서 나오며 남성 쪽을 바라봅니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-54",
+            "timestamp": 54
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[54][v2] 여성이 세탁기 쪽에서 나오며 남성 쪽을 바라봅니다."
+    },
+    {
+      "id": "d64470d1149a3fff1848c7aa1defb46299db190df7eda69fae87f3270e8545d9",
+      "timestamp": 56,
+      "text": "여성은 여러 옷가지를 한꺼번에 품에 안고 있습니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-56",
+            "timestamp": 56
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[56][v2] 여성은 여러 옷가지를 한꺼번에 품에 안고 있습니다."
+    },
+    {
+      "id": "7b89eb3996c2f5f8b12e011be36648c5f034703122726a32a0843f22a0041beb",
+      "timestamp": 62,
+      "text": "여성은 빨래를 들고 세탁기 앞에 서고,뒤쪽 남성은 휴대전화를 사용합니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-62",
+            "timestamp": 62
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[62][v2] 여성은 빨래를 들고 세탁기 앞에 서고, 뒤쪽 남성은 휴대전화를 사용합니다."
+    },
+    {
+      "id": "b9ccc160f2928f03fced6a23f69cfdffd8ddacf47e223e14cc4f7b77f553948a",
+      "timestamp": 64,
+      "text": "남성이 팔짱을 낀 채 휴대전화 통화를 하며 웃습니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-64",
+            "timestamp": 64
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[64][v2] 남성이 팔짱을 낀 채 휴대전화 통화를 하며 웃습니다."
+    },
+    {
+      "id": "1495b6461a877c17cf3a0f8e6ebf93ec93eb74a8c99f53736f1c68b6fdd4212c",
+      "timestamp": 76,
+      "text": "여성이 검은 옷가지를 안고 빨래방 안을 지나갑니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-76",
+            "timestamp": 76
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[76][v2] 여성이 검은 옷가지를 안고 빨래방 안을 지나갑니다."
+    },
+    {
+      "id": "5bfd6ed9ce7a9716acbbfb90061cfdb487e69dab8d14e54e6b8b3c5082cad7f3",
+      "timestamp": 78,
+      "text": "남성이 세탁기 앞에서 빨래 바구니를 들고 있습니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-78",
+            "timestamp": 78
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[78][v1] 남성이 세탁기 앞에서 빨래 바구니를 들고 있습니다."
+    },
+    {
+      "id": "ea85af3030544301a5b5f6abd8febfb6223971e87b46c376a5d75c1b057e9f49",
+      "timestamp": 86,
+      "text": "두 사람이 빨래방을 나와 복도로 이동합니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-86",
+            "timestamp": 86
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[86][v1] 두 사람이 빨래방을 나와 복도로 이동합니다."
+    },
+    {
+      "id": "5f1d3d1b2257069e1b17171486ba8b3a0868585a793c28226edc9d0fe80750d6",
+      "timestamp": 88,
+      "text": "여성이 빨래 바구니를 밀며 복도를 지나고,남성이 앞장섭니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-88",
+            "timestamp": 88
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[88][v1] 여성이 빨래 바구니를 밀며 복도를 지나고, 남성이 앞장섭니다."
+    },
+    {
+      "id": "7f044ac3e9aae9925b1419ae20dc7d6817324a63d609eec4add8e84ff479bfbf",
+      "timestamp": 90,
+      "text": "남성이 엘리베이터 앞에 혼자 서 있습니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-90",
+            "timestamp": 90
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[90][v1] 남성이 엘리베이터 앞에 혼자 서 있습니다."
+    },
+    {
+      "id": "ebd7d646d7326bee11fd387d3d7b1c22ab2f3a0060d1694c4da001f200a7235d",
+      "timestamp": 94,
+      "text": "여성이 엘리베이터 안쪽 벽에 기대 서 있습니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-94",
+            "timestamp": 94
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[94][v2] 여성이 엘리베이터 안쪽 벽에 기대 서 있습니다."
+    },
+    {
+      "id": "bb8e6b4943fcd56326389ad14317b7799477be49a98ce81f060b0c1af4897361",
+      "timestamp": 96,
+      "text": "두 사람이 안내문이 붙은 엘리베이터 안에 마주 서 있습니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-96",
+            "timestamp": 96
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[96][v1] 두 사람이 안내문이 붙은 엘리베이터 안에 마주 서 있습니다."
+    },
+    {
+      "id": "92ac6b197324373670d86d25c0f7217238bc25eb2478b815713c8643bc21be2e",
+      "timestamp": 100,
+      "text": "여성은 엘리베이터 안에서 남성을 바라봅니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-100",
+            "timestamp": 100
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[100][v2] 여성은 엘리베이터 안에서 남성을 바라봅니다."
+    },
+    {
+      "id": "81c6c9b7938cc43e042300e0f354040812b528a8a1b35e4f7976862c37436bb0",
+      "timestamp": 108,
+      "text": "여성이 고개를 들어 위쪽을 살핍니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-108",
+            "timestamp": 108
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[108][v2] 여성이 고개를 들어 위쪽을 살핍니다."
+    },
+    {
+      "id": "87b14d7f778a27780c09c39f11a75c2ee7d9c92638cc6577339a5bf7d075c083",
+      "timestamp": 114,
+      "text": "남성이 여성 쪽을 바라보며 말합니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-114",
+            "timestamp": 114
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[114][v2] 남성이 여성 쪽을 바라보며 말합니다."
+    },
+    {
+      "id": "2de8f0a929a14da384e69bc42f062961c1a75438369744b7df17cf91cd7cd350",
+      "timestamp": 130,
+      "text": "여성이 입술을 다문 채 미소 짓습니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-130",
+            "timestamp": 130
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[130][v2] 여성이 입술을 다문 채 미소 짓습니다."
+    },
+    {
+      "id": "6f5b86487d8d524473a705dbaa96a30e2bd11d74d78773cad8328d539f5be96d",
+      "timestamp": 136,
+      "text": "밤의 상가 앞에서 한 여성이 휴대전화를 보며 걷습니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-136",
+            "timestamp": 136
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[136][v1] 밤의 상가 앞에서 한 여성이 휴대전화를 보며 걷습니다."
+    },
+    {
+      "id": "1a464d83258576a859ace8a224a032abd71d62752bc4b8e679b3d44cbc7d09c5",
+      "timestamp": 140,
+      "text": "검은 곱슬털 강아지가 나무 아래 화단에 앉아 있습니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-140",
+            "timestamp": 140
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[140][v1] 검은 곱슬털 강아지가 나무 아래 화단에 앉아 있습니다."
+    },
+    {
+      "id": "14f5263f7da54199c1430a56c6ce0d7ca08aaa2c21446077c743f51e3c614f66",
+      "timestamp": 142,
+      "text": "강아지가 화단 가장자리를 따라 움직이고,옆에 사람의 다리가 보입니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-142",
+            "timestamp": 142
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[142][v2] 강아지가 화단 가장자리를 따라 움직이고, 옆에 사람의 다리가 보입니다."
+    },
+    {
+      "id": "b1e46c55f1e5dbfb5c404120dcf798aa02a00e175238189ea7cd259f222cd99f",
+      "timestamp": 146,
+      "text": "여성이 강아지 쪽으로 몸을 숙여 살핍니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-146",
+            "timestamp": 146
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[146][v2] 여성이 강아지 쪽으로 몸을 숙여 살핍니다."
+    },
+    {
+      "id": "74de1f03ac50a1c9a313253ee759b1648a797bc40bfedba3b7f570bb257a6bba",
+      "timestamp": 152,
+      "text": "여성이 휴대전화로 강아지와 관련된 내용을 확인합니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-152",
+            "timestamp": 152
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[152][v1] 여성이 휴대전화로 강아지와 관련된 내용을 확인합니다."
+    },
+    {
+      "id": "635804ebe3c2a98b0e2ac1a8d8d26f9f2f6bd7367556f333abe3d3a0f55ab0fb",
+      "timestamp": 160,
+      "text": "흰색 차량 안에 남성이 앉아 밖을 바라봅니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-160",
+            "timestamp": 160
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[160][v2] 흰색 차량 안에 남성이 앉아 밖을 바라봅니다."
+    },
+    {
+      "id": "bfae3877ca32cb5a09db8ed651da166d2645365d394495630ea6e062bc33a60e",
+      "timestamp": 164,
+      "text": "여성이 강아지 곁에 앉아 강아지를 살핍니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-164",
+            "timestamp": 164
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[164][v1] 여성이 강아지 곁에 앉아 강아지를 살핍니다."
+    },
+    {
+      "id": "643b67812845c97e84d4d6f554703e8f8199e8c3a9dc31aae0a8e750e1e23d74",
+      "timestamp": 166,
+      "text": "화단 주변으로 노란 줄이 길게 이어져 있습니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-166",
+            "timestamp": 166
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[166][v2] 화단 주변으로 노란 줄이 길게 이어져 있습니다."
+    },
+    {
+      "id": "95e910532475224228ab5f9f9e327a555036efe120d7f95eefaccd10e98f27d8",
+      "timestamp": 172,
+      "text": "흰 옷을 입은 남성이 강아지 쪽을 바라봅니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-172",
+            "timestamp": 172
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[172][v2] 흰 옷을 입은 남성이 강아지 쪽을 바라봅니다."
+    },
+    {
+      "id": "deea9d2243f8b3da47a46715a6629f6bd7b8037d78d3f5bd0192afc5b949fe6b",
+      "timestamp": 180,
+      "text": "여성이 앉은 옆에 남성이 서 있습니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-180",
+            "timestamp": 180
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[180][v1] 여성이 앉은 옆에 남성이 서 있습니다."
+    },
+    {
+      "id": "e1adfca4d37c7038cda6b1a490abe19bdb244215d0217fb668f170413e9f3060",
+      "timestamp": 184,
+      "text": "두 사람이 강아지 곁에 함께 앉아 있습니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-184",
+            "timestamp": 184
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[184][v1] 두 사람이 강아지 곁에 함께 앉아 있습니다."
+    },
+    {
+      "id": "218a1c7c54d5a66bed2b459d45b8431f5c2397ea1aa6198fe45061c152e90817",
+      "timestamp": 206,
+      "text": "여성이 남성을 바라보며 서서 이야기합니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-206",
+            "timestamp": 206
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[206][v2] 여성이 남성을 바라보며 서서 이야기합니다."
+    },
+    {
+      "id": "2bd97c37e14f5754413d3a98a47ef3cbd8ed07b7073cc24c04d1e1ba786c10e9",
+      "timestamp": 208,
+      "text": "강아지가 여성의 다리 곁에 서 있습니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-208",
+            "timestamp": 208
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[208][v1] 강아지가 여성의 다리 곁에 서 있습니다."
+    },
+    {
+      "id": "1975e0dd66adb9256b7aa501c75a853e1721b0a0026072280f743796dbba6c20",
+      "timestamp": 210,
+      "text": "남성이 강아지 쪽을 내려다봅니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-210",
+            "timestamp": 210
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[210][v2] 남성이 강아지 쪽을 내려다봅니다."
+    },
+    {
+      "id": "e22efee5b2520af3b8da0c980bbd871e964922f693872946c9e0b7a91538ebe5",
+      "timestamp": 212,
+      "text": "남성이 차도 옆에서 여성에게 말을 겁니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-212",
+            "timestamp": 212
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[212][v1] 남성이 차도 옆에서 여성에게 말을 겁니다."
+    },
+    {
+      "id": "47ade2ee0c9f5c7db8a4e8a7ed84803baa70e276e67501c5a327f7edcb1a8a9f",
+      "timestamp": 216,
+      "text": "여성은 남성을 바라보며 환하게 웃습니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-216",
+            "timestamp": 216
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[216][v2] 여성은 남성을 바라보며 환하게 웃습니다."
+    },
+    {
+      "id": "a000c768c3935fd277d0875de8cbc4a138ddae81ca44a45c9c4fe856c0938ddc",
+      "timestamp": 222,
+      "text": "남성이 야간 도로에서 차를 운전합니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-222",
+            "timestamp": 222
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[222][v1] 남성이 야간 도로에서 차를 운전합니다."
+    },
+    {
+      "id": "dc7820f36085477191a3659fd3dc0306f9038bce852569ee3b393fb972588938",
+      "timestamp": 228,
+      "text": "조수석의 여성이 휴대전화를 든 채 운전자를 바라봅니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-228",
+            "timestamp": 228
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[228][v2] 조수석의 여성이 휴대전화를 든 채 운전자를 바라봅니다."
+    },
+    {
+      "id": "350938219239f57c17e70f975a5c071316056d24d6b77f22b2c75fb8a0bcbc6f",
+      "timestamp": 236,
+      "text": "운전자가 웃으며 옆자리 여성을 돌아봅니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-236",
+            "timestamp": 236
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[236][v2] 운전자가 웃으며 옆자리 여성을 돌아봅니다."
+    },
+    {
+      "id": "ea6405299b9bc864c43e6967b12cc906f75d9186d9a72ae1480de1b482eb384d",
+      "timestamp": 238,
+      "text": "여성이 휴대전화를 든 채 정면을 바라봅니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-238",
+            "timestamp": 238
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[238][v2] 여성이 휴대전화를 든 채 정면을 바라봅니다."
+    },
+    {
+      "id": "5dec359bf14c0fe516688b0993cfe8821f28679045b738114e96d30b66173d78",
+      "timestamp": 248,
+      "text": "여성은 입술을 다문 채 차창 밖을 바라봅니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-248",
+            "timestamp": 248
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[248][v2] 여성은 입술을 다문 채 차창 밖을 바라봅니다."
+    },
+    {
+      "id": "77b545e44d787d2b3cd8c33d0670e0f3a7af9c5b4bbea3226c0c2529725fe206",
+      "timestamp": 256,
+      "text": "여성이 눈을 감고 미소 짓습니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-256",
+            "timestamp": 256
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[256][v2] 여성이 눈을 감고 미소 짓습니다."
+    },
+    {
+      "id": "e29dba1268aed0de671accd90a7de0502bef332b93c8c14fc100c399e933e4fa",
+      "timestamp": 260,
+      "text": "운전자가 앞을 바라보며 운전합니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-260",
+            "timestamp": 260
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[260][v2] 운전자가 앞을 바라보며 운전합니다."
+    },
+    {
+      "id": "329d7082b6a3f4229c8b89dc7ff467a6ad2555b7d5810c446d878d76499f8989",
+      "timestamp": 264,
+      "text": "장면이 집 안으로 바뀌고,여성이 회색 잠옷 차림으로 앉아 있습니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-264",
+            "timestamp": 264
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[264][v1] 장면이 집 안으로 바뀌고, 여성이 회색 잠옷 차림으로 앉아 있습니다."
+    },
+    {
+      "id": "a90023b23a13a20d9d18232390e9142a258a83de28d69545473143144f262d09",
+      "timestamp": 270,
+      "text": "여성이 현관 앞에 앉아 휴대전화를 확인합니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-270",
+            "timestamp": 270
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[270][v1] 여성이 현관 앞에 앉아 휴대전화를 확인합니다."
+    },
+    {
+      "id": "64ca41fa8598309cfbb62f46878bec6e49b2767f13ff079b7007d3e51209c281",
+      "timestamp": 272,
+      "text": "여성은 휴대전화 화면을 스크롤합니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-272",
+            "timestamp": 272
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[272][v2] 여성은 휴대전화 화면을 스크롤합니다."
+    },
+    {
+      "id": "0a38e8a8bf09c983ff55dc2f2fcca644370973e25c2a417d2facedb663e0d58b",
+      "timestamp": 274,
+      "text": "휴대전화 화면에 강아지 사진과 게시글들이 이어집니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-274",
+            "timestamp": 274
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[274][v1] 휴대전화 화면에 강아지 사진과 게시글들이 이어집니다."
+    },
+    {
+      "id": "d39ac615eb67592033e2f4f4dcd6871c8fd6eb734a8041a23c7cfd648b4dc5aa",
+      "timestamp": 286,
+      "text": "여성이 휴대전화 자판을 누르며 메시지를 작성합니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-286",
+            "timestamp": 286
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[286][v2] 여성이 휴대전화 자판을 누르며 메시지를 작성합니다."
+    },
+    {
+      "id": "e73d55e7e8477e682b7a5ae74bf54434b91d5e959fc1b8cd62f6fe59d5ae5954",
+      "timestamp": 288,
+      "text": "휴대전화 대화창에 주황색 메시지가 표시됩니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-288",
+            "timestamp": 288
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[288][v2] 휴대전화 대화창에 주황색 메시지가 표시됩니다."
+    },
+    {
+      "id": "c78efe6678d5d5e862fcf957ce18e24c230c4d34534dba9a938f5806c965a697",
+      "timestamp": 298,
+      "text": "여성이 휴대전화를 들고 위쪽을 바라봅니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-298",
+            "timestamp": 298
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[298][v2] 여성이 휴대전화를 들고 위쪽을 바라봅니다."
+    },
+    {
+      "id": "982eb6a52cee2949e03d8c33a85192dbff8c442e0d83b4519ef5efb4e01f7d8c",
+      "timestamp": 308,
+      "text": "여성이 현관 앞에서 파란 봉투를 묶습니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-308",
+            "timestamp": 308
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[308][v1] 여성이 현관 앞에서 파란 봉투를 묶습니다."
+    },
+    {
+      "id": "604e02cb21aab4c1a5d06b0afb1cc1ae3a2d7cee62bd1b9a449faf3f07aef3ce",
+      "timestamp": 312,
+      "text": "여성이 고개를 돌려 현관 쪽을 바라봅니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-312",
+            "timestamp": 312
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[312][v2] 여성이 고개를 돌려 현관 쪽을 바라봅니다."
+    },
+    {
+      "id": "5c0ee788abb97b5d0642b84e07c562fdb637a67720656173d9275721f45cac34",
+      "timestamp": 324,
+      "text": "여성이 휴대전화를 보며 미소 짓습니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-324",
+            "timestamp": 324
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[324][v2] 여성이 휴대전화를 보며 미소 짓습니다."
+    },
+    {
+      "id": "c4f27b039c46dbad2294de151f4535db66615ebe69df15d7de83347b4313a03d",
+      "timestamp": 332,
+      "text": "여러 사람이 카페 안으로 들어옵니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-332",
+            "timestamp": 332
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[332][v1] 여러 사람이 카페 안으로 들어옵니다."
+    },
+    {
+      "id": "7bdb6fc49f8343d37547dfc5af04486d50e54af522cd69a5560cdc27faa326cd",
+      "timestamp": 338,
+      "text": "일행이 카페 안쪽의 빈자리를 둘러봅니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-338",
+            "timestamp": 338
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[338][v1] 일행이 카페 안쪽의 빈자리를 둘러봅니다."
+    },
+    {
+      "id": "3e60b3c4f895da48fa55b04207e4eda9c6c49006b57e40ee6ff01bf460852661",
+      "timestamp": 340,
+      "text": "한 여성이 자리에 앉은 일행에게 손짓하며 이야기합니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-340",
+            "timestamp": 340
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[340][v2] 한 여성이 자리에 앉은 일행에게 손짓하며 이야기합니다."
+    },
+    {
+      "id": "77a6f7b84b8bc3da6d7d2548f6fb21da444285cc940b7219399318796d0e832a",
+      "timestamp": 344,
+      "text": "네 사람이 창가 테이블에 모여 앉아 있습니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-344",
+            "timestamp": 344
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[344][v1] 네 사람이 창가 테이블에 모여 앉아 있습니다."
+    },
+    {
+      "id": "80c59afd23b75646098a006c50aa5d76c31a8e6139b43193da244f64beb49d8f",
+      "timestamp": 348,
+      "text": "한 여성이 카페 안으로 들어와 일행 쪽으로 다가갑니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-348",
+            "timestamp": 348
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[348][v2] 한 여성이 카페 안으로 들어와 일행 쪽으로 다가갑니다."
+    },
+    {
+      "id": "dda373462249b498b3a28bb83c7ff9553e74329764f2527bc22cfebf33b59e2e",
+      "timestamp": 358,
+      "text": "창가 쪽 테이블에 노트북과 음료가 놓여 있습니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-358",
+            "timestamp": 358
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[358][v1] 창가 쪽 테이블에 노트북과 음료가 놓여 있습니다."
+    },
+    {
+      "id": "df1330b50ac325405ac53ccc975dcc5cfe733a8993b276fb80e8a09955b36e41",
+      "timestamp": 366,
+      "text": "두 여성이 테이블 쪽으로 다가갑니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-366",
+            "timestamp": 366
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[366][v2] 두 여성이 테이블 쪽으로 다가갑니다."
+    },
+    {
+      "id": "b4895b327f7c4df0b561920ba50f27f40e691d5573e6e6651730f576a79f8f4f",
+      "timestamp": 370,
+      "text": "한 여성이 일행 사이에서 빈자리를 가리킵니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-370",
+            "timestamp": 370
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[370][v2] 한 여성이 일행 사이에서 빈자리를 가리킵니다."
+    },
+    {
+      "id": "7e2f8f9502edd2bd75ca206be3a648f7516317c7a233451b66811e0967a297f3",
+      "timestamp": 378,
+      "text": "흰색 상의를 입은 여성이 친구 쪽으로 몸을 기울여 이야기합니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-378",
+            "timestamp": 378
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[378][v2] 흰색 상의를 입은 여성이 친구 쪽으로 몸을 기울여 이야기합니다."
+    },
+    {
+      "id": "eef83ccde81375d603b89a339380b1478964eef2d533c9df11dc1162031ba2f6",
+      "timestamp": 386,
+      "text": "테이블에 앉은 일행이 휴대전화를 함께 들여다봅니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-386",
+            "timestamp": 386
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[386][v1] 테이블에 앉은 일행이 휴대전화를 함께 들여다봅니다."
+    },
+    {
+      "id": "3f90c0eac72d6efd2ef1d391b40fe1b3e28ece009bd267a1ddeb160b232ff137",
+      "timestamp": 394,
+      "text": "두 여성이 입구 쪽을 바라봅니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-394",
+            "timestamp": 394
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[394][v2] 두 여성이 입구 쪽을 바라봅니다."
+    },
+    {
+      "id": "1f93634193d8609be1c49097a0d719f2e901a105b1b5372337422e832fd68ebf",
+      "timestamp": 398,
+      "text": "흰색 상의를 입은 여성이 크게 웃습니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-398",
+            "timestamp": 398
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[398][v2] 흰색 상의를 입은 여성이 크게 웃습니다."
+    },
+    {
+      "id": "042007ae9dbc3e1e010ea2c23f05d59505460b183b8fc457e7e246267c9b6332",
+      "timestamp": 408,
+      "text": "테이블에 앉은 여성이 맞은편 사람을 향해 손을 듭니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-408",
+            "timestamp": 408
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[408][v2] 테이블에 앉은 여성이 맞은편 사람을 향해 손을 듭니다."
+    },
+    {
+      "id": "089f6906f6b29aa3bcc191835cf4bb911799a885fc90248c13a00b04b33ac47c",
+      "timestamp": 410,
+      "text": "한 여성이 팔을 높이 들어 천장을 가리킵니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-410",
+            "timestamp": 410
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[410][v1] 한 여성이 팔을 높이 들어 천장을 가리킵니다."
+    },
+    {
+      "id": "015e286dca93a2ff02a7ade05b8e85df3f3642837cf68d35ed49e5e877ed59b3",
+      "timestamp": 414,
+      "text": "여성이 투명한 물병을 들고 주변을 바라봅니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-414",
+            "timestamp": 414
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[414][v2] 여성이 투명한 물병을 들고 주변을 바라봅니다."
+    },
+    {
+      "id": "c235175e12ee88dbf8828521198a71d877d4cd802429fc94a7bca0ed823512cc",
+      "timestamp": 418,
+      "text": "여성이 옆자리 사람을 보며 환하게 웃습니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-418",
+            "timestamp": 418
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[418][v2] 여성이 옆자리 사람을 보며 환하게 웃습니다."
+    },
+    {
+      "id": "075aa3e1f4ca9302e88f69e4435e2b4cd4846f491bc166ad4fe4c9babf96131f",
+      "timestamp": 444,
+      "text": "장면이 작은 아파트 내부로 바뀌고,사람들이 현관으로 들어옵니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-444",
+            "timestamp": 444
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[444][v1] 장면이 작은 아파트 내부로 바뀌고, 사람들이 현관으로 들어옵니다."
+    },
+    {
+      "id": "770fbd5824227e1c99dfa6c904fea9b69c4dbc73b081b1f1a30bb1388afd32ef",
+      "timestamp": 446,
+      "text": "침대와 주방이 한 공간에 이어진 아파트 안으로 일행이 들어옵니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-446",
+            "timestamp": 446
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[446][v1] 침대와 주방이 한 공간에 이어진 아파트 안으로 일행이 들어옵니다."
+    },
+    {
+      "id": "33277e386bf2e84de3515ee701673f4a9bd624ce4e72e20db49e0023353b88ad",
+      "timestamp": 450,
+      "text": "한 남성이 커다란 휴지 묶음을 들고 이동합니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-450",
+            "timestamp": 450
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[450][v2] 한 남성이 커다란 휴지 묶음을 들고 이동합니다."
+    },
+    {
+      "id": "0b3d3f089a9dfd6d59735fb9ea4b6791244ea3fe78f2241a892fed116e38ca7d",
+      "timestamp": 456,
+      "text": "소파에 앉은 남성이 한쪽을 가리킵니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-456",
+            "timestamp": 456
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[456][v2] 소파에 앉은 남성이 한쪽을 가리킵니다."
+    },
+    {
+      "id": "ba3fde6ef9a190bf8ea9a11091ef6609a090789b45406506d7ac9284ac437add",
+      "timestamp": 458,
+      "text": "흰색 상의를 입은 여성이 창가에 서서 미소 짓습니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-458",
+            "timestamp": 458
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[458][v2] 흰색 상의를 입은 여성이 창가에 서서 미소 짓습니다."
+    },
+    {
+      "id": "417f30db213fe2d2bd03d30e1d4db078b7ab714575f1b77fb290318c53322643",
+      "timestamp": 468,
+      "text": "테이블 위에 여러 개의 음식 용기와 종이컵이 놓입니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-468",
+            "timestamp": 468
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[468][v1] 테이블 위에 여러 개의 음식 용기와 종이컵이 놓입니다."
+    },
+    {
+      "id": "c82820493affe86c2b909d4d754c2c7613491e005418682fe8398cd620b80449",
+      "timestamp": 472,
+      "text": "여성이 다른 사람의 손을 잡으며 자신이 하겠다는 듯 나섭니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-472",
+            "timestamp": 472
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[472][v2] 여성이 다른 사람의 손을 잡으며 자신이 하겠다는 듯 나섭니다."
+    },
+    {
+      "id": "19ac9da0780e6391f25e3b5f5e6d44a6519cb660450a5ccad141be77d5e3c882",
+      "timestamp": 478,
+      "text": "여러 사람이 테이블에 둘러앉아 음식을 나눕니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-478",
+            "timestamp": 478
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[478][v1] 여러 사람이 테이블에 둘러앉아 음식을 나눕니다."
+    },
+    {
+      "id": "e2f4ceedfefd9d7f29ef1435a8dd57ebfcce98bb73acaad2c5c7770780318910",
+      "timestamp": 482,
+      "text": "한 여성이 음식 용기의 뚜껑을 엽니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-482",
+            "timestamp": 482
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[482][v2] 한 여성이 음식 용기의 뚜껑을 엽니다."
+    },
+    {
+      "id": "51cc7de456b1ada997b49dc336fbe7e579b47f3cdf31d009c0030fc0f9afe1ec",
+      "timestamp": 484,
+      "text": "남성이 숟가락으로 음식을 들어 보이고,두 여성이 식사합니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-484",
+            "timestamp": 484
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[484][v2] 남성이 숟가락으로 음식을 들어 보이고, 두 여성이 식사합니다."
+    },
+    {
+      "id": "894afa22fbd446eab9f553deb12ced9dc961a5245299748e5c2ae8346c1bae37",
+      "timestamp": 486,
+      "text": "한 여성이 큰 용기에서 음식을 떠서 건넵니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-486",
+            "timestamp": 486
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[486][v1] 한 여성이 큰 용기에서 음식을 떠서 건넵니다."
+    },
+    {
+      "id": "83366545af39c959d83f48bb0f70f8b304d3f92734aea801782933009fcdd68b",
+      "timestamp": 492,
+      "text": "여성이 테이블 건너편으로 손을 뻗어 음식을 받으려 합니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-492",
+            "timestamp": 492
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[492][v2] 여성이 테이블 건너편으로 손을 뻗어 음식을 받으려 합니다."
+    },
+    {
+      "id": "59d88df8fbf369c4c6536108b626bca6fe6991b4b7ef50b2130edf83ded63fcb",
+      "timestamp": 498,
+      "text": "여성이 작은 그릇을 들고 음식을 덜어 줍니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-498",
+            "timestamp": 498
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[498][v2] 여성이 작은 그릇을 들고 음식을 덜어 줍니다."
+    },
+    {
+      "id": "af7c14e92a1f4c1f845ab2153fa307b7fee151e51433d6a6dde7b8a150c0574b",
+      "timestamp": 504,
+      "text": "남성이 그릇과 젓가락을 들고 벽에 기대 앉아 있습니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-504",
+            "timestamp": 504
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[504][v1] 남성이 그릇과 젓가락을 들고 벽에 기대 앉아 있습니다."
+    },
+    {
+      "id": "27b8e0941ec0f3bb7d9abf4e16d2642e1d1a50c6fa9c30f6344f105213801a38",
+      "timestamp": 510,
+      "text": "두 여성이 서로를 바라보며 이야기를 나눕니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-510",
+            "timestamp": 510
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[510][v2] 두 여성이 서로를 바라보며 이야기를 나눕니다."
+    },
+    {
+      "id": "6cd77ddea0b58540f69bf5bb2b2b12dc420d64578cfe00a8eb1af200b85a6528",
+      "timestamp": 514,
+      "text": "여성이 젓가락으로 음식을 먹습니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-514",
+            "timestamp": 514
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[514][v2] 여성이 젓가락으로 음식을 먹습니다."
+    },
+    {
+      "id": "7875510c532e6f8c321a0b2474a3fa6220d8c07b511ee23d353ec2a03de372c3",
+      "timestamp": 518,
+      "text": "여성이 소파에 앉아 정면을 바라봅니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-518",
+            "timestamp": 518
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[518][v2] 여성이 소파에 앉아 정면을 바라봅니다."
+    },
+    {
+      "id": "0e3e1af448689beca368157626b8f67d802540cea97eb8bcefdfea874910f2d8",
+      "timestamp": 524,
+      "text": "차 안의 여성이 눈을 감고 고개를 뒤로 젖힙니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-524",
+            "timestamp": 524
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[524][v2] 차 안의 여성이 눈을 감고 고개를 뒤로 젖힙니다."
+    },
+    {
+      "id": "f73a8071bff175d28b6c3d92d29da52fc0f6fdcee7bb0db44c78194e27e73d28",
+      "timestamp": 540,
+      "text": "남성이 차를 운전하며 도로를 달립니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-540",
+            "timestamp": 540
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[540][v1] 남성이 차를 운전하며 도로를 달립니다."
+    },
+    {
+      "id": "e034e24f0fff29625b33a8fdd04cb27d425699de9c9850ed59f0d89a601b1717",
+      "timestamp": 550,
+      "text": "여성이 가방을 메고 건물 복도를 걸어갑니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-550",
+            "timestamp": 550
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[550][v1] 여성이 가방을 메고 건물 복도를 걸어갑니다."
+    },
+    {
+      "id": "33e345376c42355fbb4e4f430ef1de27fdd3e9d15776cfb94c5373e573ebe130",
+      "timestamp": 554,
+      "text": "여성이 차량과 오토바이가 주차된 지하 주차장을 지나갑니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-554",
+            "timestamp": 554
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[554][v1] 여성이 차량과 오토바이가 주차된 지하 주차장을 지나갑니다."
+    },
+    {
+      "id": "15acc98329ff0a9bafae78821476e6eaa4f44ec770d753a028326d244dd9315a",
+      "timestamp": 558,
+      "text": "여성이 휴대전화를 귀에 대고 통화합니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-558",
+            "timestamp": 558
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[558][v2] 여성이 휴대전화를 귀에 대고 통화합니다."
+    },
+    {
+      "id": "459a1e649344fc7e6f889747dc9257e2e099cce7d031f036609d07caecb24039",
+      "timestamp": 564,
+      "text": "여성이 통화하며 주차장 통로를 걷습니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-564",
+            "timestamp": 564
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[564][v2] 여성이 통화하며 주차장 통로를 걷습니다."
+    },
+    {
+      "id": "837d59fed93b3f8a78796ca68a4885ee10a4e1dd97e882dd919edf5b5e83fdea",
+      "timestamp": 570,
+      "text": "여성이 엘리베이터 안으로 들어갑니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-570",
+            "timestamp": 570
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[570][v1] 여성이 엘리베이터 안으로 들어갑니다."
+    },
+    {
+      "id": "72aac84bd06692305859d4cb78158ddbe6a5366acad9cb07d1cca1820bc7db60",
+      "timestamp": 574,
+      "text": "여성이 엘리베이터에서 내려 복도로 나옵니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-574",
+            "timestamp": 574
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[574][v1] 여성이 엘리베이터에서 내려 복도로 나옵니다."
+    },
+    {
+      "id": "112cdcfbc97063e4cf302cebf057ab15f2dd2bf3cb209c4c09028cbc8f49770c",
+      "timestamp": 578,
+      "text": "여성이 열린 엘리베이터 쪽으로 몸을 돌립니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-578",
+            "timestamp": 578
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[578][v2] 여성이 열린 엘리베이터 쪽으로 몸을 돌립니다."
+    },
+    {
+      "id": "2458f1b69315654e48c0941a4fd91838ab37b5a0c506b7ed4efaedc8a612cbbc",
+      "timestamp": 580,
+      "text": "배낭을 멘 남성이 엘리베이터에서 내립니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-580",
+            "timestamp": 580
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[580][v1] 배낭을 멘 남성이 엘리베이터에서 내립니다."
+    },
+    {
+      "id": "d237f9729a8bd283ce4c39205ae674b0967a5cf789f132568b6a547dc4c74d68",
+      "timestamp": 584,
+      "text": "여성이 고개를 들어 엘리베이터 위쪽을 살핍니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-584",
+            "timestamp": 584
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[584][v2] 여성이 고개를 들어 엘리베이터 위쪽을 살핍니다."
+    },
+    {
+      "id": "5b1572294d4fbbe2c8bd64e5379322016a1a248d70e7172f67afc80eecb224df",
+      "timestamp": 590,
+      "text": "여성이 입술을 내밀고 주변을 둘러봅니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-590",
+            "timestamp": 590
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[590][v2] 여성이 입술을 내밀고 주변을 둘러봅니다."
+    },
+    {
+      "id": "9f7a298bf787dfcd0f64b2a5e3b7cccde4a7a8530472fc46e296bfc01e077f72",
+      "timestamp": 594,
+      "text": "남성이 여성을 바라보며 미소 짓습니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-594",
+            "timestamp": 594
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[594][v2] 남성이 여성을 바라보며 미소 짓습니다."
+    },
+    {
+      "id": "e4cfc2e7261446b08a9560691012d597b5fe771a5f727b079590546499675479",
+      "timestamp": 598,
+      "text": "여성이 활짝 웃으며 남성을 바라봅니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-598",
+            "timestamp": 598
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[598][v2] 여성이 활짝 웃으며 남성을 바라봅니다."
+    },
+    {
+      "id": "24b4eafb8e6cadae9f642bef699c03f88465a866746114b70b275a82e51edea8",
+      "timestamp": 600,
+      "text": "남성이 배낭을 멘 채 여성을 올려다봅니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-600",
+            "timestamp": 600
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[600][v2] 남성이 배낭을 멘 채 여성을 올려다봅니다."
+    },
+    {
+      "id": "e32d5719bfeb2430fed2a918f7955abbd8b7c2b355efde2b4394bae2b1b11fbd",
+      "timestamp": 618,
+      "text": "남성이 손에 든 작은 물건을 눈앞에 들어 보입니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-618",
+            "timestamp": 618
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[618][v1] 남성이 손에 든 작은 물건을 눈앞에 들어 보입니다."
+    },
+    {
+      "id": "cd7cd97a415ad0252d83310463cd4e7b6a0787b513437a8799e9fc80cdcb8b89",
+      "timestamp": 624,
+      "text": "여성이 작은 물건을 바라보며 웃습니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-624",
+            "timestamp": 624
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[624][v2] 여성이 작은 물건을 바라보며 웃습니다."
+    },
+    {
+      "id": "d640f386cae43606fc69d87545dce2b14bed65e59c461250c6cdbdc57614db63",
+      "timestamp": 630,
+      "text": "여성이 한 손으로 문을 잡아 열어 줍니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-630",
+            "timestamp": 630
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[630][v2] 여성이 한 손으로 문을 잡아 열어 줍니다."
+    },
+    {
+      "id": "f3bcf393d177860a508d3c5cfab76e051fd9c4ac7e16a2d3ebb42d81ac8365e7",
+      "timestamp": 632,
+      "text": "여성은 복도에서 멀어지는 남성을 바라봅니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-632",
+            "timestamp": 632
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[632][v1] 여성은 복도에서 멀어지는 남성을 바라봅니다."
+    },
+    {
+      "id": "5ef356a0baf9d79ea7a0cccc28e798d0b3a2fe5f1d58d2a187c01bc420f63f0c",
+      "timestamp": 636,
+      "text": "남성이 복도 끝에서 뒤돌아 여성을 바라봅니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-636",
+            "timestamp": 636
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[636][v1] 남성이 복도 끝에서 뒤돌아 여성을 바라봅니다."
+    },
+    {
+      "id": "3d5642f554fbd90bf4a45477829418ba557b34839e62d72dffa9dc87b4648dd1",
+      "timestamp": 650,
+      "text": "남성이 여성을 향해 복도를 걸어옵니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-650",
+            "timestamp": 650
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[650][v2] 남성이 여성을 향해 복도를 걸어옵니다."
+    },
+    {
+      "id": "54a7e8d798a0d60dade3d6544241526495e946d7101c278d8f70e493c30a2d53",
+      "timestamp": 654,
+      "text": "여성이 손짓하며 남성을 부릅니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-654",
+            "timestamp": 654
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[654][v2] 여성이 손짓하며 남성을 부릅니다."
+    },
+    {
+      "id": "ad90695909eba0f38a7eb34257039a2c4c6db638e72d9d41f0eb894dcf185950",
+      "timestamp": 664,
+      "text": "불이 켜진 긴 복도가 비어 있습니다.",
+      "tag": "v3",
+      "legacyVerbosity": "v3",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-664",
+            "timestamp": 664
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[664][v3] 불이 켜진 긴 복도가 비어 있습니다."
+    },
+    {
+      "id": "c2248d16ae462d35359898e5e5c42492b4de6fec3526a4600cde381a94668330",
+      "timestamp": 668,
+      "text": "밤길에서 두 사람이 나란히 서서 이야기합니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-668",
+            "timestamp": 668
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "korean",
+      "rawLine": "[668][v1] 밤길에서 두 사람이 나란히 서서 이야기합니다."
+    }
+  ],
+  "quarantined": [],
+  "rejected": [],
+  "reasons": [],
+  "policyVersion": "codex-v2"
+}

@@ -1,0 +1,3853 @@
+{
+  "videoId": "lnUHSWhQ-UI",
+  "videoUrl": "https://www.youtube.com/watch?v=lnUHSWhQ-UI",
+  "title": "내향적인 아이의 첫 심부름ㅣ아직 세상이 살만한 이유(feat.감동/대견/기특 주의)",
+  "duration": 630,
+  "audioLanguage": "mixed",
+  "subtitleSelection": {
+    "file": "lnUHSWhQ-UI.ko.vtt",
+    "sourceLanguage": "ko",
+    "sourceRole": "original_dialogue",
+    "logLabel": "mixed video: loaded Korean primary source subtitles"
+  },
+  "dialogueTrack": [
+    {
+      "start": 3.16,
+      "end": 4.95,
+      "sourceLanguage": "ko",
+      "sourceText": "[음악]",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 4.95,
+      "end": 4.96,
+      "sourceLanguage": "ko",
+      "sourceText": "[음악]",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 4.96,
+      "end": 10.19,
+      "sourceLanguage": "ko",
+      "sourceText": "[음악] 진짜로 갈 수 있을까",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 10.2,
+      "end": 14.51,
+      "sourceLanguage": "ko",
+      "sourceText": "모르겠네 아빠 아빠",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 14.51,
+      "end": 14.52,
+      "sourceLanguage": "ko",
+      "sourceText": "모르겠네 아빠 아빠",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 14.52,
+      "end": 17.55,
+      "sourceLanguage": "ko",
+      "sourceText": "모르겠네 아빠 아빠 아빠 맞다",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 17.55,
+      "end": 17.56,
+      "sourceLanguage": "ko",
+      "sourceText": "아빠 맞다",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 17.56,
+      "end": 29.02,
+      "sourceLanguage": "ko",
+      "sourceText": "아빠 맞다 일입니다 우리가",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 29.03,
+      "end": 39.43,
+      "sourceLanguage": "ko",
+      "sourceText": "[음악]",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 39.44,
+      "end": 42.47,
+      "sourceLanguage": "ko",
+      "sourceText": "신 신 신",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 42.47,
+      "end": 42.48,
+      "sourceLanguage": "ko",
+      "sourceText": "신 신 신",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 42.48,
+      "end": 46.59,
+      "sourceLanguage": "ko",
+      "sourceText": "신 신 신 신 어 아빠 어 아빠 위 보고 있어",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 46.59,
+      "end": 46.6,
+      "sourceLanguage": "ko",
+      "sourceText": "신 어 아빠 어 아빠 위 보고 있어",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 46.6,
+      "end": 49.27,
+      "sourceLanguage": "ko",
+      "sourceText": "신 어 아빠 어 아빠 위 보고 있어 지금 아빠 좀 힘들어",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 49.27,
+      "end": 49.28,
+      "sourceLanguage": "ko",
+      "sourceText": "지금 아빠 좀 힘들어",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 49.28,
+      "end": 58.15,
+      "sourceLanguage": "ko",
+      "sourceText": "지금 아빠 좀 힘들어 [음악]",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 58.15,
+      "end": 58.16,
+      "sourceLanguage": "ko",
+      "sourceText": "[음악]",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 58.16,
+      "end": 61.43,
+      "sourceLanguage": "ko",
+      "sourceText": "[음악] 봐 오늘은 진짜 할 수 있겠지",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 61.43,
+      "end": 61.44,
+      "sourceLanguage": "ko",
+      "sourceText": "봐 오늘은 진짜 할 수 있겠지",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 61.44,
+      "end": 63.55,
+      "sourceLanguage": "ko",
+      "sourceText": "봐 오늘은 진짜 할 수 있겠지 어 너",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 63.55,
+      "end": 63.56,
+      "sourceLanguage": "ko",
+      "sourceText": "어 너",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 63.56,
+      "end": 66.15,
+      "sourceLanguage": "ko",
+      "sourceText": "어 너 말고 오늘 진짜 역사적인 날이야",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 66.15,
+      "end": 66.16,
+      "sourceLanguage": "ko",
+      "sourceText": "말고 오늘 진짜 역사적인 날이야",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 66.16,
+      "end": 69.15,
+      "sourceLanguage": "ko",
+      "sourceText": "말고 오늘 진짜 역사적인 날이야 만약에 성공하면 리 왜냐면 태어나서",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 69.15,
+      "end": 69.16,
+      "sourceLanguage": "ko",
+      "sourceText": "만약에 성공하면 리 왜냐면 태어나서",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 69.16,
+      "end": 72.95,
+      "sourceLanguage": "ko",
+      "sourceText": "만약에 성공하면 리 왜냐면 태어나서 처음으로 성공한 거니까 리오가 혼자",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 72.95,
+      "end": 72.96,
+      "sourceLanguage": "ko",
+      "sourceText": "처음으로 성공한 거니까 리오가 혼자",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 72.96,
+      "end": 76.99,
+      "sourceLanguage": "ko",
+      "sourceText": "처음으로 성공한 거니까 리오가 혼자 아 이제 용기 있지 응 하면을 들고",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 76.99,
+      "end": 77,
+      "sourceLanguage": "ko",
+      "sourceText": "아 이제 용기 있지 응 하면을 들고",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 77,
+      "end": 79.15,
+      "sourceLanguage": "ko",
+      "sourceText": "아 이제 용기 있지 응 하면을 들고 가야 되는 거야 근데 이거 아니야",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 79.15,
+      "end": 79.16,
+      "sourceLanguage": "ko",
+      "sourceText": "가야 되는 거야 근데 이거 아니야",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 79.16,
+      "end": 81.63,
+      "sourceLanguage": "ko",
+      "sourceText": "가야 되는 거야 근데 이거 아니야 이건 무거워서 못 들고 아빠 핸드폰",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 81.63,
+      "end": 81.64,
+      "sourceLanguage": "ko",
+      "sourceText": "이건 무거워서 못 들고 아빠 핸드폰",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 81.64,
+      "end": 83.91,
+      "sourceLanguage": "ko",
+      "sourceText": "이건 무거워서 못 들고 아빠 핸드폰 들고가 비밀번호를 다",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 83.91,
+      "end": 83.92,
+      "sourceLanguage": "ko",
+      "sourceText": "들고가 비밀번호를 다",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 83.92,
+      "end": 87.07,
+      "sourceLanguage": "ko",
+      "sourceText": "들고가 비밀번호를 다 알잖아음 들러오는 비밀번호도 아 다",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 87.07,
+      "end": 87.08,
+      "sourceLanguage": "ko",
+      "sourceText": "알잖아음 들러오는 비밀번호도 아 다",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 87.08,
+      "end": 90.23,
+      "sourceLanguage": "ko",
+      "sourceText": "알잖아음 들러오는 비밀번호도 아 다 아니까 이제 할 수 있어 만약에 비보",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 90.23,
+      "end": 90.24,
+      "sourceLanguage": "ko",
+      "sourceText": "아니까 이제 할 수 있어 만약에 비보",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 90.24,
+      "end": 93.43,
+      "sourceLanguage": "ko",
+      "sourceText": "아니까 이제 할 수 있어 만약에 비보 까먹으면 이거 무전기로 아빠 엄마 찾",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 93.43,
+      "end": 93.44,
+      "sourceLanguage": "ko",
+      "sourceText": "까먹으면 이거 무전기로 아빠 엄마 찾",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 93.44,
+      "end": 95.39,
+      "sourceLanguage": "ko",
+      "sourceText": "까먹으면 이거 무전기로 아빠 엄마 찾 무전기 안 되면 핸드폰으로 어",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 95.39,
+      "end": 95.4,
+      "sourceLanguage": "ko",
+      "sourceText": "무전기 안 되면 핸드폰으로 어",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 95.4,
+      "end": 98.83,
+      "sourceLanguage": "ko",
+      "sourceText": "무전기 안 되면 핸드폰으로 어 무전기가 될 거야",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 98.84,
+      "end": 101.95,
+      "sourceLanguage": "ko",
+      "sourceText": "근데은 진짜로 갈 수 있을까 모르겠네",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 101.95,
+      "end": 101.96,
+      "sourceLanguage": "ko",
+      "sourceText": "근데은 진짜로 갈 수 있을까 모르겠네",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 101.96,
+      "end": 104.31,
+      "sourceLanguage": "ko",
+      "sourceText": "근데은 진짜로 갈 수 있을까 모르겠네 왜 갑자기 떨려",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 104.31,
+      "end": 104.32,
+      "sourceLanguage": "ko",
+      "sourceText": "왜 갑자기 떨려",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 104.32,
+      "end": 109.63,
+      "sourceLanguage": "ko",
+      "sourceText": "왜 갑자기 떨려 아 떨리는 건 아니고 떨리면 하지 마",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 109.63,
+      "end": 109.64,
+      "sourceLanguage": "ko",
+      "sourceText": "아 떨리는 건 아니고 떨리면 하지 마",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 109.64,
+      "end": 112.39,
+      "sourceLanguage": "ko",
+      "sourceText": "아 떨리는 건 아니고 떨리면 하지 마 떨리는 건 아니고 들어올 때",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 112.39,
+      "end": 112.4,
+      "sourceLanguage": "ko",
+      "sourceText": "떨리는 건 아니고 들어올 때",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 112.4,
+      "end": 116.83,
+      "sourceLanguage": "ko",
+      "sourceText": "떨리는 건 아니고 들어올 때 엘리베이터 떨 먹 린다 짝짝 짝짝짝",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 116.83,
+      "end": 116.84,
+      "sourceLanguage": "ko",
+      "sourceText": "엘리베이터 떨 먹 린다 짝짝 짝짝짝",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 116.84,
+      "end": 119.23,
+      "sourceLanguage": "ko",
+      "sourceText": "엘리베이터 떨 먹 린다 짝짝 짝짝짝 좀 떨리는 거 같은데 살짝 안 떨려",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 119.23,
+      "end": 119.24,
+      "sourceLanguage": "ko",
+      "sourceText": "좀 떨리는 거 같은데 살짝 안 떨려",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 119.24,
+      "end": 121.91,
+      "sourceLanguage": "ko",
+      "sourceText": "좀 떨리는 거 같은데 살짝 안 떨려 아니 지금 기대 기대가 한 80%",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 121.91,
+      "end": 121.92,
+      "sourceLanguage": "ko",
+      "sourceText": "아니 지금 기대 기대가 한 80%",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 121.92,
+      "end": 124.87,
+      "sourceLanguage": "ko",
+      "sourceText": "아니 지금 기대 기대가 한 80% 걱정이 20% 아빠가 여기 여기서",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 124.87,
+      "end": 124.88,
+      "sourceLanguage": "ko",
+      "sourceText": "걱정이 20% 아빠가 여기 여기서",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 124.88,
+      "end": 127.63,
+      "sourceLanguage": "ko",
+      "sourceText": "걱정이 20% 아빠가 여기 여기서 위에서 보고 있을게 무섭다고 겁내면",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 127.63,
+      "end": 127.64,
+      "sourceLanguage": "ko",
+      "sourceText": "위에서 보고 있을게 무섭다고 겁내면",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 127.64,
+      "end": 130.11,
+      "sourceLanguage": "ko",
+      "sourceText": "위에서 보고 있을게 무섭다고 겁내면 안돼 갑자기 막 아빠 침착해야 돼",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 130.11,
+      "end": 130.12,
+      "sourceLanguage": "ko",
+      "sourceText": "안돼 갑자기 막 아빠 침착해야 돼",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 130.12,
+      "end": 133.23,
+      "sourceLanguage": "ko",
+      "sourceText": "안돼 갑자기 막 아빠 침착해야 돼 알았지 응 근데 내가 무전기를",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 133.23,
+      "end": 133.24,
+      "sourceLanguage": "ko",
+      "sourceText": "알았지 응 근데 내가 무전기를",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 133.24,
+      "end": 136.75,
+      "sourceLanguage": "ko",
+      "sourceText": "알았지 응 근데 내가 무전기를 얘기하면 그때 아빠가 얘기해야 돼",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 136.75,
+      "end": 136.76,
+      "sourceLanguage": "ko",
+      "sourceText": "얘기하면 그때 아빠가 얘기해야 돼",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 136.76,
+      "end": 138.83,
+      "sourceLanguage": "ko",
+      "sourceText": "얘기하면 그때 아빠가 얘기해야 돼 엘리베이터에서 아빠가 바로 얘기해",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 138.83,
+      "end": 138.84,
+      "sourceLanguage": "ko",
+      "sourceText": "엘리베이터에서 아빠가 바로 얘기해",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 138.84,
+      "end": 141.71,
+      "sourceLanguage": "ko",
+      "sourceText": "엘리베이터에서 아빠가 바로 얘기해 버리면 사람들이 놀랄 수도",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 141.71,
+      "end": 141.72,
+      "sourceLanguage": "ko",
+      "sourceText": "버리면 사람들이 놀랄 수도",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 141.72,
+      "end": 144.87,
+      "sourceLanguage": "ko",
+      "sourceText": "버리면 사람들이 놀랄 수도 있잖아 알았어 무슨 얘긴지 알았어",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 144.87,
+      "end": 144.88,
+      "sourceLanguage": "ko",
+      "sourceText": "있잖아 알았어 무슨 얘긴지 알았어",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 144.88,
+      "end": 146.59,
+      "sourceLanguage": "ko",
+      "sourceText": "있잖아 알았어 무슨 얘긴지 알았어 갑자기 아빠가 말 걸면 창피할 수도",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 146.59,
+      "end": 146.6,
+      "sourceLanguage": "ko",
+      "sourceText": "갑자기 아빠가 말 걸면 창피할 수도",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 146.6,
+      "end": 148.83,
+      "sourceLanguage": "ko",
+      "sourceText": "갑자기 아빠가 말 걸면 창피할 수도 있 있 아니 그게",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 148.83,
+      "end": 148.84,
+      "sourceLanguage": "ko",
+      "sourceText": "있 있 아니 그게",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 148.84,
+      "end": 152.35,
+      "sourceLanguage": "ko",
+      "sourceText": "있 있 아니 그게 아니라 알았어 근데 뭐뭐 하고 이랬지",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 152.35,
+      "end": 152.36,
+      "sourceLanguage": "ko",
+      "sourceText": "아니라 알았어 근데 뭐뭐 하고 이랬지",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 152.36,
+      "end": 156.55,
+      "sourceLanguage": "ko",
+      "sourceText": "아니라 알았어 근데 뭐뭐 하고 이랬지 아 어 초코 쭈쭈바 초코 쭈쭈바 세",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 156.55,
+      "end": 156.56,
+      "sourceLanguage": "ko",
+      "sourceText": "아 어 초코 쭈쭈바 초코 쭈쭈바 세",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 156.56,
+      "end": 159.87,
+      "sourceLanguage": "ko",
+      "sourceText": "아 어 초코 쭈쭈바 초코 쭈쭈바 세 개 리야 빨리 밥 좀 먹어 고기 다",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 159.87,
+      "end": 159.88,
+      "sourceLanguage": "ko",
+      "sourceText": "개 리야 빨리 밥 좀 먹어 고기 다",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 159.88,
+      "end": 161.51,
+      "sourceLanguage": "ko",
+      "sourceText": "개 리야 빨리 밥 좀 먹어 고기 다 먹었네",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 161.51,
+      "end": 161.52,
+      "sourceLanguage": "ko",
+      "sourceText": "먹었네",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 161.52,
+      "end": 164.03,
+      "sourceLanguage": "ko",
+      "sourceText": "먹었네 배부 배부른게 아니라 지금 긴장에서",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 164.03,
+      "end": 164.04,
+      "sourceLanguage": "ko",
+      "sourceText": "배부 배부른게 아니라 지금 긴장에서",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 164.04,
+      "end": 166.09,
+      "sourceLanguage": "ko",
+      "sourceText": "배부 배부른게 아니라 지금 긴장에서 밥맛이 없어지는 거 맛",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 166.09,
+      "end": 166.1,
+      "sourceLanguage": "ko",
+      "sourceText": "밥맛이 없어지는 거 맛",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 166.1,
+      "end": 168.35,
+      "sourceLanguage": "ko",
+      "sourceText": "밥맛이 없어지는 거 맛 [음악]",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 168.35,
+      "end": 168.36,
+      "sourceLanguage": "ko",
+      "sourceText": "[음악]",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 168.36,
+      "end": 172.59,
+      "sourceLanguage": "ko",
+      "sourceText": "[음악] 봐 혹시나 혹시나 추상한 사람들",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 172.59,
+      "end": 172.6,
+      "sourceLanguage": "ko",
+      "sourceText": "봐 혹시나 혹시나 추상한 사람들",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 172.6,
+      "end": 175.91,
+      "sourceLanguage": "ko",
+      "sourceText": "봐 혹시나 혹시나 추상한 사람들 따라가지 말고 그거는 잘 알지 응",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 175.91,
+      "end": 175.92,
+      "sourceLanguage": "ko",
+      "sourceText": "따라가지 말고 그거는 잘 알지 응",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 175.92,
+      "end": 179.23,
+      "sourceLanguage": "ko",
+      "sourceText": "따라가지 말고 그거는 잘 알지 응 근데 자꾸 따라가자 그럼 그럼 아빠",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 179.23,
+      "end": 179.24,
+      "sourceLanguage": "ko",
+      "sourceText": "근데 자꾸 따라가자 그럼 그럼 아빠",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 179.24,
+      "end": 182.07,
+      "sourceLanguage": "ko",
+      "sourceText": "근데 자꾸 따라가자 그럼 그럼 아빠 불러야지 그러면 아빠 옷 빨리 입고",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 182.07,
+      "end": 182.08,
+      "sourceLanguage": "ko",
+      "sourceText": "불러야지 그러면 아빠 옷 빨리 입고",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 182.08,
+      "end": 184.35,
+      "sourceLanguage": "ko",
+      "sourceText": "불러야지 그러면 아빠 옷 빨리 입고 빨리 내려와서 어 아니야 옷 입을",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 184.35,
+      "end": 184.36,
+      "sourceLanguage": "ko",
+      "sourceText": "빨리 내려와서 어 아니야 옷 입을",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 184.36,
+      "end": 186.11,
+      "sourceLanguage": "ko",
+      "sourceText": "빨리 내려와서 어 아니야 옷 입을 시간이 어딨어 아빠 이러거 빨 달려가",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 186.11,
+      "end": 186.12,
+      "sourceLanguage": "ko",
+      "sourceText": "시간이 어딨어 아빠 이러거 빨 달려가",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 186.12,
+      "end": 193.55,
+      "sourceLanguage": "ko",
+      "sourceText": "시간이 어딨어 아빠 이러거 빨 달려가 아 달려가",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 193.56,
+      "end": 196.67,
+      "sourceLanguage": "ko",
+      "sourceText": "가지고냐 근데 오늘 만약에 성공하고",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 196.67,
+      "end": 196.68,
+      "sourceLanguage": "ko",
+      "sourceText": "가지고냐 근데 오늘 만약에 성공하고",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 196.68,
+      "end": 200.27,
+      "sourceLanguage": "ko",
+      "sourceText": "가지고냐 근데 오늘 만약에 성공하고 아까 말했듯이 자신감 막 넘쳐서 어",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 200.27,
+      "end": 200.28,
+      "sourceLanguage": "ko",
+      "sourceText": "아까 말했듯이 자신감 막 넘쳐서 어",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 200.28,
+      "end": 202.15,
+      "sourceLanguage": "ko",
+      "sourceText": "아까 말했듯이 자신감 막 넘쳐서 어 아빠 엄마 없을 때 혼자 가려고",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 202.15,
+      "end": 202.16,
+      "sourceLanguage": "ko",
+      "sourceText": "아빠 엄마 없을 때 혼자 가려고",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 202.16,
+      "end": 204.75,
+      "sourceLanguage": "ko",
+      "sourceText": "아빠 엄마 없을 때 혼자 가려고 그러고 이제 그러면 안 돼음 꼭 꼭",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 204.75,
+      "end": 204.76,
+      "sourceLanguage": "ko",
+      "sourceText": "그러고 이제 그러면 안 돼음 꼭 꼭",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 204.76,
+      "end": 207.15,
+      "sourceLanguage": "ko",
+      "sourceText": "그러고 이제 그러면 안 돼음 꼭 꼭 아빠 엄마가 같이 있을 때만 혼자",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 207.15,
+      "end": 207.16,
+      "sourceLanguage": "ko",
+      "sourceText": "아빠 엄마가 같이 있을 때만 혼자",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 207.16,
+      "end": 210.47,
+      "sourceLanguage": "ko",
+      "sourceText": "아빠 엄마가 같이 있을 때만 혼자 이제 신 가끔 엄마 그고 아빠 없을",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 210.47,
+      "end": 210.48,
+      "sourceLanguage": "ko",
+      "sourceText": "이제 신 가끔 엄마 그고 아빠 없을",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 210.48,
+      "end": 213.87,
+      "sourceLanguage": "ko",
+      "sourceText": "이제 신 가끔 엄마 그고 아빠 없을 때도 나 아빠가 있을 때만 해 그냥",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 213.87,
+      "end": 213.88,
+      "sourceLanguage": "ko",
+      "sourceText": "때도 나 아빠가 있을 때만 해 그냥",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 213.88,
+      "end": 216.75,
+      "sourceLanguage": "ko",
+      "sourceText": "때도 나 아빠가 있을 때만 해 그냥 아직까지는 알았어 오리 딱 한번 하는",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 216.75,
+      "end": 216.76,
+      "sourceLanguage": "ko",
+      "sourceText": "아직까지는 알았어 오리 딱 한번 하는",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 216.76,
+      "end": 220.55,
+      "sourceLanguage": "ko",
+      "sourceText": "아직까지는 알았어 오리 딱 한번 하는 거야 응 한데 있어 응 진짜 진짜로",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 220.55,
+      "end": 220.56,
+      "sourceLanguage": "ko",
+      "sourceText": "거야 응 한데 있어 응 진짜 진짜로",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 220.56,
+      "end": 224.71,
+      "sourceLanguage": "ko",
+      "sourceText": "거야 응 한데 있어 응 진짜 진짜로 나 진짜로 가는 거야 카로 안가 아니",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 224.71,
+      "end": 224.72,
+      "sourceLanguage": "ko",
+      "sourceText": "나 진짜로 가는 거야 카로 안가 아니",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 224.72,
+      "end": 230.35,
+      "sourceLanguage": "ko",
+      "sourceText": "나 진짜로 가는 거야 카로 안가 아니 겁나 아니 갈 거야 갈 거야 유야",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 230.35,
+      "end": 230.36,
+      "sourceLanguage": "ko",
+      "sourceText": "겁나 아니 갈 거야 갈 거야 유야",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 230.36,
+      "end": 233.31,
+      "sourceLanguage": "ko",
+      "sourceText": "겁나 아니 갈 거야 갈 거야 유야 엘리베이터 누르고 자 엘리베이터를",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 233.31,
+      "end": 233.32,
+      "sourceLanguage": "ko",
+      "sourceText": "엘리베이터 누르고 자 엘리베이터를",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 233.32,
+      "end": 235.87,
+      "sourceLanguage": "ko",
+      "sourceText": "엘리베이터 누르고 자 엘리베이터를 눌렀습니다 들",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 235.87,
+      "end": 235.88,
+      "sourceLanguage": "ko",
+      "sourceText": "눌렀습니다 들",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 235.88,
+      "end": 239.03,
+      "sourceLanguage": "ko",
+      "sourceText": "눌렀습니다 들 눌렀습니다 그래 그런 거 있어 이렇게",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 239.03,
+      "end": 239.04,
+      "sourceLanguage": "ko",
+      "sourceText": "눌렀습니다 그래 그런 거 있어 이렇게",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 239.04,
+      "end": 244.23,
+      "sourceLanguage": "ko",
+      "sourceText": "눌렀습니다 그래 그런 거 있어 이렇게 떨려 잘할 수 있어 가는 거야 지금",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 244.23,
+      "end": 244.24,
+      "sourceLanguage": "ko",
+      "sourceText": "떨려 잘할 수 있어 가는 거야 지금",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 244.24,
+      "end": 246.83,
+      "sourceLanguage": "ko",
+      "sourceText": "떨려 잘할 수 있어 가는 거야 지금 응 리 화이팅",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 246.83,
+      "end": 246.84,
+      "sourceLanguage": "ko",
+      "sourceText": "응 리 화이팅",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 246.84,
+      "end": 250.15,
+      "sourceLanguage": "ko",
+      "sourceText": "응 리 화이팅 어 파이팅 응",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 250.15,
+      "end": 250.16,
+      "sourceLanguage": "ko",
+      "sourceText": "어 파이팅 응",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 250.16,
+      "end": 252.71,
+      "sourceLanguage": "ko",
+      "sourceText": "어 파이팅 응 파이팅",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 252.71,
+      "end": 252.72,
+      "sourceLanguage": "ko",
+      "sourceText": "파이팅",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 252.72,
+      "end": 256.39,
+      "sourceLanguage": "ko",
+      "sourceText": "파이팅 갈게 아빠 핸드폰 비원 알지 응",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 256.39,
+      "end": 256.4,
+      "sourceLanguage": "ko",
+      "sourceText": "갈게 아빠 핸드폰 비원 알지 응",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 256.4,
+      "end": 257.87,
+      "sourceLanguage": "ko",
+      "sourceText": "갈게 아빠 핸드폰 비원 알지 응 잠깐만 다시",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 257.87,
+      "end": 257.88,
+      "sourceLanguage": "ko",
+      "sourceText": "잠깐만 다시",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 257.88,
+      "end": 260.75,
+      "sourceLanguage": "ko",
+      "sourceText": "잠깐만 다시 다시 리우야 리우야 잘",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 260.75,
+      "end": 260.76,
+      "sourceLanguage": "ko",
+      "sourceText": "다시 리우야 리우야 잘",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 260.76,
+      "end": 263.23,
+      "sourceLanguage": "ko",
+      "sourceText": "다시 리우야 리우야 잘 들리지 어",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 263.23,
+      "end": 263.24,
+      "sourceLanguage": "ko",
+      "sourceText": "들리지 어",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 263.24,
+      "end": 266.03,
+      "sourceLanguage": "ko",
+      "sourceText": "들리지 어 아빠 아빠 여기 위에서 쳐다보고",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 266.03,
+      "end": 266.04,
+      "sourceLanguage": "ko",
+      "sourceText": "아빠 아빠 여기 위에서 쳐다보고",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 266.04,
+      "end": 270.67,
+      "sourceLanguage": "ko",
+      "sourceText": "아빠 아빠 여기 위에서 쳐다보고 있을게",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 270.68,
+      "end": 273.43,
+      "sourceLanguage": "ko",
+      "sourceText": "됐어 응 아빠 여기 있을게 엄마라 어",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 273.43,
+      "end": 273.44,
+      "sourceLanguage": "ko",
+      "sourceText": "됐어 응 아빠 여기 있을게 엄마라 어",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 273.44,
+      "end": 277.31,
+      "sourceLanguage": "ko",
+      "sourceText": "됐어 응 아빠 여기 있을게 엄마라 어 문 닫아도 돼 닫아도 돼 응 알았어",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 277.31,
+      "end": 277.32,
+      "sourceLanguage": "ko",
+      "sourceText": "문 닫아도 돼 닫아도 돼 응 알았어",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 277.32,
+      "end": 279.83,
+      "sourceLanguage": "ko",
+      "sourceText": "문 닫아도 돼 닫아도 돼 응 알았어 진짜 안녕 갔다 와 갔다 와 빨리",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 279.83,
+      "end": 279.84,
+      "sourceLanguage": "ko",
+      "sourceText": "진짜 안녕 갔다 와 갔다 와 빨리",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 279.84,
+      "end": 281.87,
+      "sourceLanguage": "ko",
+      "sourceText": "진짜 안녕 갔다 와 갔다 와 빨리 갔다 와 아빠 위에서 보고 있을게 어",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 281.87,
+      "end": 281.88,
+      "sourceLanguage": "ko",
+      "sourceText": "갔다 와 아빠 위에서 보고 있을게 어",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 281.88,
+      "end": 284.65,
+      "sourceLanguage": "ko",
+      "sourceText": "갔다 와 아빠 위에서 보고 있을게 어 어 무정하고",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 284.65,
+      "end": 284.66,
+      "sourceLanguage": "ko",
+      "sourceText": "어 무정하고",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 284.66,
+      "end": 286.23,
+      "sourceLanguage": "ko",
+      "sourceText": "어 무정하고 [음악]",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 286.23,
+      "end": 286.24,
+      "sourceLanguage": "ko",
+      "sourceText": "[음악]",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 286.24,
+      "end": 287.92,
+      "sourceLanguage": "ko",
+      "sourceText": "[음악] 어",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 287.92,
+      "end": 287.93,
+      "sourceLanguage": "ko",
+      "sourceText": "어",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 287.93,
+      "end": 290.27,
+      "sourceLanguage": "ko",
+      "sourceText": "어 [음악]",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 290.27,
+      "end": 290.28,
+      "sourceLanguage": "ko",
+      "sourceText": "[음악]",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 290.28,
+      "end": 297.39,
+      "sourceLanguage": "ko",
+      "sourceText": "[음악] 안녕 내려갑니다 문이",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 297.4,
+      "end": 310.91,
+      "sourceLanguage": "ko",
+      "sourceText": "다시 아씨",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 310.92,
+      "end": 324.03,
+      "sourceLanguage": "ko",
+      "sourceText": "심 진짜로 갈 수 있을까",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 324.04,
+      "end": 333.55,
+      "sourceLanguage": "ko",
+      "sourceText": "모르겠네 아빠 아빠",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 333.56,
+      "end": 336.99,
+      "sourceLanguage": "ko",
+      "sourceText": "아빠",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 337,
+      "end": 367.71,
+      "sourceLanguage": "ko",
+      "sourceText": "왔다 일치입니다 문이 됩니다",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 367.72,
+      "end": 372.51,
+      "sourceLanguage": "ko",
+      "sourceText": "신발 신발 신말 신 야 어 아빠 어",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 372.51,
+      "end": 372.52,
+      "sourceLanguage": "ko",
+      "sourceText": "신발 신발 신말 신 야 어 아빠 어",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 372.52,
+      "end": 374.47,
+      "sourceLanguage": "ko",
+      "sourceText": "신발 신발 신말 신 야 어 아빠 어 아빠 위에서 보고 있어 지금 아빠 리",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 374.47,
+      "end": 374.48,
+      "sourceLanguage": "ko",
+      "sourceText": "아빠 위에서 보고 있어 지금 아빠 리",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 374.48,
+      "end": 386.03,
+      "sourceLanguage": "ko",
+      "sourceText": "아빠 위에서 보고 있어 지금 아빠 리 보려 어선도 힘들어",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 386.04,
+      "end": 391.43,
+      "sourceLanguage": "ko",
+      "sourceText": "봐 했으면은 언니한테 물어봐",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 391.43,
+      "end": 391.44,
+      "sourceLanguage": "ko",
+      "sourceText": "봐 했으면은 언니한테 물어봐",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 391.44,
+      "end": 394.87,
+      "sourceLanguage": "ko",
+      "sourceText": "봐 했으면은 언니한테 물어봐 얘기하지",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 394.88,
+      "end": 399.91,
+      "sourceLanguage": "ko",
+      "sourceText": "[음악]",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 399.92,
+      "end": 403.99,
+      "sourceLanguage": "ko",
+      "sourceText": "마 잘 안",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 404,
+      "end": 406.79,
+      "sourceLanguage": "ko",
+      "sourceText": "올려",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 406.79,
+      "end": 406.8,
+      "sourceLanguage": "ko",
+      "sourceText": "올려",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 406.8,
+      "end": 410.23,
+      "sourceLanguage": "ko",
+      "sourceText": "올려 진짜 여기",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 410.24,
+      "end": 412.75,
+      "sourceLanguage": "ko",
+      "sourceText": "보면 아 이거 열어",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 412.75,
+      "end": 412.76,
+      "sourceLanguage": "ko",
+      "sourceText": "보면 아 이거 열어",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 412.76,
+      "end": 417.19,
+      "sourceLanguage": "ko",
+      "sourceText": "보면 아 이거 열어 줄까요네음 이렇게 어떤 거 아 그거",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 417.19,
+      "end": 417.2,
+      "sourceLanguage": "ko",
+      "sourceText": "줄까요네음 이렇게 어떤 거 아 그거",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 417.2,
+      "end": 422.15,
+      "sourceLanguage": "ko",
+      "sourceText": "줄까요네음 이렇게 어떤 거 아 그거 살 거야 어",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 422.16,
+      "end": 424.95,
+      "sourceLanguage": "ko",
+      "sourceText": "꺼내 줄게요 여기",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 424.95,
+      "end": 424.96,
+      "sourceLanguage": "ko",
+      "sourceText": "꺼내 줄게요 여기",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 424.96,
+      "end": 433.15,
+      "sourceLanguage": "ko",
+      "sourceText": "꺼내 줄게요 여기 하나자",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 433.16,
+      "end": 448.51,
+      "sourceLanguage": "ko",
+      "sourceText": "[음악]",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 448.52,
+      "end": 451.43,
+      "sourceLanguage": "ko",
+      "sourceText": "감사합니다",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 451.43,
+      "end": 451.44,
+      "sourceLanguage": "ko",
+      "sourceText": "감사합니다",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 451.44,
+      "end": 463.07,
+      "sourceLanguage": "ko",
+      "sourceText": "감사합니다 [음악]",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 463.08,
+      "end": 464.87,
+      "sourceLanguage": "ko",
+      "sourceText": "되었습니다",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 464.87,
+      "end": 464.88,
+      "sourceLanguage": "ko",
+      "sourceText": "되었습니다",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 464.88,
+      "end": 473.27,
+      "sourceLanguage": "ko",
+      "sourceText": "되었습니다 성 성공이에요",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 473.28,
+      "end": 475.99,
+      "sourceLanguage": "ko",
+      "sourceText": "성공",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 475.99,
+      "end": 476,
+      "sourceLanguage": "ko",
+      "sourceText": "성공",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 476,
+      "end": 484.11,
+      "sourceLanguage": "ko",
+      "sourceText": "성공 성공이다 어 됐다 내렸다 뛰어온다",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 484.12,
+      "end": 487.91,
+      "sourceLanguage": "ko",
+      "sourceText": "진짜 뛰네 리우야 뛰지 말지 왜 뛰지",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 487.91,
+      "end": 487.92,
+      "sourceLanguage": "ko",
+      "sourceText": "진짜 뛰네 리우야 뛰지 말지 왜 뛰지",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 487.92,
+      "end": 492.39,
+      "sourceLanguage": "ko",
+      "sourceText": "진짜 뛰네 리우야 뛰지 말지 왜 뛰지 천천히와 뛰지 말고 천천히 와도",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 492.4,
+      "end": 495.11,
+      "sourceLanguage": "ko",
+      "sourceText": "돼",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 495.11,
+      "end": 495.12,
+      "sourceLanguage": "ko",
+      "sourceText": "돼",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 495.12,
+      "end": 496.91,
+      "sourceLanguage": "ko",
+      "sourceText": "돼 [음악]",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 496.91,
+      "end": 496.92,
+      "sourceLanguage": "ko",
+      "sourceText": "[음악]",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 496.92,
+      "end": 501.31,
+      "sourceLanguage": "ko",
+      "sourceText": "[음악] 거기다 일 과를",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 501.32,
+      "end": 506.36,
+      "sourceLanguage": "ko",
+      "sourceText": "주세요 님이",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 506.37,
+      "end": 513.66,
+      "sourceLanguage": "ko",
+      "sourceText": "[음악]",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 513.67,
+      "end": 525.59,
+      "sourceLanguage": "ko",
+      "sourceText": "[음악]",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 525.6,
+      "end": 536.51,
+      "sourceLanguage": "ko",
+      "sourceText": "리 오",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 536.52,
+      "end": 543.37,
+      "sourceLanguage": "ko",
+      "sourceText": "하니다 성공했어요",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 543.38,
+      "end": 553.43,
+      "sourceLanguage": "ko",
+      "sourceText": "[음악]",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 553.44,
+      "end": 556.59,
+      "sourceLanguage": "ko",
+      "sourceText": "올라 도착했어요",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 556.59,
+      "end": 556.6,
+      "sourceLanguage": "ko",
+      "sourceText": "올라 도착했어요",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 556.6,
+      "end": 561.18,
+      "sourceLanguage": "ko",
+      "sourceText": "올라 도착했어요 도착했으니까",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 561.19,
+      "end": 564.71,
+      "sourceLanguage": "ko",
+      "sourceText": "[음악]",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 564.72,
+      "end": 568.35,
+      "sourceLanguage": "ko",
+      "sourceText": "가자",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 568.36,
+      "end": 573.31,
+      "sourceLanguage": "ko",
+      "sourceText": "무 진짜 놀렸어 우와 우와 세 이거",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 573.31,
+      "end": 573.32,
+      "sourceLanguage": "ko",
+      "sourceText": "무 진짜 놀렸어 우와 우와 세 이거",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 573.32,
+      "end": 577.55,
+      "sourceLanguage": "ko",
+      "sourceText": "무 진짜 놀렸어 우와 우와 세 이거 봐봐 세 개 미야 왜 이렇게 잘해 어",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 577.55,
+      "end": 577.56,
+      "sourceLanguage": "ko",
+      "sourceText": "봐봐 세 개 미야 왜 이렇게 잘해 어",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 577.56,
+      "end": 580.51,
+      "sourceLanguage": "ko",
+      "sourceText": "봐봐 세 개 미야 왜 이렇게 잘해 어 어 지나가 좀 아저씨가 꺼내 주셨어",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 580.51,
+      "end": 580.52,
+      "sourceLanguage": "ko",
+      "sourceText": "어 지나가 좀 아저씨가 꺼내 주셨어",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 580.52,
+      "end": 582.91,
+      "sourceLanguage": "ko",
+      "sourceText": "어 지나가 좀 아저씨가 꺼내 주셨어 와 진짜진짜 어 고맙습니다",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 582.91,
+      "end": 582.92,
+      "sourceLanguage": "ko",
+      "sourceText": "와 진짜진짜 어 고맙습니다",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 582.92,
+      "end": 585.99,
+      "sourceLanguage": "ko",
+      "sourceText": "와 진짜진짜 어 고맙습니다 했어어야 고맙습니다 이랬어 야 이거",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 585.99,
+      "end": 586,
+      "sourceLanguage": "ko",
+      "sourceText": "했어어야 고맙습니다 이랬어 야 이거",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 586,
+      "end": 587.75,
+      "sourceLanguage": "ko",
+      "sourceText": "했어어야 고맙습니다 이랬어 야 이거 다 찍었어 다 찍었어 그거 어",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 587.75,
+      "end": 587.76,
+      "sourceLanguage": "ko",
+      "sourceText": "다 찍었어 다 찍었어 그거 어",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 587.76,
+      "end": 591.35,
+      "sourceLanguage": "ko",
+      "sourceText": "다 찍었어 다 찍었어 그거 어 고맙습니다 이랬어 우와 이제 뭐 이제",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 591.35,
+      "end": 591.36,
+      "sourceLanguage": "ko",
+      "sourceText": "고맙습니다 이랬어 우와 이제 뭐 이제",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 591.36,
+      "end": 594.99,
+      "sourceLanguage": "ko",
+      "sourceText": "고맙습니다 이랬어 우와 이제 뭐 이제 인사도 잘할 수 있겠지 꺼야지 이거",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 594.99,
+      "end": 595,
+      "sourceLanguage": "ko",
+      "sourceText": "인사도 잘할 수 있겠지 꺼야지 이거",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 595,
+      "end": 597.71,
+      "sourceLanguage": "ko",
+      "sourceText": "인사도 잘할 수 있겠지 꺼야지 이거 아 진짜 잘했어 우 리오 많이 컸다",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 597.71,
+      "end": 597.72,
+      "sourceLanguage": "ko",
+      "sourceText": "아 진짜 잘했어 우 리오 많이 컸다",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 597.72,
+      "end": 601.91,
+      "sourceLanguage": "ko",
+      "sourceText": "아 진짜 잘했어 우 리오 많이 컸다 우리 리오 안 맞아 진짜 마이어 아",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 601.91,
+      "end": 601.92,
+      "sourceLanguage": "ko",
+      "sourceText": "우리 리오 안 맞아 진짜 마이어 아",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 601.92,
+      "end": 606.51,
+      "sourceLanguage": "ko",
+      "sourceText": "우리 리오 안 맞아 진짜 마이어 아 내라",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 606.52,
+      "end": 611.99,
+      "sourceLanguage": "ko",
+      "sourceText": "많이네",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 612,
+      "end": 621.14,
+      "sourceLanguage": "ko",
+      "sourceText": "[음악]",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 621.15,
+      "end": 628.31,
+      "sourceLanguage": "ko",
+      "sourceText": "[음악]",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 628.32,
+      "end": 631.52,
+      "sourceLanguage": "ko",
+      "sourceText": "thought m",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    }
+  ],
+  "frames": [
+    {
+      "timestamp": 0,
+      "filename": "frame-0001.jpg",
+      "sha256": "2609e8424b45ecaa7b8e381430e72694733d7d7b27e1099a5ace711d7af0ddcc"
+    },
+    {
+      "timestamp": 0,
+      "filename": "frame-0002.jpg",
+      "sha256": "2609e8424b45ecaa7b8e381430e72694733d7d7b27e1099a5ace711d7af0ddcc"
+    },
+    {
+      "timestamp": 2,
+      "filename": "frame-0003.jpg",
+      "sha256": "2609e8424b45ecaa7b8e381430e72694733d7d7b27e1099a5ace711d7af0ddcc"
+    },
+    {
+      "timestamp": 4,
+      "filename": "frame-0004.jpg",
+      "sha256": "2609e8424b45ecaa7b8e381430e72694733d7d7b27e1099a5ace711d7af0ddcc"
+    },
+    {
+      "timestamp": 6,
+      "filename": "frame-0005.jpg",
+      "sha256": "9b19330709b2aad4999054dadc1274a1899afcce9f4d38e6712ba7330cdf523c"
+    },
+    {
+      "timestamp": 8,
+      "filename": "frame-0006.jpg",
+      "sha256": "9b19330709b2aad4999054dadc1274a1899afcce9f4d38e6712ba7330cdf523c"
+    },
+    {
+      "timestamp": 10,
+      "filename": "frame-0007.jpg",
+      "sha256": "c219139ea51b8df855514bc0ebb99d85b741c5aa35fbd235d6bd02ed49e43dc6"
+    },
+    {
+      "timestamp": 12,
+      "filename": "frame-0008.jpg",
+      "sha256": "c219139ea51b8df855514bc0ebb99d85b741c5aa35fbd235d6bd02ed49e43dc6"
+    },
+    {
+      "timestamp": 14,
+      "filename": "frame-0009.jpg",
+      "sha256": "92691b6116b6ffd11c5fc57766a346b361061f8f61c765ae721e2f96439f37a6"
+    },
+    {
+      "timestamp": 16,
+      "filename": "frame-0010.jpg",
+      "sha256": "92691b6116b6ffd11c5fc57766a346b361061f8f61c765ae721e2f96439f37a6"
+    },
+    {
+      "timestamp": 18,
+      "filename": "frame-0011.jpg",
+      "sha256": "68610156a708453f06f5bf00773093643853b5feeaf374d278f86c4f00a845ab"
+    },
+    {
+      "timestamp": 20,
+      "filename": "frame-0012.jpg",
+      "sha256": "68610156a708453f06f5bf00773093643853b5feeaf374d278f86c4f00a845ab"
+    },
+    {
+      "timestamp": 22,
+      "filename": "frame-0013.jpg",
+      "sha256": "68610156a708453f06f5bf00773093643853b5feeaf374d278f86c4f00a845ab"
+    },
+    {
+      "timestamp": 24,
+      "filename": "frame-0014.jpg",
+      "sha256": "68610156a708453f06f5bf00773093643853b5feeaf374d278f86c4f00a845ab"
+    },
+    {
+      "timestamp": 26,
+      "filename": "frame-0015.jpg",
+      "sha256": "68610156a708453f06f5bf00773093643853b5feeaf374d278f86c4f00a845ab"
+    },
+    {
+      "timestamp": 28,
+      "filename": "frame-0016.jpg",
+      "sha256": "68610156a708453f06f5bf00773093643853b5feeaf374d278f86c4f00a845ab"
+    },
+    {
+      "timestamp": 30,
+      "filename": "frame-0017.jpg",
+      "sha256": "68610156a708453f06f5bf00773093643853b5feeaf374d278f86c4f00a845ab"
+    },
+    {
+      "timestamp": 32,
+      "filename": "frame-0018.jpg",
+      "sha256": "984bbd957c2ecaebc858d0162be89cbd4aef1133499522fd33dc3578d475952f"
+    },
+    {
+      "timestamp": 34,
+      "filename": "frame-0019.jpg",
+      "sha256": "984bbd957c2ecaebc858d0162be89cbd4aef1133499522fd33dc3578d475952f"
+    },
+    {
+      "timestamp": 36,
+      "filename": "frame-0020.jpg",
+      "sha256": "8d5b005842ed3e2410cf2d7e78d93f6760cc31dce28ac94b7592c61e2c3701b6"
+    },
+    {
+      "timestamp": 38,
+      "filename": "frame-0021.jpg",
+      "sha256": "8d5b005842ed3e2410cf2d7e78d93f6760cc31dce28ac94b7592c61e2c3701b6"
+    },
+    {
+      "timestamp": 40,
+      "filename": "frame-0022.jpg",
+      "sha256": "8d5b005842ed3e2410cf2d7e78d93f6760cc31dce28ac94b7592c61e2c3701b6"
+    },
+    {
+      "timestamp": 42,
+      "filename": "frame-0023.jpg",
+      "sha256": "8d5b005842ed3e2410cf2d7e78d93f6760cc31dce28ac94b7592c61e2c3701b6"
+    },
+    {
+      "timestamp": 44,
+      "filename": "frame-0024.jpg",
+      "sha256": "06f5872a2bcfe9258f8ae4d529ff0ccfe8b02d57d0023af1114426881a0aeb74"
+    },
+    {
+      "timestamp": 46,
+      "filename": "frame-0025.jpg",
+      "sha256": "06f5872a2bcfe9258f8ae4d529ff0ccfe8b02d57d0023af1114426881a0aeb74"
+    },
+    {
+      "timestamp": 48,
+      "filename": "frame-0026.jpg",
+      "sha256": "441fcabc491c92491c0d7d402a224fa239d9930be22d58944d677c546088d17a"
+    },
+    {
+      "timestamp": 50,
+      "filename": "frame-0027.jpg",
+      "sha256": "441fcabc491c92491c0d7d402a224fa239d9930be22d58944d677c546088d17a"
+    },
+    {
+      "timestamp": 52,
+      "filename": "frame-0028.jpg",
+      "sha256": "8e5a1ac6e02e77f838a1e608bd019cc3ebd45cb459c6a7d8daebc0352078be3c"
+    },
+    {
+      "timestamp": 54,
+      "filename": "frame-0029.jpg",
+      "sha256": "8e5a1ac6e02e77f838a1e608bd019cc3ebd45cb459c6a7d8daebc0352078be3c"
+    },
+    {
+      "timestamp": 56,
+      "filename": "frame-0030.jpg",
+      "sha256": "8e5a1ac6e02e77f838a1e608bd019cc3ebd45cb459c6a7d8daebc0352078be3c"
+    },
+    {
+      "timestamp": 58,
+      "filename": "frame-0031.jpg",
+      "sha256": "36cbfd0093f68de17a6c00a98519a3f1f48c03732421ffdc839065e48d31dc26"
+    },
+    {
+      "timestamp": 60,
+      "filename": "frame-0032.jpg",
+      "sha256": "fe8c754e5665f695b89f955e4c718e78f543a62c88d8b6795bbb4bf3b3a39403"
+    },
+    {
+      "timestamp": 62,
+      "filename": "frame-0033.jpg",
+      "sha256": "fe8c754e5665f695b89f955e4c718e78f543a62c88d8b6795bbb4bf3b3a39403"
+    },
+    {
+      "timestamp": 64,
+      "filename": "frame-0034.jpg",
+      "sha256": "08ba3c1f91b3315430480470fe5b79518785e72e225e9e4a9de32e13158e4bd1"
+    },
+    {
+      "timestamp": 66,
+      "filename": "frame-0035.jpg",
+      "sha256": "08ba3c1f91b3315430480470fe5b79518785e72e225e9e4a9de32e13158e4bd1"
+    },
+    {
+      "timestamp": 68,
+      "filename": "frame-0036.jpg",
+      "sha256": "88a501c993a210b8cf59c919d6c82b810e9e1bbae13824a8e35f19187a0b69e8"
+    },
+    {
+      "timestamp": 70,
+      "filename": "frame-0037.jpg",
+      "sha256": "88a501c993a210b8cf59c919d6c82b810e9e1bbae13824a8e35f19187a0b69e8"
+    },
+    {
+      "timestamp": 72,
+      "filename": "frame-0038.jpg",
+      "sha256": "88a501c993a210b8cf59c919d6c82b810e9e1bbae13824a8e35f19187a0b69e8"
+    },
+    {
+      "timestamp": 74,
+      "filename": "frame-0039.jpg",
+      "sha256": "d9aae835611314ce5b9ae0c6a722fe7a9031be2a95af94e95631322c242188c6"
+    },
+    {
+      "timestamp": 76,
+      "filename": "frame-0040.jpg",
+      "sha256": "d9aae835611314ce5b9ae0c6a722fe7a9031be2a95af94e95631322c242188c6"
+    },
+    {
+      "timestamp": 78,
+      "filename": "frame-0041.jpg",
+      "sha256": "7ebadd85fc0c4675433090a231d63570790775059284adc0dd98ba0a2005520d"
+    },
+    {
+      "timestamp": 80,
+      "filename": "frame-0042.jpg",
+      "sha256": "7ebadd85fc0c4675433090a231d63570790775059284adc0dd98ba0a2005520d"
+    },
+    {
+      "timestamp": 82,
+      "filename": "frame-0043.jpg",
+      "sha256": "7ebadd85fc0c4675433090a231d63570790775059284adc0dd98ba0a2005520d"
+    },
+    {
+      "timestamp": 84,
+      "filename": "frame-0044.jpg",
+      "sha256": "fe6882460b57eea92f662741d93e0751441afbc7cff90d0e93a5dd30d8096703"
+    },
+    {
+      "timestamp": 86,
+      "filename": "frame-0045.jpg",
+      "sha256": "fe6882460b57eea92f662741d93e0751441afbc7cff90d0e93a5dd30d8096703"
+    },
+    {
+      "timestamp": 88,
+      "filename": "frame-0046.jpg",
+      "sha256": "fe6882460b57eea92f662741d93e0751441afbc7cff90d0e93a5dd30d8096703"
+    },
+    {
+      "timestamp": 90,
+      "filename": "frame-0047.jpg",
+      "sha256": "db828f4727500e7e9322dbf99d65094072d8e8328f522d45a129ab4e1a436ed0"
+    },
+    {
+      "timestamp": 92,
+      "filename": "frame-0048.jpg",
+      "sha256": "db828f4727500e7e9322dbf99d65094072d8e8328f522d45a129ab4e1a436ed0"
+    },
+    {
+      "timestamp": 94,
+      "filename": "frame-0049.jpg",
+      "sha256": "db828f4727500e7e9322dbf99d65094072d8e8328f522d45a129ab4e1a436ed0"
+    },
+    {
+      "timestamp": 96,
+      "filename": "frame-0050.jpg",
+      "sha256": "db828f4727500e7e9322dbf99d65094072d8e8328f522d45a129ab4e1a436ed0"
+    },
+    {
+      "timestamp": 98,
+      "filename": "frame-0051.jpg",
+      "sha256": "ce5708f512459b3fef5b91efc3b956a59fea3f1b30f52af3dbd1a5563fa89c85"
+    },
+    {
+      "timestamp": 100,
+      "filename": "frame-0052.jpg",
+      "sha256": "ce5708f512459b3fef5b91efc3b956a59fea3f1b30f52af3dbd1a5563fa89c85"
+    },
+    {
+      "timestamp": 102,
+      "filename": "frame-0053.jpg",
+      "sha256": "f179e0477fd9f7f7857f980f34942f465967e54a49ca756ff85e32693ea899b2"
+    },
+    {
+      "timestamp": 104,
+      "filename": "frame-0054.jpg",
+      "sha256": "f179e0477fd9f7f7857f980f34942f465967e54a49ca756ff85e32693ea899b2"
+    },
+    {
+      "timestamp": 106,
+      "filename": "frame-0055.jpg",
+      "sha256": "f179e0477fd9f7f7857f980f34942f465967e54a49ca756ff85e32693ea899b2"
+    },
+    {
+      "timestamp": 108,
+      "filename": "frame-0056.jpg",
+      "sha256": "f179e0477fd9f7f7857f980f34942f465967e54a49ca756ff85e32693ea899b2"
+    },
+    {
+      "timestamp": 110,
+      "filename": "frame-0057.jpg",
+      "sha256": "aa8c35454b7d6e69e119ecd287412736cdb2a7387d25749a0ad7eeff97cfe804"
+    },
+    {
+      "timestamp": 112,
+      "filename": "frame-0058.jpg",
+      "sha256": "aa8c35454b7d6e69e119ecd287412736cdb2a7387d25749a0ad7eeff97cfe804"
+    },
+    {
+      "timestamp": 114,
+      "filename": "frame-0059.jpg",
+      "sha256": "aa8c35454b7d6e69e119ecd287412736cdb2a7387d25749a0ad7eeff97cfe804"
+    },
+    {
+      "timestamp": 116,
+      "filename": "frame-0060.jpg",
+      "sha256": "a4dc2403278728c21e50bd100b68cab33cc45d39c57176fb8332ecd6b2c65846"
+    },
+    {
+      "timestamp": 118,
+      "filename": "frame-0061.jpg",
+      "sha256": "a4dc2403278728c21e50bd100b68cab33cc45d39c57176fb8332ecd6b2c65846"
+    },
+    {
+      "timestamp": 120,
+      "filename": "frame-0062.jpg",
+      "sha256": "1b877052dcde7b75eb16b765f2ba38714771ccb465fabdf3598bba9514d50cfb"
+    },
+    {
+      "timestamp": 122,
+      "filename": "frame-0063.jpg",
+      "sha256": "1b877052dcde7b75eb16b765f2ba38714771ccb465fabdf3598bba9514d50cfb"
+    },
+    {
+      "timestamp": 124,
+      "filename": "frame-0064.jpg",
+      "sha256": "1b877052dcde7b75eb16b765f2ba38714771ccb465fabdf3598bba9514d50cfb"
+    },
+    {
+      "timestamp": 126,
+      "filename": "frame-0065.jpg",
+      "sha256": "dafebfc3acd9266058c0dd515150f36f518c5e80da25a1a38aa77f5823cac79f"
+    },
+    {
+      "timestamp": 128,
+      "filename": "frame-0066.jpg",
+      "sha256": "dafebfc3acd9266058c0dd515150f36f518c5e80da25a1a38aa77f5823cac79f"
+    },
+    {
+      "timestamp": 130,
+      "filename": "frame-0067.jpg",
+      "sha256": "dafebfc3acd9266058c0dd515150f36f518c5e80da25a1a38aa77f5823cac79f"
+    },
+    {
+      "timestamp": 132,
+      "filename": "frame-0068.jpg",
+      "sha256": "dafebfc3acd9266058c0dd515150f36f518c5e80da25a1a38aa77f5823cac79f"
+    },
+    {
+      "timestamp": 134,
+      "filename": "frame-0069.jpg",
+      "sha256": "95d47cadd575ae96a4e961f72a8a7b39a721575a7074cd7e974f507f8ab25c60"
+    },
+    {
+      "timestamp": 136,
+      "filename": "frame-0070.jpg",
+      "sha256": "95d47cadd575ae96a4e961f72a8a7b39a721575a7074cd7e974f507f8ab25c60"
+    },
+    {
+      "timestamp": 138,
+      "filename": "frame-0071.jpg",
+      "sha256": "95d47cadd575ae96a4e961f72a8a7b39a721575a7074cd7e974f507f8ab25c60"
+    },
+    {
+      "timestamp": 140,
+      "filename": "frame-0072.jpg",
+      "sha256": "7dc10a03b4d8689864e17f04860dd360e732a94392658e75120dc1fca587f84f"
+    },
+    {
+      "timestamp": 142,
+      "filename": "frame-0073.jpg",
+      "sha256": "7dc10a03b4d8689864e17f04860dd360e732a94392658e75120dc1fca587f84f"
+    },
+    {
+      "timestamp": 144,
+      "filename": "frame-0074.jpg",
+      "sha256": "4a52dfff95c1573b7dc6dc575753187aebd976d01a0f96bbd8a00462ae5111cc"
+    },
+    {
+      "timestamp": 146,
+      "filename": "frame-0075.jpg",
+      "sha256": "7bf1952e8917ffcc2cd1fe80df5d585e26522d79a7e5b7a30086e7346dfce9b9"
+    },
+    {
+      "timestamp": 148,
+      "filename": "frame-0076.jpg",
+      "sha256": "7bf1952e8917ffcc2cd1fe80df5d585e26522d79a7e5b7a30086e7346dfce9b9"
+    },
+    {
+      "timestamp": 150,
+      "filename": "frame-0077.jpg",
+      "sha256": "8852e5fe2a5bd98357ee9bab3a8f4bd37eedcb1d6b03980d5e829ebd2bbe0b6d"
+    },
+    {
+      "timestamp": 152,
+      "filename": "frame-0078.jpg",
+      "sha256": "8852e5fe2a5bd98357ee9bab3a8f4bd37eedcb1d6b03980d5e829ebd2bbe0b6d"
+    },
+    {
+      "timestamp": 154,
+      "filename": "frame-0079.jpg",
+      "sha256": "8852e5fe2a5bd98357ee9bab3a8f4bd37eedcb1d6b03980d5e829ebd2bbe0b6d"
+    },
+    {
+      "timestamp": 156,
+      "filename": "frame-0080.jpg",
+      "sha256": "8852e5fe2a5bd98357ee9bab3a8f4bd37eedcb1d6b03980d5e829ebd2bbe0b6d"
+    },
+    {
+      "timestamp": 158,
+      "filename": "frame-0081.jpg",
+      "sha256": "47ae7262d70a778175f3d8ddeb8556f1b924cdf96f9d6367db79a7f764e49abd"
+    },
+    {
+      "timestamp": 160,
+      "filename": "frame-0082.jpg",
+      "sha256": "47ae7262d70a778175f3d8ddeb8556f1b924cdf96f9d6367db79a7f764e49abd"
+    },
+    {
+      "timestamp": 162,
+      "filename": "frame-0083.jpg",
+      "sha256": "47ae7262d70a778175f3d8ddeb8556f1b924cdf96f9d6367db79a7f764e49abd"
+    },
+    {
+      "timestamp": 164,
+      "filename": "frame-0084.jpg",
+      "sha256": "cac33b52eae2fe7a40ad2ca25c0fef169d745d335219c9251a131b6a855efddf"
+    },
+    {
+      "timestamp": 166,
+      "filename": "frame-0085.jpg",
+      "sha256": "cac33b52eae2fe7a40ad2ca25c0fef169d745d335219c9251a131b6a855efddf"
+    },
+    {
+      "timestamp": 168,
+      "filename": "frame-0086.jpg",
+      "sha256": "cac33b52eae2fe7a40ad2ca25c0fef169d745d335219c9251a131b6a855efddf"
+    },
+    {
+      "timestamp": 170,
+      "filename": "frame-0087.jpg",
+      "sha256": "8e9c8948a3ecfe6666d068bac4a1ed6a09f4bf872e736051605ed9d73f7fc985"
+    },
+    {
+      "timestamp": 172,
+      "filename": "frame-0088.jpg",
+      "sha256": "b6e4850996762b8e819dd804132e24a49821956e5b95fed5f36d0ebe37f59f99"
+    },
+    {
+      "timestamp": 174,
+      "filename": "frame-0089.jpg",
+      "sha256": "b6e4850996762b8e819dd804132e24a49821956e5b95fed5f36d0ebe37f59f99"
+    },
+    {
+      "timestamp": 176,
+      "filename": "frame-0090.jpg",
+      "sha256": "b6e4850996762b8e819dd804132e24a49821956e5b95fed5f36d0ebe37f59f99"
+    },
+    {
+      "timestamp": 178,
+      "filename": "frame-0091.jpg",
+      "sha256": "cae1f5b95825a404cbc6be5ddb0d35ddf2038734372f0977da6a43947b0a6e6d"
+    },
+    {
+      "timestamp": 180,
+      "filename": "frame-0092.jpg",
+      "sha256": "cae1f5b95825a404cbc6be5ddb0d35ddf2038734372f0977da6a43947b0a6e6d"
+    },
+    {
+      "timestamp": 182,
+      "filename": "frame-0093.jpg",
+      "sha256": "cae1f5b95825a404cbc6be5ddb0d35ddf2038734372f0977da6a43947b0a6e6d"
+    },
+    {
+      "timestamp": 184,
+      "filename": "frame-0094.jpg",
+      "sha256": "fc41ed5910f55d8a6fac9d6e0520b402b3539da65e0709228d480d265d137818"
+    },
+    {
+      "timestamp": 186,
+      "filename": "frame-0095.jpg",
+      "sha256": "fc41ed5910f55d8a6fac9d6e0520b402b3539da65e0709228d480d265d137818"
+    },
+    {
+      "timestamp": 188,
+      "filename": "frame-0096.jpg",
+      "sha256": "fc41ed5910f55d8a6fac9d6e0520b402b3539da65e0709228d480d265d137818"
+    },
+    {
+      "timestamp": 190,
+      "filename": "frame-0097.jpg",
+      "sha256": "ccfd3ea2ee7f912eb3e54bf9081b17c4c067988ffc1e4347e0664184e84f859f"
+    },
+    {
+      "timestamp": 192,
+      "filename": "frame-0098.jpg",
+      "sha256": "ccfd3ea2ee7f912eb3e54bf9081b17c4c067988ffc1e4347e0664184e84f859f"
+    },
+    {
+      "timestamp": 194,
+      "filename": "frame-0099.jpg",
+      "sha256": "21e2268508d0e2ebc6f9d4dda7d4a22f67d1e9ae387146902f609e88c586ff82"
+    },
+    {
+      "timestamp": 196,
+      "filename": "frame-0100.jpg",
+      "sha256": "21e2268508d0e2ebc6f9d4dda7d4a22f67d1e9ae387146902f609e88c586ff82"
+    },
+    {
+      "timestamp": 198,
+      "filename": "frame-0101.jpg",
+      "sha256": "21e2268508d0e2ebc6f9d4dda7d4a22f67d1e9ae387146902f609e88c586ff82"
+    },
+    {
+      "timestamp": 200,
+      "filename": "frame-0102.jpg",
+      "sha256": "21e2268508d0e2ebc6f9d4dda7d4a22f67d1e9ae387146902f609e88c586ff82"
+    },
+    {
+      "timestamp": 202,
+      "filename": "frame-0103.jpg",
+      "sha256": "95182e707946f4cbb15eb570b5fc5ea90a24f6b752569f365c495fded38c9a88"
+    },
+    {
+      "timestamp": 204,
+      "filename": "frame-0104.jpg",
+      "sha256": "95182e707946f4cbb15eb570b5fc5ea90a24f6b752569f365c495fded38c9a88"
+    },
+    {
+      "timestamp": 206,
+      "filename": "frame-0105.jpg",
+      "sha256": "95182e707946f4cbb15eb570b5fc5ea90a24f6b752569f365c495fded38c9a88"
+    },
+    {
+      "timestamp": 208,
+      "filename": "frame-0106.jpg",
+      "sha256": "37138bcba0f567e08a803c7b5b334c1852a773bb397f81427fd918cdfdb5882a"
+    },
+    {
+      "timestamp": 210,
+      "filename": "frame-0107.jpg",
+      "sha256": "37138bcba0f567e08a803c7b5b334c1852a773bb397f81427fd918cdfdb5882a"
+    },
+    {
+      "timestamp": 212,
+      "filename": "frame-0108.jpg",
+      "sha256": "cb8a467e1386f2518c042b723237052f9eacb61030a2fdf2d69e83ccba52c70c"
+    },
+    {
+      "timestamp": 214,
+      "filename": "frame-0109.jpg",
+      "sha256": "cb8a467e1386f2518c042b723237052f9eacb61030a2fdf2d69e83ccba52c70c"
+    },
+    {
+      "timestamp": 216,
+      "filename": "frame-0110.jpg",
+      "sha256": "cb8a467e1386f2518c042b723237052f9eacb61030a2fdf2d69e83ccba52c70c"
+    },
+    {
+      "timestamp": 218,
+      "filename": "frame-0111.jpg",
+      "sha256": "6a226371f478e8a9619987dae585fc7a554c62adac725b820126c87c43c6fff6"
+    },
+    {
+      "timestamp": 220,
+      "filename": "frame-0112.jpg",
+      "sha256": "6a226371f478e8a9619987dae585fc7a554c62adac725b820126c87c43c6fff6"
+    },
+    {
+      "timestamp": 222,
+      "filename": "frame-0113.jpg",
+      "sha256": "6a226371f478e8a9619987dae585fc7a554c62adac725b820126c87c43c6fff6"
+    },
+    {
+      "timestamp": 224,
+      "filename": "frame-0114.jpg",
+      "sha256": "2be26b709def24e4d103f971e69c55d0c353498590224f329e2e22a8c30b9b32"
+    },
+    {
+      "timestamp": 226,
+      "filename": "frame-0115.jpg",
+      "sha256": "2be26b709def24e4d103f971e69c55d0c353498590224f329e2e22a8c30b9b32"
+    },
+    {
+      "timestamp": 228,
+      "filename": "frame-0116.jpg",
+      "sha256": "2be26b709def24e4d103f971e69c55d0c353498590224f329e2e22a8c30b9b32"
+    },
+    {
+      "timestamp": 230,
+      "filename": "frame-0117.jpg",
+      "sha256": "f61060eb942b211de2704b955f30abb6ca690f12a1bbf6e6f133e245ad7e4b3a"
+    },
+    {
+      "timestamp": 232,
+      "filename": "frame-0118.jpg",
+      "sha256": "f61060eb942b211de2704b955f30abb6ca690f12a1bbf6e6f133e245ad7e4b3a"
+    },
+    {
+      "timestamp": 234,
+      "filename": "frame-0119.jpg",
+      "sha256": "d95d5b3254ed08be2b9d5ffbe426393d1f791111c4b90533ca57b8c113f3ec49"
+    },
+    {
+      "timestamp": 236,
+      "filename": "frame-0120.jpg",
+      "sha256": "d95d5b3254ed08be2b9d5ffbe426393d1f791111c4b90533ca57b8c113f3ec49"
+    },
+    {
+      "timestamp": 238,
+      "filename": "frame-0121.jpg",
+      "sha256": "9bd0ed83a409be60235e25c7704a4e75c4347368485bed836dcc7b6d650f338e"
+    },
+    {
+      "timestamp": 240,
+      "filename": "frame-0122.jpg",
+      "sha256": "9bd0ed83a409be60235e25c7704a4e75c4347368485bed836dcc7b6d650f338e"
+    },
+    {
+      "timestamp": 242,
+      "filename": "frame-0123.jpg",
+      "sha256": "9d356b9149b99b159f56ae3ff16eb625810ecdc006083a1e0ef164f5fb3a0ad2"
+    },
+    {
+      "timestamp": 244,
+      "filename": "frame-0124.jpg",
+      "sha256": "9d356b9149b99b159f56ae3ff16eb625810ecdc006083a1e0ef164f5fb3a0ad2"
+    },
+    {
+      "timestamp": 246,
+      "filename": "frame-0125.jpg",
+      "sha256": "7caa09d7ab40b02fcf5282673d4530eed6cbf0ca7400de5a139683d68e13e68f"
+    },
+    {
+      "timestamp": 248,
+      "filename": "frame-0126.jpg",
+      "sha256": "7caa09d7ab40b02fcf5282673d4530eed6cbf0ca7400de5a139683d68e13e68f"
+    },
+    {
+      "timestamp": 250,
+      "filename": "frame-0127.jpg",
+      "sha256": "7caa09d7ab40b02fcf5282673d4530eed6cbf0ca7400de5a139683d68e13e68f"
+    },
+    {
+      "timestamp": 252,
+      "filename": "frame-0128.jpg",
+      "sha256": "ca764de705b60463d415c7310651374806f38afa855ce7cc5efe0350eba7e897"
+    },
+    {
+      "timestamp": 254,
+      "filename": "frame-0129.jpg",
+      "sha256": "febe1a9556b4771c7f50131c0a5c4b34dc8a6bd0b92db7b7c02484d8f682e17c"
+    },
+    {
+      "timestamp": 256,
+      "filename": "frame-0130.jpg",
+      "sha256": "febe1a9556b4771c7f50131c0a5c4b34dc8a6bd0b92db7b7c02484d8f682e17c"
+    },
+    {
+      "timestamp": 258,
+      "filename": "frame-0131.jpg",
+      "sha256": "7a09b052256d824fc1310c01ff0d9135213440fde3fb537c964bea4bda53079b"
+    },
+    {
+      "timestamp": 260,
+      "filename": "frame-0132.jpg",
+      "sha256": "7a09b052256d824fc1310c01ff0d9135213440fde3fb537c964bea4bda53079b"
+    },
+    {
+      "timestamp": 262,
+      "filename": "frame-0133.jpg",
+      "sha256": "7a09b052256d824fc1310c01ff0d9135213440fde3fb537c964bea4bda53079b"
+    },
+    {
+      "timestamp": 264,
+      "filename": "frame-0134.jpg",
+      "sha256": "7a09b052256d824fc1310c01ff0d9135213440fde3fb537c964bea4bda53079b"
+    },
+    {
+      "timestamp": 266,
+      "filename": "frame-0135.jpg",
+      "sha256": "c14ac9661abbacf3164603cad62aae743baa772596230eb5183d65ef9523d57a"
+    },
+    {
+      "timestamp": 268,
+      "filename": "frame-0136.jpg",
+      "sha256": "fe2a6cbe272cf1e106471ebda45578aefcb4c0174a4b7a2e21d46a90b21184ae"
+    },
+    {
+      "timestamp": 270,
+      "filename": "frame-0137.jpg",
+      "sha256": "7e20e1d8eb6c2cc53a31a9ea51b494aca4d2f8af6adfb20510fe4c924cc6c2d8"
+    },
+    {
+      "timestamp": 272,
+      "filename": "frame-0138.jpg",
+      "sha256": "7e20e1d8eb6c2cc53a31a9ea51b494aca4d2f8af6adfb20510fe4c924cc6c2d8"
+    },
+    {
+      "timestamp": 274,
+      "filename": "frame-0139.jpg",
+      "sha256": "6742ff9ca9b4ddd3855fede97ad9149eece3f0065b4a2ffa7873a65bbf4ea78d"
+    },
+    {
+      "timestamp": 276,
+      "filename": "frame-0140.jpg",
+      "sha256": "127710a57b91176290e7e678b8ab51d798b2eb6c2cbec4cd983f545bcde1175d"
+    },
+    {
+      "timestamp": 278,
+      "filename": "frame-0141.jpg",
+      "sha256": "1c790f60a070bb835314d3ca1308ad55c60f1615a50b886d2ba58f987960dd1a"
+    },
+    {
+      "timestamp": 280,
+      "filename": "frame-0142.jpg",
+      "sha256": "9790f98dd2f36f6e0cfbb88b354c6f7c7d05df9a257ce465175060489d4ca6f3"
+    },
+    {
+      "timestamp": 282,
+      "filename": "frame-0143.jpg",
+      "sha256": "9790f98dd2f36f6e0cfbb88b354c6f7c7d05df9a257ce465175060489d4ca6f3"
+    },
+    {
+      "timestamp": 284,
+      "filename": "frame-0144.jpg",
+      "sha256": "9790f98dd2f36f6e0cfbb88b354c6f7c7d05df9a257ce465175060489d4ca6f3"
+    },
+    {
+      "timestamp": 286,
+      "filename": "frame-0145.jpg",
+      "sha256": "37cd6330b2b6703013eddcdb9be41f2afc149d3f719fe992708517e93ec403fa"
+    },
+    {
+      "timestamp": 288,
+      "filename": "frame-0146.jpg",
+      "sha256": "37cd6330b2b6703013eddcdb9be41f2afc149d3f719fe992708517e93ec403fa"
+    },
+    {
+      "timestamp": 290,
+      "filename": "frame-0147.jpg",
+      "sha256": "37cd6330b2b6703013eddcdb9be41f2afc149d3f719fe992708517e93ec403fa"
+    },
+    {
+      "timestamp": 292,
+      "filename": "frame-0148.jpg",
+      "sha256": "37cd6330b2b6703013eddcdb9be41f2afc149d3f719fe992708517e93ec403fa"
+    },
+    {
+      "timestamp": 294,
+      "filename": "frame-0149.jpg",
+      "sha256": "b9e5166ac6719299994a1fc39e5ff5ba506f81b991ea2d5d0d7a7fadb4cb8173"
+    },
+    {
+      "timestamp": 296,
+      "filename": "frame-0150.jpg",
+      "sha256": "b9e5166ac6719299994a1fc39e5ff5ba506f81b991ea2d5d0d7a7fadb4cb8173"
+    },
+    {
+      "timestamp": 298,
+      "filename": "frame-0151.jpg",
+      "sha256": "b9e5166ac6719299994a1fc39e5ff5ba506f81b991ea2d5d0d7a7fadb4cb8173"
+    },
+    {
+      "timestamp": 300,
+      "filename": "frame-0152.jpg",
+      "sha256": "79b731e38c85c6648bce80322b5fadda2b3e31cc435cf602abc6a599072d958b"
+    },
+    {
+      "timestamp": 302,
+      "filename": "frame-0153.jpg",
+      "sha256": "79b731e38c85c6648bce80322b5fadda2b3e31cc435cf602abc6a599072d958b"
+    },
+    {
+      "timestamp": 304,
+      "filename": "frame-0154.jpg",
+      "sha256": "16c9af4352b15e870fd8fa9270c37751f1bcea5f5a3b40eb2505456374b81b99"
+    },
+    {
+      "timestamp": 306,
+      "filename": "frame-0155.jpg",
+      "sha256": "16c9af4352b15e870fd8fa9270c37751f1bcea5f5a3b40eb2505456374b81b99"
+    },
+    {
+      "timestamp": 308,
+      "filename": "frame-0156.jpg",
+      "sha256": "16c9af4352b15e870fd8fa9270c37751f1bcea5f5a3b40eb2505456374b81b99"
+    },
+    {
+      "timestamp": 310,
+      "filename": "frame-0157.jpg",
+      "sha256": "3c99be9d8e281f43d9fb6b124c1cb14dbd9ddbfa51280f0db16bc9a8c08e76d1"
+    },
+    {
+      "timestamp": 312,
+      "filename": "frame-0158.jpg",
+      "sha256": "3c99be9d8e281f43d9fb6b124c1cb14dbd9ddbfa51280f0db16bc9a8c08e76d1"
+    },
+    {
+      "timestamp": 314,
+      "filename": "frame-0159.jpg",
+      "sha256": "3c99be9d8e281f43d9fb6b124c1cb14dbd9ddbfa51280f0db16bc9a8c08e76d1"
+    },
+    {
+      "timestamp": 316,
+      "filename": "frame-0160.jpg",
+      "sha256": "2e649be2de8c38a8ad085e0214ec96868d3b15dd0879709ad245b6a4be0a0445"
+    },
+    {
+      "timestamp": 318,
+      "filename": "frame-0161.jpg",
+      "sha256": "2e649be2de8c38a8ad085e0214ec96868d3b15dd0879709ad245b6a4be0a0445"
+    },
+    {
+      "timestamp": 320,
+      "filename": "frame-0162.jpg",
+      "sha256": "2e649be2de8c38a8ad085e0214ec96868d3b15dd0879709ad245b6a4be0a0445"
+    },
+    {
+      "timestamp": 322,
+      "filename": "frame-0163.jpg",
+      "sha256": "2e649be2de8c38a8ad085e0214ec96868d3b15dd0879709ad245b6a4be0a0445"
+    },
+    {
+      "timestamp": 324,
+      "filename": "frame-0164.jpg",
+      "sha256": "392dd29c30f61e7d86948717f945bd7d417ca5b9ee133dced43120a1bb9c2131"
+    },
+    {
+      "timestamp": 326,
+      "filename": "frame-0165.jpg",
+      "sha256": "392dd29c30f61e7d86948717f945bd7d417ca5b9ee133dced43120a1bb9c2131"
+    },
+    {
+      "timestamp": 328,
+      "filename": "frame-0166.jpg",
+      "sha256": "392dd29c30f61e7d86948717f945bd7d417ca5b9ee133dced43120a1bb9c2131"
+    },
+    {
+      "timestamp": 330,
+      "filename": "frame-0167.jpg",
+      "sha256": "5538a0a2e4ca9b7d5f372d1fda5080bc43f5a29dbe7f0861771101ca38d5f115"
+    },
+    {
+      "timestamp": 332,
+      "filename": "frame-0168.jpg",
+      "sha256": "5538a0a2e4ca9b7d5f372d1fda5080bc43f5a29dbe7f0861771101ca38d5f115"
+    },
+    {
+      "timestamp": 334,
+      "filename": "frame-0169.jpg",
+      "sha256": "5538a0a2e4ca9b7d5f372d1fda5080bc43f5a29dbe7f0861771101ca38d5f115"
+    },
+    {
+      "timestamp": 336,
+      "filename": "frame-0170.jpg",
+      "sha256": "c6e4ce1f29e90e66f669375cdd40aa38de36223536a457db84cdddff96dfa1d8"
+    },
+    {
+      "timestamp": 338,
+      "filename": "frame-0171.jpg",
+      "sha256": "c6e4ce1f29e90e66f669375cdd40aa38de36223536a457db84cdddff96dfa1d8"
+    },
+    {
+      "timestamp": 340,
+      "filename": "frame-0172.jpg",
+      "sha256": "53c5da936fadd2dbbe8c31fd7b87dfa051ed2df87d76fef3b4a225ee35e9807e"
+    },
+    {
+      "timestamp": 342,
+      "filename": "frame-0173.jpg",
+      "sha256": "53c5da936fadd2dbbe8c31fd7b87dfa051ed2df87d76fef3b4a225ee35e9807e"
+    },
+    {
+      "timestamp": 344,
+      "filename": "frame-0174.jpg",
+      "sha256": "53c5da936fadd2dbbe8c31fd7b87dfa051ed2df87d76fef3b4a225ee35e9807e"
+    },
+    {
+      "timestamp": 346,
+      "filename": "frame-0175.jpg",
+      "sha256": "38183165d086cd09d5d7328b6265c4151fa309f24a6845ac9203d4f567b2c313"
+    },
+    {
+      "timestamp": 348,
+      "filename": "frame-0176.jpg",
+      "sha256": "38183165d086cd09d5d7328b6265c4151fa309f24a6845ac9203d4f567b2c313"
+    },
+    {
+      "timestamp": 350,
+      "filename": "frame-0177.jpg",
+      "sha256": "38183165d086cd09d5d7328b6265c4151fa309f24a6845ac9203d4f567b2c313"
+    },
+    {
+      "timestamp": 352,
+      "filename": "frame-0178.jpg",
+      "sha256": "a1fff9b9170c31ffd8f281b71d4ea7a87bb79beefbe38a78fda1b430936fda0c"
+    },
+    {
+      "timestamp": 354,
+      "filename": "frame-0179.jpg",
+      "sha256": "a1fff9b9170c31ffd8f281b71d4ea7a87bb79beefbe38a78fda1b430936fda0c"
+    },
+    {
+      "timestamp": 356,
+      "filename": "frame-0180.jpg",
+      "sha256": "922c67f0553812db88f48180ce722641cb98928c3e53d551fe7f218108d3f9ec"
+    },
+    {
+      "timestamp": 358,
+      "filename": "frame-0181.jpg",
+      "sha256": "922c67f0553812db88f48180ce722641cb98928c3e53d551fe7f218108d3f9ec"
+    },
+    {
+      "timestamp": 360,
+      "filename": "frame-0182.jpg",
+      "sha256": "922c67f0553812db88f48180ce722641cb98928c3e53d551fe7f218108d3f9ec"
+    },
+    {
+      "timestamp": 362,
+      "filename": "frame-0183.jpg",
+      "sha256": "922c67f0553812db88f48180ce722641cb98928c3e53d551fe7f218108d3f9ec"
+    },
+    {
+      "timestamp": 364,
+      "filename": "frame-0184.jpg",
+      "sha256": "dceb751132152a3c0b3ea3a140c67cbdd579f733eb609746ac4df32b80d6bd9a"
+    },
+    {
+      "timestamp": 366,
+      "filename": "frame-0185.jpg",
+      "sha256": "bb32430caa7b3a9281e0e80a0917cef88b41bb38958615549616d434ce19f77a"
+    },
+    {
+      "timestamp": 368,
+      "filename": "frame-0186.jpg",
+      "sha256": "bb32430caa7b3a9281e0e80a0917cef88b41bb38958615549616d434ce19f77a"
+    },
+    {
+      "timestamp": 370,
+      "filename": "frame-0187.jpg",
+      "sha256": "7143d79cc1938132b945f445b7361f63aaff1a9df39f4831249c5368aef2cf59"
+    },
+    {
+      "timestamp": 372,
+      "filename": "frame-0188.jpg",
+      "sha256": "7143d79cc1938132b945f445b7361f63aaff1a9df39f4831249c5368aef2cf59"
+    },
+    {
+      "timestamp": 374,
+      "filename": "frame-0189.jpg",
+      "sha256": "7143d79cc1938132b945f445b7361f63aaff1a9df39f4831249c5368aef2cf59"
+    },
+    {
+      "timestamp": 376,
+      "filename": "frame-0190.jpg",
+      "sha256": "47261ea8c648b616fea9b3e04b46fcf299a03b5c79abbfd4c1cf388fe700a3b9"
+    },
+    {
+      "timestamp": 378,
+      "filename": "frame-0191.jpg",
+      "sha256": "47261ea8c648b616fea9b3e04b46fcf299a03b5c79abbfd4c1cf388fe700a3b9"
+    },
+    {
+      "timestamp": 380,
+      "filename": "frame-0192.jpg",
+      "sha256": "10d516ea9a80746f6ec8b6d745ed09cfdfd626afcfdfc34fec737cfcc91b81f5"
+    },
+    {
+      "timestamp": 382,
+      "filename": "frame-0193.jpg",
+      "sha256": "10d516ea9a80746f6ec8b6d745ed09cfdfd626afcfdfc34fec737cfcc91b81f5"
+    },
+    {
+      "timestamp": 384,
+      "filename": "frame-0194.jpg",
+      "sha256": "10d516ea9a80746f6ec8b6d745ed09cfdfd626afcfdfc34fec737cfcc91b81f5"
+    },
+    {
+      "timestamp": 386,
+      "filename": "frame-0195.jpg",
+      "sha256": "e173ed0d294cf64a06339d3361caeeeca3dda4a894d5124c63eb70797c346c4f"
+    },
+    {
+      "timestamp": 388,
+      "filename": "frame-0196.jpg",
+      "sha256": "11d0681922bae03360bbd8e575fe93a5f379c8ed012f48fdcad56781c6448fa5"
+    },
+    {
+      "timestamp": 390,
+      "filename": "frame-0197.jpg",
+      "sha256": "11d0681922bae03360bbd8e575fe93a5f379c8ed012f48fdcad56781c6448fa5"
+    },
+    {
+      "timestamp": 392,
+      "filename": "frame-0198.jpg",
+      "sha256": "11d0681922bae03360bbd8e575fe93a5f379c8ed012f48fdcad56781c6448fa5"
+    },
+    {
+      "timestamp": 394,
+      "filename": "frame-0199.jpg",
+      "sha256": "a2946079065265ce7b34419a428ccf5c4fd17b1a0d014e3d30f1b9c9448816f1"
+    },
+    {
+      "timestamp": 396,
+      "filename": "frame-0200.jpg",
+      "sha256": "a2946079065265ce7b34419a428ccf5c4fd17b1a0d014e3d30f1b9c9448816f1"
+    },
+    {
+      "timestamp": 398,
+      "filename": "frame-0201.jpg",
+      "sha256": "1c2c0144383fec315a0fda402208fe0ca897dd345d88b61035f7c987345f2b93"
+    },
+    {
+      "timestamp": 400,
+      "filename": "frame-0202.jpg",
+      "sha256": "1c2c0144383fec315a0fda402208fe0ca897dd345d88b61035f7c987345f2b93"
+    },
+    {
+      "timestamp": 402,
+      "filename": "frame-0203.jpg",
+      "sha256": "1c2c0144383fec315a0fda402208fe0ca897dd345d88b61035f7c987345f2b93"
+    },
+    {
+      "timestamp": 404,
+      "filename": "frame-0204.jpg",
+      "sha256": "7b2de31bf7b3001fedec505f7ca529d937ba86c89508a479cc16def0d132ce15"
+    },
+    {
+      "timestamp": 406,
+      "filename": "frame-0205.jpg",
+      "sha256": "7b2de31bf7b3001fedec505f7ca529d937ba86c89508a479cc16def0d132ce15"
+    },
+    {
+      "timestamp": 408,
+      "filename": "frame-0206.jpg",
+      "sha256": "1e8f1ff9db435b9e667541810b66e68aa9ddcc417505332331be77f4ef4c182f"
+    },
+    {
+      "timestamp": 410,
+      "filename": "frame-0207.jpg",
+      "sha256": "1e8f1ff9db435b9e667541810b66e68aa9ddcc417505332331be77f4ef4c182f"
+    },
+    {
+      "timestamp": 412,
+      "filename": "frame-0208.jpg",
+      "sha256": "52bfb6df7ece29371f7de35ef141744ea7effcaebf0a1ed9b59053d7f535e380"
+    },
+    {
+      "timestamp": 414,
+      "filename": "frame-0209.jpg",
+      "sha256": "52bfb6df7ece29371f7de35ef141744ea7effcaebf0a1ed9b59053d7f535e380"
+    },
+    {
+      "timestamp": 416,
+      "filename": "frame-0210.jpg",
+      "sha256": "52bfb6df7ece29371f7de35ef141744ea7effcaebf0a1ed9b59053d7f535e380"
+    },
+    {
+      "timestamp": 418,
+      "filename": "frame-0211.jpg",
+      "sha256": "10026840a2232194e05aad32cbd4ebb6681b69fce4f5e90d5d11d6c422b3d268"
+    },
+    {
+      "timestamp": 420,
+      "filename": "frame-0212.jpg",
+      "sha256": "10026840a2232194e05aad32cbd4ebb6681b69fce4f5e90d5d11d6c422b3d268"
+    },
+    {
+      "timestamp": 422,
+      "filename": "frame-0213.jpg",
+      "sha256": "10026840a2232194e05aad32cbd4ebb6681b69fce4f5e90d5d11d6c422b3d268"
+    },
+    {
+      "timestamp": 424,
+      "filename": "frame-0214.jpg",
+      "sha256": "6492fb3d9b699c52b64fe002682b8ff39c561a49b39dc9a313fa6082a4c063bc"
+    },
+    {
+      "timestamp": 426,
+      "filename": "frame-0215.jpg",
+      "sha256": "6492fb3d9b699c52b64fe002682b8ff39c561a49b39dc9a313fa6082a4c063bc"
+    },
+    {
+      "timestamp": 428,
+      "filename": "frame-0216.jpg",
+      "sha256": "6492fb3d9b699c52b64fe002682b8ff39c561a49b39dc9a313fa6082a4c063bc"
+    },
+    {
+      "timestamp": 430,
+      "filename": "frame-0217.jpg",
+      "sha256": "5a589e6e211fc053c4870b667840b0412217793ce1136ca23687fabc3b663561"
+    },
+    {
+      "timestamp": 432,
+      "filename": "frame-0218.jpg",
+      "sha256": "5a589e6e211fc053c4870b667840b0412217793ce1136ca23687fabc3b663561"
+    },
+    {
+      "timestamp": 434,
+      "filename": "frame-0219.jpg",
+      "sha256": "5a589e6e211fc053c4870b667840b0412217793ce1136ca23687fabc3b663561"
+    },
+    {
+      "timestamp": 436,
+      "filename": "frame-0220.jpg",
+      "sha256": "efb8e2d0c38cb01e843cf7077611384d0d2a8c60b587fcbd59ed3ddf5c5a79c9"
+    },
+    {
+      "timestamp": 438,
+      "filename": "frame-0221.jpg",
+      "sha256": "efb8e2d0c38cb01e843cf7077611384d0d2a8c60b587fcbd59ed3ddf5c5a79c9"
+    },
+    {
+      "timestamp": 440,
+      "filename": "frame-0222.jpg",
+      "sha256": "efb8e2d0c38cb01e843cf7077611384d0d2a8c60b587fcbd59ed3ddf5c5a79c9"
+    },
+    {
+      "timestamp": 442,
+      "filename": "frame-0223.jpg",
+      "sha256": "9752c3f13571d892ff1e9ea1f90bc5fe37ebf0167e2542b12b0249705f9cfff3"
+    },
+    {
+      "timestamp": 444,
+      "filename": "frame-0224.jpg",
+      "sha256": "9752c3f13571d892ff1e9ea1f90bc5fe37ebf0167e2542b12b0249705f9cfff3"
+    },
+    {
+      "timestamp": 446,
+      "filename": "frame-0225.jpg",
+      "sha256": "9752c3f13571d892ff1e9ea1f90bc5fe37ebf0167e2542b12b0249705f9cfff3"
+    },
+    {
+      "timestamp": 448,
+      "filename": "frame-0226.jpg",
+      "sha256": "9752c3f13571d892ff1e9ea1f90bc5fe37ebf0167e2542b12b0249705f9cfff3"
+    },
+    {
+      "timestamp": 450,
+      "filename": "frame-0227.jpg",
+      "sha256": "f2369c1fc0d9c6f10ea0ce71eaed45a84406a9c56780c3110acbc2519a05bd0e"
+    },
+    {
+      "timestamp": 452,
+      "filename": "frame-0228.jpg",
+      "sha256": "f2369c1fc0d9c6f10ea0ce71eaed45a84406a9c56780c3110acbc2519a05bd0e"
+    },
+    {
+      "timestamp": 454,
+      "filename": "frame-0229.jpg",
+      "sha256": "95ae3811b753e425dee985e9d5d00c7ee7f9e386c2c49b2482478c4f0ce2976a"
+    },
+    {
+      "timestamp": 456,
+      "filename": "frame-0230.jpg",
+      "sha256": "95ae3811b753e425dee985e9d5d00c7ee7f9e386c2c49b2482478c4f0ce2976a"
+    },
+    {
+      "timestamp": 458,
+      "filename": "frame-0231.jpg",
+      "sha256": "078f2d74f066710ebf9ac64fc46c47c8333fc5d8a894a90f6d94951707ba936b"
+    },
+    {
+      "timestamp": 460,
+      "filename": "frame-0232.jpg",
+      "sha256": "078f2d74f066710ebf9ac64fc46c47c8333fc5d8a894a90f6d94951707ba936b"
+    },
+    {
+      "timestamp": 462,
+      "filename": "frame-0233.jpg",
+      "sha256": "7ec527e7e2573c3457b98881aa0fb25783af925776409d92190ba2f754dd66f0"
+    },
+    {
+      "timestamp": 464,
+      "filename": "frame-0234.jpg",
+      "sha256": "7ec527e7e2573c3457b98881aa0fb25783af925776409d92190ba2f754dd66f0"
+    },
+    {
+      "timestamp": 466,
+      "filename": "frame-0235.jpg",
+      "sha256": "05f967ef13ed5d6b1339090418fa110b069cf5d4605c44a01e10f15174134655"
+    },
+    {
+      "timestamp": 468,
+      "filename": "frame-0236.jpg",
+      "sha256": "05f967ef13ed5d6b1339090418fa110b069cf5d4605c44a01e10f15174134655"
+    },
+    {
+      "timestamp": 470,
+      "filename": "frame-0237.jpg",
+      "sha256": "3a94ab94110570a14ca6ae3feea88b2d173947cd570ffc62c686b9ef2f3a19a6"
+    },
+    {
+      "timestamp": 472,
+      "filename": "frame-0238.jpg",
+      "sha256": "3a94ab94110570a14ca6ae3feea88b2d173947cd570ffc62c686b9ef2f3a19a6"
+    },
+    {
+      "timestamp": 474,
+      "filename": "frame-0239.jpg",
+      "sha256": "3a94ab94110570a14ca6ae3feea88b2d173947cd570ffc62c686b9ef2f3a19a6"
+    },
+    {
+      "timestamp": 476,
+      "filename": "frame-0240.jpg",
+      "sha256": "57c6178ff4e29c0dfd5d935fb0eb8bdb1764a25702fc6cf91e0b201b6c7e2785"
+    },
+    {
+      "timestamp": 478,
+      "filename": "frame-0241.jpg",
+      "sha256": "57c6178ff4e29c0dfd5d935fb0eb8bdb1764a25702fc6cf91e0b201b6c7e2785"
+    },
+    {
+      "timestamp": 480,
+      "filename": "frame-0242.jpg",
+      "sha256": "57c6178ff4e29c0dfd5d935fb0eb8bdb1764a25702fc6cf91e0b201b6c7e2785"
+    },
+    {
+      "timestamp": 482,
+      "filename": "frame-0243.jpg",
+      "sha256": "04fe107109715bbb2f54c4faea9e32515dc9159d63cbc98e183b6c32023907eb"
+    },
+    {
+      "timestamp": 484,
+      "filename": "frame-0244.jpg",
+      "sha256": "b2e5ad1405b17a547dc2494fc4c4a0a27ffe9004df2a0202ab4ccadabbac3fb9"
+    },
+    {
+      "timestamp": 486,
+      "filename": "frame-0245.jpg",
+      "sha256": "b2e5ad1405b17a547dc2494fc4c4a0a27ffe9004df2a0202ab4ccadabbac3fb9"
+    },
+    {
+      "timestamp": 488,
+      "filename": "frame-0246.jpg",
+      "sha256": "49bb58179b6bf6e84fd9661fc9459cc3ea935bb53f84e4fe379e6d60bf2cac52"
+    },
+    {
+      "timestamp": 490,
+      "filename": "frame-0247.jpg",
+      "sha256": "49bb58179b6bf6e84fd9661fc9459cc3ea935bb53f84e4fe379e6d60bf2cac52"
+    },
+    {
+      "timestamp": 492,
+      "filename": "frame-0248.jpg",
+      "sha256": "49bb58179b6bf6e84fd9661fc9459cc3ea935bb53f84e4fe379e6d60bf2cac52"
+    },
+    {
+      "timestamp": 494,
+      "filename": "frame-0249.jpg",
+      "sha256": "ee86ca3ea80739a15eb3484b02617102705201ea5c406cd1dab8ba9b6cf86e61"
+    },
+    {
+      "timestamp": 496,
+      "filename": "frame-0250.jpg",
+      "sha256": "ee86ca3ea80739a15eb3484b02617102705201ea5c406cd1dab8ba9b6cf86e61"
+    },
+    {
+      "timestamp": 498,
+      "filename": "frame-0251.jpg",
+      "sha256": "d3eb7d9d1a9744a115103ba0fe8e472662b02cef881ff8a16c94128be16a2ff4"
+    },
+    {
+      "timestamp": 500,
+      "filename": "frame-0252.jpg",
+      "sha256": "1e2d292d4edb0805409c591f4db38cbe6d11b5780bc26807c9a0f8d259f4de7d"
+    },
+    {
+      "timestamp": 502,
+      "filename": "frame-0253.jpg",
+      "sha256": "1e2d292d4edb0805409c591f4db38cbe6d11b5780bc26807c9a0f8d259f4de7d"
+    },
+    {
+      "timestamp": 504,
+      "filename": "frame-0254.jpg",
+      "sha256": "1e2d292d4edb0805409c591f4db38cbe6d11b5780bc26807c9a0f8d259f4de7d"
+    },
+    {
+      "timestamp": 506,
+      "filename": "frame-0255.jpg",
+      "sha256": "052c0ae48b61ac59ae5f290df7c0cdf4e191e9254907b5e7e054b995c9acf629"
+    },
+    {
+      "timestamp": 508,
+      "filename": "frame-0256.jpg",
+      "sha256": "052c0ae48b61ac59ae5f290df7c0cdf4e191e9254907b5e7e054b995c9acf629"
+    },
+    {
+      "timestamp": 510,
+      "filename": "frame-0257.jpg",
+      "sha256": "052c0ae48b61ac59ae5f290df7c0cdf4e191e9254907b5e7e054b995c9acf629"
+    },
+    {
+      "timestamp": 512,
+      "filename": "frame-0258.jpg",
+      "sha256": "530f705b3348870b4ccd9af6516db15b17280473c310ede5b5e13dc2373632f9"
+    },
+    {
+      "timestamp": 514,
+      "filename": "frame-0259.jpg",
+      "sha256": "530f705b3348870b4ccd9af6516db15b17280473c310ede5b5e13dc2373632f9"
+    },
+    {
+      "timestamp": 516,
+      "filename": "frame-0260.jpg",
+      "sha256": "530f705b3348870b4ccd9af6516db15b17280473c310ede5b5e13dc2373632f9"
+    },
+    {
+      "timestamp": 518,
+      "filename": "frame-0261.jpg",
+      "sha256": "697ee588dd871fa75d9f454a19182b1c9e7ef3622c5e767b878224676605c6d5"
+    },
+    {
+      "timestamp": 520,
+      "filename": "frame-0262.jpg",
+      "sha256": "697ee588dd871fa75d9f454a19182b1c9e7ef3622c5e767b878224676605c6d5"
+    },
+    {
+      "timestamp": 522,
+      "filename": "frame-0263.jpg",
+      "sha256": "697ee588dd871fa75d9f454a19182b1c9e7ef3622c5e767b878224676605c6d5"
+    },
+    {
+      "timestamp": 524,
+      "filename": "frame-0264.jpg",
+      "sha256": "618316946d466a49b2520e89d7c36dc23733a8e042b6d3ad685c25cf5f6c2664"
+    },
+    {
+      "timestamp": 526,
+      "filename": "frame-0265.jpg",
+      "sha256": "618316946d466a49b2520e89d7c36dc23733a8e042b6d3ad685c25cf5f6c2664"
+    },
+    {
+      "timestamp": 528,
+      "filename": "frame-0266.jpg",
+      "sha256": "618316946d466a49b2520e89d7c36dc23733a8e042b6d3ad685c25cf5f6c2664"
+    },
+    {
+      "timestamp": 530,
+      "filename": "frame-0267.jpg",
+      "sha256": "906354e1a0b619f8af53a5750030d3c468bc9aec1fd86e07d3af924d55fd8e9f"
+    },
+    {
+      "timestamp": 532,
+      "filename": "frame-0268.jpg",
+      "sha256": "906354e1a0b619f8af53a5750030d3c468bc9aec1fd86e07d3af924d55fd8e9f"
+    },
+    {
+      "timestamp": 534,
+      "filename": "frame-0269.jpg",
+      "sha256": "08b4d97a41f6deda001e5c1bc6c6dfca62e98c5f161b54abec484a924f8e9082"
+    },
+    {
+      "timestamp": 536,
+      "filename": "frame-0270.jpg",
+      "sha256": "08b4d97a41f6deda001e5c1bc6c6dfca62e98c5f161b54abec484a924f8e9082"
+    },
+    {
+      "timestamp": 538,
+      "filename": "frame-0271.jpg",
+      "sha256": "08b4d97a41f6deda001e5c1bc6c6dfca62e98c5f161b54abec484a924f8e9082"
+    },
+    {
+      "timestamp": 540,
+      "filename": "frame-0272.jpg",
+      "sha256": "219a8a136ea4570e87762297dfa3741b04d7b6ab124e400aa5ddb972eafa81f7"
+    },
+    {
+      "timestamp": 542,
+      "filename": "frame-0273.jpg",
+      "sha256": "219a8a136ea4570e87762297dfa3741b04d7b6ab124e400aa5ddb972eafa81f7"
+    },
+    {
+      "timestamp": 544,
+      "filename": "frame-0274.jpg",
+      "sha256": "219a8a136ea4570e87762297dfa3741b04d7b6ab124e400aa5ddb972eafa81f7"
+    },
+    {
+      "timestamp": 546,
+      "filename": "frame-0275.jpg",
+      "sha256": "d5e22aa147c130d6a3e6ed393aadc63890c3d4bec9bc4d16d93031eb4da996a1"
+    },
+    {
+      "timestamp": 548,
+      "filename": "frame-0276.jpg",
+      "sha256": "d5e22aa147c130d6a3e6ed393aadc63890c3d4bec9bc4d16d93031eb4da996a1"
+    },
+    {
+      "timestamp": 550,
+      "filename": "frame-0277.jpg",
+      "sha256": "d5e22aa147c130d6a3e6ed393aadc63890c3d4bec9bc4d16d93031eb4da996a1"
+    },
+    {
+      "timestamp": 552,
+      "filename": "frame-0278.jpg",
+      "sha256": "48a640688b1867988cf22f58780d835049c816efc380b048d669edd1ac10c31f"
+    },
+    {
+      "timestamp": 554,
+      "filename": "frame-0279.jpg",
+      "sha256": "48a640688b1867988cf22f58780d835049c816efc380b048d669edd1ac10c31f"
+    },
+    {
+      "timestamp": 556,
+      "filename": "frame-0280.jpg",
+      "sha256": "48a640688b1867988cf22f58780d835049c816efc380b048d669edd1ac10c31f"
+    },
+    {
+      "timestamp": 558,
+      "filename": "frame-0281.jpg",
+      "sha256": "7a049dfd83b3ab64dc9da1f3372c167816da2ad3b797d276d88ed36c3d47da38"
+    },
+    {
+      "timestamp": 560,
+      "filename": "frame-0282.jpg",
+      "sha256": "7a049dfd83b3ab64dc9da1f3372c167816da2ad3b797d276d88ed36c3d47da38"
+    },
+    {
+      "timestamp": 562,
+      "filename": "frame-0283.jpg",
+      "sha256": "68730745bc035cea96dba6a7ed2bce6b402b87cd03a7dd87a82b44cd747dc4e6"
+    },
+    {
+      "timestamp": 564,
+      "filename": "frame-0284.jpg",
+      "sha256": "68730745bc035cea96dba6a7ed2bce6b402b87cd03a7dd87a82b44cd747dc4e6"
+    },
+    {
+      "timestamp": 566,
+      "filename": "frame-0285.jpg",
+      "sha256": "27e7281ccb56b61f73294b4a5043647e211be47f7e536d037976dd4bfb01bb85"
+    },
+    {
+      "timestamp": 568,
+      "filename": "frame-0286.jpg",
+      "sha256": "27e7281ccb56b61f73294b4a5043647e211be47f7e536d037976dd4bfb01bb85"
+    },
+    {
+      "timestamp": 570,
+      "filename": "frame-0287.jpg",
+      "sha256": "27e7281ccb56b61f73294b4a5043647e211be47f7e536d037976dd4bfb01bb85"
+    },
+    {
+      "timestamp": 572,
+      "filename": "frame-0288.jpg",
+      "sha256": "e907e8a91e0acd51101aa2df7be36cea9d8e785cf38094a2fd74e6bbe3ea3df6"
+    },
+    {
+      "timestamp": 574,
+      "filename": "frame-0289.jpg",
+      "sha256": "e907e8a91e0acd51101aa2df7be36cea9d8e785cf38094a2fd74e6bbe3ea3df6"
+    },
+    {
+      "timestamp": 576,
+      "filename": "frame-0290.jpg",
+      "sha256": "e907e8a91e0acd51101aa2df7be36cea9d8e785cf38094a2fd74e6bbe3ea3df6"
+    },
+    {
+      "timestamp": 578,
+      "filename": "frame-0291.jpg",
+      "sha256": "10cc3607393ab6f0900a9c83f1d7220a5e98f3637ee08c8f6b87fd4ef25d784d"
+    },
+    {
+      "timestamp": 580,
+      "filename": "frame-0292.jpg",
+      "sha256": "10cc3607393ab6f0900a9c83f1d7220a5e98f3637ee08c8f6b87fd4ef25d784d"
+    },
+    {
+      "timestamp": 582,
+      "filename": "frame-0293.jpg",
+      "sha256": "10cc3607393ab6f0900a9c83f1d7220a5e98f3637ee08c8f6b87fd4ef25d784d"
+    },
+    {
+      "timestamp": 584,
+      "filename": "frame-0294.jpg",
+      "sha256": "0f38ba2ca7153a410f1b40ffefeeb1ced0bddcec3d8a416fdffdc0e8eb35b958"
+    },
+    {
+      "timestamp": 586,
+      "filename": "frame-0295.jpg",
+      "sha256": "0f38ba2ca7153a410f1b40ffefeeb1ced0bddcec3d8a416fdffdc0e8eb35b958"
+    },
+    {
+      "timestamp": 588,
+      "filename": "frame-0296.jpg",
+      "sha256": "2ec3250a2411d7679d329bf16fdbc7093d72cc8d5300d1195c396f7dfb2f9b7c"
+    },
+    {
+      "timestamp": 590,
+      "filename": "frame-0297.jpg",
+      "sha256": "2ec3250a2411d7679d329bf16fdbc7093d72cc8d5300d1195c396f7dfb2f9b7c"
+    },
+    {
+      "timestamp": 592,
+      "filename": "frame-0298.jpg",
+      "sha256": "2ec3250a2411d7679d329bf16fdbc7093d72cc8d5300d1195c396f7dfb2f9b7c"
+    },
+    {
+      "timestamp": 594,
+      "filename": "frame-0299.jpg",
+      "sha256": "2ec3250a2411d7679d329bf16fdbc7093d72cc8d5300d1195c396f7dfb2f9b7c"
+    },
+    {
+      "timestamp": 596,
+      "filename": "frame-0300.jpg",
+      "sha256": "676e8625b00aac019c9af77039de61949215ef01decbb2ac2955fe780bc054a5"
+    },
+    {
+      "timestamp": 598,
+      "filename": "frame-0301.jpg",
+      "sha256": "676e8625b00aac019c9af77039de61949215ef01decbb2ac2955fe780bc054a5"
+    },
+    {
+      "timestamp": 600,
+      "filename": "frame-0302.jpg",
+      "sha256": "9e8775b6b84e856b8af20ae8e3bd1c9f0b7111c77ac36578f78fad41d422451c"
+    },
+    {
+      "timestamp": 602,
+      "filename": "frame-0303.jpg",
+      "sha256": "29ba6f30e95bf8dd42d95b5b88f1daee7a616a77a250942f594cdc0452446a0e"
+    },
+    {
+      "timestamp": 604,
+      "filename": "frame-0304.jpg",
+      "sha256": "29ba6f30e95bf8dd42d95b5b88f1daee7a616a77a250942f594cdc0452446a0e"
+    },
+    {
+      "timestamp": 606,
+      "filename": "frame-0305.jpg",
+      "sha256": "29ba6f30e95bf8dd42d95b5b88f1daee7a616a77a250942f594cdc0452446a0e"
+    },
+    {
+      "timestamp": 608,
+      "filename": "frame-0306.jpg",
+      "sha256": "29ba6f30e95bf8dd42d95b5b88f1daee7a616a77a250942f594cdc0452446a0e"
+    },
+    {
+      "timestamp": 610,
+      "filename": "frame-0307.jpg",
+      "sha256": "8be90b9c8485bcddb4837e77f1a98b9129714eed4e21acd59705a6c28920582b"
+    },
+    {
+      "timestamp": 612,
+      "filename": "frame-0308.jpg",
+      "sha256": "8be90b9c8485bcddb4837e77f1a98b9129714eed4e21acd59705a6c28920582b"
+    },
+    {
+      "timestamp": 614,
+      "filename": "frame-0309.jpg",
+      "sha256": "8be90b9c8485bcddb4837e77f1a98b9129714eed4e21acd59705a6c28920582b"
+    },
+    {
+      "timestamp": 616,
+      "filename": "frame-0310.jpg",
+      "sha256": "7242d446735b9f145b5e723c49b3a136eb6258c6f0dcddc87edb287cacdfdc90"
+    },
+    {
+      "timestamp": 618,
+      "filename": "frame-0311.jpg",
+      "sha256": "7242d446735b9f145b5e723c49b3a136eb6258c6f0dcddc87edb287cacdfdc90"
+    },
+    {
+      "timestamp": 620,
+      "filename": "frame-0312.jpg",
+      "sha256": "7242d446735b9f145b5e723c49b3a136eb6258c6f0dcddc87edb287cacdfdc90"
+    },
+    {
+      "timestamp": 622,
+      "filename": "frame-0313.jpg",
+      "sha256": "7242d446735b9f145b5e723c49b3a136eb6258c6f0dcddc87edb287cacdfdc90"
+    },
+    {
+      "timestamp": 624,
+      "filename": "frame-0314.jpg",
+      "sha256": "807bc12d4c3b6387d881aff8f2d0dbf742f528a7843f454a189264afd7f849aa"
+    },
+    {
+      "timestamp": 626,
+      "filename": "frame-0315.jpg",
+      "sha256": "807bc12d4c3b6387d881aff8f2d0dbf742f528a7843f454a189264afd7f849aa"
+    },
+    {
+      "timestamp": 628,
+      "filename": "frame-0316.jpg",
+      "sha256": "807bc12d4c3b6387d881aff8f2d0dbf742f528a7843f454a189264afd7f849aa"
+    }
+  ],
+  "policyVersion": "unvalidated-comparison-prompt",
+  "policyValidation": "bypassed",
+  "promptFile": "/Users/chacha/src/youtube-describer-test/test_scripts/prompt_template_writer_v3.txt",
+  "assetCache": "hit",
+  "assetDir": "/Users/chacha/src/youtube-describer-test/test_scripts/result/lnUHSWhQ-UI/asset",
+  "geminiTemperature": 0.7,
+  "models": [
+    {
+      "model": "gemini-3.1-pro-preview",
+      "requestedModel": "gemini-3.1-pro-preview",
+      "provider": "gemini",
+      "outputFile": "gemini-3.1-pro-preview.txt",
+      "geminiMediaResolution": "MEDIA_RESOLUTION_LOW"
+    }
+  ]
+}

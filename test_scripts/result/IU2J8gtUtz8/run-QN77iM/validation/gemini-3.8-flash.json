@@ -1,0 +1,2541 @@
+{
+  "events": [
+    {
+      "id": "ca8400ec1b98db81e4776855a29f6a5507295be6f16be4d475849a9a66f0f329",
+      "timestamp": 0,
+      "text": "자막 (팀쿡 인터뷰 당시..)",
+      "tag": "txt",
+      "legacyVerbosity": "text",
+      "provenance": {
+        "kind": "screen_text",
+        "frameEvidence": [
+          {
+            "id": "frame-0",
+            "timestamp": 0
+          }
+        ],
+        "visibleTextEvidence": "자막 (팀쿡 인터뷰 당시..)",
+        "source": "gemini_multimodal_frame"
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "rejected",
+      "validationReasons": [
+        "TIMESTAMP_OUT_OF_RANGE"
+      ],
+      "ttsEligible": false,
+      "audioLanguage": "mixed",
+      "rawLine": "[0][txt] 자막 (팀쿡 인터뷰 당시..)"
+    },
+    {
+      "id": "2c69053bd49b9c5d74d1af7a5078926be40c088aa312172a8104ada7a153cd1c",
+      "timestamp": 10,
+      "text": "자막 na ga.",
+      "tag": "txt",
+      "legacyVerbosity": "text",
+      "provenance": {
+        "kind": "screen_text",
+        "frameEvidence": [
+          {
+            "id": "frame-10",
+            "timestamp": 10.043
+          }
+        ],
+        "visibleTextEvidence": "자막 na ga.",
+        "source": "gemini_multimodal_frame"
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "mixed",
+      "rawLine": "[10][txt] 자막 NA GA."
+    },
+    {
+      "id": "ee3873784233910acfb2e9be9b8ea6b3d1b4e866e3bd73a6308f042acea93ebc",
+      "timestamp": 12,
+      "text": "파란 배경에 흰색 육각형 로고가 나타납니다.",
+      "tag": "v3",
+      "legacyVerbosity": "v3",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-12",
+            "timestamp": 11.545
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "mixed",
+      "rawLine": "[12][v3] 파란 배경에 흰색 육각형 로고가 나타납니다."
+    },
+    {
+      "id": "62eef63819f088601adf6377fbedb5af63dbb246a8180b800eff935da5b2ee39",
+      "timestamp": 16,
+      "text": "자막 전자기기를 좋아하는 잇섭",
+      "tag": "txt",
+      "legacyVerbosity": "text",
+      "provenance": {
+        "kind": "screen_text",
+        "frameEvidence": [
+          {
+            "id": "frame-16",
+            "timestamp": 15.983
+          }
+        ],
+        "visibleTextEvidence": "자막 전자기기를 좋아하는 잇섭",
+        "source": "gemini_multimodal_frame"
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "mixed",
+      "rawLine": "[16][txt] 자막 전자기기를 좋아하는 잇섭"
+    },
+    {
+      "id": "4705b4257e13319d3f06eab2cb68765c34aac7d1a98a4ee18cbae01a1476af28",
+      "timestamp": 23,
+      "text": "애플의 소프트웨어 엔지니어링 부사장 크레이그 페더리기가 서 있습니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-23",
+            "timestamp": 22.523
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "mixed",
+      "rawLine": "[23][v1] 애플의 소프트웨어 엔지니어링 부사장 크레이그 페더리기가 서 있습니다."
+    },
+    {
+      "id": "a26ce468e9812a23364ef593e14f18686bb78f284cd675424efc1b766a728040",
+      "timestamp": 35,
+      "text": "페더리기가 넥이 세 개 달린 일렉트릭 기타를 메고 있습니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-35",
+            "timestamp": 35.102
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "mixed",
+      "rawLine": "[35][v2] 페더리기가 넥이 세 개 달린 일렉트릭 기타를 메고 있습니다."
+    },
+    {
+      "id": "8306f32c1e4ad1c1640eefcfe9907586c687ff8406bf2858402e5246c94bf0e5",
+      "timestamp": 39,
+      "text": "하드웨어 엔지니어링 부사장 존 터너스가 창가에 서 있습니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-39",
+            "timestamp": 39.173
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "mixed",
+      "rawLine": "[39][v1] 하드웨어 엔지니어링 부사장 존 터너스가 창가에 서 있습니다."
+    },
+    {
+      "id": "d6c15af282302e3fb88b8ef110c609003b512a0d6396266ae0aab3320a9befc8",
+      "timestamp": 46,
+      "text": "손에 쥔 스마트폰을 반으로 접습니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-46",
+            "timestamp": 45.512
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "mixed",
+      "rawLine": "[46][v1] 손에 쥔 스마트폰을 반으로 접습니다."
+    },
+    {
+      "id": "6ff119a507264226856da025dd68139a13610d4d87ba01bc3cb439ffb3488bf2",
+      "timestamp": 54,
+      "text": "반쯤 접힌 기기가 탁자 위에 세워져 탁상시계 화면을 띄웁니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-54",
+            "timestamp": 53.72
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "mixed",
+      "rawLine": "[54][v2] 반쯤 접힌 기기가 탁자 위에 세워져 탁상시계 화면을 띄웁니다."
+    },
+    {
+      "id": "1527affd7f0c1dae74ce49f8d5db4b637528e4a1f62537dc832549b36b83a726",
+      "timestamp": 93,
+      "text": "통유리창 너머로 정원이 보이는 야외 테라스에 잇섭과 페더리기가 마주 앉아 있습니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-93",
+            "timestamp": 93.327
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "mixed",
+      "rawLine": "[93][v1] 통유리창 너머로 정원이 보이는 야외 테라스에 잇섭과 페더리기가 마주 앉아 있습니다."
+    },
+    {
+      "id": "a18603252e7a601cbe30a0505de1731b4298bbebc168c55bb19aa625ef1dd007",
+      "timestamp": 116,
+      "text": "화면을 접자 실행 중이던 게임 화면이 바깥쪽 화면으로 이어집니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-116",
+            "timestamp": 116.083
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "mixed",
+      "rawLine": "[116][v1] 화면을 접자 실행 중이던 게임 화면이 바깥쪽 화면으로 이어집니다."
+    },
+    {
+      "id": "8ea65c3bb6bb67383814c43406dca1fd3fd580c50318c66eea808711b88fd8ac",
+      "timestamp": 124,
+      "text": "맞아요,우리도 이 애니메이션을 정말 좋아합니다.",
+      "tag": "trans",
+      "legacyVerbosity": "translation",
+      "provenance": {
+        "kind": "foreign_dialogue",
+        "dialogueInterval": {
+          "start": 123.68,
+          "end": 124.91,
+          "sourceLanguage": "ko",
+          "sourceText": "의도로 만들었는지가 궁금합니다.in love with this",
+          "confirmed": true
+        }
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "quarantined",
+      "validationReasons": [
+        "UNCERTAIN_MIXED_INTERVAL"
+      ],
+      "ttsEligible": false,
+      "audioLanguage": "mixed",
+      "rawLine": "[124][trans] 맞아요, 우리도 이 애니메이션을 정말 좋아합니다."
+    },
+    {
+      "id": "96a4c0b46307c059097c96203938fb31b8e5e07a751c7dd3ff4b349db19b1b44",
+      "timestamp": 127,
+      "text": "저희가 만들고 싶었던 건 기기에서 일어나는 일을 가장 자연스럽게 표현하는 것이었어요.",
+      "tag": "trans",
+      "legacyVerbosity": "translation",
+      "provenance": {
+        "kind": "foreign_dialogue",
+        "dialogueInterval": {
+          "start": 126.04,
+          "end": 127.27,
+          "sourceLanguage": "ko",
+          "sourceText": "animation.i i think we wanted to create",
+          "confirmed": true
+        }
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "quarantined",
+      "validationReasons": [
+        "UNCERTAIN_MIXED_INTERVAL"
+      ],
+      "ttsEligible": false,
+      "audioLanguage": "mixed",
+      "rawLine": "[127][trans] 저희가 만들고 싶었던 건 기기에서 일어나는 일을 가장 자연스럽게 표현하는 것이었어요."
+    },
+    {
+      "id": "42d79665980a5879c5893e51350c05f6df32d32ae1f4e7e74830a624f8b88809",
+      "timestamp": 135,
+      "text": "바깥 화면에서 하던 일이 그대로 안쪽 화면으로 매끄럽게 이어지는 거죠.",
+      "tag": "trans",
+      "legacyVerbosity": "translation",
+      "provenance": {
+        "kind": "foreign_dialogue",
+        "dialogueInterval": {
+          "start": 134.44,
+          "end": 135.55,
+          "sourceLanguage": "ko",
+          "sourceText": "device,which is you're transparently",
+          "confirmed": true
+        }
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "quarantined",
+      "validationReasons": [
+        "UNCERTAIN_MIXED_INTERVAL"
+      ],
+      "ttsEligible": false,
+      "audioLanguage": "mixed",
+      "rawLine": "[135][trans] 바깥 화면에서 하던 일이 그대로 안쪽 화면으로 매끄럽게 이어지는 거죠."
+    },
+    {
+      "id": "d7977e862d1bcdd5e9854874b87132b34d85f98216b2fdda865ec61de474719e",
+      "timestamp": 143,
+      "text": "우리는 그 연속성을 보여주기를 원했습니다.",
+      "tag": "trans",
+      "legacyVerbosity": "translation",
+      "provenance": {
+        "kind": "foreign_dialogue",
+        "dialogueInterval": {
+          "start": 143,
+          "end": 143.79,
+          "sourceLanguage": "ko",
+          "sourceText": "inside.and so we really wanted",
+          "confirmed": true
+        }
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "quarantined",
+      "validationReasons": [
+        "UNCERTAIN_MIXED_INTERVAL"
+      ],
+      "ttsEligible": false,
+      "audioLanguage": "mixed",
+      "rawLine": "[143][trans] 우리는 그 연속성을 보여주기를 원했습니다."
+    },
+    {
+      "id": "ba38bdb1499d76101bc970535877ffc1ece23b01d386c212ef280a89e2702660",
+      "timestamp": 145,
+      "text": "왜냐하면 사람들이 한쪽 화면에서 무언가를 시작했다가 다른 쪽으로 옮겨가는 일이 자주 있을 테니까요.",
+      "tag": "trans",
+      "legacyVerbosity": "translation",
+      "provenance": {
+        "kind": "foreign_dialogue",
+        "dialogueInterval": {
+          "start": 144.56,
+          "end": 145.79,
+          "sourceLanguage": "ko",
+          "sourceText": "continuity because we expect people to",
+          "confirmed": true
+        }
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "quarantined",
+      "validationReasons": [
+        "UNCERTAIN_MIXED_INTERVAL"
+      ],
+      "ttsEligible": false,
+      "audioLanguage": "mixed",
+      "rawLine": "[145][trans] 왜냐하면 사람들이 한쪽 화면에서 무언가를 시작했다가 다른 쪽으로 옮겨가는 일이 자주 있을 테니까요."
+    },
+    {
+      "id": "adb56f4f4d32edd2713df7e411d103fa46bf6baabc049f4aa21b588d0ffc5ed7",
+      "timestamp": 151,
+      "text": "그래서 펼쳤을 때 즉각적으로 그 밑의 창을 통해 본다는 느낌이 가장 자연스럽다고 생각했습니다.",
+      "tag": "trans",
+      "legacyVerbosity": "translation",
+      "provenance": {
+        "kind": "foreign_dialogue",
+        "dialogueInterval": {
+          "start": 150.6,
+          "end": 151.39,
+          "sourceLanguage": "ko",
+          "sourceText": "other.and so the idea that as you",
+          "confirmed": true
+        }
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "quarantined",
+      "validationReasons": [
+        "UNCERTAIN_MIXED_INTERVAL"
+      ],
+      "ttsEligible": false,
+      "audioLanguage": "mixed",
+      "rawLine": "[151][trans] 그래서 펼쳤을 때 즉각적으로 그 밑의 창을 통해 본다는 느낌이 가장 자연스럽다고 생각했습니다."
+    },
+    {
+      "id": "793e910e47f9ef2a7be1f7aafa533fc18d7e07ee51cd909c0993f2fd757289dc",
+      "timestamp": 161,
+      "text": "산만하거나 현란하지 않고,의식하지 않아도 당연하게 느껴지는 애니메이션이 중요했습니다.",
+      "tag": "trans",
+      "legacyVerbosity": "translation",
+      "provenance": {
+        "kind": "foreign_dialogue",
+        "dialogueInterval": {
+          "start": 158.72,
+          "end": 171.71,
+          "sourceLanguage": "ko",
+          "sourceText": "below feels like the most natural thing.",
+          "confirmed": true
+        }
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "quarantined",
+      "validationReasons": [
+        "UNCERTAIN_MIXED_INTERVAL"
+      ],
+      "ttsEligible": false,
+      "audioLanguage": "mixed",
+      "rawLine": "[161][trans] 산만하거나 현란하지 않고, 의식하지 않아도 당연하게 느껴지는 애니메이션이 중요했습니다."
+    },
+    {
+      "id": "6270ff07ea73055f6c2b6b44538cd3cafdb155828a7eab0076e337f2fde4621e",
+      "timestamp": 175,
+      "text": "태블릿 화면에 여러 개의 작업 창이 겹쳐 떠 있습니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-175",
+            "timestamp": 174.508
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "mixed",
+      "rawLine": "[175][v2] 태블릿 화면에 여러 개의 작업 창이 겹쳐 떠 있습니다."
+    },
+    {
+      "id": "d9edd6a5c8978c68eb6320d3cf73a3b1332b1a3e404011d668394c17fc7635ca",
+      "timestamp": 182,
+      "text": "접히는 화면 좌우에 서로 다른 앱 창이 나란히 열립니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-182",
+            "timestamp": 182.115
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "mixed",
+      "rawLine": "[182][v1] 접히는 화면 좌우에 서로 다른 앱 창이 나란히 열립니다."
+    },
+    {
+      "id": "7d64bee47404462a03692e92628424ad7a4a44ffd52ea2cde8c8966b7e06c684",
+      "timestamp": 192,
+      "text": "아이폰 듀오는 그 자체로 독자적인 제품입니다.아이패드가 아니에요.",
+      "tag": "trans",
+      "legacyVerbosity": "translation",
+      "provenance": {
+        "kind": "foreign_dialogue",
+        "dialogueInterval": {
+          "start": 189.56,
+          "end": 192.83,
+          "sourceLanguage": "ko",
+          "sourceText": "그것도 궁금합니다.iphone duo as much",
+          "confirmed": true
+        }
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "quarantined",
+      "validationReasons": [
+        "UNCERTAIN_MIXED_INTERVAL"
+      ],
+      "ttsEligible": false,
+      "audioLanguage": "mixed",
+      "rawLine": "[192][trans] 아이폰 듀오는 그 자체로 독자적인 제품입니다. 아이패드가 아니에요."
+    },
+    {
+      "id": "68e659de002728d1994195a048fe7a147219cb6fb8e23d3a14cb1fe40050aaf3",
+      "timestamp": 198,
+      "text": "놀라울 만큼 다재다능하면서도,아이폰 사용자에게 익숙하고 일관된 경험을 주고자 했습니다.",
+      "tag": "trans",
+      "legacyVerbosity": "translation",
+      "provenance": {
+        "kind": "foreign_dialogue",
+        "dialogueInterval": {
+          "start": 194.8,
+          "end": 198.11,
+          "sourceLanguage": "ko",
+          "sourceText": "it it is not an ipad.um it is a uh",
+          "confirmed": true
+        }
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "quarantined",
+      "validationReasons": [
+        "UNCERTAIN_MIXED_INTERVAL"
+      ],
+      "ttsEligible": false,
+      "audioLanguage": "mixed",
+      "rawLine": "[198][trans] 놀라울 만큼 다재다능하면서도, 아이폰 사용자에게 익숙하고 일관된 경험을 주고자 했습니다."
+    },
+    {
+      "id": "3a837d484b93fd465a85c4edb20134ae03d24644574a87e89a969f5c7a028a57",
+      "timestamp": 211,
+      "text": "접힌 상태와 펼친 상태 모두 전반적인 사용 방식이 일관되게 이어지는 게 매우 중요했습니다.",
+      "tag": "trans",
+      "legacyVerbosity": "translation",
+      "provenance": {
+        "kind": "foreign_dialogue",
+        "dialogueInterval": {
+          "start": 210.52,
+          "end": 211.59,
+          "sourceLanguage": "ko",
+          "sourceText": "iphone user.and so the model when it",
+          "confirmed": true
+        }
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "quarantined",
+      "validationReasons": [
+        "UNCERTAIN_MIXED_INTERVAL"
+      ],
+      "ttsEligible": false,
+      "audioLanguage": "mixed",
+      "rawLine": "[211][trans] 접힌 상태와 펼친 상태 모두 전반적인 사용 방식이 일관되게 이어지는 게 매우 중요했습니다."
+    },
+    {
+      "id": "11221010d353a6b858dda8e0baf7a9cf12ee48f9d06549b6afc58086913e10ad",
+      "timestamp": 227,
+      "text": "상호작용도 자연스럽고 매끄럽게 만들고 싶었죠.",
+      "tag": "trans",
+      "legacyVerbosity": "translation",
+      "provenance": {
+        "kind": "foreign_dialogue",
+        "dialogueInterval": {
+          "start": 225.08,
+          "end": 227.07,
+          "sourceLanguage": "ko",
+          "sourceText": "very important to us.um,we wanted to",
+          "confirmed": true
+        }
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "quarantined",
+      "validationReasons": [
+        "UNCERTAIN_MIXED_INTERVAL"
+      ],
+      "ttsEligible": false,
+      "audioLanguage": "mixed",
+      "rawLine": "[227][trans] 상호작용도 자연스럽고 매끄럽게 만들고 싶었죠."
+    },
+    {
+      "id": "677ae263eb4e270102753bbd7ee459c5085e408f2ac14ea224fa51cbec855187",
+      "timestamp": 232,
+      "text": "복잡한 창 관리나 정렬 작업은 번거로울 수 있고,기기를 접을 때 매끄럽게 전환되지 않기도 합니다.",
+      "tag": "trans",
+      "legacyVerbosity": "translation",
+      "provenance": {
+        "kind": "foreign_dialogue",
+        "dialogueInterval": {
+          "start": 231.32,
+          "end": 232.63,
+          "sourceLanguage": "ko",
+          "sourceText": "natural and fluid as well.some of these",
+          "confirmed": true
+        }
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "quarantined",
+      "validationReasons": [
+        "UNCERTAIN_MIXED_INTERVAL"
+      ],
+      "ttsEligible": false,
+      "audioLanguage": "mixed",
+      "rawLine": "[232][trans] 복잡한 창 관리나 정렬 작업은 번거로울 수 있고, 기기를 접을 때 매끄럽게 전환되지 않기도 합니다."
+    },
+    {
+      "id": "ec2140cd0e1fd3a6dc9e5ac1e6719363d0d20b10ffe81355d7477b56e4e4ba75",
+      "timestamp": 245,
+      "text": "멀티태스킹이나 영상 시청 같은 강력한 기능을 주면서도 아이폰 고유의 단순함을 지키고자 했습니다.",
+      "tag": "trans",
+      "legacyVerbosity": "translation",
+      "provenance": {
+        "kind": "foreign_dialogue",
+        "dialogueInterval": {
+          "start": 243.96,
+          "end": 245.03,
+          "sourceLanguage": "ko",
+          "sourceText": "everything everything changes.",
+          "confirmed": true
+        }
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "quarantined",
+      "validationReasons": [
+        "UNCERTAIN_MIXED_INTERVAL"
+      ],
+      "ttsEligible": false,
+      "audioLanguage": "mixed",
+      "rawLine": "[245][trans] 멀티태스킹이나 영상 시청 같은 강력한 기능을 주면서도 아이폰 고유의 단순함을 지키고자 했습니다."
+    },
+    {
+      "id": "488acd18c8459cb142884faa520f5a8989576c39fcc87a882e797e9255607c9c",
+      "timestamp": 271,
+      "text": "화면 오른쪽 가장자리에 조작 버튼들이 세로로 배치됩니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-271",
+            "timestamp": 271.305
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "mixed",
+      "rawLine": "[271][v2] 화면 오른쪽 가장자리에 조작 버튼들이 세로로 배치됩니다."
+    },
+    {
+      "id": "8e490ec330590bc3b6fdc82721b0be5d3afcb30132dbd49754b50c90c369b342",
+      "timestamp": 280,
+      "text": "잇섭의 이전 영상 썸네일과 시청자 댓글들이 화면에 뜹니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-280",
+            "timestamp": 280.414
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "mixed",
+      "rawLine": "[280][v2] 잇섭의 이전 영상 썸네일과 시청자 댓글들이 화면에 뜹니다."
+    },
+    {
+      "id": "77a79a84f3516ef71e5acf9deb22850048a33e5938af47a0183f20559d7e6e11",
+      "timestamp": 303,
+      "text": "단순히 아이폰을 늘리거나 아이패드를 줄인 것이 아니라 독자적인 제품으로 접근했습니다.",
+      "tag": "trans",
+      "legacyVerbosity": "translation",
+      "provenance": {
+        "kind": "foreign_dialogue",
+        "dialogueInterval": {
+          "start": 301.6,
+          "end": 303.07,
+          "sourceLanguage": "ko",
+          "sourceText": "strching out aone or",
+          "confirmed": true
+        }
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "quarantined",
+      "validationReasons": [
+        "UNCERTAIN_MIXED_INTERVAL"
+      ],
+      "ttsEligible": false,
+      "audioLanguage": "mixed",
+      "rawLine": "[303][trans] 단순히 아이폰을 늘리거나 아이패드를 줄인 것이 아니라 독자적인 제품으로 접근했습니다."
+    },
+    {
+      "id": "44a71438290f83569393de28cebad7f534cd9a1b5a5a90f6ea364e5b7bf0eba2",
+      "timestamp": 309,
+      "text": "하드웨어와 인터페이스를 동시에 구상하며 수많은 대안을 검토했습니다.",
+      "tag": "trans",
+      "legacyVerbosity": "translation",
+      "provenance": {
+        "kind": "foreign_dialogue",
+        "dialogueInterval": {
+          "start": 308.28,
+          "end": 309.87,
+          "sourceLanguage": "ko",
+          "sourceText": "as its own thing.we conceived of both",
+          "confirmed": true
+        }
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "quarantined",
+      "validationReasons": [
+        "UNCERTAIN_MIXED_INTERVAL"
+      ],
+      "ttsEligible": false,
+      "audioLanguage": "mixed",
+      "rawLine": "[309][trans] 하드웨어와 인터페이스를 동시에 구상하며 수많은 대안을 검토했습니다."
+    },
+    {
+      "id": "c4b54bf3df8dde8ef2cebc25289a9bbd2b829e38ad1306320cf00509f8190b0a",
+      "timestamp": 322,
+      "text": "인터페이스를 새롭고 독창적으로 바꾼다면 훌륭한 폼팩터를 완성할 수 있겠다고 판단했죠.",
+      "tag": "trans",
+      "legacyVerbosity": "translation",
+      "provenance": {
+        "kind": "foreign_dialogue",
+        "dialogueInterval": {
+          "start": 321.84,
+          "end": 322.55,
+          "sourceLanguage": "ko",
+          "sourceText": "factor uh if we adapted the",
+          "confirmed": true
+        }
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "quarantined",
+      "validationReasons": [
+        "UNCERTAIN_MIXED_INTERVAL"
+      ],
+      "ttsEligible": false,
+      "audioLanguage": "mixed",
+      "rawLine": "[322][trans] 인터페이스를 새롭고 독창적으로 바꾼다면 훌륭한 폼팩터를 완성할 수 있겠다고 판단했죠."
+    },
+    {
+      "id": "b4ad65db51d294749277c293dda3343a10a6bf520be9cec75af2a8765c1976af",
+      "timestamp": 327,
+      "text": "버튼들을 접히는 축 쪽으로 옮겨 손이 쉽게 닿도록 하고,화면 높이 전체를 콘텐츠에 쓸 수 있게 했습니다.",
+      "tag": "trans",
+      "legacyVerbosity": "translation",
+      "provenance": {
+        "kind": "foreign_dialogue",
+        "dialogueInterval": {
+          "start": 325.4,
+          "end": 327.03,
+          "sourceLanguage": "ko",
+          "sourceText": "allne and unique way to take advantage of",
+          "confirmed": true
+        }
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "quarantined",
+      "validationReasons": [
+        "UNCERTAIN_MIXED_INTERVAL"
+      ],
+      "ttsEligible": false,
+      "audioLanguage": "mixed",
+      "rawLine": "[327][trans] 버튼들을 접히는 축 쪽으로 옮겨 손이 쉽게 닿도록 하고, 화면 높이 전체를 콘텐츠에 쓸 수 있게 했습니다."
+    },
+    {
+      "id": "f02e5759870f1d110cf37eb089a38daf959b65365c5f41ee7fb03c8669905e38",
+      "timestamp": 336,
+      "text": "기존 스마트폰 ui를 그대로 가져와 아래로 밀어 넣고 콘텐츠 공간을 줄이는 것보다 훨씬 우수하다고 봅니다.",
+      "tag": "trans",
+      "legacyVerbosity": "translation",
+      "provenance": {
+        "kind": "foreign_dialogue",
+        "dialogueInterval": {
+          "start": 334.52,
+          "end": 336.19,
+          "sourceLanguage": "ko",
+          "sourceText": "device.and we think this is uh really",
+          "confirmed": true
+        }
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "quarantined",
+      "validationReasons": [
+        "UNCERTAIN_MIXED_INTERVAL"
+      ],
+      "ttsEligible": false,
+      "audioLanguage": "mixed",
+      "rawLine": "[336][trans] 기존 스마트폰 UI를 그대로 가져와 아래로 밀어 넣고 콘텐츠 공간을 줄이는 것보다 훨씬 우수하다고 봅니다."
+    },
+    {
+      "id": "81324f41033ca4e412834ba41a568e58e89c640668003487cb048bc15c0c1683",
+      "timestamp": 352,
+      "text": "기존 방식에 얽매이지 않고 이 폼팩터에 꼭 맞게 디자인을 최적화하는 데 집중했습니다.",
+      "tag": "trans",
+      "legacyVerbosity": "translation",
+      "provenance": {
+        "kind": "foreign_dialogue",
+        "dialogueInterval": {
+          "start": 351.52,
+          "end": 352.43,
+          "sourceLanguage": "ko",
+          "sourceText": "bottom.and so uh it was very important",
+          "confirmed": true
+        }
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "quarantined",
+      "validationReasons": [
+        "UNCERTAIN_MIXED_INTERVAL"
+      ],
+      "ttsEligible": false,
+      "audioLanguage": "mixed",
+      "rawLine": "[352][trans] 기존 방식에 얽매이지 않고 이 폼팩터에 꼭 맞게 디자인을 최적화하는 데 집중했습니다."
+    },
+    {
+      "id": "64c388f89d450f396ea16d092227562393578737f06bacba88fb7e21a85767a2",
+      "timestamp": 366,
+      "text": "왼손잡이 사용자를 위한 조정도 거쳤습니다.",
+      "tag": "trans",
+      "legacyVerbosity": "translation",
+      "provenance": {
+        "kind": "foreign_dialogue",
+        "dialogueInterval": {
+          "start": 365.48,
+          "end": 366.67,
+          "sourceLanguage": "ko",
+          "sourceText": "users who are left-handed,uh",
+          "confirmed": true
+        }
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "quarantined",
+      "validationReasons": [
+        "UNCERTAIN_MIXED_INTERVAL"
+      ],
+      "ttsEligible": false,
+      "audioLanguage": "mixed",
+      "rawLine": "[366][trans] 왼손잡이 사용자를 위한 조정도 거쳤습니다."
+    },
+    {
+      "id": "53d3656656b50a9ec10bf5d9baf888727883d7e9acd22e7c6bef2042f3d0a8fb",
+      "timestamp": 370,
+      "text": "예를 들어 키보드를 한쪽으로 밀어 두면 한 손으로도 손을 무리하게 뻗지 않고 입력할 수 있죠.",
+      "tag": "trans",
+      "legacyVerbosity": "translation",
+      "provenance": {
+        "kind": "foreign_dialogue",
+        "dialogueInterval": {
+          "start": 369.24,
+          "end": 370.39,
+          "sourceLanguage": "ko",
+          "sourceText": "of adaptations.for instance,you can",
+          "confirmed": true
+        }
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "quarantined",
+      "validationReasons": [
+        "UNCERTAIN_MIXED_INTERVAL"
+      ],
+      "ttsEligible": false,
+      "audioLanguage": "mixed",
+      "rawLine": "[370][trans] 예를 들어 키보드를 한쪽으로 밀어 두면 한 손으로도 손을 무리하게 뻗지 않고 입력할 수 있죠."
+    },
+    {
+      "id": "c2ff4a1ecac4d4c7d146c922c0af7d4aa74bebf2bc35d4b0179bc1a0907c01ef",
+      "timestamp": 380,
+      "text": "화면을 위아래로 반쯤 접어 아래쪽에 키보드 자판을 띄웁니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-380",
+            "timestamp": 380.347
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "mixed",
+      "rawLine": "[380][v2] 화면을 위아래로 반쯤 접어 아래쪽에 키보드 자판을 띄웁니다."
+    },
+    {
+      "id": "0318659d909ae9fe2d9466fb1a3239aab8af548876c8dd493402a89de5c002b5",
+      "timestamp": 383,
+      "text": "기기가 열려 있든 닫혀 있든 양손 조작 시 측면 버튼을 통해 세로 방향 조작에 쉽게 접근할 수 있습니다.",
+      "tag": "trans",
+      "legacyVerbosity": "translation",
+      "provenance": {
+        "kind": "foreign_dialogue",
+        "dialogueInterval": {
+          "start": 383,
+          "end": 383.59,
+          "sourceLanguage": "ko",
+          "sourceText": "natural thing uh certainly when the",
+          "confirmed": true
+        }
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "quarantined",
+      "validationReasons": [
+        "UNCERTAIN_MIXED_INTERVAL"
+      ],
+      "ttsEligible": false,
+      "audioLanguage": "mixed",
+      "rawLine": "[383][trans] 기기가 열려 있든 닫혀 있든 양손 조작 시 측면 버튼을 통해 세로 방향 조작에 쉽게 접근할 수 있습니다."
+    },
+    {
+      "id": "51e7e2d99adc64fe6808ffbcda926755277cb4926df43089a48168dcb37a0f6e",
+      "timestamp": 394,
+      "text": "기기 위쪽까지 손이 닿지 않을 만큼 길지 않기 때문입니다.",
+      "tag": "trans",
+      "legacyVerbosity": "translation",
+      "provenance": {
+        "kind": "foreign_dialogue",
+        "dialogueInterval": {
+          "start": 393.88,
+          "end": 394.95,
+          "sourceLanguage": "ko",
+          "sourceText": "because the device isn't so tall that",
+          "confirmed": true
+        }
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "quarantined",
+      "validationReasons": [
+        "UNCERTAIN_MIXED_INTERVAL"
+      ],
+      "ttsEligible": false,
+      "audioLanguage": "mixed",
+      "rawLine": "[394][trans] 기기 위쪽까지 손이 닿지 않을 만큼 길지 않기 때문입니다."
+    },
+    {
+      "id": "ed800d9016b29ab69370643a44326150c806b81141b41a5a4232a2f6a09e5fb4",
+      "timestamp": 408,
+      "text": "두 개의 카메라 렌즈가 달린 검은색 스마트폰 뒷면이 보입니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-408",
+            "timestamp": 408.108
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "mixed",
+      "rawLine": "[408][v2] 두 개의 카메라 렌즈가 달린 검은색 스마트폰 뒷면이 보입니다."
+    },
+    {
+      "id": "33792764fb117ae16c5f913884c088b69f47cdbfd8257526ce1b178f8b2c5dfc",
+      "timestamp": 426,
+      "text": "애플은 최초가 되는 것보다 최고가 되는 데 집중합니다.",
+      "tag": "trans",
+      "legacyVerbosity": "translation",
+      "provenance": {
+        "kind": "foreign_dialogue",
+        "dialogueInterval": {
+          "start": 423.92,
+          "end": 426.83,
+          "sourceLanguage": "ko",
+          "sourceText": "궁금합니다.i think ason",
+          "confirmed": true
+        }
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "quarantined",
+      "validationReasons": [
+        "UNCERTAIN_MIXED_INTERVAL"
+      ],
+      "ttsEligible": false,
+      "audioLanguage": "mixed",
+      "rawLine": "[426][trans] 애플은 최초가 되는 것보다 최고가 되는 데 집중합니다."
+    },
+    {
+      "id": "6e8a1a40fe0cd32c0e614f62a70da8991658ed3b10876575b27041e6dae9e7f5",
+      "timestamp": 433,
+      "text": "모든 요소가 비전에 완벽히 부합할 때까지 서두르지 않고 준비했습니다.",
+      "tag": "trans",
+      "legacyVerbosity": "translation",
+      "provenance": {
+        "kind": "foreign_dialogue",
+        "dialogueInterval": {
+          "start": 432.88,
+          "end": 433.91,
+          "sourceLanguage": "ko",
+          "sourceText": "best and we weren this product until",
+          "confirmed": true
+        }
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "quarantined",
+      "validationReasons": [
+        "UNCERTAIN_MIXED_INTERVAL"
+      ],
+      "ttsEligible": false,
+      "audioLanguage": "mixed",
+      "rawLine": "[433][trans] 모든 요소가 비전에 완벽히 부합할 때까지 서두르지 않고 준비했습니다."
+    },
+    {
+      "id": "05eec344cb2ead67e8032f120970e0c418344803c6394bbacd6514369c4c3af3",
+      "timestamp": 444,
+      "text": "앞서 이야기한 사용자 경험처럼 매우 독창적이고 야심 찬 프로젝트였습니다.",
+      "tag": "trans",
+      "legacyVerbosity": "translation",
+      "provenance": {
+        "kind": "foreign_dialogue",
+        "dialogueInterval": {
+          "start": 443.64,
+          "end": 444.95,
+          "sourceLanguage": "ko",
+          "sourceText": "already with this user experience i",
+          "confirmed": true
+        }
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "quarantined",
+      "validationReasons": [
+        "UNCERTAIN_MIXED_INTERVAL"
+      ],
+      "ttsEligible": false,
+      "audioLanguage": "mixed",
+      "rawLine": "[444][trans] 앞서 이야기한 사용자 경험처럼 매우 독창적이고 야심 찬 프로젝트였습니다."
+    },
+    {
+      "id": "9ac864c8a30686e9118ea3e047c3668471c5e10eebcc226f30a12c3bf24e5337",
+      "timestamp": 450,
+      "text": "운영체제 전체와 기본 앱,프레임워크를 완전히 새로운 틀에 맞게 최적화했습니다.",
+      "tag": "trans",
+      "legacyVerbosity": "translation",
+      "provenance": {
+        "kind": "foreign_dialogue",
+        "dialogueInterval": {
+          "start": 448.56,
+          "end": 450.39,
+          "sourceLanguage": "ko",
+          "sourceText": "very ambitious project to take the",
+          "confirmed": true
+        }
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "quarantined",
+      "validationReasons": [
+        "UNCERTAIN_MIXED_INTERVAL"
+      ],
+      "ttsEligible": false,
+      "audioLanguage": "mixed",
+      "rawLine": "[450][trans] 운영체제 전체와 기본 앱, 프레임워크를 완전히 새로운 틀에 맞게 최적화했습니다."
+    },
+    {
+      "id": "782058d2c3e808c11900882d501b5ca8df74b18d0d171847bbb55b6fbc58c40d",
+      "timestamp": 458,
+      "text": "다른 제조사들처럼 기존 운영체제를 화면에 얹어 서둘러 출시하지 않고,공들여 훌륭한 제품을 만들고자 했습니다.",
+      "tag": "trans",
+      "legacyVerbosity": "translation",
+      "provenance": {
+        "kind": "foreign_dialogue",
+        "dialogueInterval": {
+          "start": 457.32,
+          "end": 458.15,
+          "sourceLanguage": "ko",
+          "sourceText": "framework.i think if you look at other",
+          "confirmed": true
+        }
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "quarantined",
+      "validationReasons": [
+        "UNCERTAIN_MIXED_INTERVAL"
+      ],
+      "ttsEligible": false,
+      "audioLanguage": "mixed",
+      "rawLine": "[458][trans] 다른 제조사들처럼 기존 운영체제를 화면에 얹어 서둘러 출시하지 않고, 공들여 훌륭한 제품을 만들고자 했습니다."
+    },
+    {
+      "id": "04331c602863efb9f8e20f79b8593bfc4de1d187d5b8012d99f9b050896097ef",
+      "timestamp": 470,
+      "text": "하드웨어의 완성도와 내부 디스플레이의 평평함 등 독보적인 요소들이 많지만,",
+      "tag": "trans",
+      "legacyVerbosity": "translation",
+      "provenance": {
+        "kind": "foreign_dialogue",
+        "dialogueInterval": {
+          "start": 468.56,
+          "end": 470.67,
+          "sourceLanguage": "ko",
+          "sourceText": "great.i think if you look at the",
+          "confirmed": true
+        }
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "quarantined",
+      "validationReasons": [
+        "UNCERTAIN_MIXED_INTERVAL"
+      ],
+      "ttsEligible": false,
+      "audioLanguage": "mixed",
+      "rawLine": "[470][trans] 하드웨어의 완성도와 내부 디스플레이의 평평함 등 독보적인 요소들이 많지만,"
+    },
+    {
+      "id": "47ea32e1e1a77ae1a95384e23ddc16d51bca7b6acefa0d97b132333ce865f37a",
+      "timestamp": 482,
+      "text": "개별 기능보다 모든 것이 완벽하게 하나로 어우러진 완성된 경험 자체가 가장 큰 가치입니다.",
+      "tag": "trans",
+      "legacyVerbosity": "translation",
+      "provenance": {
+        "kind": "foreign_dialogue",
+        "dialogueInterval": {
+          "start": 481.84,
+          "end": 482.63,
+          "sourceLanguage": "ko",
+          "sourceText": "elements to the experience,but for",
+          "confirmed": true
+        }
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "quarantined",
+      "validationReasons": [
+        "UNCERTAIN_MIXED_INTERVAL"
+      ],
+      "ttsEligible": false,
+      "audioLanguage": "mixed",
+      "rawLine": "[482][trans] 개별 기능보다 모든 것이 완벽하게 하나로 어우러진 완성된 경험 자체가 가장 큰 가치입니다."
+    },
+    {
+      "id": "3db6843ca3bbdbdc0a654a646327a1903c1805da30dfe89aeada1423f0605163",
+      "timestamp": 495,
+      "text": "두 사람이 미소를 지으며 악수를 나눕니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-495",
+            "timestamp": 494.761
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "mixed",
+      "rawLine": "[495][v2] 두 사람이 미소를 지으며 악수를 나눕니다."
+    },
+    {
+      "id": "60782ff16b653846bdaa85d466cfb893bc1a3a6f05a3af89e953cf66dc3cdf1f",
+      "timestamp": 511,
+      "text": "자막 (난 어차피 ceo 아니야~ᄏᄏ)",
+      "tag": "txt",
+      "legacyVerbosity": "text",
+      "provenance": {
+        "kind": "screen_text",
+        "frameEvidence": [
+          {
+            "id": "frame-511",
+            "timestamp": 510.577
+          }
+        ],
+        "visibleTextEvidence": "자막 (난 어차피 ceo 아니야~ᄏᄏ)",
+        "source": "gemini_multimodal_frame"
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "mixed",
+      "rawLine": "[511][txt] 자막 (난 어차피 CEO 아니야~ㅋㅋ)"
+    },
+    {
+      "id": "03f70936b0f6a1a1cf6fae7546802e021af26d2588e7c395fd664ce9e7191ed0",
+      "timestamp": 526,
+      "text": "자막 almost there...(거의 끝나갑니다..)",
+      "tag": "txt",
+      "legacyVerbosity": "text",
+      "provenance": {
+        "kind": "screen_text",
+        "frameEvidence": [
+          {
+            "id": "frame-526",
+            "timestamp": 525.926
+          }
+        ],
+        "visibleTextEvidence": "자막 almost there...(거의 끝나갑니다..)",
+        "source": "gemini_multimodal_frame"
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "mixed",
+      "rawLine": "[526][txt] 자막 Almost there... (거의 끝나갑니다..)"
+    }
+  ],
+  "accepted": [
+    {
+      "id": "2c69053bd49b9c5d74d1af7a5078926be40c088aa312172a8104ada7a153cd1c",
+      "timestamp": 10,
+      "text": "자막 na ga.",
+      "tag": "txt",
+      "legacyVerbosity": "text",
+      "provenance": {
+        "kind": "screen_text",
+        "frameEvidence": [
+          {
+            "id": "frame-10",
+            "timestamp": 10.043
+          }
+        ],
+        "visibleTextEvidence": "자막 na ga.",
+        "source": "gemini_multimodal_frame"
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "mixed",
+      "rawLine": "[10][txt] 자막 NA GA."
+    },
+    {
+      "id": "ee3873784233910acfb2e9be9b8ea6b3d1b4e866e3bd73a6308f042acea93ebc",
+      "timestamp": 12,
+      "text": "파란 배경에 흰색 육각형 로고가 나타납니다.",
+      "tag": "v3",
+      "legacyVerbosity": "v3",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-12",
+            "timestamp": 11.545
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "mixed",
+      "rawLine": "[12][v3] 파란 배경에 흰색 육각형 로고가 나타납니다."
+    },
+    {
+      "id": "62eef63819f088601adf6377fbedb5af63dbb246a8180b800eff935da5b2ee39",
+      "timestamp": 16,
+      "text": "자막 전자기기를 좋아하는 잇섭",
+      "tag": "txt",
+      "legacyVerbosity": "text",
+      "provenance": {
+        "kind": "screen_text",
+        "frameEvidence": [
+          {
+            "id": "frame-16",
+            "timestamp": 15.983
+          }
+        ],
+        "visibleTextEvidence": "자막 전자기기를 좋아하는 잇섭",
+        "source": "gemini_multimodal_frame"
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "mixed",
+      "rawLine": "[16][txt] 자막 전자기기를 좋아하는 잇섭"
+    },
+    {
+      "id": "4705b4257e13319d3f06eab2cb68765c34aac7d1a98a4ee18cbae01a1476af28",
+      "timestamp": 23,
+      "text": "애플의 소프트웨어 엔지니어링 부사장 크레이그 페더리기가 서 있습니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-23",
+            "timestamp": 22.523
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "mixed",
+      "rawLine": "[23][v1] 애플의 소프트웨어 엔지니어링 부사장 크레이그 페더리기가 서 있습니다."
+    },
+    {
+      "id": "a26ce468e9812a23364ef593e14f18686bb78f284cd675424efc1b766a728040",
+      "timestamp": 35,
+      "text": "페더리기가 넥이 세 개 달린 일렉트릭 기타를 메고 있습니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-35",
+            "timestamp": 35.102
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "mixed",
+      "rawLine": "[35][v2] 페더리기가 넥이 세 개 달린 일렉트릭 기타를 메고 있습니다."
+    },
+    {
+      "id": "8306f32c1e4ad1c1640eefcfe9907586c687ff8406bf2858402e5246c94bf0e5",
+      "timestamp": 39,
+      "text": "하드웨어 엔지니어링 부사장 존 터너스가 창가에 서 있습니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-39",
+            "timestamp": 39.173
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "mixed",
+      "rawLine": "[39][v1] 하드웨어 엔지니어링 부사장 존 터너스가 창가에 서 있습니다."
+    },
+    {
+      "id": "d6c15af282302e3fb88b8ef110c609003b512a0d6396266ae0aab3320a9befc8",
+      "timestamp": 46,
+      "text": "손에 쥔 스마트폰을 반으로 접습니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-46",
+            "timestamp": 45.512
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "mixed",
+      "rawLine": "[46][v1] 손에 쥔 스마트폰을 반으로 접습니다."
+    },
+    {
+      "id": "6ff119a507264226856da025dd68139a13610d4d87ba01bc3cb439ffb3488bf2",
+      "timestamp": 54,
+      "text": "반쯤 접힌 기기가 탁자 위에 세워져 탁상시계 화면을 띄웁니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-54",
+            "timestamp": 53.72
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "mixed",
+      "rawLine": "[54][v2] 반쯤 접힌 기기가 탁자 위에 세워져 탁상시계 화면을 띄웁니다."
+    },
+    {
+      "id": "1527affd7f0c1dae74ce49f8d5db4b637528e4a1f62537dc832549b36b83a726",
+      "timestamp": 93,
+      "text": "통유리창 너머로 정원이 보이는 야외 테라스에 잇섭과 페더리기가 마주 앉아 있습니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-93",
+            "timestamp": 93.327
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "mixed",
+      "rawLine": "[93][v1] 통유리창 너머로 정원이 보이는 야외 테라스에 잇섭과 페더리기가 마주 앉아 있습니다."
+    },
+    {
+      "id": "a18603252e7a601cbe30a0505de1731b4298bbebc168c55bb19aa625ef1dd007",
+      "timestamp": 116,
+      "text": "화면을 접자 실행 중이던 게임 화면이 바깥쪽 화면으로 이어집니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-116",
+            "timestamp": 116.083
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "mixed",
+      "rawLine": "[116][v1] 화면을 접자 실행 중이던 게임 화면이 바깥쪽 화면으로 이어집니다."
+    },
+    {
+      "id": "6270ff07ea73055f6c2b6b44538cd3cafdb155828a7eab0076e337f2fde4621e",
+      "timestamp": 175,
+      "text": "태블릿 화면에 여러 개의 작업 창이 겹쳐 떠 있습니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-175",
+            "timestamp": 174.508
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "mixed",
+      "rawLine": "[175][v2] 태블릿 화면에 여러 개의 작업 창이 겹쳐 떠 있습니다."
+    },
+    {
+      "id": "d9edd6a5c8978c68eb6320d3cf73a3b1332b1a3e404011d668394c17fc7635ca",
+      "timestamp": 182,
+      "text": "접히는 화면 좌우에 서로 다른 앱 창이 나란히 열립니다.",
+      "tag": "v1",
+      "legacyVerbosity": "v1",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-182",
+            "timestamp": 182.115
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "mixed",
+      "rawLine": "[182][v1] 접히는 화면 좌우에 서로 다른 앱 창이 나란히 열립니다."
+    },
+    {
+      "id": "488acd18c8459cb142884faa520f5a8989576c39fcc87a882e797e9255607c9c",
+      "timestamp": 271,
+      "text": "화면 오른쪽 가장자리에 조작 버튼들이 세로로 배치됩니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-271",
+            "timestamp": 271.305
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "mixed",
+      "rawLine": "[271][v2] 화면 오른쪽 가장자리에 조작 버튼들이 세로로 배치됩니다."
+    },
+    {
+      "id": "8e490ec330590bc3b6fdc82721b0be5d3afcb30132dbd49754b50c90c369b342",
+      "timestamp": 280,
+      "text": "잇섭의 이전 영상 썸네일과 시청자 댓글들이 화면에 뜹니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-280",
+            "timestamp": 280.414
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "mixed",
+      "rawLine": "[280][v2] 잇섭의 이전 영상 썸네일과 시청자 댓글들이 화면에 뜹니다."
+    },
+    {
+      "id": "c2ff4a1ecac4d4c7d146c922c0af7d4aa74bebf2bc35d4b0179bc1a0907c01ef",
+      "timestamp": 380,
+      "text": "화면을 위아래로 반쯤 접어 아래쪽에 키보드 자판을 띄웁니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-380",
+            "timestamp": 380.347
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "mixed",
+      "rawLine": "[380][v2] 화면을 위아래로 반쯤 접어 아래쪽에 키보드 자판을 띄웁니다."
+    },
+    {
+      "id": "ed800d9016b29ab69370643a44326150c806b81141b41a5a4232a2f6a09e5fb4",
+      "timestamp": 408,
+      "text": "두 개의 카메라 렌즈가 달린 검은색 스마트폰 뒷면이 보입니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-408",
+            "timestamp": 408.108
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "mixed",
+      "rawLine": "[408][v2] 두 개의 카메라 렌즈가 달린 검은색 스마트폰 뒷면이 보입니다."
+    },
+    {
+      "id": "3db6843ca3bbdbdc0a654a646327a1903c1805da30dfe89aeada1423f0605163",
+      "timestamp": 495,
+      "text": "두 사람이 미소를 지으며 악수를 나눕니다.",
+      "tag": "v2",
+      "legacyVerbosity": "v2",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-495",
+            "timestamp": 494.761
+          }
+        ]
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "mixed",
+      "rawLine": "[495][v2] 두 사람이 미소를 지으며 악수를 나눕니다."
+    },
+    {
+      "id": "60782ff16b653846bdaa85d466cfb893bc1a3a6f05a3af89e953cf66dc3cdf1f",
+      "timestamp": 511,
+      "text": "자막 (난 어차피 ceo 아니야~ᄏᄏ)",
+      "tag": "txt",
+      "legacyVerbosity": "text",
+      "provenance": {
+        "kind": "screen_text",
+        "frameEvidence": [
+          {
+            "id": "frame-511",
+            "timestamp": 510.577
+          }
+        ],
+        "visibleTextEvidence": "자막 (난 어차피 ceo 아니야~ᄏᄏ)",
+        "source": "gemini_multimodal_frame"
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "mixed",
+      "rawLine": "[511][txt] 자막 (난 어차피 CEO 아니야~ㅋㅋ)"
+    },
+    {
+      "id": "03f70936b0f6a1a1cf6fae7546802e021af26d2588e7c395fd664ce9e7191ed0",
+      "timestamp": 526,
+      "text": "자막 almost there...(거의 끝나갑니다..)",
+      "tag": "txt",
+      "legacyVerbosity": "text",
+      "provenance": {
+        "kind": "screen_text",
+        "frameEvidence": [
+          {
+            "id": "frame-526",
+            "timestamp": 525.926
+          }
+        ],
+        "visibleTextEvidence": "자막 almost there...(거의 끝나갑니다..)",
+        "source": "gemini_multimodal_frame"
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "accepted",
+      "validationReasons": [],
+      "ttsEligible": true,
+      "audioLanguage": "mixed",
+      "rawLine": "[526][txt] 자막 Almost there... (거의 끝나갑니다..)"
+    }
+  ],
+  "quarantined": [
+    {
+      "id": "8ea65c3bb6bb67383814c43406dca1fd3fd580c50318c66eea808711b88fd8ac",
+      "timestamp": 124,
+      "text": "맞아요,우리도 이 애니메이션을 정말 좋아합니다.",
+      "tag": "trans",
+      "legacyVerbosity": "translation",
+      "provenance": {
+        "kind": "foreign_dialogue",
+        "dialogueInterval": {
+          "start": 123.68,
+          "end": 124.91,
+          "sourceLanguage": "ko",
+          "sourceText": "의도로 만들었는지가 궁금합니다.in love with this",
+          "confirmed": true
+        }
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "quarantined",
+      "validationReasons": [
+        "UNCERTAIN_MIXED_INTERVAL"
+      ],
+      "ttsEligible": false,
+      "audioLanguage": "mixed",
+      "rawLine": "[124][trans] 맞아요, 우리도 이 애니메이션을 정말 좋아합니다."
+    },
+    {
+      "id": "96a4c0b46307c059097c96203938fb31b8e5e07a751c7dd3ff4b349db19b1b44",
+      "timestamp": 127,
+      "text": "저희가 만들고 싶었던 건 기기에서 일어나는 일을 가장 자연스럽게 표현하는 것이었어요.",
+      "tag": "trans",
+      "legacyVerbosity": "translation",
+      "provenance": {
+        "kind": "foreign_dialogue",
+        "dialogueInterval": {
+          "start": 126.04,
+          "end": 127.27,
+          "sourceLanguage": "ko",
+          "sourceText": "animation.i i think we wanted to create",
+          "confirmed": true
+        }
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "quarantined",
+      "validationReasons": [
+        "UNCERTAIN_MIXED_INTERVAL"
+      ],
+      "ttsEligible": false,
+      "audioLanguage": "mixed",
+      "rawLine": "[127][trans] 저희가 만들고 싶었던 건 기기에서 일어나는 일을 가장 자연스럽게 표현하는 것이었어요."
+    },
+    {
+      "id": "42d79665980a5879c5893e51350c05f6df32d32ae1f4e7e74830a624f8b88809",
+      "timestamp": 135,
+      "text": "바깥 화면에서 하던 일이 그대로 안쪽 화면으로 매끄럽게 이어지는 거죠.",
+      "tag": "trans",
+      "legacyVerbosity": "translation",
+      "provenance": {
+        "kind": "foreign_dialogue",
+        "dialogueInterval": {
+          "start": 134.44,
+          "end": 135.55,
+          "sourceLanguage": "ko",
+          "sourceText": "device,which is you're transparently",
+          "confirmed": true
+        }
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "quarantined",
+      "validationReasons": [
+        "UNCERTAIN_MIXED_INTERVAL"
+      ],
+      "ttsEligible": false,
+      "audioLanguage": "mixed",
+      "rawLine": "[135][trans] 바깥 화면에서 하던 일이 그대로 안쪽 화면으로 매끄럽게 이어지는 거죠."
+    },
+    {
+      "id": "d7977e862d1bcdd5e9854874b87132b34d85f98216b2fdda865ec61de474719e",
+      "timestamp": 143,
+      "text": "우리는 그 연속성을 보여주기를 원했습니다.",
+      "tag": "trans",
+      "legacyVerbosity": "translation",
+      "provenance": {
+        "kind": "foreign_dialogue",
+        "dialogueInterval": {
+          "start": 143,
+          "end": 143.79,
+          "sourceLanguage": "ko",
+          "sourceText": "inside.and so we really wanted",
+          "confirmed": true
+        }
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "quarantined",
+      "validationReasons": [
+        "UNCERTAIN_MIXED_INTERVAL"
+      ],
+      "ttsEligible": false,
+      "audioLanguage": "mixed",
+      "rawLine": "[143][trans] 우리는 그 연속성을 보여주기를 원했습니다."
+    },
+    {
+      "id": "ba38bdb1499d76101bc970535877ffc1ece23b01d386c212ef280a89e2702660",
+      "timestamp": 145,
+      "text": "왜냐하면 사람들이 한쪽 화면에서 무언가를 시작했다가 다른 쪽으로 옮겨가는 일이 자주 있을 테니까요.",
+      "tag": "trans",
+      "legacyVerbosity": "translation",
+      "provenance": {
+        "kind": "foreign_dialogue",
+        "dialogueInterval": {
+          "start": 144.56,
+          "end": 145.79,
+          "sourceLanguage": "ko",
+          "sourceText": "continuity because we expect people to",
+          "confirmed": true
+        }
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "quarantined",
+      "validationReasons": [
+        "UNCERTAIN_MIXED_INTERVAL"
+      ],
+      "ttsEligible": false,
+      "audioLanguage": "mixed",
+      "rawLine": "[145][trans] 왜냐하면 사람들이 한쪽 화면에서 무언가를 시작했다가 다른 쪽으로 옮겨가는 일이 자주 있을 테니까요."
+    },
+    {
+      "id": "adb56f4f4d32edd2713df7e411d103fa46bf6baabc049f4aa21b588d0ffc5ed7",
+      "timestamp": 151,
+      "text": "그래서 펼쳤을 때 즉각적으로 그 밑의 창을 통해 본다는 느낌이 가장 자연스럽다고 생각했습니다.",
+      "tag": "trans",
+      "legacyVerbosity": "translation",
+      "provenance": {
+        "kind": "foreign_dialogue",
+        "dialogueInterval": {
+          "start": 150.6,
+          "end": 151.39,
+          "sourceLanguage": "ko",
+          "sourceText": "other.and so the idea that as you",
+          "confirmed": true
+        }
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "quarantined",
+      "validationReasons": [
+        "UNCERTAIN_MIXED_INTERVAL"
+      ],
+      "ttsEligible": false,
+      "audioLanguage": "mixed",
+      "rawLine": "[151][trans] 그래서 펼쳤을 때 즉각적으로 그 밑의 창을 통해 본다는 느낌이 가장 자연스럽다고 생각했습니다."
+    },
+    {
+      "id": "793e910e47f9ef2a7be1f7aafa533fc18d7e07ee51cd909c0993f2fd757289dc",
+      "timestamp": 161,
+      "text": "산만하거나 현란하지 않고,의식하지 않아도 당연하게 느껴지는 애니메이션이 중요했습니다.",
+      "tag": "trans",
+      "legacyVerbosity": "translation",
+      "provenance": {
+        "kind": "foreign_dialogue",
+        "dialogueInterval": {
+          "start": 158.72,
+          "end": 171.71,
+          "sourceLanguage": "ko",
+          "sourceText": "below feels like the most natural thing.",
+          "confirmed": true
+        }
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "quarantined",
+      "validationReasons": [
+        "UNCERTAIN_MIXED_INTERVAL"
+      ],
+      "ttsEligible": false,
+      "audioLanguage": "mixed",
+      "rawLine": "[161][trans] 산만하거나 현란하지 않고, 의식하지 않아도 당연하게 느껴지는 애니메이션이 중요했습니다."
+    },
+    {
+      "id": "7d64bee47404462a03692e92628424ad7a4a44ffd52ea2cde8c8966b7e06c684",
+      "timestamp": 192,
+      "text": "아이폰 듀오는 그 자체로 독자적인 제품입니다.아이패드가 아니에요.",
+      "tag": "trans",
+      "legacyVerbosity": "translation",
+      "provenance": {
+        "kind": "foreign_dialogue",
+        "dialogueInterval": {
+          "start": 189.56,
+          "end": 192.83,
+          "sourceLanguage": "ko",
+          "sourceText": "그것도 궁금합니다.iphone duo as much",
+          "confirmed": true
+        }
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "quarantined",
+      "validationReasons": [
+        "UNCERTAIN_MIXED_INTERVAL"
+      ],
+      "ttsEligible": false,
+      "audioLanguage": "mixed",
+      "rawLine": "[192][trans] 아이폰 듀오는 그 자체로 독자적인 제품입니다. 아이패드가 아니에요."
+    },
+    {
+      "id": "68e659de002728d1994195a048fe7a147219cb6fb8e23d3a14cb1fe40050aaf3",
+      "timestamp": 198,
+      "text": "놀라울 만큼 다재다능하면서도,아이폰 사용자에게 익숙하고 일관된 경험을 주고자 했습니다.",
+      "tag": "trans",
+      "legacyVerbosity": "translation",
+      "provenance": {
+        "kind": "foreign_dialogue",
+        "dialogueInterval": {
+          "start": 194.8,
+          "end": 198.11,
+          "sourceLanguage": "ko",
+          "sourceText": "it it is not an ipad.um it is a uh",
+          "confirmed": true
+        }
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "quarantined",
+      "validationReasons": [
+        "UNCERTAIN_MIXED_INTERVAL"
+      ],
+      "ttsEligible": false,
+      "audioLanguage": "mixed",
+      "rawLine": "[198][trans] 놀라울 만큼 다재다능하면서도, 아이폰 사용자에게 익숙하고 일관된 경험을 주고자 했습니다."
+    },
+    {
+      "id": "3a837d484b93fd465a85c4edb20134ae03d24644574a87e89a969f5c7a028a57",
+      "timestamp": 211,
+      "text": "접힌 상태와 펼친 상태 모두 전반적인 사용 방식이 일관되게 이어지는 게 매우 중요했습니다.",
+      "tag": "trans",
+      "legacyVerbosity": "translation",
+      "provenance": {
+        "kind": "foreign_dialogue",
+        "dialogueInterval": {
+          "start": 210.52,
+          "end": 211.59,
+          "sourceLanguage": "ko",
+          "sourceText": "iphone user.and so the model when it",
+          "confirmed": true
+        }
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "quarantined",
+      "validationReasons": [
+        "UNCERTAIN_MIXED_INTERVAL"
+      ],
+      "ttsEligible": false,
+      "audioLanguage": "mixed",
+      "rawLine": "[211][trans] 접힌 상태와 펼친 상태 모두 전반적인 사용 방식이 일관되게 이어지는 게 매우 중요했습니다."
+    },
+    {
+      "id": "11221010d353a6b858dda8e0baf7a9cf12ee48f9d06549b6afc58086913e10ad",
+      "timestamp": 227,
+      "text": "상호작용도 자연스럽고 매끄럽게 만들고 싶었죠.",
+      "tag": "trans",
+      "legacyVerbosity": "translation",
+      "provenance": {
+        "kind": "foreign_dialogue",
+        "dialogueInterval": {
+          "start": 225.08,
+          "end": 227.07,
+          "sourceLanguage": "ko",
+          "sourceText": "very important to us.um,we wanted to",
+          "confirmed": true
+        }
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "quarantined",
+      "validationReasons": [
+        "UNCERTAIN_MIXED_INTERVAL"
+      ],
+      "ttsEligible": false,
+      "audioLanguage": "mixed",
+      "rawLine": "[227][trans] 상호작용도 자연스럽고 매끄럽게 만들고 싶었죠."
+    },
+    {
+      "id": "677ae263eb4e270102753bbd7ee459c5085e408f2ac14ea224fa51cbec855187",
+      "timestamp": 232,
+      "text": "복잡한 창 관리나 정렬 작업은 번거로울 수 있고,기기를 접을 때 매끄럽게 전환되지 않기도 합니다.",
+      "tag": "trans",
+      "legacyVerbosity": "translation",
+      "provenance": {
+        "kind": "foreign_dialogue",
+        "dialogueInterval": {
+          "start": 231.32,
+          "end": 232.63,
+          "sourceLanguage": "ko",
+          "sourceText": "natural and fluid as well.some of these",
+          "confirmed": true
+        }
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "quarantined",
+      "validationReasons": [
+        "UNCERTAIN_MIXED_INTERVAL"
+      ],
+      "ttsEligible": false,
+      "audioLanguage": "mixed",
+      "rawLine": "[232][trans] 복잡한 창 관리나 정렬 작업은 번거로울 수 있고, 기기를 접을 때 매끄럽게 전환되지 않기도 합니다."
+    },
+    {
+      "id": "ec2140cd0e1fd3a6dc9e5ac1e6719363d0d20b10ffe81355d7477b56e4e4ba75",
+      "timestamp": 245,
+      "text": "멀티태스킹이나 영상 시청 같은 강력한 기능을 주면서도 아이폰 고유의 단순함을 지키고자 했습니다.",
+      "tag": "trans",
+      "legacyVerbosity": "translation",
+      "provenance": {
+        "kind": "foreign_dialogue",
+        "dialogueInterval": {
+          "start": 243.96,
+          "end": 245.03,
+          "sourceLanguage": "ko",
+          "sourceText": "everything everything changes.",
+          "confirmed": true
+        }
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "quarantined",
+      "validationReasons": [
+        "UNCERTAIN_MIXED_INTERVAL"
+      ],
+      "ttsEligible": false,
+      "audioLanguage": "mixed",
+      "rawLine": "[245][trans] 멀티태스킹이나 영상 시청 같은 강력한 기능을 주면서도 아이폰 고유의 단순함을 지키고자 했습니다."
+    },
+    {
+      "id": "77a79a84f3516ef71e5acf9deb22850048a33e5938af47a0183f20559d7e6e11",
+      "timestamp": 303,
+      "text": "단순히 아이폰을 늘리거나 아이패드를 줄인 것이 아니라 독자적인 제품으로 접근했습니다.",
+      "tag": "trans",
+      "legacyVerbosity": "translation",
+      "provenance": {
+        "kind": "foreign_dialogue",
+        "dialogueInterval": {
+          "start": 301.6,
+          "end": 303.07,
+          "sourceLanguage": "ko",
+          "sourceText": "strching out aone or",
+          "confirmed": true
+        }
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "quarantined",
+      "validationReasons": [
+        "UNCERTAIN_MIXED_INTERVAL"
+      ],
+      "ttsEligible": false,
+      "audioLanguage": "mixed",
+      "rawLine": "[303][trans] 단순히 아이폰을 늘리거나 아이패드를 줄인 것이 아니라 독자적인 제품으로 접근했습니다."
+    },
+    {
+      "id": "44a71438290f83569393de28cebad7f534cd9a1b5a5a90f6ea364e5b7bf0eba2",
+      "timestamp": 309,
+      "text": "하드웨어와 인터페이스를 동시에 구상하며 수많은 대안을 검토했습니다.",
+      "tag": "trans",
+      "legacyVerbosity": "translation",
+      "provenance": {
+        "kind": "foreign_dialogue",
+        "dialogueInterval": {
+          "start": 308.28,
+          "end": 309.87,
+          "sourceLanguage": "ko",
+          "sourceText": "as its own thing.we conceived of both",
+          "confirmed": true
+        }
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "quarantined",
+      "validationReasons": [
+        "UNCERTAIN_MIXED_INTERVAL"
+      ],
+      "ttsEligible": false,
+      "audioLanguage": "mixed",
+      "rawLine": "[309][trans] 하드웨어와 인터페이스를 동시에 구상하며 수많은 대안을 검토했습니다."
+    },
+    {
+      "id": "c4b54bf3df8dde8ef2cebc25289a9bbd2b829e38ad1306320cf00509f8190b0a",
+      "timestamp": 322,
+      "text": "인터페이스를 새롭고 독창적으로 바꾼다면 훌륭한 폼팩터를 완성할 수 있겠다고 판단했죠.",
+      "tag": "trans",
+      "legacyVerbosity": "translation",
+      "provenance": {
+        "kind": "foreign_dialogue",
+        "dialogueInterval": {
+          "start": 321.84,
+          "end": 322.55,
+          "sourceLanguage": "ko",
+          "sourceText": "factor uh if we adapted the",
+          "confirmed": true
+        }
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "quarantined",
+      "validationReasons": [
+        "UNCERTAIN_MIXED_INTERVAL"
+      ],
+      "ttsEligible": false,
+      "audioLanguage": "mixed",
+      "rawLine": "[322][trans] 인터페이스를 새롭고 독창적으로 바꾼다면 훌륭한 폼팩터를 완성할 수 있겠다고 판단했죠."
+    },
+    {
+      "id": "b4ad65db51d294749277c293dda3343a10a6bf520be9cec75af2a8765c1976af",
+      "timestamp": 327,
+      "text": "버튼들을 접히는 축 쪽으로 옮겨 손이 쉽게 닿도록 하고,화면 높이 전체를 콘텐츠에 쓸 수 있게 했습니다.",
+      "tag": "trans",
+      "legacyVerbosity": "translation",
+      "provenance": {
+        "kind": "foreign_dialogue",
+        "dialogueInterval": {
+          "start": 325.4,
+          "end": 327.03,
+          "sourceLanguage": "ko",
+          "sourceText": "allne and unique way to take advantage of",
+          "confirmed": true
+        }
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "quarantined",
+      "validationReasons": [
+        "UNCERTAIN_MIXED_INTERVAL"
+      ],
+      "ttsEligible": false,
+      "audioLanguage": "mixed",
+      "rawLine": "[327][trans] 버튼들을 접히는 축 쪽으로 옮겨 손이 쉽게 닿도록 하고, 화면 높이 전체를 콘텐츠에 쓸 수 있게 했습니다."
+    },
+    {
+      "id": "f02e5759870f1d110cf37eb089a38daf959b65365c5f41ee7fb03c8669905e38",
+      "timestamp": 336,
+      "text": "기존 스마트폰 ui를 그대로 가져와 아래로 밀어 넣고 콘텐츠 공간을 줄이는 것보다 훨씬 우수하다고 봅니다.",
+      "tag": "trans",
+      "legacyVerbosity": "translation",
+      "provenance": {
+        "kind": "foreign_dialogue",
+        "dialogueInterval": {
+          "start": 334.52,
+          "end": 336.19,
+          "sourceLanguage": "ko",
+          "sourceText": "device.and we think this is uh really",
+          "confirmed": true
+        }
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "quarantined",
+      "validationReasons": [
+        "UNCERTAIN_MIXED_INTERVAL"
+      ],
+      "ttsEligible": false,
+      "audioLanguage": "mixed",
+      "rawLine": "[336][trans] 기존 스마트폰 UI를 그대로 가져와 아래로 밀어 넣고 콘텐츠 공간을 줄이는 것보다 훨씬 우수하다고 봅니다."
+    },
+    {
+      "id": "81324f41033ca4e412834ba41a568e58e89c640668003487cb048bc15c0c1683",
+      "timestamp": 352,
+      "text": "기존 방식에 얽매이지 않고 이 폼팩터에 꼭 맞게 디자인을 최적화하는 데 집중했습니다.",
+      "tag": "trans",
+      "legacyVerbosity": "translation",
+      "provenance": {
+        "kind": "foreign_dialogue",
+        "dialogueInterval": {
+          "start": 351.52,
+          "end": 352.43,
+          "sourceLanguage": "ko",
+          "sourceText": "bottom.and so uh it was very important",
+          "confirmed": true
+        }
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "quarantined",
+      "validationReasons": [
+        "UNCERTAIN_MIXED_INTERVAL"
+      ],
+      "ttsEligible": false,
+      "audioLanguage": "mixed",
+      "rawLine": "[352][trans] 기존 방식에 얽매이지 않고 이 폼팩터에 꼭 맞게 디자인을 최적화하는 데 집중했습니다."
+    },
+    {
+      "id": "64c388f89d450f396ea16d092227562393578737f06bacba88fb7e21a85767a2",
+      "timestamp": 366,
+      "text": "왼손잡이 사용자를 위한 조정도 거쳤습니다.",
+      "tag": "trans",
+      "legacyVerbosity": "translation",
+      "provenance": {
+        "kind": "foreign_dialogue",
+        "dialogueInterval": {
+          "start": 365.48,
+          "end": 366.67,
+          "sourceLanguage": "ko",
+          "sourceText": "users who are left-handed,uh",
+          "confirmed": true
+        }
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "quarantined",
+      "validationReasons": [
+        "UNCERTAIN_MIXED_INTERVAL"
+      ],
+      "ttsEligible": false,
+      "audioLanguage": "mixed",
+      "rawLine": "[366][trans] 왼손잡이 사용자를 위한 조정도 거쳤습니다."
+    },
+    {
+      "id": "53d3656656b50a9ec10bf5d9baf888727883d7e9acd22e7c6bef2042f3d0a8fb",
+      "timestamp": 370,
+      "text": "예를 들어 키보드를 한쪽으로 밀어 두면 한 손으로도 손을 무리하게 뻗지 않고 입력할 수 있죠.",
+      "tag": "trans",
+      "legacyVerbosity": "translation",
+      "provenance": {
+        "kind": "foreign_dialogue",
+        "dialogueInterval": {
+          "start": 369.24,
+          "end": 370.39,
+          "sourceLanguage": "ko",
+          "sourceText": "of adaptations.for instance,you can",
+          "confirmed": true
+        }
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "quarantined",
+      "validationReasons": [
+        "UNCERTAIN_MIXED_INTERVAL"
+      ],
+      "ttsEligible": false,
+      "audioLanguage": "mixed",
+      "rawLine": "[370][trans] 예를 들어 키보드를 한쪽으로 밀어 두면 한 손으로도 손을 무리하게 뻗지 않고 입력할 수 있죠."
+    },
+    {
+      "id": "0318659d909ae9fe2d9466fb1a3239aab8af548876c8dd493402a89de5c002b5",
+      "timestamp": 383,
+      "text": "기기가 열려 있든 닫혀 있든 양손 조작 시 측면 버튼을 통해 세로 방향 조작에 쉽게 접근할 수 있습니다.",
+      "tag": "trans",
+      "legacyVerbosity": "translation",
+      "provenance": {
+        "kind": "foreign_dialogue",
+        "dialogueInterval": {
+          "start": 383,
+          "end": 383.59,
+          "sourceLanguage": "ko",
+          "sourceText": "natural thing uh certainly when the",
+          "confirmed": true
+        }
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "quarantined",
+      "validationReasons": [
+        "UNCERTAIN_MIXED_INTERVAL"
+      ],
+      "ttsEligible": false,
+      "audioLanguage": "mixed",
+      "rawLine": "[383][trans] 기기가 열려 있든 닫혀 있든 양손 조작 시 측면 버튼을 통해 세로 방향 조작에 쉽게 접근할 수 있습니다."
+    },
+    {
+      "id": "51e7e2d99adc64fe6808ffbcda926755277cb4926df43089a48168dcb37a0f6e",
+      "timestamp": 394,
+      "text": "기기 위쪽까지 손이 닿지 않을 만큼 길지 않기 때문입니다.",
+      "tag": "trans",
+      "legacyVerbosity": "translation",
+      "provenance": {
+        "kind": "foreign_dialogue",
+        "dialogueInterval": {
+          "start": 393.88,
+          "end": 394.95,
+          "sourceLanguage": "ko",
+          "sourceText": "because the device isn't so tall that",
+          "confirmed": true
+        }
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "quarantined",
+      "validationReasons": [
+        "UNCERTAIN_MIXED_INTERVAL"
+      ],
+      "ttsEligible": false,
+      "audioLanguage": "mixed",
+      "rawLine": "[394][trans] 기기 위쪽까지 손이 닿지 않을 만큼 길지 않기 때문입니다."
+    },
+    {
+      "id": "33792764fb117ae16c5f913884c088b69f47cdbfd8257526ce1b178f8b2c5dfc",
+      "timestamp": 426,
+      "text": "애플은 최초가 되는 것보다 최고가 되는 데 집중합니다.",
+      "tag": "trans",
+      "legacyVerbosity": "translation",
+      "provenance": {
+        "kind": "foreign_dialogue",
+        "dialogueInterval": {
+          "start": 423.92,
+          "end": 426.83,
+          "sourceLanguage": "ko",
+          "sourceText": "궁금합니다.i think ason",
+          "confirmed": true
+        }
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "quarantined",
+      "validationReasons": [
+        "UNCERTAIN_MIXED_INTERVAL"
+      ],
+      "ttsEligible": false,
+      "audioLanguage": "mixed",
+      "rawLine": "[426][trans] 애플은 최초가 되는 것보다 최고가 되는 데 집중합니다."
+    },
+    {
+      "id": "6e8a1a40fe0cd32c0e614f62a70da8991658ed3b10876575b27041e6dae9e7f5",
+      "timestamp": 433,
+      "text": "모든 요소가 비전에 완벽히 부합할 때까지 서두르지 않고 준비했습니다.",
+      "tag": "trans",
+      "legacyVerbosity": "translation",
+      "provenance": {
+        "kind": "foreign_dialogue",
+        "dialogueInterval": {
+          "start": 432.88,
+          "end": 433.91,
+          "sourceLanguage": "ko",
+          "sourceText": "best and we weren this product until",
+          "confirmed": true
+        }
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "quarantined",
+      "validationReasons": [
+        "UNCERTAIN_MIXED_INTERVAL"
+      ],
+      "ttsEligible": false,
+      "audioLanguage": "mixed",
+      "rawLine": "[433][trans] 모든 요소가 비전에 완벽히 부합할 때까지 서두르지 않고 준비했습니다."
+    },
+    {
+      "id": "05eec344cb2ead67e8032f120970e0c418344803c6394bbacd6514369c4c3af3",
+      "timestamp": 444,
+      "text": "앞서 이야기한 사용자 경험처럼 매우 독창적이고 야심 찬 프로젝트였습니다.",
+      "tag": "trans",
+      "legacyVerbosity": "translation",
+      "provenance": {
+        "kind": "foreign_dialogue",
+        "dialogueInterval": {
+          "start": 443.64,
+          "end": 444.95,
+          "sourceLanguage": "ko",
+          "sourceText": "already with this user experience i",
+          "confirmed": true
+        }
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "quarantined",
+      "validationReasons": [
+        "UNCERTAIN_MIXED_INTERVAL"
+      ],
+      "ttsEligible": false,
+      "audioLanguage": "mixed",
+      "rawLine": "[444][trans] 앞서 이야기한 사용자 경험처럼 매우 독창적이고 야심 찬 프로젝트였습니다."
+    },
+    {
+      "id": "9ac864c8a30686e9118ea3e047c3668471c5e10eebcc226f30a12c3bf24e5337",
+      "timestamp": 450,
+      "text": "운영체제 전체와 기본 앱,프레임워크를 완전히 새로운 틀에 맞게 최적화했습니다.",
+      "tag": "trans",
+      "legacyVerbosity": "translation",
+      "provenance": {
+        "kind": "foreign_dialogue",
+        "dialogueInterval": {
+          "start": 448.56,
+          "end": 450.39,
+          "sourceLanguage": "ko",
+          "sourceText": "very ambitious project to take the",
+          "confirmed": true
+        }
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "quarantined",
+      "validationReasons": [
+        "UNCERTAIN_MIXED_INTERVAL"
+      ],
+      "ttsEligible": false,
+      "audioLanguage": "mixed",
+      "rawLine": "[450][trans] 운영체제 전체와 기본 앱, 프레임워크를 완전히 새로운 틀에 맞게 최적화했습니다."
+    },
+    {
+      "id": "782058d2c3e808c11900882d501b5ca8df74b18d0d171847bbb55b6fbc58c40d",
+      "timestamp": 458,
+      "text": "다른 제조사들처럼 기존 운영체제를 화면에 얹어 서둘러 출시하지 않고,공들여 훌륭한 제품을 만들고자 했습니다.",
+      "tag": "trans",
+      "legacyVerbosity": "translation",
+      "provenance": {
+        "kind": "foreign_dialogue",
+        "dialogueInterval": {
+          "start": 457.32,
+          "end": 458.15,
+          "sourceLanguage": "ko",
+          "sourceText": "framework.i think if you look at other",
+          "confirmed": true
+        }
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "quarantined",
+      "validationReasons": [
+        "UNCERTAIN_MIXED_INTERVAL"
+      ],
+      "ttsEligible": false,
+      "audioLanguage": "mixed",
+      "rawLine": "[458][trans] 다른 제조사들처럼 기존 운영체제를 화면에 얹어 서둘러 출시하지 않고, 공들여 훌륭한 제품을 만들고자 했습니다."
+    },
+    {
+      "id": "04331c602863efb9f8e20f79b8593bfc4de1d187d5b8012d99f9b050896097ef",
+      "timestamp": 470,
+      "text": "하드웨어의 완성도와 내부 디스플레이의 평평함 등 독보적인 요소들이 많지만,",
+      "tag": "trans",
+      "legacyVerbosity": "translation",
+      "provenance": {
+        "kind": "foreign_dialogue",
+        "dialogueInterval": {
+          "start": 468.56,
+          "end": 470.67,
+          "sourceLanguage": "ko",
+          "sourceText": "great.i think if you look at the",
+          "confirmed": true
+        }
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "quarantined",
+      "validationReasons": [
+        "UNCERTAIN_MIXED_INTERVAL"
+      ],
+      "ttsEligible": false,
+      "audioLanguage": "mixed",
+      "rawLine": "[470][trans] 하드웨어의 완성도와 내부 디스플레이의 평평함 등 독보적인 요소들이 많지만,"
+    },
+    {
+      "id": "47ea32e1e1a77ae1a95384e23ddc16d51bca7b6acefa0d97b132333ce865f37a",
+      "timestamp": 482,
+      "text": "개별 기능보다 모든 것이 완벽하게 하나로 어우러진 완성된 경험 자체가 가장 큰 가치입니다.",
+      "tag": "trans",
+      "legacyVerbosity": "translation",
+      "provenance": {
+        "kind": "foreign_dialogue",
+        "dialogueInterval": {
+          "start": 481.84,
+          "end": 482.63,
+          "sourceLanguage": "ko",
+          "sourceText": "elements to the experience,but for",
+          "confirmed": true
+        }
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "quarantined",
+      "validationReasons": [
+        "UNCERTAIN_MIXED_INTERVAL"
+      ],
+      "ttsEligible": false,
+      "audioLanguage": "mixed",
+      "rawLine": "[482][trans] 개별 기능보다 모든 것이 완벽하게 하나로 어우러진 완성된 경험 자체가 가장 큰 가치입니다."
+    }
+  ],
+  "rejected": [
+    {
+      "id": "ca8400ec1b98db81e4776855a29f6a5507295be6f16be4d475849a9a66f0f329",
+      "timestamp": 0,
+      "text": "자막 (팀쿡 인터뷰 당시..)",
+      "tag": "txt",
+      "legacyVerbosity": "text",
+      "provenance": {
+        "kind": "screen_text",
+        "frameEvidence": [
+          {
+            "id": "frame-0",
+            "timestamp": 0
+          }
+        ],
+        "visibleTextEvidence": "자막 (팀쿡 인터뷰 당시..)",
+        "source": "gemini_multimodal_frame"
+      },
+      "policyVersion": "codex-v2",
+      "validationStatus": "rejected",
+      "validationReasons": [
+        "TIMESTAMP_OUT_OF_RANGE"
+      ],
+      "ttsEligible": false,
+      "audioLanguage": "mixed",
+      "rawLine": "[0][txt] 자막 (팀쿡 인터뷰 당시..)"
+    }
+  ],
+  "reasons": [
+    {
+      "id": "ca8400ec1b98db81e4776855a29f6a5507295be6f16be4d475849a9a66f0f329",
+      "code": "TIMESTAMP_OUT_OF_RANGE"
+    },
+    {
+      "id": "8ea65c3bb6bb67383814c43406dca1fd3fd580c50318c66eea808711b88fd8ac",
+      "code": "UNCERTAIN_MIXED_INTERVAL"
+    },
+    {
+      "id": "96a4c0b46307c059097c96203938fb31b8e5e07a751c7dd3ff4b349db19b1b44",
+      "code": "UNCERTAIN_MIXED_INTERVAL"
+    },
+    {
+      "id": "42d79665980a5879c5893e51350c05f6df32d32ae1f4e7e74830a624f8b88809",
+      "code": "UNCERTAIN_MIXED_INTERVAL"
+    },
+    {
+      "id": "d7977e862d1bcdd5e9854874b87132b34d85f98216b2fdda865ec61de474719e",
+      "code": "UNCERTAIN_MIXED_INTERVAL"
+    },
+    {
+      "id": "ba38bdb1499d76101bc970535877ffc1ece23b01d386c212ef280a89e2702660",
+      "code": "UNCERTAIN_MIXED_INTERVAL"
+    },
+    {
+      "id": "adb56f4f4d32edd2713df7e411d103fa46bf6baabc049f4aa21b588d0ffc5ed7",
+      "code": "UNCERTAIN_MIXED_INTERVAL"
+    },
+    {
+      "id": "793e910e47f9ef2a7be1f7aafa533fc18d7e07ee51cd909c0993f2fd757289dc",
+      "code": "UNCERTAIN_MIXED_INTERVAL"
+    },
+    {
+      "id": "7d64bee47404462a03692e92628424ad7a4a44ffd52ea2cde8c8966b7e06c684",
+      "code": "UNCERTAIN_MIXED_INTERVAL"
+    },
+    {
+      "id": "68e659de002728d1994195a048fe7a147219cb6fb8e23d3a14cb1fe40050aaf3",
+      "code": "UNCERTAIN_MIXED_INTERVAL"
+    },
+    {
+      "id": "3a837d484b93fd465a85c4edb20134ae03d24644574a87e89a969f5c7a028a57",
+      "code": "UNCERTAIN_MIXED_INTERVAL"
+    },
+    {
+      "id": "11221010d353a6b858dda8e0baf7a9cf12ee48f9d06549b6afc58086913e10ad",
+      "code": "UNCERTAIN_MIXED_INTERVAL"
+    },
+    {
+      "id": "677ae263eb4e270102753bbd7ee459c5085e408f2ac14ea224fa51cbec855187",
+      "code": "UNCERTAIN_MIXED_INTERVAL"
+    },
+    {
+      "id": "ec2140cd0e1fd3a6dc9e5ac1e6719363d0d20b10ffe81355d7477b56e4e4ba75",
+      "code": "UNCERTAIN_MIXED_INTERVAL"
+    },
+    {
+      "id": "77a79a84f3516ef71e5acf9deb22850048a33e5938af47a0183f20559d7e6e11",
+      "code": "UNCERTAIN_MIXED_INTERVAL"
+    },
+    {
+      "id": "44a71438290f83569393de28cebad7f534cd9a1b5a5a90f6ea364e5b7bf0eba2",
+      "code": "UNCERTAIN_MIXED_INTERVAL"
+    },
+    {
+      "id": "c4b54bf3df8dde8ef2cebc25289a9bbd2b829e38ad1306320cf00509f8190b0a",
+      "code": "UNCERTAIN_MIXED_INTERVAL"
+    },
+    {
+      "id": "b4ad65db51d294749277c293dda3343a10a6bf520be9cec75af2a8765c1976af",
+      "code": "UNCERTAIN_MIXED_INTERVAL"
+    },
+    {
+      "id": "f02e5759870f1d110cf37eb089a38daf959b65365c5f41ee7fb03c8669905e38",
+      "code": "UNCERTAIN_MIXED_INTERVAL"
+    },
+    {
+      "id": "81324f41033ca4e412834ba41a568e58e89c640668003487cb048bc15c0c1683",
+      "code": "UNCERTAIN_MIXED_INTERVAL"
+    },
+    {
+      "id": "64c388f89d450f396ea16d092227562393578737f06bacba88fb7e21a85767a2",
+      "code": "UNCERTAIN_MIXED_INTERVAL"
+    },
+    {
+      "id": "53d3656656b50a9ec10bf5d9baf888727883d7e9acd22e7c6bef2042f3d0a8fb",
+      "code": "UNCERTAIN_MIXED_INTERVAL"
+    },
+    {
+      "id": "0318659d909ae9fe2d9466fb1a3239aab8af548876c8dd493402a89de5c002b5",
+      "code": "UNCERTAIN_MIXED_INTERVAL"
+    },
+    {
+      "id": "51e7e2d99adc64fe6808ffbcda926755277cb4926df43089a48168dcb37a0f6e",
+      "code": "UNCERTAIN_MIXED_INTERVAL"
+    },
+    {
+      "id": "33792764fb117ae16c5f913884c088b69f47cdbfd8257526ce1b178f8b2c5dfc",
+      "code": "UNCERTAIN_MIXED_INTERVAL"
+    },
+    {
+      "id": "6e8a1a40fe0cd32c0e614f62a70da8991658ed3b10876575b27041e6dae9e7f5",
+      "code": "UNCERTAIN_MIXED_INTERVAL"
+    },
+    {
+      "id": "05eec344cb2ead67e8032f120970e0c418344803c6394bbacd6514369c4c3af3",
+      "code": "UNCERTAIN_MIXED_INTERVAL"
+    },
+    {
+      "id": "9ac864c8a30686e9118ea3e047c3668471c5e10eebcc226f30a12c3bf24e5337",
+      "code": "UNCERTAIN_MIXED_INTERVAL"
+    },
+    {
+      "id": "782058d2c3e808c11900882d501b5ca8df74b18d0d171847bbb55b6fbc58c40d",
+      "code": "UNCERTAIN_MIXED_INTERVAL"
+    },
+    {
+      "id": "04331c602863efb9f8e20f79b8593bfc4de1d187d5b8012d99f9b050896097ef",
+      "code": "UNCERTAIN_MIXED_INTERVAL"
+    },
+    {
+      "id": "47ea32e1e1a77ae1a95384e23ddc16d51bca7b6acefa0d97b132333ce865f37a",
+      "code": "UNCERTAIN_MIXED_INTERVAL"
+    }
+  ],
+  "policyVersion": "codex-v2"
+}
