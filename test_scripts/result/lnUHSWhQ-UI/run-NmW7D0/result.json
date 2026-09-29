@@ -1,0 +1,56 @@
+{
+  "workDir": "/Users/chacha/src/youtube-describer-test/test_scripts/result/lnUHSWhQ-UI/run-NmW7D0",
+  "videoId": "lnUHSWhQ-UI",
+  "title": "내향적인 아이의 첫 심부름ㅣ아직 세상이 살만한 이유(feat.감동/대견/기특 주의)",
+  "frameCount": 316,
+  "dialogueCount": 249,
+  "audioLanguage": "mixed",
+  "models": [
+    {
+      "provider": "gemini",
+      "requestedModel": "gemini-3.1-pro-preview",
+      "outputFile": "gemini-3.1-pro-preview.txt",
+      "model": "gemini-3.1-pro-preview",
+      "durationMs": 14438,
+      "text": "[0][txt] 셀프 촬영 중.\n[6][txt] 자막은 아이가 설렘에 평정심을 되찾는다고 설명합니다.\n[14][txt] 자막은 아이가 안 터지는 무전기에 다시 불안해졌다고 설명합니다.\n[18][txt] \"문이 열립니다.\"\n[32][txt] (긴장)어휴...\n[36][txt] '아빠, 엄마가 보고 있는다 했는데..'\n[44][txt] 위에서 지켜보고 있을 엄마, 아빠 모습을 생각하니,\n[52][txt] 리후 손 흔들어 봐~\n[58][txt] 아빠의 음성에 안도감을 느끼며 편의점을 들어가는데..\n[60][txt] NEW FAMILY STORY EPISODE. 24-11.\n[64][v1] 식탁 앞에 앉은 여자아이가 식사하며 대화합니다.\n[102][v2] 맞은편에 앉은 아빠가 고기를 가위로 자릅니다.\n[120][v2] 아이가 젓가락을 들고 아빠를 봅니다.\n[134][txt] (나도 갑자기 걱정ㅋㅋ) 무섭다고 겁내면 안돼, 갑자기 막!\n[144][txt] 엘리베이터에서 아빠가 바로 얘기 해버리면 사람들이 놀랄 수도 있잖아~\n[146][txt] 갑자기 아빠가 말 걸면 창피할 수도 있어서?ㅋㅋ\n[238][v1] 아이가 가방을 들고 거실을 지나 현관으로 갑니다.\n[254][v2] 아이가 현관문을 엽니다.\n[270][v1] 아이가 집을 나섭니다.\n[276][txt] 핸드폰 촬영준비중ㅋㅋ\n[286][v2] 아빠가 문틈 사이로 복도를 걸어가는 아이를 촬영합니다.\n[300][v1] 아이가 엘리베이터를 타고 1층 버튼을 누릅니다.\n[304][txt] 으흐응ㅠㅠ\n[330][txt] '아빠가 엘리베이터에서는 무전기 안 될 수도 있다고 그랬는데..'\n[336][txt] 안 터지는 무전기에 다시 불안해진다..\n[340][txt] (1층)왔다..\n[346][txt] \"문이 열립니다.\"\n[352][txt] 엄마와 매일 등원하며 듣던 승강기 언니 목소리가 낯설고,\n[366][txt] 위에서 지켜보고 있을 엄마, 아빠 모습을 생각하니,\n[370][txt] 자신감을 되찾고, \"신난다\"고 주문을 걸어본다.\n[380][txt] 리후 손 흔들어 봐~\n[386][v1] 아이가 편의점에 들어섭니다.\n[394][txt] 모르겠으면 언니한테 물어봐~\n[398][txt] 창피하니..?ㅋㅋㅋ\n[412][txt] 이대로 실패할 것인가..\n[436][txt] 평소에 쑥스러워서 잘 못하는 감사 인사도 하고 많이 놀랐어요.\n[442][txt] 도움 주셔서 정말 감사합니다.\n[458][txt] 자 이제 가방에 넣고~\n[462][txt] 친절하게 대해 주셔서 정말 감사합니다.\n[470][txt] 성공이다!\n[482][v1] 아이가 아파트 단지를 걸어갑니다.\n[484][txt] 어!? 나왔다 나왔다\n[488][v2] 아이가 뛰어갑니다.\n[494][txt] 뛰지말지~ 왜 뛰지? 리후야~\n[498][txt] 거의 다왔어!\n[500][txt] \"비밀번호를 눌러주세요~\"\n[524][txt] 엘리베이터 왔다!\n[534][v1] 아이가 엘리베이터를 탑니다.\n[552][txt] 많이 무서웠을 리후\n[562][txt] 가자!\n[572][v1] 엘리베이터 문이 열리고 아이가 아빠를 향해 뛰어옵니다.\n[584][txt] 지나가는 아저씨가 꺼내주셨어!\n[610][v2] 아이가 아빠에게 안깁니다.",
+      "usage": {
+        "promptTokenCount": 106163,
+        "candidatesTokenCount": 1027,
+        "totalTokenCount": 107190,
+        "cachedContentTokenCount": 101772,
+        "promptTokensDetails": [
+          {
+            "modality": "IMAGE",
+            "tokenCount": 79948
+          },
+          {
+            "modality": "TEXT",
+            "tokenCount": 26215
+          }
+        ],
+        "cacheTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 25130
+          },
+          {
+            "modality": "IMAGE",
+            "tokenCount": 76642
+          }
+        ],
+        "serviceTier": "standard"
+      },
+      "summary": {
+        "lines": 53,
+        "tagged": 53,
+        "tags": {
+          "v1": 8,
+          "v2": 6,
+          "v3": 0,
+          "txt": 39,
+          "trans": 0
+        }
+      }
+    }
+  ]
+}

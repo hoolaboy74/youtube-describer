@@ -1,0 +1,16 @@
+{
+  "workDir": "/Users/chacha/src/youtube-describer-test/test_scripts/result/lnUHSWhQ-UI/run-xSRc80",
+  "videoId": "lnUHSWhQ-UI",
+  "title": "내향적인 아이의 첫 심부름ㅣ아직 세상이 살만한 이유(feat.감동/대견/기특 주의)",
+  "frameCount": 316,
+  "dialogueCount": 249,
+  "audioLanguage": "mixed",
+  "models": [
+    {
+      "provider": "gemini",
+      "requestedModel": "gemini-3.1-pro-preview",
+      "errorFile": "gemini-3.1-pro-preview.error.txt",
+      "error": "Error: [GoogleGenerativeAI Error]: Error fetching from https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-pro-preview:streamGenerateContent?alt=sse: [503 Service Unavailable] Deadline expired before operation could complete.\n    at handleResponseNotOk (/Users/chacha/src/youtube-describer-test/backend/node_modules/@google/generative-ai/dist/index.js:434:11)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async makeRequest (/Users/chacha/src/youtube-describer-test/backend/node_modules/@google/generative-ai/dist/index.js:403:9)\n    at async generateContentStream (/Users/chacha/src/youtube-describer-test/backend/node_modules/@google/generative-ai/dist/index.js:862:22)\n    at async runGemini (/Users/chacha/src/youtube-describer-test/test_scripts/compare_model.js:497:18)\n    at async Promise.allSettled (index 0)\n    at async main (/Users/chacha/src/youtube-describer-test/test_scripts/compare_model.js:723:23)"
+    }
+  ]
+}

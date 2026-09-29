@@ -1,0 +1,6413 @@
+{
+  "videoId": "aA0mgdhdVUs",
+  "videoUrl": "https://www.youtube.com/watch?v=aA0mgdhdVUs",
+  "title": "착한 척 (SUB)",
+  "duration": 714,
+  "audioLanguage": "korean",
+  "subtitleSelection": {
+    "file": "aA0mgdhdVUs.ko.vtt",
+    "sourceLanguage": "ko",
+    "sourceRole": "original_dialogue",
+    "logLabel": "korean video: loaded source subtitles"
+  },
+  "dialogueTrack": [
+    {
+      "start": 4.58,
+      "end": 20.55,
+      "sourceLanguage": "ko",
+      "sourceText": "[음악]",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 20.56,
+      "end": 23.19,
+      "sourceLanguage": "ko",
+      "sourceText": "저 혹시 이거",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 23.19,
+      "end": 23.2,
+      "sourceLanguage": "ko",
+      "sourceText": "저 혹시 이거",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 23.2,
+      "end": 24.51,
+      "sourceLanguage": "ko",
+      "sourceText": "저 혹시 이거 &gt;&gt; 아네 제 거",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 24.51,
+      "end": 24.52,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 아네 제 거",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 24.52,
+      "end": 26.91,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 아네 제 거 &gt;&gt; 아네 다음에 제가 써도 될까요?",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 26.91,
+      "end": 26.92,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 아네 다음에 제가 써도 될까요?",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 26.92,
+      "end": 28.03,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 아네 다음에 제가 써도 될까요? 아쓰세요.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 28.03,
+      "end": 28.04,
+      "sourceLanguage": "ko",
+      "sourceText": "아쓰세요.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 28.04,
+      "end": 30.12,
+      "sourceLanguage": "ko",
+      "sourceText": "아쓰세요. &gt;&gt; 감사합니다.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 30.12,
+      "end": 30.13,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 감사합니다.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 30.13,
+      "end": 31.91,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 감사합니다. [음악]",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 31.91,
+      "end": 31.92,
+      "sourceLanguage": "ko",
+      "sourceText": "[음악]",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 31.92,
+      "end": 34.11,
+      "sourceLanguage": "ko",
+      "sourceText": "[음악] &gt;&gt; 네.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 34.11,
+      "end": 34.12,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 네.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 34.12,
+      "end": 37.33,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 네. 아 만족도 조사. 아 괜찮이요?",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 37.33,
+      "end": 37.34,
+      "sourceLanguage": "ko",
+      "sourceText": "아 만족도 조사. 아 괜찮이요?",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 37.34,
+      "end": 38.59,
+      "sourceLanguage": "ko",
+      "sourceText": "아 만족도 조사. 아 괜찮이요? [음악]",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 38.59,
+      "end": 38.6,
+      "sourceLanguage": "ko",
+      "sourceText": "[음악]",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 38.6,
+      "end": 41.23,
+      "sourceLanguage": "ko",
+      "sourceText": "[음악] 아 5분 정도는 괜찮을 것 같아요.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 41.23,
+      "end": 41.24,
+      "sourceLanguage": "ko",
+      "sourceText": "아 5분 정도는 괜찮을 것 같아요.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 41.24,
+      "end": 42.31,
+      "sourceLanguage": "ko",
+      "sourceText": "아 5분 정도는 괜찮을 것 같아요. 예.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 42.31,
+      "end": 42.32,
+      "sourceLanguage": "ko",
+      "sourceText": "예.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 42.32,
+      "end": 45.95,
+      "sourceLanguage": "ko",
+      "sourceText": "예. &gt;&gt; 음.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 45.96,
+      "end": 48.46,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 아 네. 네. 만족하겠습니다. 다.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 48.46,
+      "end": 48.47,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 아 네. 네. 만족하겠습니다. 다.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 48.47,
+      "end": 49.71,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 아 네. 네. 만족하겠습니다. 다. [음악]",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 49.71,
+      "end": 49.72,
+      "sourceLanguage": "ko",
+      "sourceText": "[음악]",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 49.72,
+      "end": 52.67,
+      "sourceLanguage": "ko",
+      "sourceText": "[음악] 네. 아.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 52.67,
+      "end": 52.68,
+      "sourceLanguage": "ko",
+      "sourceText": "네. 아.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 52.68,
+      "end": 53.51,
+      "sourceLanguage": "ko",
+      "sourceText": "네. 아. 그러면은",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 53.51,
+      "end": 53.52,
+      "sourceLanguage": "ko",
+      "sourceText": "그러면은",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 53.52,
+      "end": 57.23,
+      "sourceLanguage": "ko",
+      "sourceText": "그러면은 &gt;&gt; 아 저 사람이 뭔 적긴 한데.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 57.23,
+      "end": 57.24,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 아 저 사람이 뭔 적긴 한데.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 57.24,
+      "end": 58.79,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 아 저 사람이 뭔 적긴 한데. 말랐네.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 58.79,
+      "end": 58.8,
+      "sourceLanguage": "ko",
+      "sourceText": "말랐네.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 58.8,
+      "end": 61.35,
+      "sourceLanguage": "ko",
+      "sourceText": "말랐네. &gt;&gt; 그러면 매우 만족으로 보겠습니다.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 61.35,
+      "end": 61.36,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 그러면 매우 만족으로 보겠습니다.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 61.36,
+      "end": 63.03,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 그러면 매우 만족으로 보겠습니다. 네.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 63.03,
+      "end": 63.04,
+      "sourceLanguage": "ko",
+      "sourceText": "네.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 63.04,
+      "end": 65.71,
+      "sourceLanguage": "ko",
+      "sourceText": "네. &gt;&gt; 네. 매우 만족합니다.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 65.71,
+      "end": 65.72,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 네. 매우 만족합니다.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 65.72,
+      "end": 67.99,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 네. 매우 만족합니다. &gt;&gt; 네. 네. 감사합니다. 네.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 67.99,
+      "end": 68,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 네. 네. 감사합니다. 네.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 68,
+      "end": 70.31,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 네. 네. 감사합니다. 네. &gt;&gt; 아, 저 여기 다 돼 갖고 예. 여기",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 70.31,
+      "end": 70.32,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 아, 저 여기 다 돼 갖고 예. 여기",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 70.32,
+      "end": 71.23,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 아, 저 여기 다 돼 갖고 예. 여기 있으시면 돼요. 이제",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 71.23,
+      "end": 71.24,
+      "sourceLanguage": "ko",
+      "sourceText": "있으시면 돼요. 이제",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 71.24,
+      "end": 72.43,
+      "sourceLanguage": "ko",
+      "sourceText": "있으시면 돼요. 이제 &gt;&gt; 감사합니다. 네.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 72.43,
+      "end": 72.44,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 감사합니다. 네.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 72.44,
+      "end": 74.39,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 감사합니다. 네. &gt;&gt; 예. 쓰세요. 쓰세요. 네.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 74.39,
+      "end": 74.4,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 예. 쓰세요. 쓰세요. 네.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 74.4,
+      "end": 75.95,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 예. 쓰세요. 쓰세요. 네. &gt;&gt; 네.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 75.95,
+      "end": 75.96,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 네.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 75.96,
+      "end": 81.21,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 네. 네. [음악]",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 81.22,
+      "end": 92.34,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; [음악]",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 92.35,
+      "end": 98.31,
+      "sourceLanguage": "ko",
+      "sourceText": "[음악]",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 98.32,
+      "end": 99.31,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 문이 다",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 99.31,
+      "end": 99.32,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 문이 다",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 99.32,
+      "end": 100.47,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 문이 다 &gt;&gt; 어 몇 층 눌러 드릴까요?",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 100.47,
+      "end": 100.48,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 어 몇 층 눌러 드릴까요?",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 100.48,
+      "end": 102.35,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 어 몇 층 눌러 드릴까요? &gt;&gt; 저 24 아 [콧방귀]",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 102.35,
+      "end": 102.36,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 저 24 아 [콧방귀]",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 102.36,
+      "end": 113.91,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 저 24 아 [콧방귀] &gt;&gt; 저도 24층 사라죠. 아. 오.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 113.92,
+      "end": 117.11,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 엘베가 많이 덥죠?",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 117.11,
+      "end": 117.12,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 엘베가 많이 덥죠?",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 117.12,
+      "end": 117.87,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 엘베가 많이 덥죠? &gt;&gt; 네.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 117.87,
+      "end": 117.88,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 네.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 117.88,
+      "end": 120.15,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 네. &gt;&gt; 네. 입주 지나고 나서 안 틀어",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 120.15,
+      "end": 120.16,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 네. 입주 지나고 나서 안 틀어",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 120.16,
+      "end": 122.63,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 네. 입주 지나고 나서 안 틀어 주더라고요.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 122.63,
+      "end": 122.64,
+      "sourceLanguage": "ko",
+      "sourceText": "주더라고요.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 122.64,
+      "end": 122.83,
+      "sourceLanguage": "ko",
+      "sourceText": "주더라고요. 아,",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 122.83,
+      "end": 122.84,
+      "sourceLanguage": "ko",
+      "sourceText": "아,",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 122.84,
+      "end": 125.43,
+      "sourceLanguage": "ko",
+      "sourceText": "아, &gt;&gt; 근데 관리실에 전화하면 좀 틀어 줄",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 125.43,
+      "end": 125.44,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 근데 관리실에 전화하면 좀 틀어 줄",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 125.44,
+      "end": 126.67,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 근데 관리실에 전화하면 좀 틀어 줄 수도 있긴 한데.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 126.67,
+      "end": 126.68,
+      "sourceLanguage": "ko",
+      "sourceText": "수도 있긴 한데.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 126.68,
+      "end": 129.91,
+      "sourceLanguage": "ko",
+      "sourceText": "수도 있긴 한데. &gt;&gt; 어. 어. 진짜요? 와. 한번 해",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 129.91,
+      "end": 129.92,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 어. 어. 진짜요? 와. 한번 해",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 129.92,
+      "end": 133.31,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 어. 어. 진짜요? 와. 한번 해 봐야겠다. 네. 감사합니다.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 133.31,
+      "end": 133.32,
+      "sourceLanguage": "ko",
+      "sourceText": "봐야겠다. 네. 감사합니다.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 133.32,
+      "end": 138.39,
+      "sourceLanguage": "ko",
+      "sourceText": "봐야겠다. 네. 감사합니다. &gt;&gt; 이제 마주치면 인사해야겠네.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 138.4,
+      "end": 143.99,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 와드다.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 144,
+      "end": 146.31,
+      "sourceLanguage": "ko",
+      "sourceText": "비",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 146.31,
+      "end": 146.32,
+      "sourceLanguage": "ko",
+      "sourceText": "비",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 146.32,
+      "end": 148.51,
+      "sourceLanguage": "ko",
+      "sourceText": "비 엄마 어딨어?",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 148.51,
+      "end": 148.52,
+      "sourceLanguage": "ko",
+      "sourceText": "엄마 어딨어?",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 148.52,
+      "end": 154.39,
+      "sourceLanguage": "ko",
+      "sourceText": "엄마 어딨어? 휴.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 154.4,
+      "end": 156.47,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 누아 안녕하세요.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 156.47,
+      "end": 156.48,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 누아 안녕하세요.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 156.48,
+      "end": 158.11,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 누아 안녕하세요. &gt;&gt; 어 안녕하세요.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 158.11,
+      "end": 158.12,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 어 안녕하세요.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 158.12,
+      "end": 159.99,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 어 안녕하세요. &gt;&gt; 강아지 키우세요?",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 159.99,
+      "end": 160,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 강아지 키우세요?",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 160,
+      "end": 162.75,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 강아지 키우세요? &gt;&gt; 아 아니야. 그 누가 두 온 거 같아",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 162.75,
+      "end": 162.76,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 아 아니야. 그 누가 두 온 거 같아",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 162.76,
+      "end": 163.51,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 아 아니야. 그 누가 두 온 거 같아 가지고",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 163.51,
+      "end": 163.52,
+      "sourceLanguage": "ko",
+      "sourceText": "가지고",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 163.52,
+      "end": 166.15,
+      "sourceLanguage": "ko",
+      "sourceText": "가지고 &gt;&gt; 네.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 166.15,
+      "end": 166.16,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 네.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 166.16,
+      "end": 167.63,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 네. &gt;&gt; 아, 여기 도로 바로 옆이라서 위험할",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 167.63,
+      "end": 167.64,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 아, 여기 도로 바로 옆이라서 위험할",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 167.64,
+      "end": 168.31,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 아, 여기 도로 바로 옆이라서 위험할 텐데.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 168.31,
+      "end": 168.32,
+      "sourceLanguage": "ko",
+      "sourceText": "텐데.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 168.32,
+      "end": 178.55,
+      "sourceLanguage": "ko",
+      "sourceText": "텐데. &gt;&gt; 그렇죠? 아, 어떡하지?",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 178.56,
+      "end": 181.27,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 일단 차에 태우시죠. 아니, 뭐",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 181.27,
+      "end": 181.28,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 일단 차에 태우시죠. 아니, 뭐",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 181.28,
+      "end": 183.35,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 일단 차에 태우시죠. 아니, 뭐 병원에 데려가든 파출수를 가든 일단",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 183.35,
+      "end": 183.36,
+      "sourceLanguage": "ko",
+      "sourceText": "병원에 데려가든 파출수를 가든 일단",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 183.36,
+      "end": 185.31,
+      "sourceLanguage": "ko",
+      "sourceText": "병원에 데려가든 파출수를 가든 일단 저희가 발견했으니까 책임을 져야 될",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 185.31,
+      "end": 185.32,
+      "sourceLanguage": "ko",
+      "sourceText": "저희가 발견했으니까 책임을 져야 될",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 185.32,
+      "end": 185.83,
+      "sourceLanguage": "ko",
+      "sourceText": "저희가 발견했으니까 책임을 져야 될 거 같아죠?",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 185.83,
+      "end": 185.84,
+      "sourceLanguage": "ko",
+      "sourceText": "거 같아죠?",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 185.84,
+      "end": 187.91,
+      "sourceLanguage": "ko",
+      "sourceText": "거 같아죠? &gt;&gt; 아니야. 아니야. 그 그냥 두고",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 187.91,
+      "end": 187.92,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 아니야. 아니야. 그 그냥 두고",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 187.92,
+      "end": 189.79,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 아니야. 아니야. 그 그냥 두고 가는게 맞는 거 같아.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 189.79,
+      "end": 189.8,
+      "sourceLanguage": "ko",
+      "sourceText": "가는게 맞는 거 같아.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 189.8,
+      "end": 191.75,
+      "sourceLanguage": "ko",
+      "sourceText": "가는게 맞는 거 같아. 뭐 길량이도 길가지도 보인 대로 다",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 191.75,
+      "end": 191.76,
+      "sourceLanguage": "ko",
+      "sourceText": "뭐 길량이도 길가지도 보인 대로 다",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 191.76,
+      "end": 193.51,
+      "sourceLanguage": "ko",
+      "sourceText": "뭐 길량이도 길가지도 보인 대로 다 병원 데고 가면 병원비 감당도 안",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 193.51,
+      "end": 193.52,
+      "sourceLanguage": "ko",
+      "sourceText": "병원 데고 가면 병원비 감당도 안",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 193.52,
+      "end": 196.63,
+      "sourceLanguage": "ko",
+      "sourceText": "병원 데고 가면 병원비 감당도 안 되고 또 주변에 뭐 주인 나타나면은",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 196.63,
+      "end": 196.64,
+      "sourceLanguage": "ko",
+      "sourceText": "되고 또 주변에 뭐 주인 나타나면은",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 196.64,
+      "end": 198.03,
+      "sourceLanguage": "ko",
+      "sourceText": "되고 또 주변에 뭐 주인 나타나면은 있는 자리에 있어야지 주인 찾기도",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 198.03,
+      "end": 198.04,
+      "sourceLanguage": "ko",
+      "sourceText": "있는 자리에 있어야지 주인 찾기도",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 198.04,
+      "end": 199.47,
+      "sourceLanguage": "ko",
+      "sourceText": "있는 자리에 있어야지 주인 찾기도 편할 거고 예",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 199.47,
+      "end": 199.48,
+      "sourceLanguage": "ko",
+      "sourceText": "편할 거고 예",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 199.48,
+      "end": 199.87,
+      "sourceLanguage": "ko",
+      "sourceText": "편할 거고 예 &gt;&gt; 아",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 199.87,
+      "end": 199.88,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 아",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 199.88,
+      "end": 204.39,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 아 &gt;&gt; 돌는게 맞는 거 같아",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 204.4,
+      "end": 206.79,
+      "sourceLanguage": "ko",
+      "sourceText": "아 그죠 그죠 두고",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 206.79,
+      "end": 206.8,
+      "sourceLanguage": "ko",
+      "sourceText": "아 그죠 그죠 두고",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 206.8,
+      "end": 211.51,
+      "sourceLanguage": "ko",
+      "sourceText": "아 그죠 그죠 두고 &gt;&gt; 일단은 일단은",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 211.52,
+      "end": 213.51,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 집 들어가는 길이시면 저 같이",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 213.51,
+      "end": 213.52,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 집 들어가는 길이시면 저 같이",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 213.52,
+      "end": 214.79,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 집 들어가는 길이시면 저 같이 가실래요",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 214.79,
+      "end": 214.8,
+      "sourceLanguage": "ko",
+      "sourceText": "가실래요",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 214.8,
+      "end": 218.91,
+      "sourceLanguage": "ko",
+      "sourceText": "가실래요 &gt;&gt; 아 어네 감사합니다. 어, 네.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 218.91,
+      "end": 218.92,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 아 어네 감사합니다. 어, 네.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 218.92,
+      "end": 225.35,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 아 어네 감사합니다. 어, 네. &gt;&gt; 네.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 225.36,
+      "end": 228.15,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 사실 강하지요.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 228.15,
+      "end": 228.16,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 사실 강하지요.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 228.16,
+      "end": 230.51,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 사실 강하지요. 먼저 두고 가자 해서 좋았어요.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 230.51,
+      "end": 230.52,
+      "sourceLanguage": "ko",
+      "sourceText": "먼저 두고 가자 해서 좋았어요.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 230.52,
+      "end": 232.31,
+      "sourceLanguage": "ko",
+      "sourceText": "먼저 두고 가자 해서 좋았어요. &gt;&gt; 아, 뭐 어쩔 수 없으니까.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 232.31,
+      "end": 232.32,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 아, 뭐 어쩔 수 없으니까.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 232.32,
+      "end": 234.43,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 아, 뭐 어쩔 수 없으니까. 그니까요. 근데 그냥 두고 가면 진짜",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 234.43,
+      "end": 234.44,
+      "sourceLanguage": "ko",
+      "sourceText": "그니까요. 근데 그냥 두고 가면 진짜",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 234.44,
+      "end": 237.51,
+      "sourceLanguage": "ko",
+      "sourceText": "그니까요. 근데 그냥 두고 가면 진짜 나쁜 사람 될 거 같아서 좀 오버를",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 237.51,
+      "end": 237.52,
+      "sourceLanguage": "ko",
+      "sourceText": "나쁜 사람 될 거 같아서 좀 오버를",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 237.52,
+      "end": 241.19,
+      "sourceLanguage": "ko",
+      "sourceText": "나쁜 사람 될 거 같아서 좀 오버를 했거든요. 근데 딱 두 봐요 하시니까",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 241.19,
+      "end": 241.2,
+      "sourceLanguage": "ko",
+      "sourceText": "했거든요. 근데 딱 두 봐요 하시니까",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 241.2,
+      "end": 245.23,
+      "sourceLanguage": "ko",
+      "sourceText": "했거든요. 근데 딱 두 봐요 하시니까 아 뭔가 좀 못했지만 속으로는음",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 245.23,
+      "end": 245.24,
+      "sourceLanguage": "ko",
+      "sourceText": "아 뭔가 좀 못했지만 속으로는음",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 245.24,
+      "end": 248.59,
+      "sourceLanguage": "ko",
+      "sourceText": "아 뭔가 좀 못했지만 속으로는음 다행이다. 그래서 아 너 못됐다.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 248.59,
+      "end": 248.6,
+      "sourceLanguage": "ko",
+      "sourceText": "다행이다. 그래서 아 너 못됐다.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 248.6,
+      "end": 250.63,
+      "sourceLanguage": "ko",
+      "sourceText": "다행이다. 그래서 아 너 못됐다. 그죠?",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 250.63,
+      "end": 250.64,
+      "sourceLanguage": "ko",
+      "sourceText": "그죠?",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 250.64,
+      "end": 252.99,
+      "sourceLanguage": "ko",
+      "sourceText": "그죠? &gt;&gt; 그게 착하시니까 할 수 있는 생각",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 252.99,
+      "end": 253,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 그게 착하시니까 할 수 있는 생각",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 253,
+      "end": 253.87,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 그게 착하시니까 할 수 있는 생각 같아요.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 253.87,
+      "end": 253.88,
+      "sourceLanguage": "ko",
+      "sourceText": "같아요.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 253.88,
+      "end": 254.47,
+      "sourceLanguage": "ko",
+      "sourceText": "같아요. &gt;&gt; 그런가?",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 254.47,
+      "end": 254.48,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 그런가?",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 254.48,
+      "end": 258.43,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 그런가? &gt;&gt; 음.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 258.44,
+      "end": 260.11,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 그게 강아지 사진 저도 좀 받을 수",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 260.11,
+      "end": 260.12,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 그게 강아지 사진 저도 좀 받을 수",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 260.12,
+      "end": 261.67,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 그게 강아지 사진 저도 좀 받을 수 있을까요?",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 261.67,
+      "end": 261.68,
+      "sourceLanguage": "ko",
+      "sourceText": "있을까요?",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 261.68,
+      "end": 275.63,
+      "sourceLanguage": "ko",
+      "sourceText": "있을까요? 아, 사진이요?",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 275.64,
+      "end": 277.39,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 강아지 주인 찾습니다.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 277.39,
+      "end": 277.4,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 강아지 주인 찾습니다.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 277.4,
+      "end": 280.27,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 강아지 주인 찾습니다. &gt;&gt; 진짜 걸렸다.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 280.27,
+      "end": 280.28,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 진짜 걸렸다.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 280.28,
+      "end": 286.87,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 진짜 걸렸다. 음. 나는 되게 많이 하셨네.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 286.88,
+      "end": 289.11,
+      "sourceLanguage": "ko",
+      "sourceText": "주인한테 연락 왔어요. 아까 강아지",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 289.11,
+      "end": 289.12,
+      "sourceLanguage": "ko",
+      "sourceText": "주인한테 연락 왔어요. 아까 강아지",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 289.12,
+      "end": 291.31,
+      "sourceLanguage": "ko",
+      "sourceText": "주인한테 연락 왔어요. 아까 강아지 같이 발견한 사람이에요.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 291.31,
+      "end": 291.32,
+      "sourceLanguage": "ko",
+      "sourceText": "같이 발견한 사람이에요.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 291.32,
+      "end": 301.55,
+      "sourceLanguage": "ko",
+      "sourceText": "같이 발견한 사람이에요. &gt;&gt; 아직 안 왔어요.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 301.56,
+      "end": 303.23,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 오작동이겠죠?",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 303.23,
+      "end": 303.24,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 오작동이겠죠?",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 303.24,
+      "end": 305.11,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 오작동이겠죠? &gt;&gt; 아니라면.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 305.11,
+      "end": 305.12,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 아니라면.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 305.12,
+      "end": 312.19,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 아니라면. &gt;&gt; 음. 나갔다 와야겠다.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 312.2,
+      "end": 315.91,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 저기요. 건 아니죠? 네. 우적동이온",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 315.91,
+      "end": 315.92,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 저기요. 건 아니죠? 네. 우적동이온",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 315.92,
+      "end": 318.31,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 저기요. 건 아니죠? 네. 우적동이온 걱정하지 말래요.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 318.31,
+      "end": 318.32,
+      "sourceLanguage": "ko",
+      "sourceText": "걱정하지 말래요.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 318.32,
+      "end": 322.63,
+      "sourceLanguage": "ko",
+      "sourceText": "걱정하지 말래요. 들어가셔도 돼요.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 322.64,
+      "end": 326.07,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 하인 감사합니다.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 326.07,
+      "end": 326.08,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 하인 감사합니다.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 326.08,
+      "end": 327.43,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 하인 감사합니다. &gt;&gt; 들으셨어요?",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 327.43,
+      "end": 327.44,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 들으셨어요?",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 327.44,
+      "end": 333.71,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 들으셨어요? &gt;&gt; 네.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 333.72,
+      "end": 337.31,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 어 공전 뭔가 오까지 해야 되는데",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 337.31,
+      "end": 337.32,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 어 공전 뭔가 오까지 해야 되는데",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 337.32,
+      "end": 340.11,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 어 공전 뭔가 오까지 해야 되는데 지명인데 사인타이 바야 되나?",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 340.11,
+      "end": 340.12,
+      "sourceLanguage": "ko",
+      "sourceText": "지명인데 사인타이 바야 되나?",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 340.12,
+      "end": 341.55,
+      "sourceLanguage": "ko",
+      "sourceText": "지명인데 사인타이 바야 되나? 한국이랑 지한이 있다가 팬이 좀",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 341.55,
+      "end": 341.56,
+      "sourceLanguage": "ko",
+      "sourceText": "한국이랑 지한이 있다가 팬이 좀",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 341.56,
+      "end": 342.31,
+      "sourceLanguage": "ko",
+      "sourceText": "한국이랑 지한이 있다가 팬이 좀 옆으로",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 342.31,
+      "end": 342.32,
+      "sourceLanguage": "ko",
+      "sourceText": "옆으로",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 342.32,
+      "end": 345.07,
+      "sourceLanguage": "ko",
+      "sourceText": "옆으로 &gt;&gt; 아 진전 [콧방귀] 똥지 않아? 어",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 345.07,
+      "end": 345.08,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 아 진전 [콧방귀] 똥지 않아? 어",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 345.08,
+      "end": 345.95,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 아 진전 [콧방귀] 똥지 않아? 어 나 똥 냄새나",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 345.95,
+      "end": 345.96,
+      "sourceLanguage": "ko",
+      "sourceText": "나 똥 냄새나",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 345.96,
+      "end": 347.91,
+      "sourceLanguage": "ko",
+      "sourceText": "나 똥 냄새나 &gt;&gt; 아 진짜 땡큐",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 347.91,
+      "end": 347.92,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 아 진짜 땡큐",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 347.92,
+      "end": 349.75,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 아 진짜 땡큐 &gt;&gt; 어 이거 배터리 7번데",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 349.75,
+      "end": 349.76,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 어 이거 배터리 7번데",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 349.76,
+      "end": 353.15,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 어 이거 배터리 7번데 &gt;&gt; 어씨 콘센트 자리 어기 없던데 근데",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 353.15,
+      "end": 353.16,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 어씨 콘센트 자리 어기 없던데 근데",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 353.16,
+      "end": 355.47,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 어씨 콘센트 자리 어기 없던데 근데 &gt;&gt; 아니 콘센트 자리 하나 있는데 사람",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 355.47,
+      "end": 355.48,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 아니 콘센트 자리 하나 있는데 사람",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 355.48,
+      "end": 356.19,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 아니 콘센트 자리 하나 있는데 사람 있어",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 356.19,
+      "end": 356.2,
+      "sourceLanguage": "ko",
+      "sourceText": "있어",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 356.2,
+      "end": 359.47,
+      "sourceLanguage": "ko",
+      "sourceText": "있어 &gt;&gt; 아 오늘까지 마감이라 켜야 되잖아",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 359.47,
+      "end": 359.48,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 아 오늘까지 마감이라 켜야 되잖아",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 359.48,
+      "end": 361.59,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 아 오늘까지 마감이라 켜야 되잖아 &gt;&gt; 되게 넓다 콘센트도 있고네 명이나",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 361.59,
+      "end": 361.6,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 되게 넓다 콘센트도 있고네 명이나",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 361.6,
+      "end": 365.48,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 되게 넓다 콘센트도 있고네 명이나 앉을 수 있고 우리 공전 해야 되",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 365.48,
+      "end": 365.49,
+      "sourceLanguage": "ko",
+      "sourceText": "앉을 수 있고 우리 공전 해야 되",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 365.49,
+      "end": 366.07,
+      "sourceLanguage": "ko",
+      "sourceText": "앉을 수 있고 우리 공전 해야 되 [울음]",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 366.07,
+      "end": 366.08,
+      "sourceLanguage": "ko",
+      "sourceText": "[울음]",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 366.08,
+      "end": 367.19,
+      "sourceLanguage": "ko",
+      "sourceText": "[울음] &gt;&gt; 나한테 충전할 때 없어",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 367.19,
+      "end": 367.2,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 나한테 충전할 때 없어",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 367.2,
+      "end": 367.79,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 나한테 충전할 때 없어 &gt;&gt; 치",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 367.79,
+      "end": 367.8,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 치",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 367.8,
+      "end": 368.95,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 치 &gt;&gt; 아 넓어",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 368.95,
+      "end": 368.96,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 아 넓어",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 368.96,
+      "end": 371.91,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 아 넓어 &gt;&gt; 그 저희 테이블이 큰 자리여 가지고",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 371.91,
+      "end": 371.92,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 그 저희 테이블이 큰 자리여 가지고",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 371.92,
+      "end": 375.11,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 그 저희 테이블이 큰 자리여 가지고 괜찮으시면 자리 바꿔 드릴까요 저희",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 375.11,
+      "end": 375.12,
+      "sourceLanguage": "ko",
+      "sourceText": "괜찮으시면 자리 바꿔 드릴까요 저희",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 375.12,
+      "end": 376.47,
+      "sourceLanguage": "ko",
+      "sourceText": "괜찮으시면 자리 바꿔 드릴까요 저희 저기 콘센트 안 써가지고",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 376.47,
+      "end": 376.48,
+      "sourceLanguage": "ko",
+      "sourceText": "저기 콘센트 안 써가지고",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 376.48,
+      "end": 377.51,
+      "sourceLanguage": "ko",
+      "sourceText": "저기 콘센트 안 써가지고 &gt;&gt; 콘센트 아 네",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 377.51,
+      "end": 377.52,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 콘센트 아 네",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 377.52,
+      "end": 378.99,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 콘센트 아 네 &gt;&gt; 아 그럼 친구한테 물어보고 바꿔",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 378.99,
+      "end": 379,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 아 그럼 친구한테 물어보고 바꿔",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 379,
+      "end": 379.59,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 아 그럼 친구한테 물어보고 바꿔 드릴게요.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 379.59,
+      "end": 379.6,
+      "sourceLanguage": "ko",
+      "sourceText": "드릴게요.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 379.6,
+      "end": 381.71,
+      "sourceLanguage": "ko",
+      "sourceText": "드릴게요. &gt;&gt; 감사합니다. 아니 감사합니다. 아",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 381.71,
+      "end": 381.72,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 감사합니다. 아니 감사합니다. 아",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 381.72,
+      "end": 383.23,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 감사합니다. 아니 감사합니다. 아 감사합니다.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 383.23,
+      "end": 383.24,
+      "sourceLanguage": "ko",
+      "sourceText": "감사합니다.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 383.24,
+      "end": 385.27,
+      "sourceLanguage": "ko",
+      "sourceText": "감사합니다. &gt;&gt; 어떻게 생겼어? 아니",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 385.27,
+      "end": 385.28,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 어떻게 생겼어? 아니",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 385.28,
+      "end": 388.35,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 어떻게 생겼어? 아니 &gt;&gt; 그 저쪽 테이블 분들이 그 콘센트가",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 388.35,
+      "end": 388.36,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 그 저쪽 테이블 분들이 그 콘센트가",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 388.36,
+      "end": 390.03,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 그 저쪽 테이블 분들이 그 콘센트가 꼭 필요하다고 하셔 갖고 괜찮으면 자",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 390.03,
+      "end": 390.04,
+      "sourceLanguage": "ko",
+      "sourceText": "꼭 필요하다고 하셔 갖고 괜찮으면 자",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 390.04,
+      "end": 397.67,
+      "sourceLanguage": "ko",
+      "sourceText": "꼭 필요하다고 하셔 갖고 괜찮으면 자 좀 바꿔 줄까? 지금",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 397.68,
+      "end": 401.11,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 괜찮지? 아구나. 아",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 401.11,
+      "end": 401.12,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 괜찮지? 아구나. 아",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 401.12,
+      "end": 403.47,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 괜찮지? 아구나. 아 여기 앉으세요. 네.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 403.47,
+      "end": 403.48,
+      "sourceLanguage": "ko",
+      "sourceText": "여기 앉으세요. 네.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 403.48,
+      "end": 404.63,
+      "sourceLanguage": "ko",
+      "sourceText": "여기 앉으세요. 네. [목을 가다듬음] 네.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 404.63,
+      "end": 404.64,
+      "sourceLanguage": "ko",
+      "sourceText": "[목을 가다듬음] 네.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 404.64,
+      "end": 406.23,
+      "sourceLanguage": "ko",
+      "sourceText": "[목을 가다듬음] 네. &gt;&gt; 아닙니다. [음악][노래] 네. 아유",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 406.23,
+      "end": 406.24,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 아닙니다. [음악][노래] 네. 아유",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 406.24,
+      "end": 409.07,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 아닙니다. [음악][노래] 네. 아유 즐거하세요.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 409.07,
+      "end": 409.08,
+      "sourceLanguage": "ko",
+      "sourceText": "즐거하세요.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 409.08,
+      "end": 411.23,
+      "sourceLanguage": "ko",
+      "sourceText": "즐거하세요. &gt;&gt; 어우 뭐야 합니다.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 411.23,
+      "end": 411.24,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 어우 뭐야 합니다.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 411.24,
+      "end": 412.67,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 어우 뭐야 합니다. &gt;&gt; 아 쾌적해.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 412.67,
+      "end": 412.68,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 아 쾌적해.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 412.68,
+      "end": 414.03,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 아 쾌적해. &gt;&gt; 여기는 에어컨이 안 오네.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 414.03,
+      "end": 414.04,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 여기는 에어컨이 안 오네.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 414.04,
+      "end": 415.51,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 여기는 에어컨이 안 오네. &gt;&gt; 너무 시원하잖아.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 415.51,
+      "end": 415.52,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 너무 시원하잖아.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 415.52,
+      "end": 419.27,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 너무 시원하잖아. &gt;&gt; 야 괜나게",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 419.27,
+      "end": 419.28,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 야 괜나게",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 419.28,
+      "end": 422.91,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 야 괜나게 &gt;&gt; 그런게 아니고 말을 못해.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 422.91,
+      "end": 422.92,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 그런게 아니고 말을 못해.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 422.92,
+      "end": 424.27,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 그런게 아니고 말을 못해. &gt;&gt; 전기차 충전시키자.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 424.27,
+      "end": 424.28,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 전기차 충전시키자.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 424.28,
+      "end": 426.23,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 전기차 충전시키자. &gt;&gt; 야 다 가져와.음",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 426.23,
+      "end": 426.24,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 야 다 가져와.음",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 426.24,
+      "end": 427.31,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 야 다 가져와.음 &gt;&gt; 진짜 멋있다.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 427.31,
+      "end": 427.32,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 진짜 멋있다.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 427.32,
+      "end": 429.23,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 진짜 멋있다. &gt;&gt; 야",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 429.23,
+      "end": 429.24,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 야",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 429.24,
+      "end": 430.31,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 야 &gt;&gt; 너 [비명]",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 430.31,
+      "end": 430.32,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 너 [비명]",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 430.32,
+      "end": 431.99,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 너 [비명] 뭐해?",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 431.99,
+      "end": 432,
+      "sourceLanguage": "ko",
+      "sourceText": "뭐해?",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 432,
+      "end": 433.83,
+      "sourceLanguage": "ko",
+      "sourceText": "뭐해? &gt;&gt; 빨 가자. 근데 저 근데 저희 저희",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 433.83,
+      "end": 433.84,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 빨 가자. 근데 저 근데 저희 저희",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 433.84,
+      "end": 435.55,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 빨 가자. 근데 저 근데 저희 저희 처음 가는 거면 뭐 사과되지 않아요?",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 435.55,
+      "end": 435.56,
+      "sourceLanguage": "ko",
+      "sourceText": "처음 가는 거면 뭐 사과되지 않아요?",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 435.56,
+      "end": 436.67,
+      "sourceLanguage": "ko",
+      "sourceText": "처음 가는 거면 뭐 사과되지 않아요? &gt;&gt; 아니 아니 아니",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 436.67,
+      "end": 436.68,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 아니 아니 아니",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 436.68,
+      "end": 440.07,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 아니 아니 아니 &gt;&gt; 아 어 그럼 잠깐만 그 잠깐만 기다려",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 440.07,
+      "end": 440.08,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 아 어 그럼 잠깐만 그 잠깐만 기다려",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 440.08,
+      "end": 443.43,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 아 어 그럼 잠깐만 그 잠깐만 기다려 주세요.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 443.44,
+      "end": 445.07,
+      "sourceLanguage": "ko",
+      "sourceText": "[웃음]",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 445.07,
+      "end": 445.08,
+      "sourceLanguage": "ko",
+      "sourceText": "[웃음]",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 445.08,
+      "end": 445.55,
+      "sourceLanguage": "ko",
+      "sourceText": "[웃음] &gt;&gt; 슈지",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 445.55,
+      "end": 445.56,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 슈지",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 445.56,
+      "end": 447.39,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 슈지 &gt;&gt; 어 여기 거실이고 여기가",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 447.39,
+      "end": 447.4,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 어 여기 거실이고 여기가",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 447.4,
+      "end": 449.11,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 어 여기 거실이고 여기가 안방하겠습니다.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 449.11,
+      "end": 449.12,
+      "sourceLanguage": "ko",
+      "sourceText": "안방하겠습니다.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 449.12,
+      "end": 449.87,
+      "sourceLanguage": "ko",
+      "sourceText": "안방하겠습니다. &gt;&gt; 어 좋다.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 449.87,
+      "end": 449.88,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 어 좋다.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 449.88,
+      "end": 451.31,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 어 좋다. &gt;&gt; 어 원더 좋게요.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 451.31,
+      "end": 451.32,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 어 원더 좋게요.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 451.32,
+      "end": 453.99,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 어 원더 좋게요. &gt;&gt; 오 두루마리 휴지 센스 이거 누구야?",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 453.99,
+      "end": 454,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 오 두루마리 휴지 센스 이거 누구야?",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 454,
+      "end": 455.55,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 오 두루마리 휴지 센스 이거 누구야? &gt;&gt; 아 이거 다 같이 샀어요.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 455.55,
+      "end": 455.56,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 아 이거 다 같이 샀어요.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 455.56,
+      "end": 456.95,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 아 이거 다 같이 샀어요. &gt;&gt; 에이 뭘 또 같이 샀대요? 착한",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 456.95,
+      "end": 456.96,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 에이 뭘 또 같이 샀대요? 착한",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 456.96,
+      "end": 458.51,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 에이 뭘 또 같이 샀대요? 착한 경성이가 산 거고 저희는 인성",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 458.51,
+      "end": 458.52,
+      "sourceLanguage": "ko",
+      "sourceText": "경성이가 산 거고 저희는 인성",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 458.52,
+      "end": 460.19,
+      "sourceLanguage": "ko",
+      "sourceText": "경성이가 산 거고 저희는 인성 빠애지라 그런 거 살 생각 못",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 460.19,
+      "end": 460.2,
+      "sourceLanguage": "ko",
+      "sourceText": "빠애지라 그런 거 살 생각 못",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 460.2,
+      "end": 461.47,
+      "sourceLanguage": "ko",
+      "sourceText": "빠애지라 그런 거 살 생각 못 했어요. [웃음]",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 461.47,
+      "end": 461.48,
+      "sourceLanguage": "ko",
+      "sourceText": "했어요. [웃음]",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 461.48,
+      "end": 465.59,
+      "sourceLanguage": "ko",
+      "sourceText": "했어요. [웃음] &gt;&gt; 그게 뭐야? 아시 빼고요.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 465.59,
+      "end": 465.6,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 그게 뭐야? 아시 빼고요.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 465.6,
+      "end": 466.59,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 그게 뭐야? 아시 빼고요. &gt;&gt; 어 여기",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 466.59,
+      "end": 466.6,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 어 여기",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 466.6,
+      "end": 472.07,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 어 여기 &gt;&gt; 어 감사합니다.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 472.08,
+      "end": 473.27,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 언니 제가 할게요. 제가 할게. 어우",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 473.27,
+      "end": 473.28,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 언니 제가 할게요. 제가 할게. 어우",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 473.28,
+      "end": 475.59,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 언니 제가 할게요. 제가 할게. 어우 괜찮아지는데",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 475.59,
+      "end": 475.6,
+      "sourceLanguage": "ko",
+      "sourceText": "괜찮아지는데",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 475.6,
+      "end": 477.39,
+      "sourceLanguage": "ko",
+      "sourceText": "괜찮아지는데 감사 감사합 감사합니다.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 477.39,
+      "end": 477.4,
+      "sourceLanguage": "ko",
+      "sourceText": "감사 감사합 감사합니다.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 477.4,
+      "end": 479.83,
+      "sourceLanguage": "ko",
+      "sourceText": "감사 감사합 감사합니다. &gt;&gt; 네",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 479.83,
+      "end": 479.84,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 네",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 479.84,
+      "end": 482.51,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 네 &gt;&gt; 와 맛있겠다.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 482.51,
+      "end": 482.52,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 와 맛있겠다.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 482.52,
+      "end": 486.23,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 와 맛있겠다. &gt;&gt; 야",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 486.24,
+      "end": 487.35,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 아 저 주세요.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 487.35,
+      "end": 487.36,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 아 저 주세요.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 487.36,
+      "end": 488.15,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 아 저 주세요. &gt;&gt; 어 주세요.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 488.15,
+      "end": 488.16,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 어 주세요.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 488.16,
+      "end": 488.79,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 어 주세요. &gt;&gt; 어 아니",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 488.79,
+      "end": 488.8,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 어 아니",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 488.8,
+      "end": 490.03,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 어 아니 &gt;&gt; 아 저 주세요.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 490.03,
+      "end": 490.04,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 아 저 주세요.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 490.04,
+      "end": 492.51,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 아 저 주세요. &gt;&gt; 아 제가 아까운데 언니 아까부터 그럼",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 492.51,
+      "end": 492.52,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 아 제가 아까운데 언니 아까부터 그럼",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 492.52,
+      "end": 494.47,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 아 제가 아까운데 언니 아까부터 그럼 제가 뭐가 돼요?",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 494.47,
+      "end": 494.48,
+      "sourceLanguage": "ko",
+      "sourceText": "제가 뭐가 돼요?",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 494.48,
+      "end": 496.15,
+      "sourceLanguage": "ko",
+      "sourceText": "제가 뭐가 돼요? &gt;&gt; 아 내가 할 수 있을 것 같은",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 496.15,
+      "end": 496.16,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 아 내가 할 수 있을 것 같은",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 496.16,
+      "end": 496.71,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 아 내가 할 수 있을 것 같은 상관데.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 496.71,
+      "end": 496.72,
+      "sourceLanguage": "ko",
+      "sourceText": "상관데.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 496.72,
+      "end": 499.07,
+      "sourceLanguage": "ko",
+      "sourceText": "상관데. &gt;&gt; 아이고 냅둬 냈다 경상이 옆에 있으면",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 499.07,
+      "end": 499.08,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 아이고 냅둬 냈다 경상이 옆에 있으면",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 499.08,
+      "end": 500.67,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 아이고 냅둬 냈다 경상이 옆에 있으면 원래 나쁜 사람 되는 거 패시야.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 500.67,
+      "end": 500.68,
+      "sourceLanguage": "ko",
+      "sourceText": "원래 나쁜 사람 되는 거 패시야.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 500.68,
+      "end": 502.39,
+      "sourceLanguage": "ko",
+      "sourceText": "원래 나쁜 사람 되는 거 패시야. 맛있겠다. 우리 경상에 하고 싶은 거",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 502.39,
+      "end": 502.4,
+      "sourceLanguage": "ko",
+      "sourceText": "맛있겠다. 우리 경상에 하고 싶은 거",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 502.4,
+      "end": 503.47,
+      "sourceLanguage": "ko",
+      "sourceText": "맛있겠다. 우리 경상에 하고 싶은 거 다행.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 503.47,
+      "end": 503.48,
+      "sourceLanguage": "ko",
+      "sourceText": "다행.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 503.48,
+      "end": 505.19,
+      "sourceLanguage": "ko",
+      "sourceText": "다행. &gt;&gt; 원래 약한만큼 도움 받을 수 있는게",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 505.19,
+      "end": 505.2,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 원래 약한만큼 도움 받을 수 있는게",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 505.2,
+      "end": 507.35,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 원래 약한만큼 도움 받을 수 있는게 있으니까 사람들이 착하게 사는 건데",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 507.35,
+      "end": 507.36,
+      "sourceLanguage": "ko",
+      "sourceText": "있으니까 사람들이 착하게 사는 건데",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 507.36,
+      "end": 509.27,
+      "sourceLanguage": "ko",
+      "sourceText": "있으니까 사람들이 착하게 사는 건데 경성에는 뭐 예쁘니까 안 착해도",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 509.27,
+      "end": 509.28,
+      "sourceLanguage": "ko",
+      "sourceText": "경성에는 뭐 예쁘니까 안 착해도",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 509.28,
+      "end": 509.63,
+      "sourceLanguage": "ko",
+      "sourceText": "경성에는 뭐 예쁘니까 안 착해도 되지.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 509.63,
+      "end": 509.64,
+      "sourceLanguage": "ko",
+      "sourceText": "되지.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 509.64,
+      "end": 511.31,
+      "sourceLanguage": "ko",
+      "sourceText": "되지. &gt;&gt; 아, 맞아. 언니 진짜 너무 예뻐요.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 511.31,
+      "end": 511.32,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 아, 맞아. 언니 진짜 너무 예뻐요.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 511.32,
+      "end": 514.99,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 아, 맞아. 언니 진짜 너무 예뻐요. &gt;&gt; 돼지라고요?",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 515,
+      "end": 517.83,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 돼지.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 517.83,
+      "end": 517.84,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 돼지.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 517.84,
+      "end": 519.83,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 돼지. &gt;&gt; 아, 근데 가만히 있는 사람, 나쁜",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 519.83,
+      "end": 519.84,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 아, 근데 가만히 있는 사람, 나쁜",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 519.84,
+      "end": 522.63,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 아, 근데 가만히 있는 사람, 나쁜 사람 만든 거면 착한게 맞아요?",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 522.63,
+      "end": 522.64,
+      "sourceLanguage": "ko",
+      "sourceText": "사람 만든 거면 착한게 맞아요?",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 522.64,
+      "end": 532.31,
+      "sourceLanguage": "ko",
+      "sourceText": "사람 만든 거면 착한게 맞아요? &gt;&gt; 아, 그냥 아무것도 하지 말 거야.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 532.32,
+      "end": 535.43,
+      "sourceLanguage": "ko",
+      "sourceText": "사장님 사탕 하나만 먹어도 될까요?",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 535.43,
+      "end": 535.44,
+      "sourceLanguage": "ko",
+      "sourceText": "사장님 사탕 하나만 먹어도 될까요?",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 535.44,
+      "end": 539.87,
+      "sourceLanguage": "ko",
+      "sourceText": "사장님 사탕 하나만 먹어도 될까요? &gt;&gt; 아 그럼요. 먹으라고 둔 건데.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 539.87,
+      "end": 539.88,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 아 그럼요. 먹으라고 둔 건데.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 539.88,
+      "end": 540.63,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 아 그럼요. 먹으라고 둔 건데. 합니다.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 540.63,
+      "end": 540.64,
+      "sourceLanguage": "ko",
+      "sourceText": "합니다.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 540.64,
+      "end": 542.34,
+      "sourceLanguage": "ko",
+      "sourceText": "합니다. &gt;&gt; 아, 예전에는 타는 손님마다 직접",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 542.34,
+      "end": 542.35,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 아, 예전에는 타는 손님마다 직접",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 542.35,
+      "end": 544.23,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 아, 예전에는 타는 손님마다 직접 [음악] 줬었는데 불편해 하는",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 544.23,
+      "end": 544.24,
+      "sourceLanguage": "ko",
+      "sourceText": "[음악] 줬었는데 불편해 하는",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 544.24,
+      "end": 546.43,
+      "sourceLanguage": "ko",
+      "sourceText": "[음악] 줬었는데 불편해 하는 사람들이 있더라고요.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 546.43,
+      "end": 546.44,
+      "sourceLanguage": "ko",
+      "sourceText": "사람들이 있더라고요.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 546.44,
+      "end": 548.07,
+      "sourceLanguage": "ko",
+      "sourceText": "사람들이 있더라고요. 그래서 그냥 먹을 사람만 먹으라고",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 548.07,
+      "end": 548.08,
+      "sourceLanguage": "ko",
+      "sourceText": "그래서 그냥 먹을 사람만 먹으라고",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 548.08,
+      "end": 554.75,
+      "sourceLanguage": "ko",
+      "sourceText": "그래서 그냥 먹을 사람만 먹으라고 뒀습니다.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 554.76,
+      "end": 557.71,
+      "sourceLanguage": "ko",
+      "sourceText": "내가 남들보다 부족한 사람이라서",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 557.71,
+      "end": 557.72,
+      "sourceLanguage": "ko",
+      "sourceText": "내가 남들보다 부족한 사람이라서",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 557.72,
+      "end": 559.75,
+      "sourceLanguage": "ko",
+      "sourceText": "내가 남들보다 부족한 사람이라서 언젠가 받아야 될지도 모를 도움",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 559.75,
+      "end": 559.76,
+      "sourceLanguage": "ko",
+      "sourceText": "언젠가 받아야 될지도 모를 도움",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 559.76,
+      "end": 560.63,
+      "sourceLanguage": "ko",
+      "sourceText": "언젠가 받아야 될지도 모를 도움 때문에.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 560.63,
+      "end": 560.64,
+      "sourceLanguage": "ko",
+      "sourceText": "때문에.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 560.64,
+      "end": 562.71,
+      "sourceLanguage": "ko",
+      "sourceText": "때문에. &gt;&gt; 아, 네. 구입 찾주분 되시죠?",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 562.71,
+      "end": 562.72,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 아, 네. 구입 찾주분 되시죠?",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 562.72,
+      "end": 563.95,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 아, 네. 구입 찾주분 되시죠? 아니, 차에 비상등 켜져 있어",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 563.95,
+      "end": 563.96,
+      "sourceLanguage": "ko",
+      "sourceText": "아니, 차에 비상등 켜져 있어",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 563.96,
+      "end": 564.31,
+      "sourceLanguage": "ko",
+      "sourceText": "아니, 차에 비상등 켜져 있어 가지고.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 564.31,
+      "end": 564.32,
+      "sourceLanguage": "ko",
+      "sourceText": "가지고.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 564.32,
+      "end": 565.27,
+      "sourceLanguage": "ko",
+      "sourceText": "가지고. &gt;&gt; 나는 친절한 걸까?",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 565.27,
+      "end": 565.28,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 나는 친절한 걸까?",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 565.28,
+      "end": 575.43,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 나는 친절한 걸까? &gt;&gt; 아, 네. 네. 네.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 575.44,
+      "end": 578.83,
+      "sourceLanguage": "ko",
+      "sourceText": "20",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 578.84,
+      "end": 579.51,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 어",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 579.51,
+      "end": 579.52,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 어",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 579.52,
+      "end": 579.83,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 어 &gt;&gt; 어",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 579.83,
+      "end": 579.84,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 어",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 579.84,
+      "end": 580.59,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 어 &gt;&gt; 어",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 580.59,
+      "end": 580.6,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 어",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 580.6,
+      "end": 580.79,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 어 &gt;&gt; 어",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 580.79,
+      "end": 580.8,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 어",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 580.8,
+      "end": 581.55,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 어 &gt;&gt; 안녕하세요.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 581.55,
+      "end": 581.56,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 안녕하세요.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 581.56,
+      "end": 583.07,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 안녕하세요. &gt;&gt; 안녕하세요. 감사합니다. 아",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 583.07,
+      "end": 583.08,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 안녕하세요. 감사합니다. 아",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 583.08,
+      "end": 585.11,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 안녕하세요. 감사합니다. 아 아니에요. 아니에요.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 585.11,
+      "end": 585.12,
+      "sourceLanguage": "ko",
+      "sourceText": "아니에요. 아니에요.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 585.12,
+      "end": 588.71,
+      "sourceLanguage": "ko",
+      "sourceText": "아니에요. 아니에요. &gt;&gt; 물이",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 588.72,
+      "end": 590.31,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 엘베",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 590.31,
+      "end": 590.32,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 엘베",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 590.32,
+      "end": 592.83,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 엘베 좀 시원해진 거 같지 않아요?",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 592.83,
+      "end": 592.84,
+      "sourceLanguage": "ko",
+      "sourceText": "좀 시원해진 거 같지 않아요?",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 592.84,
+      "end": 595.87,
+      "sourceLanguage": "ko",
+      "sourceText": "좀 시원해진 거 같지 않아요? &gt;&gt; 어 진짜 혹시 관리에서 전화해 주신",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 595.87,
+      "end": 595.88,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 어 진짜 혹시 관리에서 전화해 주신",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 595.88,
+      "end": 597.91,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 어 진짜 혹시 관리에서 전화해 주신 거예요? 대박.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 597.91,
+      "end": 597.92,
+      "sourceLanguage": "ko",
+      "sourceText": "거예요? 대박.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 597.92,
+      "end": 600.59,
+      "sourceLanguage": "ko",
+      "sourceText": "거예요? 대박. 감사합니다.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 600.59,
+      "end": 600.6,
+      "sourceLanguage": "ko",
+      "sourceText": "감사합니다.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 600.6,
+      "end": 602.95,
+      "sourceLanguage": "ko",
+      "sourceText": "감사합니다. &gt;&gt; 아 제가 잘한 일 말을 안 하면",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 602.95,
+      "end": 602.96,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 아 제가 잘한 일 말을 안 하면",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 602.96,
+      "end": 605.51,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 아 제가 잘한 일 말을 안 하면 아무도 모르니까 좀 꺼드록 대봤어.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 605.51,
+      "end": 605.52,
+      "sourceLanguage": "ko",
+      "sourceText": "아무도 모르니까 좀 꺼드록 대봤어.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 605.52,
+      "end": 607.83,
+      "sourceLanguage": "ko",
+      "sourceText": "아무도 모르니까 좀 꺼드록 대봤어. 오 꺼들어",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 607.83,
+      "end": 607.84,
+      "sourceLanguage": "ko",
+      "sourceText": "오 꺼들어",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 607.84,
+      "end": 610.31,
+      "sourceLanguage": "ko",
+      "sourceText": "오 꺼들어 아 [콧방귀] 줄 거 없는데 아 나",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 610.31,
+      "end": 610.32,
+      "sourceLanguage": "ko",
+      "sourceText": "아 [콧방귀] 줄 거 없는데 아 나",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 610.32,
+      "end": 613.55,
+      "sourceLanguage": "ko",
+      "sourceText": "아 [콧방귀] 줄 거 없는데 아 나 줄 거 있다.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 613.55,
+      "end": 613.56,
+      "sourceLanguage": "ko",
+      "sourceText": "줄 거 있다.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 613.56,
+      "end": 616.75,
+      "sourceLanguage": "ko",
+      "sourceText": "줄 거 있다. &gt;&gt; 오 더 주는 거예요? 이거 진짜 귀한",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 616.75,
+      "end": 616.76,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 오 더 주는 거예요? 이거 진짜 귀한",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 616.76,
+      "end": 617.27,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 오 더 주는 거예요? 이거 진짜 귀한 거예요.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 617.27,
+      "end": 617.28,
+      "sourceLanguage": "ko",
+      "sourceText": "거예요.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 617.28,
+      "end": 619.59,
+      "sourceLanguage": "ko",
+      "sourceText": "거예요. &gt;&gt; 귀한 거.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 619.59,
+      "end": 619.6,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 귀한 거.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 619.6,
+      "end": 626.18,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 귀한 거. 잘 전시해 놓을게요. [웃음]",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 626.19,
+      "end": 627.31,
+      "sourceLanguage": "ko",
+      "sourceText": "[한숨]",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 627.31,
+      "end": 627.32,
+      "sourceLanguage": "ko",
+      "sourceText": "[한숨]",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 627.32,
+      "end": 627.95,
+      "sourceLanguage": "ko",
+      "sourceText": "[한숨] &gt;&gt; 들어가세요.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 627.95,
+      "end": 627.96,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 들어가세요.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 627.96,
+      "end": 635.39,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 들어가세요. &gt;&gt; 주님 들어요.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 635.4,
+      "end": 639.39,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 저 혹시 그 강아지 연락 왔어요?",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 639.39,
+      "end": 639.4,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 저 혹시 그 강아지 연락 왔어요?",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 639.4,
+      "end": 642.79,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 저 혹시 그 강아지 연락 왔어요? 아, 아직 그 알림 계속 확인해 보고",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 642.79,
+      "end": 642.8,
+      "sourceLanguage": "ko",
+      "sourceText": "아, 아직 그 알림 계속 확인해 보고",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 642.8,
+      "end": 645.07,
+      "sourceLanguage": "ko",
+      "sourceText": "아, 아직 그 알림 계속 확인해 보고 있긴 하거든요.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 645.07,
+      "end": 645.08,
+      "sourceLanguage": "ko",
+      "sourceText": "있긴 하거든요.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 645.08,
+      "end": 647.67,
+      "sourceLanguage": "ko",
+      "sourceText": "있긴 하거든요. &gt;&gt; 그럼 괜찮으면은 그 편안한옥 갈아입고",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 647.67,
+      "end": 647.68,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 그럼 괜찮으면은 그 편안한옥 갈아입고",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 647.68,
+      "end": 649.47,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 그럼 괜찮으면은 그 편안한옥 갈아입고 좀 산책견 한 바퀴 돌려 보실래요?",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 649.47,
+      "end": 649.48,
+      "sourceLanguage": "ko",
+      "sourceText": "좀 산책견 한 바퀴 돌려 보실래요?",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 649.48,
+      "end": 652.59,
+      "sourceLanguage": "ko",
+      "sourceText": "좀 산책견 한 바퀴 돌려 보실래요? 그 강아지 있나?",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 652.59,
+      "end": 652.6,
+      "sourceLanguage": "ko",
+      "sourceText": "그 강아지 있나?",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 652.6,
+      "end": 654.55,
+      "sourceLanguage": "ko",
+      "sourceText": "그 강아지 있나? &gt;&gt; 네.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 654.55,
+      "end": 654.56,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 네.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 654.56,
+      "end": 655.87,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 네. &gt;&gt; 5분 후 1층.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 655.87,
+      "end": 655.88,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 5분 후 1층.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 655.88,
+      "end": 657.83,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 5분 후 1층. &gt;&gt; 5분 후 1층. 오케이. 오케이.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 657.83,
+      "end": 657.84,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 5분 후 1층. 오케이. 오케이.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 657.84,
+      "end": 658.47,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 5분 후 1층. 오케이. 오케이. &gt;&gt; 네. 저요 [목을 가다듬음]",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 658.47,
+      "end": 658.48,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 네. 저요 [목을 가다듬음]",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 658.48,
+      "end": 659.03,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 네. 저요 [목을 가다듬음] &gt;&gt; 다 봐요.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 659.03,
+      "end": 659.04,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 다 봐요.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 659.04,
+      "end": 662.2,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 다 봐요. &gt;&gt; 네.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 662.21,
+      "end": 665.79,
+      "sourceLanguage": "ko",
+      "sourceText": "[음악]",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 665.8,
+      "end": 666.43,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 어,",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 666.43,
+      "end": 666.44,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 어,",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 666.44,
+      "end": 667.35,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 어, &gt;&gt; 회사.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 667.35,
+      "end": 667.36,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 회사.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 667.36,
+      "end": 668.87,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 회사. &gt;&gt; 아, 사오신 거예요?",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 668.87,
+      "end": 668.88,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 아, 사오신 거예요?",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 668.88,
+      "end": 670.79,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 아, 사오신 거예요? 얼마나 수요? 없지. 아니",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 670.79,
+      "end": 670.8,
+      "sourceLanguage": "ko",
+      "sourceText": "얼마나 수요? 없지. 아니",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 670.8,
+      "end": 673.07,
+      "sourceLanguage": "ko",
+      "sourceText": "얼마나 수요? 없지. 아니 &gt;&gt; 그냥 그렇다고.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 673.07,
+      "end": 673.08,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 그냥 그렇다고.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 673.08,
+      "end": 676.61,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 그냥 그렇다고. &gt;&gt; 아",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 676.62,
+      "end": 676.87,
+      "sourceLanguage": "ko",
+      "sourceText": "[음악]",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 676.87,
+      "end": 676.88,
+      "sourceLanguage": "ko",
+      "sourceText": "[음악]",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 676.88,
+      "end": 677.79,
+      "sourceLanguage": "ko",
+      "sourceText": "[음악] &gt;&gt; 내가 불쌍해.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 677.79,
+      "end": 677.8,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 내가 불쌍해.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 677.8,
+      "end": 680.23,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 내가 불쌍해. &gt;&gt; 멤버십에 가입하시면 우리가 몰랐던",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 680.23,
+      "end": 680.24,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 멤버십에 가입하시면 우리가 몰랐던",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 680.24,
+      "end": 683.11,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 멤버십에 가입하시면 우리가 몰랐던 이야기 동국편 마지막 에피소드",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 683.11,
+      "end": 683.12,
+      "sourceLanguage": "ko",
+      "sourceText": "이야기 동국편 마지막 에피소드",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 683.12,
+      "end": 685.35,
+      "sourceLanguage": "ko",
+      "sourceText": "이야기 동국편 마지막 에피소드 가난지심을 감상하실 수 있습니다.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 685.35,
+      "end": 685.36,
+      "sourceLanguage": "ko",
+      "sourceText": "가난지심을 감상하실 수 있습니다.",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 685.36,
+      "end": 687.23,
+      "sourceLanguage": "ko",
+      "sourceText": "가난지심을 감상하실 수 있습니다. &gt;&gt; 근데 왜 내 눈치 보고 가난한",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 687.23,
+      "end": 687.24,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 근데 왜 내 눈치 보고 가난한",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 687.24,
+      "end": 689.63,
+      "sourceLanguage": "ko",
+      "sourceText": "&gt;&gt; 근데 왜 내 눈치 보고 가난한 척하냐고?",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 689.63,
+      "end": 689.64,
+      "sourceLanguage": "ko",
+      "sourceText": "척하냐고?",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 689.64,
+      "end": 691.51,
+      "sourceLanguage": "ko",
+      "sourceText": "척하냐고? 아 뭐 그러면서 우월감이라도 느껴보고",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 691.51,
+      "end": 691.52,
+      "sourceLanguage": "ko",
+      "sourceText": "아 뭐 그러면서 우월감이라도 느껴보고",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    },
+    {
+      "start": 691.52,
+      "end": 695.4,
+      "sourceLanguage": "ko",
+      "sourceText": "아 뭐 그러면서 우월감이라도 느껴보고 싶어. 그래서 그러는 거야?",
+      "source": "youtube_caption",
+      "confirmed": true,
+      "sourceRole": "original_dialogue"
+    }
+  ],
+  "frames": [
+    {
+      "timestamp": 0,
+      "filename": "frame-0001.jpg",
+      "sha256": "74fff0ec73a9ca95053fec6027d5acbde1e46b44e23b5fb0bf5c5f828e9ddd25"
+    },
+    {
+      "timestamp": 0,
+      "filename": "frame-0002.jpg",
+      "sha256": "74fff0ec73a9ca95053fec6027d5acbde1e46b44e23b5fb0bf5c5f828e9ddd25"
+    },
+    {
+      "timestamp": 2,
+      "filename": "frame-0003.jpg",
+      "sha256": "74fff0ec73a9ca95053fec6027d5acbde1e46b44e23b5fb0bf5c5f828e9ddd25"
+    },
+    {
+      "timestamp": 4,
+      "filename": "frame-0004.jpg",
+      "sha256": "74fff0ec73a9ca95053fec6027d5acbde1e46b44e23b5fb0bf5c5f828e9ddd25"
+    },
+    {
+      "timestamp": 6,
+      "filename": "frame-0005.jpg",
+      "sha256": "0067f9a61dcc00ee4d90a29096dc78daa01cfdbf910ae2f2906e06c457aefead"
+    },
+    {
+      "timestamp": 8,
+      "filename": "frame-0006.jpg",
+      "sha256": "4c665c01050757ca2d5005188c2c147e2d1d5b08d786323b87a72f598120dd73"
+    },
+    {
+      "timestamp": 10,
+      "filename": "frame-0007.jpg",
+      "sha256": "4c665c01050757ca2d5005188c2c147e2d1d5b08d786323b87a72f598120dd73"
+    },
+    {
+      "timestamp": 12,
+      "filename": "frame-0008.jpg",
+      "sha256": "420850c127740e866bfff979feeeb069f42590585c22ff07dad0108aa1e3e482"
+    },
+    {
+      "timestamp": 14,
+      "filename": "frame-0009.jpg",
+      "sha256": "420850c127740e866bfff979feeeb069f42590585c22ff07dad0108aa1e3e482"
+    },
+    {
+      "timestamp": 16,
+      "filename": "frame-0010.jpg",
+      "sha256": "aa0bc3eec6c52b1301af7ef86a2125064e211298d4d07439e181787fbc559e09"
+    },
+    {
+      "timestamp": 18,
+      "filename": "frame-0011.jpg",
+      "sha256": "c64e1ec3b01b3e73b2090b271e2b3b3d162e2e6e353bbef8efa89e0350267a54"
+    },
+    {
+      "timestamp": 20,
+      "filename": "frame-0012.jpg",
+      "sha256": "c64e1ec3b01b3e73b2090b271e2b3b3d162e2e6e353bbef8efa89e0350267a54"
+    },
+    {
+      "timestamp": 22,
+      "filename": "frame-0013.jpg",
+      "sha256": "c64e1ec3b01b3e73b2090b271e2b3b3d162e2e6e353bbef8efa89e0350267a54"
+    },
+    {
+      "timestamp": 24,
+      "filename": "frame-0014.jpg",
+      "sha256": "c64e1ec3b01b3e73b2090b271e2b3b3d162e2e6e353bbef8efa89e0350267a54"
+    },
+    {
+      "timestamp": 26,
+      "filename": "frame-0015.jpg",
+      "sha256": "479bc89c6b3d9592903f8ebe9731dc32cdafb7c8b19185a0a215bcd352ba1b67"
+    },
+    {
+      "timestamp": 28,
+      "filename": "frame-0016.jpg",
+      "sha256": "479bc89c6b3d9592903f8ebe9731dc32cdafb7c8b19185a0a215bcd352ba1b67"
+    },
+    {
+      "timestamp": 30,
+      "filename": "frame-0017.jpg",
+      "sha256": "d3bada51c3eb724988b2d5a3a36657ccb9e8f409120ce5f613cc53be8ab8385f"
+    },
+    {
+      "timestamp": 32,
+      "filename": "frame-0018.jpg",
+      "sha256": "b6923cc6a4e27921bb0d000be99a6c60695285503b3c5d325f1027c928924bc9"
+    },
+    {
+      "timestamp": 34,
+      "filename": "frame-0019.jpg",
+      "sha256": "b6923cc6a4e27921bb0d000be99a6c60695285503b3c5d325f1027c928924bc9"
+    },
+    {
+      "timestamp": 36,
+      "filename": "frame-0020.jpg",
+      "sha256": "b6923cc6a4e27921bb0d000be99a6c60695285503b3c5d325f1027c928924bc9"
+    },
+    {
+      "timestamp": 38,
+      "filename": "frame-0021.jpg",
+      "sha256": "e88daac0d5abb20db98df836576266cf6e10278ca36fc8550f6ac9818296812d"
+    },
+    {
+      "timestamp": 40,
+      "filename": "frame-0022.jpg",
+      "sha256": "e88daac0d5abb20db98df836576266cf6e10278ca36fc8550f6ac9818296812d"
+    },
+    {
+      "timestamp": 42,
+      "filename": "frame-0023.jpg",
+      "sha256": "6dd382fd7f1a1a4ef7d8af4c518b218141a9df96ca5493bd8a517ceddd77b63f"
+    },
+    {
+      "timestamp": 44,
+      "filename": "frame-0024.jpg",
+      "sha256": "c218ac8a2894556ca0d0a03d935113791fe54ed3aa5664e9186a5e95a6332530"
+    },
+    {
+      "timestamp": 46,
+      "filename": "frame-0025.jpg",
+      "sha256": "c218ac8a2894556ca0d0a03d935113791fe54ed3aa5664e9186a5e95a6332530"
+    },
+    {
+      "timestamp": 48,
+      "filename": "frame-0026.jpg",
+      "sha256": "c218ac8a2894556ca0d0a03d935113791fe54ed3aa5664e9186a5e95a6332530"
+    },
+    {
+      "timestamp": 50,
+      "filename": "frame-0027.jpg",
+      "sha256": "672132cbd9ca90e8304712e79cfd5a0013adb697c70e0e44944470fdc963bb19"
+    },
+    {
+      "timestamp": 52,
+      "filename": "frame-0028.jpg",
+      "sha256": "672132cbd9ca90e8304712e79cfd5a0013adb697c70e0e44944470fdc963bb19"
+    },
+    {
+      "timestamp": 54,
+      "filename": "frame-0029.jpg",
+      "sha256": "a2478f1d2a700d5f5425e5c7fbc6804e246d4f6c31d4a829f46bcb4bf6e6cc10"
+    },
+    {
+      "timestamp": 56,
+      "filename": "frame-0030.jpg",
+      "sha256": "80497198df24f040e98fe7f5dcb1e986e161114db5bd1fdb87cd0e11cebb7df8"
+    },
+    {
+      "timestamp": 58,
+      "filename": "frame-0031.jpg",
+      "sha256": "f90adb63295b140e524c4931a55a77bad781b193d56d42528b87ed0f54be95ae"
+    },
+    {
+      "timestamp": 60,
+      "filename": "frame-0032.jpg",
+      "sha256": "f90adb63295b140e524c4931a55a77bad781b193d56d42528b87ed0f54be95ae"
+    },
+    {
+      "timestamp": 62,
+      "filename": "frame-0033.jpg",
+      "sha256": "6c575426d77364121384850f1c81e1eecad3cefec689e4f85a48a08add64bd08"
+    },
+    {
+      "timestamp": 64,
+      "filename": "frame-0034.jpg",
+      "sha256": "d1da97730a92abcc8c2b004f278de9acb253834c7b051a758d3ca3638ac49087"
+    },
+    {
+      "timestamp": 66,
+      "filename": "frame-0035.jpg",
+      "sha256": "6f9f1765104f3061327f15a062c1a4a5dfe924c8e57138aecc4697feafd9c47c"
+    },
+    {
+      "timestamp": 68,
+      "filename": "frame-0036.jpg",
+      "sha256": "86c472b828c0bb771e939a1e757ef24e569d24c566837b900cdb421d22347973"
+    },
+    {
+      "timestamp": 70,
+      "filename": "frame-0037.jpg",
+      "sha256": "e6d27c90bf24fd11dcb7b2c19b08e510f325693f8a756c55c1956a0b137c8a6a"
+    },
+    {
+      "timestamp": 72,
+      "filename": "frame-0038.jpg",
+      "sha256": "e6d27c90bf24fd11dcb7b2c19b08e510f325693f8a756c55c1956a0b137c8a6a"
+    },
+    {
+      "timestamp": 74,
+      "filename": "frame-0039.jpg",
+      "sha256": "e6d27c90bf24fd11dcb7b2c19b08e510f325693f8a756c55c1956a0b137c8a6a"
+    },
+    {
+      "timestamp": 76,
+      "filename": "frame-0040.jpg",
+      "sha256": "551b1b0a9de20426d14a6edb9b98761ff059d0b36082e615f80b84e5ab1133be"
+    },
+    {
+      "timestamp": 78,
+      "filename": "frame-0041.jpg",
+      "sha256": "b803a775dfa051aa317c81cff6f99aff709daa6d5a2c95d0cf0949c3f88521a0"
+    },
+    {
+      "timestamp": 80,
+      "filename": "frame-0042.jpg",
+      "sha256": "5fbe251dd020e7d72dd0a1e10e188a0f04af286a53aef797881cad8156fde5bc"
+    },
+    {
+      "timestamp": 82,
+      "filename": "frame-0043.jpg",
+      "sha256": "cf1a1077454de0ebc014c63bfca2d6e67217f63342a78809bb67341623d280ec"
+    },
+    {
+      "timestamp": 84,
+      "filename": "frame-0044.jpg",
+      "sha256": "cf1a1077454de0ebc014c63bfca2d6e67217f63342a78809bb67341623d280ec"
+    },
+    {
+      "timestamp": 86,
+      "filename": "frame-0045.jpg",
+      "sha256": "cf1a1077454de0ebc014c63bfca2d6e67217f63342a78809bb67341623d280ec"
+    },
+    {
+      "timestamp": 88,
+      "filename": "frame-0046.jpg",
+      "sha256": "ada5fec2b264131c2da6348f72ff8d8e88236aecde98edee4873e1035872dc71"
+    },
+    {
+      "timestamp": 90,
+      "filename": "frame-0047.jpg",
+      "sha256": "ada5fec2b264131c2da6348f72ff8d8e88236aecde98edee4873e1035872dc71"
+    },
+    {
+      "timestamp": 92,
+      "filename": "frame-0048.jpg",
+      "sha256": "d06c742a91feedbe342bfff0ea4ea62f4f8339c6dd4198186b7b726c4e18f7b7"
+    },
+    {
+      "timestamp": 94,
+      "filename": "frame-0049.jpg",
+      "sha256": "2f3f1782ded2f35343cf1cc2c30f363d94aadffbc425cbb06f8660df5b1a929f"
+    },
+    {
+      "timestamp": 96,
+      "filename": "frame-0050.jpg",
+      "sha256": "79f1f1e7a3853949b062630ea8c096ec5014e21e8ca95a900ce5058f279a8a5d"
+    },
+    {
+      "timestamp": 98,
+      "filename": "frame-0051.jpg",
+      "sha256": "3092137e5c76139333aa6d87538d1e2730e545c2dad434398a941b052f6dfedb"
+    },
+    {
+      "timestamp": 100,
+      "filename": "frame-0052.jpg",
+      "sha256": "023da6dc25cdf38428ef64b4481b29ed5a622cae9b81be478856a98776aa3c5c"
+    },
+    {
+      "timestamp": 102,
+      "filename": "frame-0053.jpg",
+      "sha256": "023da6dc25cdf38428ef64b4481b29ed5a622cae9b81be478856a98776aa3c5c"
+    },
+    {
+      "timestamp": 104,
+      "filename": "frame-0054.jpg",
+      "sha256": "f9da3604d8bcb22552446b415939090c1d5737b4de1dea06845b1bf3623f3c76"
+    },
+    {
+      "timestamp": 106,
+      "filename": "frame-0055.jpg",
+      "sha256": "0b1de67be6020d4294e6b374375a1c21555cd76f4f8bfc87aed578d9bf060a0a"
+    },
+    {
+      "timestamp": 108,
+      "filename": "frame-0056.jpg",
+      "sha256": "94c18eb5cb353995ee2d8b6bb8ad5add7b710f02be0e7a3377bbb25c3c775f3f"
+    },
+    {
+      "timestamp": 110,
+      "filename": "frame-0057.jpg",
+      "sha256": "dadbae2f03815d55de49824197dd0d9422839dcd1d38501e273076756a94d80b"
+    },
+    {
+      "timestamp": 112,
+      "filename": "frame-0058.jpg",
+      "sha256": "8ea0ab4f80abc0c531598aace0ae0bf35f093c9b42593ca9f96582d67c5ff6c9"
+    },
+    {
+      "timestamp": 114,
+      "filename": "frame-0059.jpg",
+      "sha256": "8ea0ab4f80abc0c531598aace0ae0bf35f093c9b42593ca9f96582d67c5ff6c9"
+    },
+    {
+      "timestamp": 116,
+      "filename": "frame-0060.jpg",
+      "sha256": "ef8327475fbd6c3f2d7331e805d4f63a62174b1de0a15584016b813fd78dff6e"
+    },
+    {
+      "timestamp": 118,
+      "filename": "frame-0061.jpg",
+      "sha256": "b953e895c1fa13ab66518d17fb9fdad8e97cbe859a3f98cc947a1e1a1d7b28c1"
+    },
+    {
+      "timestamp": 120,
+      "filename": "frame-0062.jpg",
+      "sha256": "b953e895c1fa13ab66518d17fb9fdad8e97cbe859a3f98cc947a1e1a1d7b28c1"
+    },
+    {
+      "timestamp": 122,
+      "filename": "frame-0063.jpg",
+      "sha256": "c685899577a31a02763b42196c8d9ad31ebaa3cc29d3b12796046d111d187041"
+    },
+    {
+      "timestamp": 124,
+      "filename": "frame-0064.jpg",
+      "sha256": "c685899577a31a02763b42196c8d9ad31ebaa3cc29d3b12796046d111d187041"
+    },
+    {
+      "timestamp": 126,
+      "filename": "frame-0065.jpg",
+      "sha256": "7993dd6d957311c7a1221dc499ae88a65bc0d2ddab0dc11f2694f119e01e1791"
+    },
+    {
+      "timestamp": 128,
+      "filename": "frame-0066.jpg",
+      "sha256": "7993dd6d957311c7a1221dc499ae88a65bc0d2ddab0dc11f2694f119e01e1791"
+    },
+    {
+      "timestamp": 130,
+      "filename": "frame-0067.jpg",
+      "sha256": "7993dd6d957311c7a1221dc499ae88a65bc0d2ddab0dc11f2694f119e01e1791"
+    },
+    {
+      "timestamp": 132,
+      "filename": "frame-0068.jpg",
+      "sha256": "2ae9c4197fad9c4a8da5f04d53ca861c4d2d6a88055f5dd6f6c07061d8363465"
+    },
+    {
+      "timestamp": 134,
+      "filename": "frame-0069.jpg",
+      "sha256": "2ae9c4197fad9c4a8da5f04d53ca861c4d2d6a88055f5dd6f6c07061d8363465"
+    },
+    {
+      "timestamp": 136,
+      "filename": "frame-0070.jpg",
+      "sha256": "84f358f688fc1a249184a62be436df53d7bb3d85db566f0c1510606c146dff2e"
+    },
+    {
+      "timestamp": 138,
+      "filename": "frame-0071.jpg",
+      "sha256": "54f0d87c421039deaf1e0dec4f3b21002f87162729185e205117e05197d41953"
+    },
+    {
+      "timestamp": 140,
+      "filename": "frame-0072.jpg",
+      "sha256": "54f0d87c421039deaf1e0dec4f3b21002f87162729185e205117e05197d41953"
+    },
+    {
+      "timestamp": 142,
+      "filename": "frame-0073.jpg",
+      "sha256": "d33018516e8851df413cd8d244954f170983f7217acd7a924a97b3fb8fdafe9a"
+    },
+    {
+      "timestamp": 144,
+      "filename": "frame-0074.jpg",
+      "sha256": "ccd0ae9ad381a2ec6050d1d77dcb18c411bc9e3db3718caf3ffef02e83a9cf6f"
+    },
+    {
+      "timestamp": 146,
+      "filename": "frame-0075.jpg",
+      "sha256": "fc6082a233a06aeffbf9e57a81b60651608a55370b4d2803c76a43592f14276a"
+    },
+    {
+      "timestamp": 148,
+      "filename": "frame-0076.jpg",
+      "sha256": "fc6082a233a06aeffbf9e57a81b60651608a55370b4d2803c76a43592f14276a"
+    },
+    {
+      "timestamp": 150,
+      "filename": "frame-0077.jpg",
+      "sha256": "a0e231aad7544b005ef593b1e13cd063544956b7df8457e940524de3b94c6d80"
+    },
+    {
+      "timestamp": 152,
+      "filename": "frame-0078.jpg",
+      "sha256": "b6d05949b74f21c14a0b0f6bfe72f1e36566187fa691759c76bb72dd57fa6c60"
+    },
+    {
+      "timestamp": 154,
+      "filename": "frame-0079.jpg",
+      "sha256": "b6d05949b74f21c14a0b0f6bfe72f1e36566187fa691759c76bb72dd57fa6c60"
+    },
+    {
+      "timestamp": 156,
+      "filename": "frame-0080.jpg",
+      "sha256": "ba46dba048dfd6e8f383b91e79a6ebc6f84df5536e48a25ac6a5a63aef904f97"
+    },
+    {
+      "timestamp": 158,
+      "filename": "frame-0081.jpg",
+      "sha256": "b65d6733e8acb6c27bb2c096e64563104278ddd1632b0663331634b76360ff0c"
+    },
+    {
+      "timestamp": 160,
+      "filename": "frame-0082.jpg",
+      "sha256": "b65d6733e8acb6c27bb2c096e64563104278ddd1632b0663331634b76360ff0c"
+    },
+    {
+      "timestamp": 162,
+      "filename": "frame-0083.jpg",
+      "sha256": "d7f9d45e869da6d7879d775014ff5e7e99d40bb76760e34b27729e1370af478d"
+    },
+    {
+      "timestamp": 164,
+      "filename": "frame-0084.jpg",
+      "sha256": "8063dd0904fd45e53c63775b3ee3f9a0ee6c714467f02f64a05dd56171894f69"
+    },
+    {
+      "timestamp": 166,
+      "filename": "frame-0085.jpg",
+      "sha256": "8063dd0904fd45e53c63775b3ee3f9a0ee6c714467f02f64a05dd56171894f69"
+    },
+    {
+      "timestamp": 168,
+      "filename": "frame-0086.jpg",
+      "sha256": "756f4c24ec67a9856ed1f186e9f15223f35c42efc22e40541339a98d8fdfb524"
+    },
+    {
+      "timestamp": 170,
+      "filename": "frame-0087.jpg",
+      "sha256": "756f4c24ec67a9856ed1f186e9f15223f35c42efc22e40541339a98d8fdfb524"
+    },
+    {
+      "timestamp": 172,
+      "filename": "frame-0088.jpg",
+      "sha256": "bdbf7af488017bfeb64defad354b1c29492449133f76e687f0df005ebfdc179a"
+    },
+    {
+      "timestamp": 174,
+      "filename": "frame-0089.jpg",
+      "sha256": "bdbf7af488017bfeb64defad354b1c29492449133f76e687f0df005ebfdc179a"
+    },
+    {
+      "timestamp": 176,
+      "filename": "frame-0090.jpg",
+      "sha256": "052eb6f73368af23a6a308deccbac141319573c3ec3c350ef7cb8e20230d375a"
+    },
+    {
+      "timestamp": 178,
+      "filename": "frame-0091.jpg",
+      "sha256": "052eb6f73368af23a6a308deccbac141319573c3ec3c350ef7cb8e20230d375a"
+    },
+    {
+      "timestamp": 180,
+      "filename": "frame-0092.jpg",
+      "sha256": "a28cafcd235b2488cb6f37832358995d0d15aadcdd47cbda7dbe6dc541117def"
+    },
+    {
+      "timestamp": 182,
+      "filename": "frame-0093.jpg",
+      "sha256": "9431ded03adbe81840537f0f874a038c8ce2fbf0ce874c89af68f79cd1a3246b"
+    },
+    {
+      "timestamp": 184,
+      "filename": "frame-0094.jpg",
+      "sha256": "9431ded03adbe81840537f0f874a038c8ce2fbf0ce874c89af68f79cd1a3246b"
+    },
+    {
+      "timestamp": 186,
+      "filename": "frame-0095.jpg",
+      "sha256": "d3086f3045f40e3a05a02a5f02c4e3317fc1c56c5cf4d4e8c67c2367e6bf22b2"
+    },
+    {
+      "timestamp": 188,
+      "filename": "frame-0096.jpg",
+      "sha256": "e940fa93d2f55c175477efd288870875fddd56995700cf44b90a4b171437b309"
+    },
+    {
+      "timestamp": 190,
+      "filename": "frame-0097.jpg",
+      "sha256": "66e2ebc8fe29e6754b3b5d28c90f969943c295d756d0e2c03f2df3ba06262073"
+    },
+    {
+      "timestamp": 192,
+      "filename": "frame-0098.jpg",
+      "sha256": "66e2ebc8fe29e6754b3b5d28c90f969943c295d756d0e2c03f2df3ba06262073"
+    },
+    {
+      "timestamp": 194,
+      "filename": "frame-0099.jpg",
+      "sha256": "14b4828056de5c28244608956999bd2091c602bcc1b60604be02148a49a74cc3"
+    },
+    {
+      "timestamp": 196,
+      "filename": "frame-0100.jpg",
+      "sha256": "14b4828056de5c28244608956999bd2091c602bcc1b60604be02148a49a74cc3"
+    },
+    {
+      "timestamp": 198,
+      "filename": "frame-0101.jpg",
+      "sha256": "f9f1697e9166cab1b4a8a1b98cef201788492b30f5a47ac78b4d59effc711fdd"
+    },
+    {
+      "timestamp": 200,
+      "filename": "frame-0102.jpg",
+      "sha256": "1e35571ae07b65634ec025700e74da657289f4f726e0bce77c5f9d69e07911c3"
+    },
+    {
+      "timestamp": 202,
+      "filename": "frame-0103.jpg",
+      "sha256": "1e35571ae07b65634ec025700e74da657289f4f726e0bce77c5f9d69e07911c3"
+    },
+    {
+      "timestamp": 204,
+      "filename": "frame-0104.jpg",
+      "sha256": "1e35571ae07b65634ec025700e74da657289f4f726e0bce77c5f9d69e07911c3"
+    },
+    {
+      "timestamp": 206,
+      "filename": "frame-0105.jpg",
+      "sha256": "a288fbdb47e8162f87eb41fd0c282d3c611dd9684adf49fbce7776248f7ea5de"
+    },
+    {
+      "timestamp": 208,
+      "filename": "frame-0106.jpg",
+      "sha256": "08583712e86afbae2ce9496f8256cfcedf8c99445e5d90afd3c56e439215cd41"
+    },
+    {
+      "timestamp": 210,
+      "filename": "frame-0107.jpg",
+      "sha256": "b3d2662983142bc18df85f74cf57700d8d33b87e26e16c5bcf786216c5541cf7"
+    },
+    {
+      "timestamp": 212,
+      "filename": "frame-0108.jpg",
+      "sha256": "03e74b58c5351b3cce056042d86a1ecc366288d60359859bd301b7fd8990cb34"
+    },
+    {
+      "timestamp": 214,
+      "filename": "frame-0109.jpg",
+      "sha256": "03e74b58c5351b3cce056042d86a1ecc366288d60359859bd301b7fd8990cb34"
+    },
+    {
+      "timestamp": 216,
+      "filename": "frame-0110.jpg",
+      "sha256": "5b57bb72cb187d3076b5f654606f2b8cf643a22d684a42ff786c79cd9f7f433b"
+    },
+    {
+      "timestamp": 218,
+      "filename": "frame-0111.jpg",
+      "sha256": "927688ea4660095c82aa8c9c14841c56da7fe5ce9277fa50910cf6b1f73a8fc4"
+    },
+    {
+      "timestamp": 220,
+      "filename": "frame-0112.jpg",
+      "sha256": "927688ea4660095c82aa8c9c14841c56da7fe5ce9277fa50910cf6b1f73a8fc4"
+    },
+    {
+      "timestamp": 222,
+      "filename": "frame-0113.jpg",
+      "sha256": "731cfaad82f73219fd6a20b630d3012175170c24c4c3badfbe6a6a0b771d83e9"
+    },
+    {
+      "timestamp": 224,
+      "filename": "frame-0114.jpg",
+      "sha256": "731cfaad82f73219fd6a20b630d3012175170c24c4c3badfbe6a6a0b771d83e9"
+    },
+    {
+      "timestamp": 226,
+      "filename": "frame-0115.jpg",
+      "sha256": "c23a70059ea460dafc8fa71397f39e96baed54a779e4164c73b00b524e67320c"
+    },
+    {
+      "timestamp": 228,
+      "filename": "frame-0116.jpg",
+      "sha256": "0602b0de922178a2fdae9c08e831c8080402c8606c9686273c8aedb2ec4beeba"
+    },
+    {
+      "timestamp": 230,
+      "filename": "frame-0117.jpg",
+      "sha256": "4f03a4261365aa17ca450f1704585bbf04a0eef18098187480eb0f995e3a7bc0"
+    },
+    {
+      "timestamp": 232,
+      "filename": "frame-0118.jpg",
+      "sha256": "fc09dd5777d4661e17969d20abf9fcafe1f5a6bc46264cdc8657265d4c0e204c"
+    },
+    {
+      "timestamp": 234,
+      "filename": "frame-0119.jpg",
+      "sha256": "fc09dd5777d4661e17969d20abf9fcafe1f5a6bc46264cdc8657265d4c0e204c"
+    },
+    {
+      "timestamp": 236,
+      "filename": "frame-0120.jpg",
+      "sha256": "2f3080b7d067900be42fa4e3f7629ea06129660e55b2dc77b4864569b6b6f681"
+    },
+    {
+      "timestamp": 238,
+      "filename": "frame-0121.jpg",
+      "sha256": "5f6b116f8b9a8f05ddbfb268fab42a02a750bc78a21291c91cedf945a7b12a63"
+    },
+    {
+      "timestamp": 240,
+      "filename": "frame-0122.jpg",
+      "sha256": "990e5fcc7ff838e5f29eb48842867c78cc7c66f4c036e79e4f1d228ca13ebb6f"
+    },
+    {
+      "timestamp": 242,
+      "filename": "frame-0123.jpg",
+      "sha256": "9734ced0908f95713d32fe570648340239829ab380853c8935b208af6e9045f8"
+    },
+    {
+      "timestamp": 244,
+      "filename": "frame-0124.jpg",
+      "sha256": "08211619aa2b84f5a9675e11f7ce75a9cf45acd0653d9f36a1d1d8a8c699bcba"
+    },
+    {
+      "timestamp": 246,
+      "filename": "frame-0125.jpg",
+      "sha256": "ca6ea88be6288eab6f0f00c4a67e7b6acd9811fee9c3ec6430439c6a3ffe7371"
+    },
+    {
+      "timestamp": 248,
+      "filename": "frame-0126.jpg",
+      "sha256": "ca6ea88be6288eab6f0f00c4a67e7b6acd9811fee9c3ec6430439c6a3ffe7371"
+    },
+    {
+      "timestamp": 250,
+      "filename": "frame-0127.jpg",
+      "sha256": "8c39d51120fd7898db276e5cca452e85a580f90d767076e17177bbc5c9577b6c"
+    },
+    {
+      "timestamp": 252,
+      "filename": "frame-0128.jpg",
+      "sha256": "8c39d51120fd7898db276e5cca452e85a580f90d767076e17177bbc5c9577b6c"
+    },
+    {
+      "timestamp": 254,
+      "filename": "frame-0129.jpg",
+      "sha256": "c10913bde793cd6b5d8172d8f86ff513cc5ad74f110d0429df8a0c93cb08252a"
+    },
+    {
+      "timestamp": 256,
+      "filename": "frame-0130.jpg",
+      "sha256": "9e7b014ea3a331a6fa923ed0a08c8c325aa06be0a7ff9f8869a0cf30f54ff130"
+    },
+    {
+      "timestamp": 258,
+      "filename": "frame-0131.jpg",
+      "sha256": "64824b7d9094dc9257c47d7aa5b174bec45f9d9cbd4b9621bc46cb0342aa1d71"
+    },
+    {
+      "timestamp": 260,
+      "filename": "frame-0132.jpg",
+      "sha256": "64824b7d9094dc9257c47d7aa5b174bec45f9d9cbd4b9621bc46cb0342aa1d71"
+    },
+    {
+      "timestamp": 262,
+      "filename": "frame-0133.jpg",
+      "sha256": "8d8fb31d8ccfccf7193bb4e05d86ba604f8729e98eb1ea784de5f4641abb1f0d"
+    },
+    {
+      "timestamp": 264,
+      "filename": "frame-0134.jpg",
+      "sha256": "8d8fb31d8ccfccf7193bb4e05d86ba604f8729e98eb1ea784de5f4641abb1f0d"
+    },
+    {
+      "timestamp": 266,
+      "filename": "frame-0135.jpg",
+      "sha256": "347edca5b7328e09ff8180cf1f0be67020696f83574c2e5bc1a6af6979c0686e"
+    },
+    {
+      "timestamp": 268,
+      "filename": "frame-0136.jpg",
+      "sha256": "532af144f572228b783aca3c585dae2b3080b034176cde065763135da0369c4e"
+    },
+    {
+      "timestamp": 270,
+      "filename": "frame-0137.jpg",
+      "sha256": "09281aef5280149a79e070a25ed9da621e0d0cf2cdba3d5bf2d071c11b88d9f7"
+    },
+    {
+      "timestamp": 272,
+      "filename": "frame-0138.jpg",
+      "sha256": "50f2707f3ee10195aec8d0c748f895c407e870696a6a114e47b229da39d59308"
+    },
+    {
+      "timestamp": 274,
+      "filename": "frame-0139.jpg",
+      "sha256": "47062abf380f10a9837fb6df291cda4208e19b3f05ce105d5a53bc28505c5b53"
+    },
+    {
+      "timestamp": 276,
+      "filename": "frame-0140.jpg",
+      "sha256": "11d43f1bf399be682207bbcc281c6afb053523b5ab550337bc76bcc9bdc0c337"
+    },
+    {
+      "timestamp": 278,
+      "filename": "frame-0141.jpg",
+      "sha256": "92818979ad9a87bdee2f4822ed94ea6f3cecad0aae7c7d44c27cc99527d06b25"
+    },
+    {
+      "timestamp": 280,
+      "filename": "frame-0142.jpg",
+      "sha256": "cae612214c9e5525b7006bdab0e6ffd0b8e1956672933ddd5050f741c6d1093b"
+    },
+    {
+      "timestamp": 282,
+      "filename": "frame-0143.jpg",
+      "sha256": "771ed5987465e957ea137a681b3eea9d202e00dc2b3df112cb38f0725a0d39b7"
+    },
+    {
+      "timestamp": 284,
+      "filename": "frame-0144.jpg",
+      "sha256": "d1c1dbd3798da25c7a111088e1a605511f83f1c57a1d9d77d61b458803b61895"
+    },
+    {
+      "timestamp": 286,
+      "filename": "frame-0145.jpg",
+      "sha256": "788519b0ef7a9dfa631c193d42f78b31f78cdf4ab55b008b90d8889f3090778e"
+    },
+    {
+      "timestamp": 288,
+      "filename": "frame-0146.jpg",
+      "sha256": "08c798b576111b52ed3b279cc8dd4a2c69670f18fad87b3876d542f336e050f2"
+    },
+    {
+      "timestamp": 290,
+      "filename": "frame-0147.jpg",
+      "sha256": "95e7e12e5486144ffe0cfa1f6ac92d6820ee9a82b7f9096fb5e6f14c4643f132"
+    },
+    {
+      "timestamp": 292,
+      "filename": "frame-0148.jpg",
+      "sha256": "3b3d2afd20b5c758d549f4e506525591875a06970ab9e6d0a03215b6ce0a1dd3"
+    },
+    {
+      "timestamp": 294,
+      "filename": "frame-0149.jpg",
+      "sha256": "d5a02ee85a94418f23e40f868ebb73bd3e6779effb02a61b839cd6e5f09758e6"
+    },
+    {
+      "timestamp": 296,
+      "filename": "frame-0150.jpg",
+      "sha256": "d5a02ee85a94418f23e40f868ebb73bd3e6779effb02a61b839cd6e5f09758e6"
+    },
+    {
+      "timestamp": 298,
+      "filename": "frame-0151.jpg",
+      "sha256": "d5a02ee85a94418f23e40f868ebb73bd3e6779effb02a61b839cd6e5f09758e6"
+    },
+    {
+      "timestamp": 300,
+      "filename": "frame-0152.jpg",
+      "sha256": "fdecee6dc16016e96e24b244aa4086e54bdea95805a35f4e1b3572c177c04d55"
+    },
+    {
+      "timestamp": 302,
+      "filename": "frame-0153.jpg",
+      "sha256": "fdecee6dc16016e96e24b244aa4086e54bdea95805a35f4e1b3572c177c04d55"
+    },
+    {
+      "timestamp": 304,
+      "filename": "frame-0154.jpg",
+      "sha256": "fdecee6dc16016e96e24b244aa4086e54bdea95805a35f4e1b3572c177c04d55"
+    },
+    {
+      "timestamp": 306,
+      "filename": "frame-0155.jpg",
+      "sha256": "3a0e94724c4004500f2d002227eab830ee777fee2ce7298c0e4f3e283520064f"
+    },
+    {
+      "timestamp": 308,
+      "filename": "frame-0156.jpg",
+      "sha256": "3a0e94724c4004500f2d002227eab830ee777fee2ce7298c0e4f3e283520064f"
+    },
+    {
+      "timestamp": 310,
+      "filename": "frame-0157.jpg",
+      "sha256": "058761fdd8de8765f65eeadfebd95030a5c0bb00fc876c71d40d83b883ee129c"
+    },
+    {
+      "timestamp": 312,
+      "filename": "frame-0158.jpg",
+      "sha256": "8ba2ad4650a6b8141c779314239594370cc305be9d44267a151c17b75f8a41ff"
+    },
+    {
+      "timestamp": 314,
+      "filename": "frame-0159.jpg",
+      "sha256": "8ba2ad4650a6b8141c779314239594370cc305be9d44267a151c17b75f8a41ff"
+    },
+    {
+      "timestamp": 316,
+      "filename": "frame-0160.jpg",
+      "sha256": "8ba2ad4650a6b8141c779314239594370cc305be9d44267a151c17b75f8a41ff"
+    },
+    {
+      "timestamp": 318,
+      "filename": "frame-0161.jpg",
+      "sha256": "8ba2ad4650a6b8141c779314239594370cc305be9d44267a151c17b75f8a41ff"
+    },
+    {
+      "timestamp": 320,
+      "filename": "frame-0162.jpg",
+      "sha256": "4fdabac124db2584628ec7322cb512ee152316f877a8bae6ade114e0f94c55c1"
+    },
+    {
+      "timestamp": 322,
+      "filename": "frame-0163.jpg",
+      "sha256": "7ba5905c0691d7ba023f2ccd371c05ab33b83aee49569c9b84ae6c5061adbbc4"
+    },
+    {
+      "timestamp": 324,
+      "filename": "frame-0164.jpg",
+      "sha256": "7ba5905c0691d7ba023f2ccd371c05ab33b83aee49569c9b84ae6c5061adbbc4"
+    },
+    {
+      "timestamp": 326,
+      "filename": "frame-0165.jpg",
+      "sha256": "9934a5e731582f639d2876d3a606c83d424256c7437eb5c6d093b871b786d81a"
+    },
+    {
+      "timestamp": 328,
+      "filename": "frame-0166.jpg",
+      "sha256": "9934a5e731582f639d2876d3a606c83d424256c7437eb5c6d093b871b786d81a"
+    },
+    {
+      "timestamp": 330,
+      "filename": "frame-0167.jpg",
+      "sha256": "9934a5e731582f639d2876d3a606c83d424256c7437eb5c6d093b871b786d81a"
+    },
+    {
+      "timestamp": 332,
+      "filename": "frame-0168.jpg",
+      "sha256": "1dcb67d365e7963e938b04d5aa8cc8314fedbb2ea0597c08152a7c6ea32e44f9"
+    },
+    {
+      "timestamp": 334,
+      "filename": "frame-0169.jpg",
+      "sha256": "cca04969714ccd42957e8723db4b9d989da0ef76df39d2e99ef852fe1644dc7a"
+    },
+    {
+      "timestamp": 336,
+      "filename": "frame-0170.jpg",
+      "sha256": "cca04969714ccd42957e8723db4b9d989da0ef76df39d2e99ef852fe1644dc7a"
+    },
+    {
+      "timestamp": 338,
+      "filename": "frame-0171.jpg",
+      "sha256": "e652ac9d1eee9a08949f54317de92288acd04d561f8d951c4479b514d7165385"
+    },
+    {
+      "timestamp": 340,
+      "filename": "frame-0172.jpg",
+      "sha256": "e652ac9d1eee9a08949f54317de92288acd04d561f8d951c4479b514d7165385"
+    },
+    {
+      "timestamp": 342,
+      "filename": "frame-0173.jpg",
+      "sha256": "cb54b09b281a54c62b0803f761eb796b23ec7f124ecbf93947b10d956835b3b4"
+    },
+    {
+      "timestamp": 344,
+      "filename": "frame-0174.jpg",
+      "sha256": "f7850db2e08d293ac305c500fbf25887ad6aa43087217f85e88ecc31dacfad24"
+    },
+    {
+      "timestamp": 346,
+      "filename": "frame-0175.jpg",
+      "sha256": "3523f01f47a6203ddd7d58d63164c84b58c232a2153b16c97f9a0756512895ff"
+    },
+    {
+      "timestamp": 348,
+      "filename": "frame-0176.jpg",
+      "sha256": "3523f01f47a6203ddd7d58d63164c84b58c232a2153b16c97f9a0756512895ff"
+    },
+    {
+      "timestamp": 350,
+      "filename": "frame-0177.jpg",
+      "sha256": "9cc3dbcb5e2973fc4292129518da31ab9b4c729f7166eea667877a812935119a"
+    },
+    {
+      "timestamp": 352,
+      "filename": "frame-0178.jpg",
+      "sha256": "9cc3dbcb5e2973fc4292129518da31ab9b4c729f7166eea667877a812935119a"
+    },
+    {
+      "timestamp": 354,
+      "filename": "frame-0179.jpg",
+      "sha256": "9cc3dbcb5e2973fc4292129518da31ab9b4c729f7166eea667877a812935119a"
+    },
+    {
+      "timestamp": 356,
+      "filename": "frame-0180.jpg",
+      "sha256": "b0f20c63fdc13bdbe0e0fcee8c98f9c27be7ac1654c7499ace7c0768e205a463"
+    },
+    {
+      "timestamp": 358,
+      "filename": "frame-0181.jpg",
+      "sha256": "b0f20c63fdc13bdbe0e0fcee8c98f9c27be7ac1654c7499ace7c0768e205a463"
+    },
+    {
+      "timestamp": 360,
+      "filename": "frame-0182.jpg",
+      "sha256": "bb02ed6bd940059e7f1f3f114c900a910b19925107b6b597db5852b5c93f593d"
+    },
+    {
+      "timestamp": 362,
+      "filename": "frame-0183.jpg",
+      "sha256": "8951dec06c7a93691ce8e2a1a3caedce68d60eb29aacaabaf7695a42ada5badf"
+    },
+    {
+      "timestamp": 364,
+      "filename": "frame-0184.jpg",
+      "sha256": "8951dec06c7a93691ce8e2a1a3caedce68d60eb29aacaabaf7695a42ada5badf"
+    },
+    {
+      "timestamp": 366,
+      "filename": "frame-0185.jpg",
+      "sha256": "8951dec06c7a93691ce8e2a1a3caedce68d60eb29aacaabaf7695a42ada5badf"
+    },
+    {
+      "timestamp": 368,
+      "filename": "frame-0186.jpg",
+      "sha256": "090c30a73573cfec7795818260597960b1d956bf22c10cfec94deb649312fea3"
+    },
+    {
+      "timestamp": 370,
+      "filename": "frame-0187.jpg",
+      "sha256": "8f7f88e9b585cf213a78b2a48c61e7cd4deede05d9fa64505417942b119accb1"
+    },
+    {
+      "timestamp": 372,
+      "filename": "frame-0188.jpg",
+      "sha256": "8f7f88e9b585cf213a78b2a48c61e7cd4deede05d9fa64505417942b119accb1"
+    },
+    {
+      "timestamp": 374,
+      "filename": "frame-0189.jpg",
+      "sha256": "8f7f88e9b585cf213a78b2a48c61e7cd4deede05d9fa64505417942b119accb1"
+    },
+    {
+      "timestamp": 376,
+      "filename": "frame-0190.jpg",
+      "sha256": "22dddc221d99e74b04c3c19912c0a452133afa8d2ecb92f3baf10ed91e9f8e60"
+    },
+    {
+      "timestamp": 378,
+      "filename": "frame-0191.jpg",
+      "sha256": "f06f4b5bbae0002c668a81bbcc752c8e1fd826839fda41e938f5a37f05aba53b"
+    },
+    {
+      "timestamp": 380,
+      "filename": "frame-0192.jpg",
+      "sha256": "f06f4b5bbae0002c668a81bbcc752c8e1fd826839fda41e938f5a37f05aba53b"
+    },
+    {
+      "timestamp": 382,
+      "filename": "frame-0193.jpg",
+      "sha256": "fe5103f82488b153532f8d464f9d141c9b82cbc04c50169d99e65b7c680df4b9"
+    },
+    {
+      "timestamp": 384,
+      "filename": "frame-0194.jpg",
+      "sha256": "2f855241bce3203b2fe2281a3fb6dbacdba89859790c0a87f71aadd008514f0f"
+    },
+    {
+      "timestamp": 386,
+      "filename": "frame-0195.jpg",
+      "sha256": "de533c27ba4025e71485021901014c7886670bb03f284850ed9cbe0b4be7ce33"
+    },
+    {
+      "timestamp": 388,
+      "filename": "frame-0196.jpg",
+      "sha256": "9ab12678b43d58714619f0ada3ab486f8a134fa1ffc3408c764a27716b2ff7b7"
+    },
+    {
+      "timestamp": 390,
+      "filename": "frame-0197.jpg",
+      "sha256": "36fb11e2c38536db44b082628c956bc4db0bc276a03cc71e5ea810510d7bd153"
+    },
+    {
+      "timestamp": 392,
+      "filename": "frame-0198.jpg",
+      "sha256": "36fb11e2c38536db44b082628c956bc4db0bc276a03cc71e5ea810510d7bd153"
+    },
+    {
+      "timestamp": 394,
+      "filename": "frame-0199.jpg",
+      "sha256": "eaeef375d220bb814f5c67338d47d6b64e28135c1e9a8f3cc8491abd067dc4f3"
+    },
+    {
+      "timestamp": 396,
+      "filename": "frame-0200.jpg",
+      "sha256": "a631f31481e80497562e01b738a829f9228bf007650f246e6e52c25d8c178833"
+    },
+    {
+      "timestamp": 398,
+      "filename": "frame-0201.jpg",
+      "sha256": "a631f31481e80497562e01b738a829f9228bf007650f246e6e52c25d8c178833"
+    },
+    {
+      "timestamp": 400,
+      "filename": "frame-0202.jpg",
+      "sha256": "c4c4827ca39e8a0d289bb5fc0b6ebec5ec77a16970e28775641183cf659b3eab"
+    },
+    {
+      "timestamp": 402,
+      "filename": "frame-0203.jpg",
+      "sha256": "c4c4827ca39e8a0d289bb5fc0b6ebec5ec77a16970e28775641183cf659b3eab"
+    },
+    {
+      "timestamp": 404,
+      "filename": "frame-0204.jpg",
+      "sha256": "c4c4827ca39e8a0d289bb5fc0b6ebec5ec77a16970e28775641183cf659b3eab"
+    },
+    {
+      "timestamp": 406,
+      "filename": "frame-0205.jpg",
+      "sha256": "f5ede0dae887a9361fbe6cc848703153ef967fdead5c7e73d9f4c7e941e1d554"
+    },
+    {
+      "timestamp": 408,
+      "filename": "frame-0206.jpg",
+      "sha256": "f5ede0dae887a9361fbe6cc848703153ef967fdead5c7e73d9f4c7e941e1d554"
+    },
+    {
+      "timestamp": 410,
+      "filename": "frame-0207.jpg",
+      "sha256": "de40874cbfaceeedd227cb3cbcf2e921299e1f2483d80116c13726f9a0a3224b"
+    },
+    {
+      "timestamp": 412,
+      "filename": "frame-0208.jpg",
+      "sha256": "c5b76fd0fec449536f50555655b29af79df71f21bf676b1c7a4d65fcfd4aeadc"
+    },
+    {
+      "timestamp": 414,
+      "filename": "frame-0209.jpg",
+      "sha256": "48eed4f9ed9a888f5ca2ac63569036939c1f12081a62343f9bd60cb761d33344"
+    },
+    {
+      "timestamp": 416,
+      "filename": "frame-0210.jpg",
+      "sha256": "a899edc957ef5c5be84e28a4a74cab5988e3615168d7af86a6cd753f0e365bb7"
+    },
+    {
+      "timestamp": 418,
+      "filename": "frame-0211.jpg",
+      "sha256": "fbf8eda98a558504d1400eded0f02a78938afc6f365fdbafa15f3cc760f05c16"
+    },
+    {
+      "timestamp": 420,
+      "filename": "frame-0212.jpg",
+      "sha256": "61224bfc597979318d4eca6087108ee701d29ed41117416b02289d72c7333964"
+    },
+    {
+      "timestamp": 422,
+      "filename": "frame-0213.jpg",
+      "sha256": "c4b03741f35bd43d33641fae0b0e13f41040cbc490442d4c5194c5fdcc71c5b1"
+    },
+    {
+      "timestamp": 424,
+      "filename": "frame-0214.jpg",
+      "sha256": "c4b03741f35bd43d33641fae0b0e13f41040cbc490442d4c5194c5fdcc71c5b1"
+    },
+    {
+      "timestamp": 426,
+      "filename": "frame-0215.jpg",
+      "sha256": "9b85bd79176d18f67cf1c735911f721f654eb0bb2d7707080ef95f6285a0698a"
+    },
+    {
+      "timestamp": 428,
+      "filename": "frame-0216.jpg",
+      "sha256": "9b85bd79176d18f67cf1c735911f721f654eb0bb2d7707080ef95f6285a0698a"
+    },
+    {
+      "timestamp": 430,
+      "filename": "frame-0217.jpg",
+      "sha256": "9b85bd79176d18f67cf1c735911f721f654eb0bb2d7707080ef95f6285a0698a"
+    },
+    {
+      "timestamp": 432,
+      "filename": "frame-0218.jpg",
+      "sha256": "8381085bec579bc526e6ac51786feda6e06a864f1027ad240d1d5f5ac157ab0b"
+    },
+    {
+      "timestamp": 434,
+      "filename": "frame-0219.jpg",
+      "sha256": "8381085bec579bc526e6ac51786feda6e06a864f1027ad240d1d5f5ac157ab0b"
+    },
+    {
+      "timestamp": 436,
+      "filename": "frame-0220.jpg",
+      "sha256": "8381085bec579bc526e6ac51786feda6e06a864f1027ad240d1d5f5ac157ab0b"
+    },
+    {
+      "timestamp": 438,
+      "filename": "frame-0221.jpg",
+      "sha256": "ae3256b88823bf8082d7c48e92c7371fd24f0c4de623d26040993e30408bc96f"
+    },
+    {
+      "timestamp": 440,
+      "filename": "frame-0222.jpg",
+      "sha256": "ae3256b88823bf8082d7c48e92c7371fd24f0c4de623d26040993e30408bc96f"
+    },
+    {
+      "timestamp": 442,
+      "filename": "frame-0223.jpg",
+      "sha256": "ae3256b88823bf8082d7c48e92c7371fd24f0c4de623d26040993e30408bc96f"
+    },
+    {
+      "timestamp": 444,
+      "filename": "frame-0224.jpg",
+      "sha256": "1f7cecdcb017eb173bc3dcb301bda68434f134c2366ad82dd87eae202e867908"
+    },
+    {
+      "timestamp": 446,
+      "filename": "frame-0225.jpg",
+      "sha256": "6eb1524e1294a609e010fe8fec0d8627547ca8a3e31f0463904e9b3be8a13ec2"
+    },
+    {
+      "timestamp": 448,
+      "filename": "frame-0226.jpg",
+      "sha256": "6eb1524e1294a609e010fe8fec0d8627547ca8a3e31f0463904e9b3be8a13ec2"
+    },
+    {
+      "timestamp": 450,
+      "filename": "frame-0227.jpg",
+      "sha256": "9c7d5dd281c2b8b691d635b0e817e8e61f7c02600e649e4bb0bb759de3dcb650"
+    },
+    {
+      "timestamp": 452,
+      "filename": "frame-0228.jpg",
+      "sha256": "9c7d5dd281c2b8b691d635b0e817e8e61f7c02600e649e4bb0bb759de3dcb650"
+    },
+    {
+      "timestamp": 454,
+      "filename": "frame-0229.jpg",
+      "sha256": "3be0cb10272a5e8883caa93d3b60b9649628eec9c2558f1dd326274f29c51ba8"
+    },
+    {
+      "timestamp": 456,
+      "filename": "frame-0230.jpg",
+      "sha256": "a10f64c6f0d427c219781b350945a9aaa6b0844a78b1654ee8a9136f9335927d"
+    },
+    {
+      "timestamp": 458,
+      "filename": "frame-0231.jpg",
+      "sha256": "a10f64c6f0d427c219781b350945a9aaa6b0844a78b1654ee8a9136f9335927d"
+    },
+    {
+      "timestamp": 460,
+      "filename": "frame-0232.jpg",
+      "sha256": "f8cdb50f6dcfc0a2ba23d64fb2357d026288de0aa90ac7715184464e1fba65a7"
+    },
+    {
+      "timestamp": 462,
+      "filename": "frame-0233.jpg",
+      "sha256": "ffa61255a3be2f2bbedc1e0e561a60a1eabb1797204fde941852bc33a0d9eafe"
+    },
+    {
+      "timestamp": 464,
+      "filename": "frame-0234.jpg",
+      "sha256": "e941e677343e7ed2206b881ec1267d8b915614b09030c4c1919a29191ce14657"
+    },
+    {
+      "timestamp": 466,
+      "filename": "frame-0235.jpg",
+      "sha256": "e941e677343e7ed2206b881ec1267d8b915614b09030c4c1919a29191ce14657"
+    },
+    {
+      "timestamp": 468,
+      "filename": "frame-0236.jpg",
+      "sha256": "0d089c73a7780810b39b0264e60af0548b19c46c559a904c8f8d88534b3a60fd"
+    },
+    {
+      "timestamp": 470,
+      "filename": "frame-0237.jpg",
+      "sha256": "629eb0c4eb515adacaf99db1c1e6b500a68991c572506f53ade42b5526ded14d"
+    },
+    {
+      "timestamp": 472,
+      "filename": "frame-0238.jpg",
+      "sha256": "dc81d5b0033c9679e208abc0264f88cc1c1cb2d3ac4b0a87e72d9a40375d4a66"
+    },
+    {
+      "timestamp": 474,
+      "filename": "frame-0239.jpg",
+      "sha256": "9267c67a015965f2146273cbf22d5f8a8b70a486a9e95be1d445d90c64cf9b23"
+    },
+    {
+      "timestamp": 476,
+      "filename": "frame-0240.jpg",
+      "sha256": "c82f8daff3d448ff60d5929953a96e20bbde9c2847291ce1510a9d8b164da7aa"
+    },
+    {
+      "timestamp": 478,
+      "filename": "frame-0241.jpg",
+      "sha256": "b8ea8c42eaf790f64ce98aed95b753303d1623c9c1785d048b84de8cf4caaac4"
+    },
+    {
+      "timestamp": 480,
+      "filename": "frame-0242.jpg",
+      "sha256": "b8ea8c42eaf790f64ce98aed95b753303d1623c9c1785d048b84de8cf4caaac4"
+    },
+    {
+      "timestamp": 482,
+      "filename": "frame-0243.jpg",
+      "sha256": "75e6795f43e0337496f98bd202b788eb644b9405bdf2b7bfcf0ecc999a8200f3"
+    },
+    {
+      "timestamp": 484,
+      "filename": "frame-0244.jpg",
+      "sha256": "952d6e0f1f39430d62a85d0fd4e6326751b08727cce11c76b1d19230e474e45d"
+    },
+    {
+      "timestamp": 486,
+      "filename": "frame-0245.jpg",
+      "sha256": "4673d9e3e92f3b8ec0f4224893904a0b8af2bf69f86991205e9fcf9a6a828303"
+    },
+    {
+      "timestamp": 488,
+      "filename": "frame-0246.jpg",
+      "sha256": "849ff62df2956952d71e8910843efdbf04086424b0b11ef210e44ac37739cd68"
+    },
+    {
+      "timestamp": 490,
+      "filename": "frame-0247.jpg",
+      "sha256": "849ff62df2956952d71e8910843efdbf04086424b0b11ef210e44ac37739cd68"
+    },
+    {
+      "timestamp": 492,
+      "filename": "frame-0248.jpg",
+      "sha256": "849ff62df2956952d71e8910843efdbf04086424b0b11ef210e44ac37739cd68"
+    },
+    {
+      "timestamp": 494,
+      "filename": "frame-0249.jpg",
+      "sha256": "443348597cd7caa3d017dd98263bc44689127885475f86c6eff1198a12d879ed"
+    },
+    {
+      "timestamp": 496,
+      "filename": "frame-0250.jpg",
+      "sha256": "443348597cd7caa3d017dd98263bc44689127885475f86c6eff1198a12d879ed"
+    },
+    {
+      "timestamp": 498,
+      "filename": "frame-0251.jpg",
+      "sha256": "443348597cd7caa3d017dd98263bc44689127885475f86c6eff1198a12d879ed"
+    },
+    {
+      "timestamp": 500,
+      "filename": "frame-0252.jpg",
+      "sha256": "9c6f4457c744748c5f73b86e8337c69df566543ae2ae16ef498a4a34c7fc484c"
+    },
+    {
+      "timestamp": 502,
+      "filename": "frame-0253.jpg",
+      "sha256": "9c6f4457c744748c5f73b86e8337c69df566543ae2ae16ef498a4a34c7fc484c"
+    },
+    {
+      "timestamp": 504,
+      "filename": "frame-0254.jpg",
+      "sha256": "9c6f4457c744748c5f73b86e8337c69df566543ae2ae16ef498a4a34c7fc484c"
+    },
+    {
+      "timestamp": 506,
+      "filename": "frame-0255.jpg",
+      "sha256": "5e6dffccc2c89508475c7170bb0a2c9dc074758e07db96c5c8f7d98bd636199c"
+    },
+    {
+      "timestamp": 508,
+      "filename": "frame-0256.jpg",
+      "sha256": "5e6dffccc2c89508475c7170bb0a2c9dc074758e07db96c5c8f7d98bd636199c"
+    },
+    {
+      "timestamp": 510,
+      "filename": "frame-0257.jpg",
+      "sha256": "5e6dffccc2c89508475c7170bb0a2c9dc074758e07db96c5c8f7d98bd636199c"
+    },
+    {
+      "timestamp": 512,
+      "filename": "frame-0258.jpg",
+      "sha256": "9e7c7c3218f52a7b62cf3c76d6e5ed0680d38b89301f06f5386bf40788deeffa"
+    },
+    {
+      "timestamp": 514,
+      "filename": "frame-0259.jpg",
+      "sha256": "7f73c90707d267feb6f3dc67549f1456b6138981364a0f59d15470c2c47bd44d"
+    },
+    {
+      "timestamp": 516,
+      "filename": "frame-0260.jpg",
+      "sha256": "23587ec07d11dc1aeb0106df63b9533d37515f22a1d2226f6112b60754429be0"
+    },
+    {
+      "timestamp": 518,
+      "filename": "frame-0261.jpg",
+      "sha256": "ec8d25327ea22ec57d15859f4ab3167becaab75391881cb479bd33b689a10978"
+    },
+    {
+      "timestamp": 520,
+      "filename": "frame-0262.jpg",
+      "sha256": "e94f804f599dcff2b779ff61388b4aa162855ab7c5185efa15415023159d8677"
+    },
+    {
+      "timestamp": 522,
+      "filename": "frame-0263.jpg",
+      "sha256": "c714713b4a501bdb7326b79b50e0e7fd08339ee67f105e0c3c27a0e2414a98ba"
+    },
+    {
+      "timestamp": 524,
+      "filename": "frame-0264.jpg",
+      "sha256": "c714713b4a501bdb7326b79b50e0e7fd08339ee67f105e0c3c27a0e2414a98ba"
+    },
+    {
+      "timestamp": 526,
+      "filename": "frame-0265.jpg",
+      "sha256": "30394367fa54144572a5bc0050a68054048037e067f1f75c1496815f4de817c5"
+    },
+    {
+      "timestamp": 528,
+      "filename": "frame-0266.jpg",
+      "sha256": "30394367fa54144572a5bc0050a68054048037e067f1f75c1496815f4de817c5"
+    },
+    {
+      "timestamp": 530,
+      "filename": "frame-0267.jpg",
+      "sha256": "2be9b8256851b9b48a9cbe2e52fb444371596188f634aef960129ca564a4f6e0"
+    },
+    {
+      "timestamp": 532,
+      "filename": "frame-0268.jpg",
+      "sha256": "5e5d2ad8952cfaac50ec5d331313a0c2f55146a2a77c97f2bb56afdafad6122e"
+    },
+    {
+      "timestamp": 534,
+      "filename": "frame-0269.jpg",
+      "sha256": "5e5d2ad8952cfaac50ec5d331313a0c2f55146a2a77c97f2bb56afdafad6122e"
+    },
+    {
+      "timestamp": 536,
+      "filename": "frame-0270.jpg",
+      "sha256": "5e5d2ad8952cfaac50ec5d331313a0c2f55146a2a77c97f2bb56afdafad6122e"
+    },
+    {
+      "timestamp": 538,
+      "filename": "frame-0271.jpg",
+      "sha256": "8ad0508bcbfa6a484b6982b6ddbc719e0ae46b77e89ca65ed72d7262ccd10317"
+    },
+    {
+      "timestamp": 540,
+      "filename": "frame-0272.jpg",
+      "sha256": "8ad0508bcbfa6a484b6982b6ddbc719e0ae46b77e89ca65ed72d7262ccd10317"
+    },
+    {
+      "timestamp": 542,
+      "filename": "frame-0273.jpg",
+      "sha256": "7cc1d73bed2891d443b90f660d3d87287165bb9a4ead5a55c06df24a2814e8f2"
+    },
+    {
+      "timestamp": 544,
+      "filename": "frame-0274.jpg",
+      "sha256": "98f5827a83cde6427e5b2c1b963dbf0a1046ba33cfe94151582799bc05b02ea8"
+    },
+    {
+      "timestamp": 546,
+      "filename": "frame-0275.jpg",
+      "sha256": "98f5827a83cde6427e5b2c1b963dbf0a1046ba33cfe94151582799bc05b02ea8"
+    },
+    {
+      "timestamp": 548,
+      "filename": "frame-0276.jpg",
+      "sha256": "98f5827a83cde6427e5b2c1b963dbf0a1046ba33cfe94151582799bc05b02ea8"
+    },
+    {
+      "timestamp": 550,
+      "filename": "frame-0277.jpg",
+      "sha256": "84002753d7bda057b468f54c4fdc9936387e56b84f886e06d4c42bdaef8c04db"
+    },
+    {
+      "timestamp": 552,
+      "filename": "frame-0278.jpg",
+      "sha256": "4c0fea2fc2de81c540206c5a973378c804e4d30c6cb45dd16bf86eef0bbc455b"
+    },
+    {
+      "timestamp": 554,
+      "filename": "frame-0279.jpg",
+      "sha256": "4c0fea2fc2de81c540206c5a973378c804e4d30c6cb45dd16bf86eef0bbc455b"
+    },
+    {
+      "timestamp": 556,
+      "filename": "frame-0280.jpg",
+      "sha256": "e9890a543836059a0a51dd83f933b32bb55699a8818c0783e99920c40e25c17b"
+    },
+    {
+      "timestamp": 558,
+      "filename": "frame-0281.jpg",
+      "sha256": "e9890a543836059a0a51dd83f933b32bb55699a8818c0783e99920c40e25c17b"
+    },
+    {
+      "timestamp": 560,
+      "filename": "frame-0282.jpg",
+      "sha256": "2388c5415a8415dea10ab46778e5258ba5f2e4f4a02d24426cdf4d397a18174a"
+    },
+    {
+      "timestamp": 562,
+      "filename": "frame-0283.jpg",
+      "sha256": "2388c5415a8415dea10ab46778e5258ba5f2e4f4a02d24426cdf4d397a18174a"
+    },
+    {
+      "timestamp": 564,
+      "filename": "frame-0284.jpg",
+      "sha256": "41b69d041d62b18342da6ce7b18d6af6604c63b77a0ce5dcaaf5e922af4adc21"
+    },
+    {
+      "timestamp": 566,
+      "filename": "frame-0285.jpg",
+      "sha256": "41b69d041d62b18342da6ce7b18d6af6604c63b77a0ce5dcaaf5e922af4adc21"
+    },
+    {
+      "timestamp": 568,
+      "filename": "frame-0286.jpg",
+      "sha256": "41b69d041d62b18342da6ce7b18d6af6604c63b77a0ce5dcaaf5e922af4adc21"
+    },
+    {
+      "timestamp": 570,
+      "filename": "frame-0287.jpg",
+      "sha256": "371abc3fca76891d5f09edae6a61296d860ee7a215bf8f260c82289440ee6d1d"
+    },
+    {
+      "timestamp": 572,
+      "filename": "frame-0288.jpg",
+      "sha256": "4ca2990795a15986f031c82342e590bb7241f93f268b6da930eb67b9e6c7001e"
+    },
+    {
+      "timestamp": 574,
+      "filename": "frame-0289.jpg",
+      "sha256": "4ca2990795a15986f031c82342e590bb7241f93f268b6da930eb67b9e6c7001e"
+    },
+    {
+      "timestamp": 576,
+      "filename": "frame-0290.jpg",
+      "sha256": "c07c8559ab77dcf258d575189af3b482012a62871c1b888ecf47390fc8965f01"
+    },
+    {
+      "timestamp": 578,
+      "filename": "frame-0291.jpg",
+      "sha256": "e3d615e76fb3cd38518fcade5b379826b3d7308cc91e83c374a9b23d878ea7a6"
+    },
+    {
+      "timestamp": 580,
+      "filename": "frame-0292.jpg",
+      "sha256": "624b030e4e0b27efc5c1620eea76a15eb15c7e07270ecb690c56f8287a017546"
+    },
+    {
+      "timestamp": 582,
+      "filename": "frame-0293.jpg",
+      "sha256": "0ac6a9452c0226be1d6d4af59094b1e179fe307470a5ab52713dd52920795862"
+    },
+    {
+      "timestamp": 584,
+      "filename": "frame-0294.jpg",
+      "sha256": "0ac6a9452c0226be1d6d4af59094b1e179fe307470a5ab52713dd52920795862"
+    },
+    {
+      "timestamp": 586,
+      "filename": "frame-0295.jpg",
+      "sha256": "744e7bf0daf02e1c456ed599fc3f63137d9c8a0217cb109d4bc17c27999163d0"
+    },
+    {
+      "timestamp": 588,
+      "filename": "frame-0296.jpg",
+      "sha256": "2d7590e941b7cd853e24d522b98227612a222c66761b8b91b71b6651e74a750e"
+    },
+    {
+      "timestamp": 590,
+      "filename": "frame-0297.jpg",
+      "sha256": "2d7590e941b7cd853e24d522b98227612a222c66761b8b91b71b6651e74a750e"
+    },
+    {
+      "timestamp": 592,
+      "filename": "frame-0298.jpg",
+      "sha256": "80d619405ed6e1297e96a445f6393c40b579696ae38d0aaba38931d539164360"
+    },
+    {
+      "timestamp": 594,
+      "filename": "frame-0299.jpg",
+      "sha256": "365ad2c1409d191c42637895b5ee589d6496408b65d6764747f0d641203ea002"
+    },
+    {
+      "timestamp": 596,
+      "filename": "frame-0300.jpg",
+      "sha256": "9383bff92adf1d47303c0c598b9f85c6823a1c4b5c54d1023a4ecef94dd1aaa7"
+    },
+    {
+      "timestamp": 598,
+      "filename": "frame-0301.jpg",
+      "sha256": "fc17aafd904b28c79e07800877557a9251a97b3627cf226d05fee5c4f679af1e"
+    },
+    {
+      "timestamp": 600,
+      "filename": "frame-0302.jpg",
+      "sha256": "4535a1b8bb2a817b9d3464968f9e6188a4bd7dc6d7e4204947d56daefc8eb46e"
+    },
+    {
+      "timestamp": 602,
+      "filename": "frame-0303.jpg",
+      "sha256": "4535a1b8bb2a817b9d3464968f9e6188a4bd7dc6d7e4204947d56daefc8eb46e"
+    },
+    {
+      "timestamp": 604,
+      "filename": "frame-0304.jpg",
+      "sha256": "4535a1b8bb2a817b9d3464968f9e6188a4bd7dc6d7e4204947d56daefc8eb46e"
+    },
+    {
+      "timestamp": 606,
+      "filename": "frame-0305.jpg",
+      "sha256": "7bd6d3a745a86579e9f9ef3b6e21b79d801447d76a26bbd2026c500d96bdfc83"
+    },
+    {
+      "timestamp": 608,
+      "filename": "frame-0306.jpg",
+      "sha256": "7bd6d3a745a86579e9f9ef3b6e21b79d801447d76a26bbd2026c500d96bdfc83"
+    },
+    {
+      "timestamp": 610,
+      "filename": "frame-0307.jpg",
+      "sha256": "7bd6d3a745a86579e9f9ef3b6e21b79d801447d76a26bbd2026c500d96bdfc83"
+    },
+    {
+      "timestamp": 612,
+      "filename": "frame-0308.jpg",
+      "sha256": "7bd6d3a745a86579e9f9ef3b6e21b79d801447d76a26bbd2026c500d96bdfc83"
+    },
+    {
+      "timestamp": 614,
+      "filename": "frame-0309.jpg",
+      "sha256": "80751ae981b64dba59f60ed619b9db7d5aa0689bc95c91b8ddc0d54e2a1d9472"
+    },
+    {
+      "timestamp": 616,
+      "filename": "frame-0310.jpg",
+      "sha256": "80751ae981b64dba59f60ed619b9db7d5aa0689bc95c91b8ddc0d54e2a1d9472"
+    },
+    {
+      "timestamp": 618,
+      "filename": "frame-0311.jpg",
+      "sha256": "80751ae981b64dba59f60ed619b9db7d5aa0689bc95c91b8ddc0d54e2a1d9472"
+    },
+    {
+      "timestamp": 620,
+      "filename": "frame-0312.jpg",
+      "sha256": "c6a61913352d9cebf24da37e63e39043b6fc75f8443471a310d7ed2379dc038e"
+    },
+    {
+      "timestamp": 622,
+      "filename": "frame-0313.jpg",
+      "sha256": "c6a61913352d9cebf24da37e63e39043b6fc75f8443471a310d7ed2379dc038e"
+    },
+    {
+      "timestamp": 624,
+      "filename": "frame-0314.jpg",
+      "sha256": "c6a61913352d9cebf24da37e63e39043b6fc75f8443471a310d7ed2379dc038e"
+    },
+    {
+      "timestamp": 626,
+      "filename": "frame-0315.jpg",
+      "sha256": "2fb0f60643bd92a71c4840d847c607e32b067ba4fe9971cd8463a9947dcb7ffd"
+    },
+    {
+      "timestamp": 628,
+      "filename": "frame-0316.jpg",
+      "sha256": "2fb0f60643bd92a71c4840d847c607e32b067ba4fe9971cd8463a9947dcb7ffd"
+    },
+    {
+      "timestamp": 630,
+      "filename": "frame-0317.jpg",
+      "sha256": "2fb0f60643bd92a71c4840d847c607e32b067ba4fe9971cd8463a9947dcb7ffd"
+    },
+    {
+      "timestamp": 632,
+      "filename": "frame-0318.jpg",
+      "sha256": "546e252ecace03a38b14703d95839bfb5a6ad609ef4926e9c5627c64ee5e49b9"
+    },
+    {
+      "timestamp": 634,
+      "filename": "frame-0319.jpg",
+      "sha256": "9beb733d990ae43b7e5e0a431e08d7e4970d4932281e038283bddc74e9e68892"
+    },
+    {
+      "timestamp": 636,
+      "filename": "frame-0320.jpg",
+      "sha256": "9beb733d990ae43b7e5e0a431e08d7e4970d4932281e038283bddc74e9e68892"
+    },
+    {
+      "timestamp": 638,
+      "filename": "frame-0321.jpg",
+      "sha256": "872c6077a04e82aca95aeb1908d3341c66430d64abe21324bb5a16957c7493ea"
+    },
+    {
+      "timestamp": 640,
+      "filename": "frame-0322.jpg",
+      "sha256": "872c6077a04e82aca95aeb1908d3341c66430d64abe21324bb5a16957c7493ea"
+    },
+    {
+      "timestamp": 642,
+      "filename": "frame-0323.jpg",
+      "sha256": "872c6077a04e82aca95aeb1908d3341c66430d64abe21324bb5a16957c7493ea"
+    },
+    {
+      "timestamp": 644,
+      "filename": "frame-0324.jpg",
+      "sha256": "d0fc4086e549f5f5e53ec6711784eb4d9b91d5b8e0523237820cc2907c612094"
+    },
+    {
+      "timestamp": 646,
+      "filename": "frame-0325.jpg",
+      "sha256": "d0fc4086e549f5f5e53ec6711784eb4d9b91d5b8e0523237820cc2907c612094"
+    },
+    {
+      "timestamp": 648,
+      "filename": "frame-0326.jpg",
+      "sha256": "d0fc4086e549f5f5e53ec6711784eb4d9b91d5b8e0523237820cc2907c612094"
+    },
+    {
+      "timestamp": 650,
+      "filename": "frame-0327.jpg",
+      "sha256": "f3352bd6a2d6149579745e77af02cf1a4854364138ccb3a2be9660ada51cfd87"
+    },
+    {
+      "timestamp": 652,
+      "filename": "frame-0328.jpg",
+      "sha256": "d55b1a5aeb69858d5d44b1cc2669439e40ef337ee86424f21a22e5ed7bcddc27"
+    },
+    {
+      "timestamp": 654,
+      "filename": "frame-0329.jpg",
+      "sha256": "d55b1a5aeb69858d5d44b1cc2669439e40ef337ee86424f21a22e5ed7bcddc27"
+    },
+    {
+      "timestamp": 656,
+      "filename": "frame-0330.jpg",
+      "sha256": "739c183d4546b1e56b8576c4fc4cb0326c7322f3d13177d3dd635111a1095b2d"
+    },
+    {
+      "timestamp": 658,
+      "filename": "frame-0331.jpg",
+      "sha256": "739c183d4546b1e56b8576c4fc4cb0326c7322f3d13177d3dd635111a1095b2d"
+    },
+    {
+      "timestamp": 660,
+      "filename": "frame-0332.jpg",
+      "sha256": "739c183d4546b1e56b8576c4fc4cb0326c7322f3d13177d3dd635111a1095b2d"
+    },
+    {
+      "timestamp": 662,
+      "filename": "frame-0333.jpg",
+      "sha256": "739c183d4546b1e56b8576c4fc4cb0326c7322f3d13177d3dd635111a1095b2d"
+    },
+    {
+      "timestamp": 664,
+      "filename": "frame-0334.jpg",
+      "sha256": "962aa3e7fd97d5e62b6192cbad13e5322e33704433da4f157134a2045c9cae05"
+    },
+    {
+      "timestamp": 666,
+      "filename": "frame-0335.jpg",
+      "sha256": "962aa3e7fd97d5e62b6192cbad13e5322e33704433da4f157134a2045c9cae05"
+    },
+    {
+      "timestamp": 668,
+      "filename": "frame-0336.jpg",
+      "sha256": "962aa3e7fd97d5e62b6192cbad13e5322e33704433da4f157134a2045c9cae05"
+    },
+    {
+      "timestamp": 670,
+      "filename": "frame-0337.jpg",
+      "sha256": "4cfec1417bca483b2d071d707f1bb6bae1ae71310b8f34dc414df3cf3c567a36"
+    },
+    {
+      "timestamp": 672,
+      "filename": "frame-0338.jpg",
+      "sha256": "4cfec1417bca483b2d071d707f1bb6bae1ae71310b8f34dc414df3cf3c567a36"
+    },
+    {
+      "timestamp": 674,
+      "filename": "frame-0339.jpg",
+      "sha256": "4cfec1417bca483b2d071d707f1bb6bae1ae71310b8f34dc414df3cf3c567a36"
+    },
+    {
+      "timestamp": 676,
+      "filename": "frame-0340.jpg",
+      "sha256": "0c02799f74e86163288b102b94fdd0e5910b1943e65cd06eb79342948bc9c5cf"
+    },
+    {
+      "timestamp": 678,
+      "filename": "frame-0341.jpg",
+      "sha256": "0c02799f74e86163288b102b94fdd0e5910b1943e65cd06eb79342948bc9c5cf"
+    },
+    {
+      "timestamp": 680,
+      "filename": "frame-0342.jpg",
+      "sha256": "0c02799f74e86163288b102b94fdd0e5910b1943e65cd06eb79342948bc9c5cf"
+    },
+    {
+      "timestamp": 682,
+      "filename": "frame-0343.jpg",
+      "sha256": "ad658b46417bb8391df5f4b92762cb624522fbe11baddd81135f4ddcb2fcd5b5"
+    },
+    {
+      "timestamp": 684,
+      "filename": "frame-0344.jpg",
+      "sha256": "ad658b46417bb8391df5f4b92762cb624522fbe11baddd81135f4ddcb2fcd5b5"
+    },
+    {
+      "timestamp": 686,
+      "filename": "frame-0345.jpg",
+      "sha256": "ad658b46417bb8391df5f4b92762cb624522fbe11baddd81135f4ddcb2fcd5b5"
+    },
+    {
+      "timestamp": 688,
+      "filename": "frame-0346.jpg",
+      "sha256": "bf1ef0d3abb310c8bc72c8e4c9447f55f3ede0bd57ee5048e0e04b98b998b980"
+    },
+    {
+      "timestamp": 690,
+      "filename": "frame-0347.jpg",
+      "sha256": "bf1ef0d3abb310c8bc72c8e4c9447f55f3ede0bd57ee5048e0e04b98b998b980"
+    },
+    {
+      "timestamp": 692,
+      "filename": "frame-0348.jpg",
+      "sha256": "bf1ef0d3abb310c8bc72c8e4c9447f55f3ede0bd57ee5048e0e04b98b998b980"
+    },
+    {
+      "timestamp": 694,
+      "filename": "frame-0349.jpg",
+      "sha256": "f98c985583a309aa98bf2a96dc6eed968092845d055e79a22a40474dcf5436f6"
+    },
+    {
+      "timestamp": 696,
+      "filename": "frame-0350.jpg",
+      "sha256": "f98c985583a309aa98bf2a96dc6eed968092845d055e79a22a40474dcf5436f6"
+    },
+    {
+      "timestamp": 698,
+      "filename": "frame-0351.jpg",
+      "sha256": "f98c985583a309aa98bf2a96dc6eed968092845d055e79a22a40474dcf5436f6"
+    },
+    {
+      "timestamp": 700,
+      "filename": "frame-0352.jpg",
+      "sha256": "f98c985583a309aa98bf2a96dc6eed968092845d055e79a22a40474dcf5436f6"
+    },
+    {
+      "timestamp": 702,
+      "filename": "frame-0353.jpg",
+      "sha256": "f98c985583a309aa98bf2a96dc6eed968092845d055e79a22a40474dcf5436f6"
+    },
+    {
+      "timestamp": 704,
+      "filename": "frame-0354.jpg",
+      "sha256": "f98c985583a309aa98bf2a96dc6eed968092845d055e79a22a40474dcf5436f6"
+    },
+    {
+      "timestamp": 706,
+      "filename": "frame-0355.jpg",
+      "sha256": "67484ddf01c6dc57e9548843f046144b9d7ea3af5dae58d4126631cdd591fbdc"
+    },
+    {
+      "timestamp": 708,
+      "filename": "frame-0356.jpg",
+      "sha256": "67484ddf01c6dc57e9548843f046144b9d7ea3af5dae58d4126631cdd591fbdc"
+    },
+    {
+      "timestamp": 710,
+      "filename": "frame-0357.jpg",
+      "sha256": "67484ddf01c6dc57e9548843f046144b9d7ea3af5dae58d4126631cdd591fbdc"
+    },
+    {
+      "timestamp": 712,
+      "filename": "frame-0358.jpg",
+      "sha256": "67484ddf01c6dc57e9548843f046144b9d7ea3af5dae58d4126631cdd591fbdc"
+    }
+  ],
+  "policyVersion": "unvalidated-comparison-prompt",
+  "policyValidation": "bypassed",
+  "promptFile": "/Users/chacha/src/youtube-describer/test_scripts/prompt_template_writer_v13.txt",
+  "assetCache": "hit",
+  "assetDir": "/Users/chacha/src/youtube-describer/test_scripts/result/aA0mgdhdVUs/asset",
+  "geminiTemperature": 0.7,
+  "models": [
+    {
+      "model": "gpt-5.6-luna",
+      "requestedModel": "gpt-5.6-luna:high",
+      "provider": "openai",
+      "outputFile": "gpt-5.6-luna.txt",
+      "openaiImageDetail": "low",
+      "openaiReasoningEffort": "high"
+    }
+  ]
+}

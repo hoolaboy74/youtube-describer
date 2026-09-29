@@ -1,0 +1,46 @@
+{
+  "workDir": "/Users/chacha/src/youtube-describer-test/test_scripts/result/lnUHSWhQ-UI/run-uzzt8k",
+  "videoId": "lnUHSWhQ-UI",
+  "title": "내향적인 아이의 첫 심부름ㅣ아직 세상이 살만한 이유(feat.감동/대견/기특 주의)",
+  "frameCount": 316,
+  "dialogueCount": 249,
+  "audioLanguage": "mixed",
+  "models": [
+    {
+      "provider": "gemini",
+      "requestedModel": "gemini-3.1-pro-preview",
+      "outputFile": "gemini-3.1-pro-preview.txt",
+      "model": "gemini-3.1-pro-preview",
+      "durationMs": 45943,
+      "text": "[0][txt] 셀프 촬영 중\n[4][v1] 아이가 승강기 안에서 휴대전화를 들고 자신의 얼굴을 촬영합니다.\n[12][v2] 아이가 천장을 올려다보며 입을 벌립니다.\n[32][v2] 승강기에서 내린 아이가 굳은 표정으로 걸어갑니다.\n[36][v3] 높게 솟은 아파트 건물이 보입니다.\n[44][v2] 밖으로 나온 아이가 위를 쳐다보며 걷습니다.\n[64][v1] 화면이 바뀌고, 식탁에 앉은 아이가 젓가락을 쥐고 있습니다.\n[102][v2] 맞은편의 아빠가 가위로 고기를 자릅니다.\n[126][v2] 아이가 젓가락으로 밥그릇을 가리키며 말합니다.\n[144][v2] 아이가 젓가락을 든 손을 턱에 괴고 아빠를 봅니다.\n[194][v2] 아이가 눈을 질끈 감으며 크게 웃습니다.\n[238][v1] 아빠가 주황색 지갑을 아이에게 건넵니다.\n[254][v2] 작은 가방을 멘 아이가 현관문을 엽니다.\n[268][v1] 아빠가 문밖으로 나와 복도 창문 쪽으로 향합니다.\n[276][v2] 아이가 복도를 지나 승강기 쪽으로 걸어갑니다.\n[286][v1] 아빠가 휴대전화 화면으로 아이의 뒷모습을 지켜봅니다.\n[304][v1] 아이가 다시 승강기 안에서 자신을 촬영합니다.\n[310][v2] 위를 쳐다보며 입술을 오므립니다.\n[356][v1] 밖으로 나온 아이가 어두워진 거리를 걷습니다.\n[388][v2] 아이가 편의점 안의 진열장 앞을 서성입니다.\n[424][v1] 다른 사람의 손이 진열장에서 물건을 꺼내 건넵니다.\n[436][v2] 아이가 편의점 계산대 앞을 올려다봅니다.\n[470][v1] 편의점을 나온 아이가 밝게 웃으며 걷습니다.\n[482][v3] 아빠가 높은 곳에서 아이가 뛰어오는 모습을 내려다봅니다.\n[500][v2] 공동현관 출입기 앞에 선 아이가 휴대전화를 듭니다.\n[524][v1] 승강기에 탄 아이가 환한 표정으로 말합니다.\n[572][v1] 승강기 문이 열리고 아이가 휴대전화와 봉투를 들고 내립니다.\n[578][v2] 아이가 웃으며 현관문으로 다가옵니다.\n[610][v1] 아이가 아빠의 품에 안깁니다.",
+      "usage": {
+        "promptTokenCount": 106565,
+        "candidatesTokenCount": 701,
+        "totalTokenCount": 111735,
+        "promptTokensDetails": [
+          {
+            "modality": "IMAGE",
+            "tokenCount": 79948
+          },
+          {
+            "modality": "TEXT",
+            "tokenCount": 26617
+          }
+        ],
+        "thoughtsTokenCount": 4469,
+        "serviceTier": "standard"
+      },
+      "summary": {
+        "lines": 29,
+        "tagged": 29,
+        "tags": {
+          "v1": 12,
+          "v2": 14,
+          "v3": 2,
+          "txt": 1,
+          "trans": 0
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "source": "pure backend adapter loaded via vm; no DB/API/TTS calls",
+  "videoProcessorSha256": "3a491f26365e5ef3191d6de721fda873cf5fb9c54717f9dcc40fd2900e8736e9",
+  "canonicalOutputSha256": "c4284be6fec928729bbfac73bec7e1a192fa4495c279996ea8938a8fd6d8e811",
+  "summary": [
+    {
+      "model": "gemini-3.8-flash",
+      "rawLines": 22,
+      "accepted": 22,
+      "excluded": [],
+      "changed": 2
+    },
+    {
+      "model": "gpt-6-astra:medium",
+      "rawLines": 88,
+      "accepted": 88,
+      "excluded": [],
+      "changed": 13
+    }
+  ]
+}

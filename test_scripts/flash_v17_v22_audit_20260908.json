@@ -1,0 +1,429 @@
+[
+  {
+    "videoId": "lnUHSWhQ-UI",
+    "run": "run-z09pdn",
+    "prompt": "prompt_template_writer_v17.txt",
+    "model": "gemini-3.8-flash",
+    "status": "success",
+    "summary": {
+      "lines": 27,
+      "tagged": 27,
+      "tags": {
+        "v1": 14,
+        "v2": 5,
+        "v3": 0,
+        "txt": 8,
+        "trans": 0
+      }
+    },
+    "durationMs": 21042,
+    "usage": {
+      "promptTokenCount": 109882,
+      "candidatesTokenCount": 682,
+      "totalTokenCount": 112553,
+      "promptTokensDetails": [
+        {
+          "modality": "IMAGE",
+          "tokenCount": 79948
+        },
+        {
+          "modality": "TEXT",
+          "tokenCount": 29934
+        }
+      ],
+      "thoughtsTokenCount": 1989,
+      "serviceTier": "standard"
+    },
+    "cache": "hit",
+    "sameFrames": true,
+    "sameDialogues": true,
+    "policy": "PASS",
+    "canonical": {
+      "accepted": 27,
+      "rejected": 0,
+      "quarantined": 0,
+      "reasons": []
+    }
+  },
+  {
+    "videoId": "lnUHSWhQ-UI",
+    "run": "run-9FvUKo",
+    "prompt": "prompt_template_writer_v18.txt",
+    "model": "gemini-3.8-flash",
+    "status": "success",
+    "summary": {
+      "lines": 36,
+      "tagged": 36,
+      "tags": {
+        "v1": 5,
+        "v2": 16,
+        "v3": 1,
+        "txt": 14,
+        "trans": 0
+      }
+    },
+    "durationMs": 18859,
+    "usage": {
+      "promptTokenCount": 106509,
+      "candidatesTokenCount": 859,
+      "totalTokenCount": 110283,
+      "promptTokensDetails": [
+        {
+          "modality": "IMAGE",
+          "tokenCount": 79948
+        },
+        {
+          "modality": "TEXT",
+          "tokenCount": 26561
+        }
+      ],
+      "thoughtsTokenCount": 2915,
+      "serviceTier": "standard"
+    },
+    "cache": "hit",
+    "sameFrames": true,
+    "sameDialogues": true,
+    "policy": "PASS",
+    "canonical": {
+      "accepted": 36,
+      "rejected": 0,
+      "quarantined": 0,
+      "reasons": []
+    }
+  },
+  {
+    "videoId": "lnUHSWhQ-UI",
+    "run": "run-nqSGxS",
+    "prompt": "prompt_template_writer_v19.txt",
+    "model": "gemini-3.8-flash",
+    "status": "success",
+    "summary": {
+      "lines": 22,
+      "tagged": 22,
+      "tags": {
+        "v1": 8,
+        "v2": 9,
+        "v3": 0,
+        "txt": 5,
+        "trans": 0
+      }
+    },
+    "durationMs": 16901,
+    "usage": {
+      "promptTokenCount": 109904,
+      "candidatesTokenCount": 583,
+      "totalTokenCount": 111874,
+      "promptTokensDetails": [
+        {
+          "modality": "TEXT",
+          "tokenCount": 29956
+        },
+        {
+          "modality": "IMAGE",
+          "tokenCount": 79948
+        }
+      ],
+      "thoughtsTokenCount": 1387,
+      "serviceTier": "standard"
+    },
+    "cache": "hit",
+    "sameFrames": true,
+    "sameDialogues": true,
+    "policy": "PASS",
+    "canonical": {
+      "accepted": 22,
+      "rejected": 0,
+      "quarantined": 0,
+      "reasons": []
+    }
+  },
+  {
+    "videoId": "lnUHSWhQ-UI",
+    "run": "run-dwHICJ",
+    "prompt": "prompt_template_writer_v20.txt",
+    "model": "gemini-3.8-flash",
+    "status": "success",
+    "summary": {
+      "lines": 35,
+      "tagged": 35,
+      "tags": {
+        "v1": 11,
+        "v2": 13,
+        "v3": 0,
+        "txt": 11,
+        "trans": 0
+      }
+    },
+    "durationMs": 20303,
+    "usage": {
+      "promptTokenCount": 109734,
+      "candidatesTokenCount": 868,
+      "totalTokenCount": 112431,
+      "promptTokensDetails": [
+        {
+          "modality": "TEXT",
+          "tokenCount": 29786
+        },
+        {
+          "modality": "IMAGE",
+          "tokenCount": 79948
+        }
+      ],
+      "thoughtsTokenCount": 1829,
+      "serviceTier": "standard"
+    },
+    "cache": "hit",
+    "sameFrames": true,
+    "sameDialogues": true,
+    "policy": "Policy prompt is missing v2 markers: 화면에 실제로 보이는 것과 제공된 문맥으로 확인할 수 있는 것만, 원음과 중복되지 않으면서",
+    "canonical": {
+      "accepted": 35,
+      "rejected": 0,
+      "quarantined": 0,
+      "reasons": []
+    }
+  },
+  {
+    "videoId": "lnUHSWhQ-UI",
+    "run": "run-mWiE5W",
+    "prompt": "prompt_template_writer_v21.txt",
+    "model": "gemini-3.8-flash",
+    "status": "success",
+    "summary": {
+      "lines": 19,
+      "tagged": 19,
+      "tags": {
+        "v1": 10,
+        "v2": 6,
+        "v3": 0,
+        "txt": 3,
+        "trans": 0
+      }
+    },
+    "durationMs": 19025,
+    "usage": {
+      "promptTokenCount": 110206,
+      "candidatesTokenCount": 515,
+      "totalTokenCount": 112076,
+      "promptTokensDetails": [
+        {
+          "modality": "IMAGE",
+          "tokenCount": 79948
+        },
+        {
+          "modality": "TEXT",
+          "tokenCount": 30258
+        }
+      ],
+      "thoughtsTokenCount": 1355,
+      "serviceTier": "standard"
+    },
+    "cache": "hit",
+    "sameFrames": true,
+    "sameDialogues": true,
+    "policy": "PASS",
+    "canonical": {
+      "accepted": 19,
+      "rejected": 0,
+      "quarantined": 0,
+      "reasons": []
+    }
+  },
+  {
+    "videoId": "lnUHSWhQ-UI",
+    "run": "run-hPxQeY",
+    "prompt": "prompt_template_writer_v22.txt",
+    "model": "gemini-3.8-flash",
+    "status": "success",
+    "summary": {
+      "lines": 15,
+      "tagged": 15,
+      "tags": {
+        "v1": 11,
+        "v2": 4,
+        "v3": 0,
+        "txt": 0,
+        "trans": 0
+      }
+    },
+    "durationMs": 52705,
+    "usage": {
+      "promptTokenCount": 109851,
+      "candidatesTokenCount": 403,
+      "totalTokenCount": 111286,
+      "promptTokensDetails": [
+        {
+          "modality": "TEXT",
+          "tokenCount": 29903
+        },
+        {
+          "modality": "IMAGE",
+          "tokenCount": 79948
+        }
+      ],
+      "thoughtsTokenCount": 1032,
+      "serviceTier": "standard"
+    },
+    "cache": "hit",
+    "sameFrames": true,
+    "sameDialogues": true,
+    "policy": "PASS",
+    "canonical": {
+      "accepted": 15,
+      "rejected": 0,
+      "quarantined": 0,
+      "reasons": []
+    }
+  },
+  {
+    "videoId": "lnUHSWhQ-UI",
+    "run": "run-CCKGqT",
+    "prompt": "prompt_template_writer_v13.txt",
+    "model": "gemini-3.8-flash",
+    "status": "error",
+    "error": "Error: [GoogleGenerativeAI Error]: Error fetching from https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:streamGenerateContent?alt=sse: [503 Service Unavailable] This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.",
+    "cache": "hit",
+    "sameFrames": true,
+    "sameDialogues": true,
+    "policy": "PASS",
+    "canonical": null
+  },
+  {
+    "videoId": "lnUHSWhQ-UI",
+    "run": "run-FINnF4",
+    "prompt": "prompt_template_writer_v13.txt",
+    "model": "gemini-3.8-flash",
+    "status": "success",
+    "summary": {
+      "lines": 26,
+      "tagged": 26,
+      "tags": {
+        "v1": 9,
+        "v2": 9,
+        "v3": 0,
+        "txt": 8,
+        "trans": 0
+      }
+    },
+    "durationMs": 25074,
+    "usage": {
+      "promptTokenCount": 109654,
+      "candidatesTokenCount": 652,
+      "totalTokenCount": 112123,
+      "promptTokensDetails": [
+        {
+          "modality": "IMAGE",
+          "tokenCount": 79948
+        },
+        {
+          "modality": "TEXT",
+          "tokenCount": 29706
+        }
+      ],
+      "thoughtsTokenCount": 1817,
+      "serviceTier": "standard"
+    },
+    "cache": "hit",
+    "sameFrames": true,
+    "sameDialogues": true,
+    "policy": "PASS",
+    "canonical": {
+      "accepted": 26,
+      "rejected": 0,
+      "quarantined": 0,
+      "reasons": []
+    }
+  },
+  {
+    "videoId": "yaWS2T8aKjY",
+    "run": "run-dyoJNv",
+    "prompt": "prompt_template_writer_v17.txt",
+    "model": "gemini-3.8-flash",
+    "status": "success",
+    "summary": {
+      "lines": 77,
+      "tagged": 77,
+      "tags": {
+        "v1": 3,
+        "v2": 4,
+        "v3": 3,
+        "txt": 67,
+        "trans": 0
+      }
+    },
+    "durationMs": 38350,
+    "usage": {
+      "promptTokenCount": 95402,
+      "candidatesTokenCount": 2626,
+      "totalTokenCount": 104558,
+      "promptTokensDetails": [
+        {
+          "modality": "TEXT",
+          "tokenCount": 11450
+        },
+        {
+          "modality": "IMAGE",
+          "tokenCount": 83952
+        }
+      ],
+      "thoughtsTokenCount": 6530,
+      "serviceTier": "standard"
+    },
+    "cache": "hit",
+    "sameFrames": true,
+    "sameDialogues": true,
+    "policy": "PASS",
+    "canonical": {
+      "accepted": 77,
+      "rejected": 0,
+      "quarantined": 0,
+      "reasons": []
+    }
+  },
+  {
+    "videoId": "yaWS2T8aKjY",
+    "run": "run-sMLlIk",
+    "prompt": "prompt_template_writer_v19.txt",
+    "model": "gemini-3.8-flash",
+    "status": "success",
+    "summary": {
+      "lines": 69,
+      "tagged": 69,
+      "tags": {
+        "v1": 4,
+        "v2": 5,
+        "v3": 1,
+        "txt": 59,
+        "trans": 0
+      }
+    },
+    "durationMs": 40292,
+    "usage": {
+      "promptTokenCount": 95424,
+      "candidatesTokenCount": 2322,
+      "totalTokenCount": 103711,
+      "promptTokensDetails": [
+        {
+          "modality": "TEXT",
+          "tokenCount": 11472
+        },
+        {
+          "modality": "IMAGE",
+          "tokenCount": 83952
+        }
+      ],
+      "thoughtsTokenCount": 5965,
+      "serviceTier": "standard"
+    },
+    "cache": "hit",
+    "sameFrames": true,
+    "sameDialogues": true,
+    "policy": "PASS",
+    "canonical": {
+      "accepted": 69,
+      "rejected": 0,
+      "quarantined": 0,
+      "reasons": []
+    }
+  }
+]

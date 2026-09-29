@@ -1,0 +1,46 @@
+{
+  "workDir": "/Users/chacha/src/youtube-describer-test/test_scripts/result/lnUHSWhQ-UI/run-SJjQp8",
+  "videoId": "lnUHSWhQ-UI",
+  "title": "내향적인 아이의 첫 심부름ㅣ아직 세상이 살만한 이유(feat.감동/대견/기특 주의)",
+  "frameCount": 316,
+  "dialogueCount": 249,
+  "audioLanguage": "mixed",
+  "models": [
+    {
+      "provider": "gemini",
+      "requestedModel": "gemini-3.1-pro-preview",
+      "outputFile": "gemini-3.1-pro-preview.txt",
+      "model": "gemini-3.1-pro-preview",
+      "durationMs": 60610,
+      "text": "[0][v2] 세로 화면 속, 한 여자아이가 엘리베이터에 서 있습니다.\n[6][v2] 아이가 고개를 들어 위쪽을 쳐다봅니다.\n[36][v3] 밖으로 나온 아이가 높은 아파트 건물을 올려다봅니다.\n[64][v2] 화면이 가로로 바뀌고, 아이가 식탁에 앉아 교정용 젓가락으로 음식을 먹습니다.\n[102][v2] 맞은편 어른이 가위로 고기를 자릅니다.\n[126][v2] 아이가 젓가락을 든 채 진지한 표정으로 말합니다.\n[194][v2] 아이가 눈을 질끈 감고 활짝 웃습니다.\n[238][v1] 어른이 아이에게 작은 가방과 스마트폰을 건넵니다.\n[270][v2] 가방을 든 아이가 열린 현관문 밖 복도에 서 있습니다.\n[276][v2] 어른이 스마트폰을 들고 복도를 걸어가는 아이의 뒷모습을 촬영합니다.\n[300][v2] 엘리베이터 층수 버튼이 켜져 있습니다.\n[304][v2] 엘리베이터에 혼자 탄 아이가 긴장한 표정으로 입술을 다뭅니다.\n[356][v3] 건물 밖으로 나온 아이가 어스름한 길을 걸어갑니다.\n[388][v2] 상점 안, 아이가 냉장 진열장 안을 들여다봅니다.\n[424][v2] 어른의 팔이 나타나 진열장 안을 가리킵니다.\n[430][v1] 어른의 손이 진열장에서 물건을 꺼내 듭니다.\n[442][v2] 계산대 앞, 아이가 가방을 들고 서 있습니다.\n[458][v2] 아이가 가방 안에 물건을 집어넣습니다.\n[482][v3] 높은 곳에서 내려다본 화면, 아이가 건물을 향해 뛰어옵니다.\n[500][v2] 공동현관의 출입 통제기가 보입니다.\n[524][v2] 다시 엘리베이터에 탄 아이가 숨을 고릅니다.\n[540][v2] 아이가 입을 살짝 벌린 채 위를 쳐다봅니다.\n[572][v1] 문이 열리자 아이가 환하게 웃습니다.\n[578][v2] 현관문을 열고 들어온 아이가 손에 든 스마트폰을 내밉니다.\n[584][v2] 아이가 밝은 표정으로 손짓하며 이야기를 합니다.\n[610][v1] 아이가 어른의 품에 와락 안깁니다.",
+      "usage": {
+        "promptTokenCount": 106565,
+        "candidatesTokenCount": 662,
+        "totalTokenCount": 111720,
+        "promptTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 26617
+          },
+          {
+            "modality": "IMAGE",
+            "tokenCount": 79948
+          }
+        ],
+        "thoughtsTokenCount": 4493,
+        "serviceTier": "standard"
+      },
+      "summary": {
+        "lines": 26,
+        "tagged": 26,
+        "tags": {
+          "v1": 4,
+          "v2": 19,
+          "v3": 3,
+          "txt": 0,
+          "trans": 0
+        }
+      }
+    }
+  ]
+}

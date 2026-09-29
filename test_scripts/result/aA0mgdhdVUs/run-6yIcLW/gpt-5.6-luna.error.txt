@@ -1,0 +1,5 @@
+Error: OpenAI 400: {"error":{"message":"Unsupported parameter: 'temperature' is not supported with this model.","type":"invalid_request_error","param":"temperature","code":null}}
+    at runOpenAI (/Users/chacha/src/youtube-describer/test_scripts/compare_model.js:570:30)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async Promise.allSettled (index 2)
+    at async main (/Users/chacha/src/youtube-describer/test_scripts/compare_model.js:735:23)

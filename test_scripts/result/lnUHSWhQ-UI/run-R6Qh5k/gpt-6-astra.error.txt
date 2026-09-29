@@ -1,0 +1,5 @@
+Error: OpenAI 400: {"error":{"message":"Unsupported value: 'none' is not supported with the 'gpt-6-astra' model. Supported values are: 'low', 'medium', 'high', 'xhigh', and 'max'.","type":"invalid_request_error","param":"reasoning.effort","code":"unsupported_value"}}
+    at runOpenAI (/Users/chacha/src/youtube-describer-test/test_scripts/compare_model.js:503:30)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async Promise.allSettled (index 0)
+    at async main (/Users/chacha/src/youtube-describer-test/test_scripts/compare_model.js:658:23)

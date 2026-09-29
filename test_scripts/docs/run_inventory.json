@@ -1,0 +1,2110 @@
+{
+  "recorded": "2026-09-09",
+  "note": "Historical absolute promptFile paths are preserved; use directory relative to test_scripts after relocation.",
+  "runs": [
+    {
+      "directory": "result/lnUHSWhQ-UI/review-uvLJIv",
+      "videoId": "lnUHSWhQ-UI",
+      "title": "내향적인 아이의 첫 심부름ㅣ아직 세상이 살만한 이유(feat.감동/대견/기특 주의)",
+      "promptFile": "/Users/chacha/src/youtube-describer-test/test_scripts/prompt_template_writer_v13.txt",
+      "policyValidation": "bypassed",
+      "models": [
+        {
+          "requestedModel": "gemini-3.8-flash",
+          "outputFile": "gemini-3.8-flash.txt",
+          "durationMs": 45345,
+          "summary": {
+            "lines": 41,
+            "tagged": 41,
+            "tags": {
+              "v1": 15,
+              "v2": 11,
+              "v3": 0,
+              "txt": 15,
+              "trans": 0
+            }
+          },
+          "usage": {
+            "draft": {
+              "promptTokenCount": 109654,
+              "candidatesTokenCount": 985,
+              "totalTokenCount": 113426,
+              "promptTokensDetails": [
+                {
+                  "modality": "IMAGE",
+                  "tokenCount": 79948
+                },
+                {
+                  "modality": "TEXT",
+                  "tokenCount": 29706
+                }
+              ],
+              "thoughtsTokenCount": 2787,
+              "serviceTier": "standard"
+            },
+            "review": {
+              "promptTokenCount": 111256,
+              "candidatesTokenCount": 1007,
+              "totalTokenCount": 113775,
+              "promptTokensDetails": [
+                {
+                  "modality": "IMAGE",
+                  "tokenCount": 79948
+                },
+                {
+                  "modality": "TEXT",
+                  "tokenCount": 31308
+                }
+              ],
+              "thoughtsTokenCount": 1512,
+              "serviceTier": "standard"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "directory": "result/lnUHSWhQ-UI/run-0dbSwa",
+      "videoId": "lnUHSWhQ-UI",
+      "title": "내향적인 아이의 첫 심부름ㅣ아직 세상이 살만한 이유(feat.감동/대견/기특 주의)",
+      "promptFile": "/Users/chacha/src/youtube-describer-test/test_scripts/prompt_template_writer_v3.txt",
+      "policyValidation": "bypassed",
+      "models": [
+        {
+          "requestedModel": "gemini-3.1-pro-preview",
+          "outputFile": "gemini-3.1-pro-preview.txt",
+          "durationMs": 91286,
+          "summary": {
+            "lines": 58,
+            "tagged": 0,
+            "tags": {
+              "v1": 0,
+              "v2": 0,
+              "v3": 0,
+              "txt": 0,
+              "trans": 0
+            }
+          },
+          "usage": {
+            "promptTokenCount": 108181,
+            "candidatesTokenCount": 1115,
+            "totalTokenCount": 119521,
+            "promptTokensDetails": [
+              {
+                "modality": "IMAGE",
+                "tokenCount": 79948
+              },
+              {
+                "modality": "TEXT",
+                "tokenCount": 28233
+              }
+            ],
+            "thoughtsTokenCount": 10225,
+            "serviceTier": "standard"
+          }
+        }
+      ]
+    },
+    {
+      "directory": "result/lnUHSWhQ-UI/run-1QzGq9",
+      "videoId": "lnUHSWhQ-UI",
+      "title": "내향적인 아이의 첫 심부름ㅣ아직 세상이 살만한 이유(feat.감동/대견/기특 주의)",
+      "promptFile": "/Users/chacha/src/youtube-describer-test/backend/prompt_template_codex_v2.txt",
+      "policyValidation": "enforced",
+      "models": [
+        {
+          "requestedModel": "gpt-6-astra:high",
+          "outputFile": "gpt-6-astra.txt",
+          "durationMs": 167378,
+          "summary": {
+            "lines": 41,
+            "tagged": 41,
+            "tags": {
+              "v1": 15,
+              "v2": 16,
+              "v3": 1,
+              "txt": 9,
+              "trans": 0
+            }
+          },
+          "usage": {
+            "input_tokens": 72982,
+            "input_tokens_details": {
+              "cache_write_tokens": 72979,
+              "cached_tokens": 0
+            },
+            "output_tokens": 8705,
+            "output_tokens_details": {
+              "reasoning_tokens": 7818
+            },
+            "total_tokens": 81687
+          }
+        },
+        {
+          "requestedModel": "gemini-3.1-pro-preview",
+          "outputFile": "gemini-3.1-pro-preview.txt",
+          "durationMs": 34991,
+          "summary": {
+            "lines": 18,
+            "tagged": 18,
+            "tags": {
+              "v1": 7,
+              "v2": 9,
+              "v3": 1,
+              "txt": 1,
+              "trans": 0
+            }
+          },
+          "usage": {
+            "promptTokenCount": 108387,
+            "candidatesTokenCount": 471,
+            "totalTokenCount": 112019,
+            "promptTokensDetails": [
+              {
+                "modality": "IMAGE",
+                "tokenCount": 79948
+              },
+              {
+                "modality": "TEXT",
+                "tokenCount": 28439
+              }
+            ],
+            "thoughtsTokenCount": 3161,
+            "serviceTier": "standard"
+          }
+        }
+      ]
+    },
+    {
+      "directory": "result/lnUHSWhQ-UI/run-4CgqRP",
+      "videoId": "lnUHSWhQ-UI",
+      "title": "내향적인 아이의 첫 심부름ㅣ아직 세상이 살만한 이유(feat.감동/대견/기특 주의)",
+      "promptFile": "/Users/chacha/src/youtube-describer-test/test_scripts/prompt_template_writer_v8.txt",
+      "policyValidation": "bypassed",
+      "models": [
+        {
+          "requestedModel": "gemini-3.1-pro-preview",
+          "outputFile": "gemini-3.1-pro-preview.txt",
+          "durationMs": 54935,
+          "summary": {
+            "lines": 32,
+            "tagged": 32,
+            "tags": {
+              "v1": 13,
+              "v2": 17,
+              "v3": 2,
+              "txt": 0,
+              "trans": 0
+            }
+          },
+          "usage": {
+            "promptTokenCount": 106323,
+            "candidatesTokenCount": 817,
+            "totalTokenCount": 112045,
+            "promptTokensDetails": [
+              {
+                "modality": "IMAGE",
+                "tokenCount": 79948
+              },
+              {
+                "modality": "TEXT",
+                "tokenCount": 26375
+              }
+            ],
+            "thoughtsTokenCount": 4905,
+            "serviceTier": "standard"
+          }
+        }
+      ]
+    },
+    {
+      "directory": "result/lnUHSWhQ-UI/run-5W8WFd",
+      "videoId": "lnUHSWhQ-UI",
+      "title": "내향적인 아이의 첫 심부름ㅣ아직 세상이 살만한 이유(feat.감동/대견/기특 주의)",
+      "promptFile": "/Users/chacha/src/youtube-describer-test/test_scripts/prompt_template_writer_v14.txt",
+      "policyValidation": "bypassed",
+      "models": [
+        {
+          "requestedModel": "gemini-3.8-flash",
+          "outputFile": "gemini-3.8-flash.txt",
+          "durationMs": 19891,
+          "summary": {
+            "lines": 32,
+            "tagged": 32,
+            "tags": {
+              "v1": 8,
+              "v2": 11,
+              "v3": 2,
+              "txt": 11,
+              "trans": 0
+            }
+          },
+          "usage": {
+            "promptTokenCount": 110126,
+            "candidatesTokenCount": 773,
+            "totalTokenCount": 112745,
+            "promptTokensDetails": [
+              {
+                "modality": "IMAGE",
+                "tokenCount": 79948
+              },
+              {
+                "modality": "TEXT",
+                "tokenCount": 30178
+              }
+            ],
+            "thoughtsTokenCount": 1846,
+            "serviceTier": "standard"
+          }
+        }
+      ]
+    },
+    {
+      "directory": "result/lnUHSWhQ-UI/run-6o0J77",
+      "videoId": "lnUHSWhQ-UI",
+      "title": "내향적인 아이의 첫 심부름ㅣ아직 세상이 살만한 이유(feat.감동/대견/기특 주의)",
+      "promptFile": "/Users/chacha/src/youtube-describer-test/backend/prompt_template_codex_v2.txt",
+      "models": [
+        {
+          "requestedModel": "gpt-5.6-sol",
+          "outputFile": "gpt-5.6-sol.txt",
+          "durationMs": 24107,
+          "summary": {
+            "lines": 45,
+            "tagged": 45,
+            "tags": {
+              "v1": 14,
+              "v2": 21,
+              "v3": 4,
+              "txt": 6,
+              "trans": 0
+            }
+          },
+          "usage": {
+            "input_tokens": 73206,
+            "input_tokens_details": {
+              "cache_write_tokens": 73203,
+              "cached_tokens": 0
+            },
+            "output_tokens": 1044,
+            "output_tokens_details": {
+              "reasoning_tokens": 0
+            },
+            "total_tokens": 74250
+          }
+        },
+        {
+          "requestedModel": "gpt-5.6-luna",
+          "outputFile": "gpt-5.6-luna.txt",
+          "durationMs": 27927,
+          "summary": {
+            "lines": 72,
+            "tagged": 72,
+            "tags": {
+              "v1": 5,
+              "v2": 42,
+              "v3": 1,
+              "txt": 24,
+              "trans": 0
+            }
+          },
+          "usage": {
+            "input_tokens": 73206,
+            "input_tokens_details": {
+              "cache_write_tokens": 73203,
+              "cached_tokens": 0
+            },
+            "output_tokens": 1803,
+            "output_tokens_details": {
+              "reasoning_tokens": 0
+            },
+            "total_tokens": 75009
+          }
+        }
+      ]
+    },
+    {
+      "directory": "result/lnUHSWhQ-UI/run-7ovDmg",
+      "videoId": "lnUHSWhQ-UI",
+      "title": "내향적인 아이의 첫 심부름ㅣ아직 세상이 살만한 이유(feat.감동/대견/기특 주의)",
+      "promptFile": "/Users/chacha/src/youtube-describer-test/test_scripts/prompt_template_writer_v12.txt",
+      "policyValidation": "bypassed",
+      "models": [
+        {
+          "requestedModel": "gpt-6-astra:medium",
+          "outputFile": "gpt-6-astra.txt",
+          "durationMs": 49294,
+          "summary": {
+            "lines": 41,
+            "tagged": 41,
+            "tags": {
+              "v1": 13,
+              "v2": 15,
+              "v3": 0,
+              "txt": 13,
+              "trans": 0
+            }
+          },
+          "usage": {
+            "input_tokens": 73202,
+            "input_tokens_details": {
+              "cache_write_tokens": 73199,
+              "cached_tokens": 0
+            },
+            "output_tokens": 1989,
+            "output_tokens_details": {
+              "reasoning_tokens": 1034
+            },
+            "total_tokens": 75191
+          }
+        }
+      ]
+    },
+    {
+      "directory": "result/lnUHSWhQ-UI/run-8p2WPh",
+      "videoId": "lnUHSWhQ-UI",
+      "title": "내향적인 아이의 첫 심부름ㅣ아직 세상이 살만한 이유(feat.감동/대견/기특 주의)",
+      "promptFile": "/Users/chacha/src/youtube-describer-test/test_scripts/prompt_template_writer_v4.txt",
+      "policyValidation": "bypassed",
+      "models": [
+        {
+          "requestedModel": "gemini-3.1-pro-preview",
+          "outputFile": "gemini-3.1-pro-preview.txt",
+          "durationMs": 43466,
+          "summary": {
+            "lines": 21,
+            "tagged": 21,
+            "tags": {
+              "v1": 13,
+              "v2": 7,
+              "v3": 1,
+              "txt": 0,
+              "trans": 0
+            }
+          },
+          "usage": {
+            "promptTokenCount": 106957,
+            "candidatesTokenCount": 528,
+            "totalTokenCount": 111050,
+            "promptTokensDetails": [
+              {
+                "modality": "IMAGE",
+                "tokenCount": 79948
+              },
+              {
+                "modality": "TEXT",
+                "tokenCount": 27009
+              }
+            ],
+            "thoughtsTokenCount": 3565,
+            "serviceTier": "standard"
+          }
+        }
+      ]
+    },
+    {
+      "directory": "result/lnUHSWhQ-UI/run-9FvUKo",
+      "videoId": "lnUHSWhQ-UI",
+      "title": "내향적인 아이의 첫 심부름ㅣ아직 세상이 살만한 이유(feat.감동/대견/기특 주의)",
+      "promptFile": "/Users/chacha/src/youtube-describer-test/test_scripts/prompt_template_writer_v18.txt",
+      "policyValidation": "bypassed",
+      "models": [
+        {
+          "requestedModel": "gemini-3.8-flash",
+          "outputFile": "gemini-3.8-flash.txt",
+          "durationMs": 18859,
+          "summary": {
+            "lines": 36,
+            "tagged": 36,
+            "tags": {
+              "v1": 5,
+              "v2": 16,
+              "v3": 1,
+              "txt": 14,
+              "trans": 0
+            }
+          },
+          "usage": {
+            "promptTokenCount": 106509,
+            "candidatesTokenCount": 859,
+            "totalTokenCount": 110283,
+            "promptTokensDetails": [
+              {
+                "modality": "IMAGE",
+                "tokenCount": 79948
+              },
+              {
+                "modality": "TEXT",
+                "tokenCount": 26561
+              }
+            ],
+            "thoughtsTokenCount": 2915,
+            "serviceTier": "standard"
+          }
+        }
+      ]
+    },
+    {
+      "directory": "result/lnUHSWhQ-UI/run-BI9Gwj",
+      "videoId": "lnUHSWhQ-UI",
+      "title": "내향적인 아이의 첫 심부름ㅣ아직 세상이 살만한 이유(feat.감동/대견/기특 주의)",
+      "promptFile": "/Users/chacha/src/youtube-describer-test/test_scripts/prompt_template_writer_v13.txt",
+      "policyValidation": "bypassed",
+      "models": [
+        {
+          "requestedModel": "gpt-6-astra:medium",
+          "outputFile": "gpt-6-astra.txt",
+          "durationMs": 39539,
+          "summary": {
+            "lines": 45,
+            "tagged": 45,
+            "tags": {
+              "v1": 15,
+              "v2": 18,
+              "v3": 0,
+              "txt": 12,
+              "trans": 0
+            }
+          },
+          "usage": {
+            "input_tokens": 74395,
+            "input_tokens_details": {
+              "cache_write_tokens": 74392,
+              "cached_tokens": 0
+            },
+            "output_tokens": 1430,
+            "output_tokens_details": {
+              "reasoning_tokens": 458
+            },
+            "total_tokens": 75825
+          }
+        }
+      ]
+    },
+    {
+      "directory": "result/lnUHSWhQ-UI/run-CCKGqT",
+      "videoId": "lnUHSWhQ-UI",
+      "title": "내향적인 아이의 첫 심부름ㅣ아직 세상이 살만한 이유(feat.감동/대견/기특 주의)",
+      "promptFile": "/Users/chacha/src/youtube-describer-test/test_scripts/prompt_template_writer_v13.txt",
+      "policyValidation": "bypassed",
+      "models": [
+        {
+          "requestedModel": "gemini-3.8-flash",
+          "errorFile": "gemini-3.8-flash.error.txt"
+        }
+      ]
+    },
+    {
+      "directory": "result/lnUHSWhQ-UI/run-Cz6pxv",
+      "videoId": "lnUHSWhQ-UI",
+      "title": "내향적인 아이의 첫 심부름ㅣ아직 세상이 살만한 이유(feat.감동/대견/기특 주의)",
+      "promptFile": "/Users/chacha/src/youtube-describer-test/backend/prompt_template_codex_v2.txt",
+      "models": [
+        {
+          "requestedModel": "gpt-5.6-luna",
+          "errorFile": "gpt-5.6-luna.error.txt"
+        },
+        {
+          "requestedModel": "gpt-5.6-sol",
+          "errorFile": "gpt-5.6-sol.error.txt"
+        }
+      ]
+    },
+    {
+      "directory": "result/lnUHSWhQ-UI/run-FINnF4",
+      "videoId": "lnUHSWhQ-UI",
+      "title": "내향적인 아이의 첫 심부름ㅣ아직 세상이 살만한 이유(feat.감동/대견/기특 주의)",
+      "promptFile": "/Users/chacha/src/youtube-describer-test/test_scripts/prompt_template_writer_v13.txt",
+      "policyValidation": "bypassed",
+      "models": [
+        {
+          "requestedModel": "gemini-3.8-flash",
+          "outputFile": "gemini-3.8-flash.txt",
+          "durationMs": 25074,
+          "summary": {
+            "lines": 26,
+            "tagged": 26,
+            "tags": {
+              "v1": 9,
+              "v2": 9,
+              "v3": 0,
+              "txt": 8,
+              "trans": 0
+            }
+          },
+          "usage": {
+            "promptTokenCount": 109654,
+            "candidatesTokenCount": 652,
+            "totalTokenCount": 112123,
+            "promptTokensDetails": [
+              {
+                "modality": "IMAGE",
+                "tokenCount": 79948
+              },
+              {
+                "modality": "TEXT",
+                "tokenCount": 29706
+              }
+            ],
+            "thoughtsTokenCount": 1817,
+            "serviceTier": "standard"
+          }
+        }
+      ]
+    },
+    {
+      "directory": "result/lnUHSWhQ-UI/run-IZmHri",
+      "videoId": "lnUHSWhQ-UI",
+      "title": "내향적인 아이의 첫 심부름ㅣ아직 세상이 살만한 이유(feat.감동/대견/기특 주의)",
+      "promptFile": "/Users/chacha/src/youtube-describer-test/test_scripts/prompt_template_writer_v6.txt",
+      "policyValidation": "bypassed",
+      "models": [
+        {
+          "requestedModel": "gemini-3.1-pro-preview",
+          "outputFile": "gemini-3.1-pro-preview.txt",
+          "durationMs": 60691,
+          "summary": {
+            "lines": 29,
+            "tagged": 29,
+            "tags": {
+              "v1": 15,
+              "v2": 11,
+              "v3": 2,
+              "txt": 1,
+              "trans": 0
+            }
+          },
+          "usage": {
+            "promptTokenCount": 106826,
+            "candidatesTokenCount": 684,
+            "totalTokenCount": 113755,
+            "promptTokensDetails": [
+              {
+                "modality": "TEXT",
+                "tokenCount": 26878
+              },
+              {
+                "modality": "IMAGE",
+                "tokenCount": 79948
+              }
+            ],
+            "thoughtsTokenCount": 6245,
+            "serviceTier": "standard"
+          }
+        }
+      ]
+    },
+    {
+      "directory": "result/lnUHSWhQ-UI/run-Jir4KC",
+      "videoId": "lnUHSWhQ-UI",
+      "title": "내향적인 아이의 첫 심부름ㅣ아직 세상이 살만한 이유(feat.감동/대견/기특 주의)",
+      "promptFile": "/Users/chacha/src/youtube-describer-test/test_scripts/prompt_template_writer_v10.txt",
+      "policyValidation": "bypassed",
+      "models": [
+        {
+          "requestedModel": "gemini-3.1-pro-preview",
+          "outputFile": "gemini-3.1-pro-preview.txt",
+          "durationMs": 79009,
+          "summary": {
+            "lines": 40,
+            "tagged": 40,
+            "tags": {
+              "v1": 1,
+              "v2": 26,
+              "v3": 2,
+              "txt": 11,
+              "trans": 0
+            }
+          },
+          "usage": {
+            "promptTokenCount": 106727,
+            "candidatesTokenCount": 961,
+            "totalTokenCount": 115303,
+            "promptTokensDetails": [
+              {
+                "modality": "TEXT",
+                "tokenCount": 26779
+              },
+              {
+                "modality": "IMAGE",
+                "tokenCount": 79948
+              }
+            ],
+            "thoughtsTokenCount": 7615,
+            "serviceTier": "standard"
+          }
+        }
+      ]
+    },
+    {
+      "directory": "result/lnUHSWhQ-UI/run-Lp6kTk",
+      "videoId": "lnUHSWhQ-UI",
+      "title": "내향적인 아이의 첫 심부름ㅣ아직 세상이 살만한 이유(feat.감동/대견/기특 주의)",
+      "promptFile": "/Users/chacha/src/youtube-describer-test/test_scripts/prompt_template_writer_v7.txt",
+      "policyValidation": "bypassed",
+      "models": [
+        {
+          "requestedModel": "gemini-3.1-pro-preview",
+          "outputFile": "gemini-3.1-pro-preview.txt",
+          "durationMs": 54055,
+          "summary": {
+            "lines": 29,
+            "tagged": 29,
+            "tags": {
+              "v1": 7,
+              "v2": 19,
+              "v3": 1,
+              "txt": 2,
+              "trans": 0
+            }
+          },
+          "usage": {
+            "promptTokenCount": 109074,
+            "candidatesTokenCount": 783,
+            "totalTokenCount": 115626,
+            "promptTokensDetails": [
+              {
+                "modality": "IMAGE",
+                "tokenCount": 79948
+              },
+              {
+                "modality": "TEXT",
+                "tokenCount": 29126
+              }
+            ],
+            "thoughtsTokenCount": 5769,
+            "serviceTier": "standard"
+          }
+        }
+      ]
+    },
+    {
+      "directory": "result/lnUHSWhQ-UI/run-M9JvyS",
+      "videoId": "lnUHSWhQ-UI",
+      "title": "내향적인 아이의 첫 심부름ㅣ아직 세상이 살만한 이유(feat.감동/대견/기특 주의)",
+      "promptFile": "/Users/chacha/src/youtube-describer-test/test_scripts/prompt_template_writer_v5.txt",
+      "policyValidation": "bypassed",
+      "models": [
+        {
+          "requestedModel": "gemini-3.1-pro-preview",
+          "outputFile": "gemini-3.1-pro-preview.txt",
+          "durationMs": 58259,
+          "summary": {
+            "lines": 39,
+            "tagged": 39,
+            "tags": {
+              "v1": 16,
+              "v2": 15,
+              "v3": 6,
+              "txt": 2,
+              "trans": 0
+            }
+          },
+          "usage": {
+            "promptTokenCount": 107051,
+            "candidatesTokenCount": 969,
+            "totalTokenCount": 113794,
+            "promptTokensDetails": [
+              {
+                "modality": "TEXT",
+                "tokenCount": 27103
+              },
+              {
+                "modality": "IMAGE",
+                "tokenCount": 79948
+              }
+            ],
+            "thoughtsTokenCount": 5774,
+            "serviceTier": "standard"
+          }
+        }
+      ]
+    },
+    {
+      "directory": "result/lnUHSWhQ-UI/run-NS4o7i",
+      "videoId": "lnUHSWhQ-UI",
+      "title": "내향적인 아이의 첫 심부름ㅣ아직 세상이 살만한 이유(feat.감동/대견/기특 주의)",
+      "promptFile": "/Users/chacha/src/youtube-describer-test/test_scripts/prompt_template_writer_v10.txt",
+      "policyValidation": "bypassed",
+      "models": [
+        {
+          "requestedModel": "gpt-5.6-sol:high",
+          "errorFile": "gpt-5.6-sol.error.txt"
+        },
+        {
+          "requestedModel": "gpt-6-astra:medium",
+          "outputFile": "gpt-6-astra.txt",
+          "durationMs": 38474,
+          "summary": {
+            "lines": 58,
+            "tagged": 58,
+            "tags": {
+              "v1": 17,
+              "v2": 24,
+              "v3": 4,
+              "txt": 13,
+              "trans": 0
+            }
+          },
+          "usage": {
+            "input_tokens": 71308,
+            "input_tokens_details": {
+              "cache_write_tokens": 71305,
+              "cached_tokens": 0
+            },
+            "output_tokens": 1501,
+            "output_tokens_details": {
+              "reasoning_tokens": 115
+            },
+            "total_tokens": 72809
+          }
+        }
+      ]
+    },
+    {
+      "directory": "result/lnUHSWhQ-UI/run-NmW7D0",
+      "videoId": "lnUHSWhQ-UI",
+      "title": "내향적인 아이의 첫 심부름ㅣ아직 세상이 살만한 이유(feat.감동/대견/기특 주의)",
+      "promptFile": "/Users/chacha/src/youtube-describer-test/test_scripts/prompt_template_writer_v11.txt",
+      "policyValidation": "bypassed",
+      "models": [
+        {
+          "requestedModel": "gemini-3.1-pro-preview",
+          "outputFile": "gemini-3.1-pro-preview.txt",
+          "durationMs": 14438,
+          "summary": {
+            "lines": 53,
+            "tagged": 53,
+            "tags": {
+              "v1": 8,
+              "v2": 6,
+              "v3": 0,
+              "txt": 39,
+              "trans": 0
+            }
+          },
+          "usage": {
+            "promptTokenCount": 106163,
+            "candidatesTokenCount": 1027,
+            "totalTokenCount": 107190,
+            "cachedContentTokenCount": 101772,
+            "promptTokensDetails": [
+              {
+                "modality": "IMAGE",
+                "tokenCount": 79948
+              },
+              {
+                "modality": "TEXT",
+                "tokenCount": 26215
+              }
+            ],
+            "cacheTokensDetails": [
+              {
+                "modality": "TEXT",
+                "tokenCount": 25130
+              },
+              {
+                "modality": "IMAGE",
+                "tokenCount": 76642
+              }
+            ],
+            "serviceTier": "standard"
+          }
+        }
+      ]
+    },
+    {
+      "directory": "result/lnUHSWhQ-UI/run-P0xMLB",
+      "videoId": "lnUHSWhQ-UI",
+      "title": "내향적인 아이의 첫 심부름ㅣ아직 세상이 살만한 이유(feat.감동/대견/기특 주의)",
+      "promptFile": "/Users/chacha/src/youtube-describer-test/test_scripts/prompt_template_writer_v16.txt",
+      "policyValidation": "bypassed",
+      "models": [
+        {
+          "requestedModel": "gemini-3.8-flash",
+          "outputFile": "gemini-3.8-flash.txt",
+          "durationMs": 24456,
+          "summary": {
+            "lines": 34,
+            "tagged": 34,
+            "tags": {
+              "v1": 9,
+              "v2": 11,
+              "v3": 2,
+              "txt": 12,
+              "trans": 0
+            }
+          },
+          "usage": {
+            "promptTokenCount": 109979,
+            "candidatesTokenCount": 871,
+            "totalTokenCount": 113695,
+            "promptTokensDetails": [
+              {
+                "modality": "TEXT",
+                "tokenCount": 30031
+              },
+              {
+                "modality": "IMAGE",
+                "tokenCount": 79948
+              }
+            ],
+            "thoughtsTokenCount": 2845,
+            "serviceTier": "standard"
+          }
+        }
+      ]
+    },
+    {
+      "directory": "result/lnUHSWhQ-UI/run-R6Qh5k",
+      "videoId": "lnUHSWhQ-UI",
+      "title": "내향적인 아이의 첫 심부름ㅣ아직 세상이 살만한 이유(feat.감동/대견/기특 주의)",
+      "promptFile": "/Users/chacha/src/youtube-describer-test/backend/prompt_template_codex_v2.txt",
+      "policyValidation": "enforced",
+      "models": [
+        {
+          "requestedModel": "gpt-6-astra",
+          "errorFile": "gpt-6-astra.error.txt"
+        },
+        {
+          "requestedModel": "gemini-3.1-pro-preview",
+          "outputFile": "gemini-3.1-pro-preview.txt",
+          "durationMs": 38908,
+          "summary": {
+            "lines": 25,
+            "tagged": 25,
+            "tags": {
+              "v1": 9,
+              "v2": 11,
+              "v3": 0,
+              "txt": 5,
+              "trans": 0
+            }
+          },
+          "usage": {
+            "promptTokenCount": 108387,
+            "candidatesTokenCount": 639,
+            "totalTokenCount": 111852,
+            "promptTokensDetails": [
+              {
+                "modality": "TEXT",
+                "tokenCount": 28439
+              },
+              {
+                "modality": "IMAGE",
+                "tokenCount": 79948
+              }
+            ],
+            "thoughtsTokenCount": 2826,
+            "serviceTier": "standard"
+          }
+        }
+      ]
+    },
+    {
+      "directory": "result/lnUHSWhQ-UI/run-SJjQp8",
+      "videoId": "lnUHSWhQ-UI",
+      "title": "내향적인 아이의 첫 심부름ㅣ아직 세상이 살만한 이유(feat.감동/대견/기특 주의)",
+      "promptFile": "/Users/chacha/src/youtube-describer-test/test_scripts/prompt_template_writer_v9.txt",
+      "policyValidation": "bypassed",
+      "models": [
+        {
+          "requestedModel": "gemini-3.1-pro-preview",
+          "outputFile": "gemini-3.1-pro-preview.txt",
+          "durationMs": 60610,
+          "summary": {
+            "lines": 26,
+            "tagged": 26,
+            "tags": {
+              "v1": 4,
+              "v2": 19,
+              "v3": 3,
+              "txt": 0,
+              "trans": 0
+            }
+          },
+          "usage": {
+            "promptTokenCount": 106565,
+            "candidatesTokenCount": 662,
+            "totalTokenCount": 111720,
+            "promptTokensDetails": [
+              {
+                "modality": "TEXT",
+                "tokenCount": 26617
+              },
+              {
+                "modality": "IMAGE",
+                "tokenCount": 79948
+              }
+            ],
+            "thoughtsTokenCount": 4493,
+            "serviceTier": "standard"
+          }
+        }
+      ]
+    },
+    {
+      "directory": "result/lnUHSWhQ-UI/run-U7ZxAx",
+      "videoId": "lnUHSWhQ-UI",
+      "title": "내향적인 아이의 첫 심부름ㅣ아직 세상이 살만한 이유(feat.감동/대견/기특 주의)",
+      "promptFile": "/Users/chacha/src/youtube-describer-test/test_scripts/prompt_template_writer_v13.txt",
+      "policyValidation": "bypassed",
+      "models": [
+        {
+          "requestedModel": "gemini-3.8-flash",
+          "outputFile": "gemini-3.8-flash.txt",
+          "durationMs": 20959,
+          "summary": {
+            "lines": 28,
+            "tagged": 28,
+            "tags": {
+              "v1": 10,
+              "v2": 9,
+              "v3": 0,
+              "txt": 9,
+              "trans": 0
+            }
+          },
+          "usage": {
+            "promptTokenCount": 109654,
+            "candidatesTokenCount": 724,
+            "totalTokenCount": 112856,
+            "promptTokensDetails": [
+              {
+                "modality": "IMAGE",
+                "tokenCount": 79948
+              },
+              {
+                "modality": "TEXT",
+                "tokenCount": 29706
+              }
+            ],
+            "thoughtsTokenCount": 2478,
+            "serviceTier": "standard"
+          }
+        }
+      ]
+    },
+    {
+      "directory": "result/lnUHSWhQ-UI/run-UYiHaV",
+      "videoId": "lnUHSWhQ-UI",
+      "title": "내향적인 아이의 첫 심부름ㅣ아직 세상이 살만한 이유(feat.감동/대견/기특 주의)",
+      "promptFile": "/Users/chacha/src/youtube-describer-test/test_scripts/prompt_template_writer_v15.txt",
+      "policyValidation": "bypassed",
+      "models": [
+        {
+          "requestedModel": "gemini-3.8-flash",
+          "outputFile": "gemini-3.8-flash.txt",
+          "durationMs": 27816,
+          "summary": {
+            "lines": 26,
+            "tagged": 26,
+            "tags": {
+              "v1": 10,
+              "v2": 9,
+              "v3": 0,
+              "txt": 7,
+              "trans": 0
+            }
+          },
+          "usage": {
+            "promptTokenCount": 108305,
+            "candidatesTokenCount": 695,
+            "totalTokenCount": 110333,
+            "promptTokensDetails": [
+              {
+                "modality": "TEXT",
+                "tokenCount": 28357
+              },
+              {
+                "modality": "IMAGE",
+                "tokenCount": 79948
+              }
+            ],
+            "thoughtsTokenCount": 1333,
+            "serviceTier": "standard"
+          }
+        }
+      ]
+    },
+    {
+      "directory": "result/lnUHSWhQ-UI/run-drFY8O",
+      "videoId": "lnUHSWhQ-UI",
+      "title": "내향적인 아이의 첫 심부름ㅣ아직 세상이 살만한 이유(feat.감동/대견/기특 주의)",
+      "promptFile": "/Users/chacha/src/youtube-describer-test/backend/prompt_template_codex_v2.txt",
+      "models": [
+        {
+          "requestedModel": "gpt-5.6-sol",
+          "errorFile": "gpt-5.6-sol.error.txt"
+        },
+        {
+          "requestedModel": "gpt-5.6-luna",
+          "errorFile": "gpt-5.6-luna.error.txt"
+        }
+      ]
+    },
+    {
+      "directory": "result/lnUHSWhQ-UI/run-dwHICJ",
+      "videoId": "lnUHSWhQ-UI",
+      "title": "내향적인 아이의 첫 심부름ㅣ아직 세상이 살만한 이유(feat.감동/대견/기특 주의)",
+      "promptFile": "/Users/chacha/src/youtube-describer-test/test_scripts/prompt_template_writer_v20.txt",
+      "policyValidation": "bypassed",
+      "models": [
+        {
+          "requestedModel": "gemini-3.8-flash",
+          "outputFile": "gemini-3.8-flash.txt",
+          "durationMs": 20303,
+          "summary": {
+            "lines": 35,
+            "tagged": 35,
+            "tags": {
+              "v1": 11,
+              "v2": 13,
+              "v3": 0,
+              "txt": 11,
+              "trans": 0
+            }
+          },
+          "usage": {
+            "promptTokenCount": 109734,
+            "candidatesTokenCount": 868,
+            "totalTokenCount": 112431,
+            "promptTokensDetails": [
+              {
+                "modality": "TEXT",
+                "tokenCount": 29786
+              },
+              {
+                "modality": "IMAGE",
+                "tokenCount": 79948
+              }
+            ],
+            "thoughtsTokenCount": 1829,
+            "serviceTier": "standard"
+          }
+        }
+      ]
+    },
+    {
+      "directory": "result/lnUHSWhQ-UI/run-hPxQeY",
+      "videoId": "lnUHSWhQ-UI",
+      "title": "내향적인 아이의 첫 심부름ㅣ아직 세상이 살만한 이유(feat.감동/대견/기특 주의)",
+      "promptFile": "/Users/chacha/src/youtube-describer-test/test_scripts/prompt_template_writer_v22.txt",
+      "policyValidation": "bypassed",
+      "models": [
+        {
+          "requestedModel": "gemini-3.8-flash",
+          "outputFile": "gemini-3.8-flash.txt",
+          "durationMs": 52705,
+          "summary": {
+            "lines": 15,
+            "tagged": 15,
+            "tags": {
+              "v1": 11,
+              "v2": 4,
+              "v3": 0,
+              "txt": 0,
+              "trans": 0
+            }
+          },
+          "usage": {
+            "promptTokenCount": 109851,
+            "candidatesTokenCount": 403,
+            "totalTokenCount": 111286,
+            "promptTokensDetails": [
+              {
+                "modality": "TEXT",
+                "tokenCount": 29903
+              },
+              {
+                "modality": "IMAGE",
+                "tokenCount": 79948
+              }
+            ],
+            "thoughtsTokenCount": 1032,
+            "serviceTier": "standard"
+          }
+        }
+      ]
+    },
+    {
+      "directory": "result/lnUHSWhQ-UI/run-kZDWFU",
+      "videoId": "lnUHSWhQ-UI",
+      "title": "내향적인 아이의 첫 심부름ㅣ아직 세상이 살만한 이유(feat.감동/대견/기특 주의)",
+      "promptFile": "/Users/chacha/src/youtube-describer-test/test_scripts/prompt_template_writer_v10.txt",
+      "policyValidation": "bypassed",
+      "models": [
+        {
+          "requestedModel": "gemini-3.1-pro-preview",
+          "outputFile": "gemini-3.1-pro-preview.txt",
+          "durationMs": 85925,
+          "summary": {
+            "lines": 57,
+            "tagged": 56,
+            "tags": {
+              "v1": 9,
+              "v2": 20,
+              "v3": 5,
+              "txt": 22,
+              "trans": 0
+            }
+          },
+          "usage": {
+            "promptTokenCount": 106727,
+            "candidatesTokenCount": 1344,
+            "totalTokenCount": 117043,
+            "promptTokensDetails": [
+              {
+                "modality": "IMAGE",
+                "tokenCount": 79948
+              },
+              {
+                "modality": "TEXT",
+                "tokenCount": 26779
+              }
+            ],
+            "thoughtsTokenCount": 8972,
+            "serviceTier": "standard"
+          }
+        }
+      ]
+    },
+    {
+      "directory": "result/lnUHSWhQ-UI/run-khd2tA",
+      "videoId": "lnUHSWhQ-UI",
+      "title": "내향적인 아이의 첫 심부름ㅣ아직 세상이 살만한 이유(feat.감동/대견/기특 주의)",
+      "promptFile": "/Users/chacha/src/youtube-describer-test/test_scripts/prompt_template_writer_v13.txt",
+      "policyValidation": "bypassed",
+      "models": [
+        {
+          "requestedModel": "gemini-3.1-pro-preview",
+          "outputFile": "gemini-3.1-pro-preview.txt",
+          "durationMs": 18052,
+          "summary": {
+            "lines": 34,
+            "tagged": 34,
+            "tags": {
+              "v1": 12,
+              "v2": 21,
+              "v3": 0,
+              "txt": 1,
+              "trans": 0
+            }
+          },
+          "usage": {
+            "promptTokenCount": 109654,
+            "candidatesTokenCount": 773,
+            "totalTokenCount": 110427,
+            "promptTokensDetails": [
+              {
+                "modality": "IMAGE",
+                "tokenCount": 79948
+              },
+              {
+                "modality": "TEXT",
+                "tokenCount": 29706
+              }
+            ],
+            "serviceTier": "standard"
+          }
+        }
+      ]
+    },
+    {
+      "directory": "result/lnUHSWhQ-UI/run-mWiE5W",
+      "videoId": "lnUHSWhQ-UI",
+      "title": "내향적인 아이의 첫 심부름ㅣ아직 세상이 살만한 이유(feat.감동/대견/기특 주의)",
+      "promptFile": "/Users/chacha/src/youtube-describer-test/test_scripts/prompt_template_writer_v21.txt",
+      "policyValidation": "bypassed",
+      "models": [
+        {
+          "requestedModel": "gemini-3.8-flash",
+          "outputFile": "gemini-3.8-flash.txt",
+          "durationMs": 19025,
+          "summary": {
+            "lines": 19,
+            "tagged": 19,
+            "tags": {
+              "v1": 10,
+              "v2": 6,
+              "v3": 0,
+              "txt": 3,
+              "trans": 0
+            }
+          },
+          "usage": {
+            "promptTokenCount": 110206,
+            "candidatesTokenCount": 515,
+            "totalTokenCount": 112076,
+            "promptTokensDetails": [
+              {
+                "modality": "IMAGE",
+                "tokenCount": 79948
+              },
+              {
+                "modality": "TEXT",
+                "tokenCount": 30258
+              }
+            ],
+            "thoughtsTokenCount": 1355,
+            "serviceTier": "standard"
+          }
+        }
+      ]
+    },
+    {
+      "directory": "result/lnUHSWhQ-UI/run-nqSGxS",
+      "videoId": "lnUHSWhQ-UI",
+      "title": "내향적인 아이의 첫 심부름ㅣ아직 세상이 살만한 이유(feat.감동/대견/기특 주의)",
+      "promptFile": "/Users/chacha/src/youtube-describer-test/test_scripts/prompt_template_writer_v19.txt",
+      "policyValidation": "bypassed",
+      "models": [
+        {
+          "requestedModel": "gemini-3.8-flash",
+          "outputFile": "gemini-3.8-flash.txt",
+          "durationMs": 16901,
+          "summary": {
+            "lines": 22,
+            "tagged": 22,
+            "tags": {
+              "v1": 8,
+              "v2": 9,
+              "v3": 0,
+              "txt": 5,
+              "trans": 0
+            }
+          },
+          "usage": {
+            "promptTokenCount": 109904,
+            "candidatesTokenCount": 583,
+            "totalTokenCount": 111874,
+            "promptTokensDetails": [
+              {
+                "modality": "TEXT",
+                "tokenCount": 29956
+              },
+              {
+                "modality": "IMAGE",
+                "tokenCount": 79948
+              }
+            ],
+            "thoughtsTokenCount": 1387,
+            "serviceTier": "standard"
+          }
+        }
+      ]
+    },
+    {
+      "directory": "result/lnUHSWhQ-UI/run-p4iZPT",
+      "videoId": "lnUHSWhQ-UI",
+      "title": "내향적인 아이의 첫 심부름ㅣ아직 세상이 살만한 이유(feat.감동/대견/기특 주의)",
+      "promptFile": "/Users/chacha/src/youtube-describer-test/test_scripts/prompt_template.txt",
+      "policyValidation": "bypassed",
+      "models": [
+        {
+          "requestedModel": "gpt-5.6-sol",
+          "outputFile": "gpt-5.6-sol.txt",
+          "durationMs": 28594,
+          "summary": {
+            "lines": 70,
+            "tagged": 70,
+            "tags": {
+              "v1": 19,
+              "v2": 43,
+              "v3": 5,
+              "txt": 3,
+              "trans": 0
+            }
+          },
+          "usage": {
+            "input_tokens": 70565,
+            "input_tokens_details": {
+              "cache_write_tokens": 70562,
+              "cached_tokens": 0
+            },
+            "output_tokens": 1814,
+            "output_tokens_details": {
+              "reasoning_tokens": 0
+            },
+            "total_tokens": 72379
+          }
+        },
+        {
+          "requestedModel": "gemini-3.1-pro-preview",
+          "outputFile": "gemini-3.1-pro-preview.txt",
+          "durationMs": 79006,
+          "summary": {
+            "lines": 38,
+            "tagged": 38,
+            "tags": {
+              "v1": 7,
+              "v2": 27,
+              "v3": 0,
+              "txt": 4,
+              "trans": 0
+            }
+          },
+          "usage": {
+            "promptTokenCount": 106068,
+            "candidatesTokenCount": 1156,
+            "totalTokenCount": 114364,
+            "cachedContentTokenCount": 101772,
+            "promptTokensDetails": [
+              {
+                "modality": "TEXT",
+                "tokenCount": 26120
+              },
+              {
+                "modality": "IMAGE",
+                "tokenCount": 79948
+              }
+            ],
+            "cacheTokensDetails": [
+              {
+                "modality": "TEXT",
+                "tokenCount": 25062
+              },
+              {
+                "modality": "IMAGE",
+                "tokenCount": 76710
+              }
+            ],
+            "thoughtsTokenCount": 7140,
+            "serviceTier": "standard"
+          }
+        }
+      ]
+    },
+    {
+      "directory": "result/lnUHSWhQ-UI/run-r8qXdQ",
+      "videoId": "lnUHSWhQ-UI",
+      "title": "내향적인 아이의 첫 심부름ㅣ아직 세상이 살만한 이유(feat.감동/대견/기특 주의)",
+      "promptFile": "/Users/chacha/src/youtube-describer-test/test_scripts/prompt_template_writer_v10.txt",
+      "policyValidation": "bypassed",
+      "models": [
+        {
+          "requestedModel": "gpt-5.6-sol:high",
+          "outputFile": "gpt-5.6-sol.txt",
+          "durationMs": 190093,
+          "summary": {
+            "lines": 38,
+            "tagged": 38,
+            "tags": {
+              "v1": 19,
+              "v2": 13,
+              "v3": 1,
+              "txt": 5,
+              "trans": 0
+            }
+          },
+          "usage": {
+            "input_tokens": 71308,
+            "input_tokens_details": {
+              "cache_write_tokens": 71305,
+              "cached_tokens": 0
+            },
+            "output_tokens": 12468,
+            "output_tokens_details": {
+              "reasoning_tokens": 11394
+            },
+            "total_tokens": 83776
+          }
+        }
+      ]
+    },
+    {
+      "directory": "result/lnUHSWhQ-UI/run-uZ4AOX",
+      "videoId": "lnUHSWhQ-UI",
+      "title": "내향적인 아이의 첫 심부름ㅣ아직 세상이 살만한 이유(feat.감동/대견/기특 주의)",
+      "promptFile": "/Users/chacha/src/youtube-describer-test/test_scripts/prompt_template_writer_v11.txt",
+      "policyValidation": "bypassed",
+      "models": [
+        {
+          "requestedModel": "gemini-3.1-pro-preview",
+          "outputFile": "gemini-3.1-pro-preview.txt",
+          "durationMs": 67188,
+          "summary": {
+            "lines": 64,
+            "tagged": 64,
+            "tags": {
+              "v1": 18,
+              "v2": 18,
+              "v3": 2,
+              "txt": 26,
+              "trans": 0
+            }
+          },
+          "usage": {
+            "promptTokenCount": 106163,
+            "candidatesTokenCount": 1337,
+            "totalTokenCount": 114292,
+            "promptTokensDetails": [
+              {
+                "modality": "TEXT",
+                "tokenCount": 26215
+              },
+              {
+                "modality": "IMAGE",
+                "tokenCount": 79948
+              }
+            ],
+            "thoughtsTokenCount": 6792,
+            "serviceTier": "standard"
+          }
+        }
+      ]
+    },
+    {
+      "directory": "result/lnUHSWhQ-UI/run-uzzt8k",
+      "videoId": "lnUHSWhQ-UI",
+      "title": "내향적인 아이의 첫 심부름ㅣ아직 세상이 살만한 이유(feat.감동/대견/기특 주의)",
+      "promptFile": "/Users/chacha/src/youtube-describer-test/test_scripts/prompt_template_writer_v9.txt",
+      "policyValidation": "bypassed",
+      "models": [
+        {
+          "requestedModel": "gemini-3.1-pro-preview",
+          "outputFile": "gemini-3.1-pro-preview.txt",
+          "durationMs": 45943,
+          "summary": {
+            "lines": 29,
+            "tagged": 29,
+            "tags": {
+              "v1": 12,
+              "v2": 14,
+              "v3": 2,
+              "txt": 1,
+              "trans": 0
+            }
+          },
+          "usage": {
+            "promptTokenCount": 106565,
+            "candidatesTokenCount": 701,
+            "totalTokenCount": 111735,
+            "promptTokensDetails": [
+              {
+                "modality": "IMAGE",
+                "tokenCount": 79948
+              },
+              {
+                "modality": "TEXT",
+                "tokenCount": 26617
+              }
+            ],
+            "thoughtsTokenCount": 4469,
+            "serviceTier": "standard"
+          }
+        }
+      ]
+    },
+    {
+      "directory": "result/lnUHSWhQ-UI/run-vx2Zrj",
+      "videoId": "lnUHSWhQ-UI",
+      "title": "내향적인 아이의 첫 심부름ㅣ아직 세상이 살만한 이유(feat.감동/대견/기특 주의)",
+      "promptFile": "/Users/chacha/src/youtube-describer-test/backend/prompt_template_codex_v2.txt",
+      "models": [
+        {
+          "requestedModel": "gemini-3.1-pro-preview",
+          "outputFile": "gemini-3.1-pro-preview.txt",
+          "durationMs": 55092,
+          "summary": {
+            "lines": 21,
+            "tagged": 21,
+            "tags": {
+              "v1": 4,
+              "v2": 12,
+              "v3": 2,
+              "txt": 3,
+              "trans": 0
+            }
+          },
+          "usage": {
+            "promptTokenCount": 108601,
+            "candidatesTokenCount": 597,
+            "totalTokenCount": 113291,
+            "promptTokensDetails": [
+              {
+                "modality": "IMAGE",
+                "tokenCount": 79948
+              },
+              {
+                "modality": "TEXT",
+                "tokenCount": 28653
+              }
+            ],
+            "thoughtsTokenCount": 4093,
+            "serviceTier": "standard"
+          }
+        },
+        {
+          "requestedModel": "gemini-3.8-flash",
+          "outputFile": "gemini-3.8-flash.txt",
+          "durationMs": 22597,
+          "summary": {
+            "lines": 16,
+            "tagged": 16,
+            "tags": {
+              "v1": 2,
+              "v2": 12,
+              "v3": 0,
+              "txt": 2,
+              "trans": 0
+            }
+          },
+          "usage": {
+            "promptTokenCount": 108601,
+            "candidatesTokenCount": 415,
+            "totalTokenCount": 110741,
+            "promptTokensDetails": [
+              {
+                "modality": "TEXT",
+                "tokenCount": 28653
+              },
+              {
+                "modality": "IMAGE",
+                "tokenCount": 79948
+              }
+            ],
+            "thoughtsTokenCount": 1725,
+            "serviceTier": "standard"
+          }
+        }
+      ]
+    },
+    {
+      "directory": "result/lnUHSWhQ-UI/run-wdsXVo",
+      "videoId": "lnUHSWhQ-UI",
+      "title": "내향적인 아이의 첫 심부름ㅣ아직 세상이 살만한 이유(feat.감동/대견/기특 주의)",
+      "promptFile": "/Users/chacha/src/youtube-describer-test/test_scripts/prompt_template_writer_v8.txt",
+      "policyValidation": "bypassed",
+      "models": [
+        {
+          "requestedModel": "gemini-3.1-pro-preview",
+          "outputFile": "gemini-3.1-pro-preview.txt",
+          "durationMs": 62043,
+          "summary": {
+            "lines": 47,
+            "tagged": 47,
+            "tags": {
+              "v1": 11,
+              "v2": 21,
+              "v3": 2,
+              "txt": 13,
+              "trans": 0
+            }
+          },
+          "usage": {
+            "promptTokenCount": 106323,
+            "candidatesTokenCount": 1047,
+            "totalTokenCount": 113519,
+            "promptTokensDetails": [
+              {
+                "modality": "TEXT",
+                "tokenCount": 26375
+              },
+              {
+                "modality": "IMAGE",
+                "tokenCount": 79948
+              }
+            ],
+            "thoughtsTokenCount": 6149,
+            "serviceTier": "standard"
+          }
+        }
+      ]
+    },
+    {
+      "directory": "result/lnUHSWhQ-UI/run-xSRc80",
+      "videoId": "lnUHSWhQ-UI",
+      "title": "내향적인 아이의 첫 심부름ㅣ아직 세상이 살만한 이유(feat.감동/대견/기특 주의)",
+      "promptFile": "/Users/chacha/src/youtube-describer-test/test_scripts/prompt_template_writer_v8.txt",
+      "policyValidation": "bypassed",
+      "models": [
+        {
+          "requestedModel": "gemini-3.1-pro-preview",
+          "errorFile": "gemini-3.1-pro-preview.error.txt"
+        }
+      ]
+    },
+    {
+      "directory": "result/lnUHSWhQ-UI/run-z09pdn",
+      "videoId": "lnUHSWhQ-UI",
+      "title": "내향적인 아이의 첫 심부름ㅣ아직 세상이 살만한 이유(feat.감동/대견/기특 주의)",
+      "promptFile": "/Users/chacha/src/youtube-describer-test/test_scripts/prompt_template_writer_v17.txt",
+      "policyValidation": "bypassed",
+      "models": [
+        {
+          "requestedModel": "gemini-3.8-flash",
+          "outputFile": "gemini-3.8-flash.txt",
+          "durationMs": 21042,
+          "summary": {
+            "lines": 27,
+            "tagged": 27,
+            "tags": {
+              "v1": 14,
+              "v2": 5,
+              "v3": 0,
+              "txt": 8,
+              "trans": 0
+            }
+          },
+          "usage": {
+            "promptTokenCount": 109882,
+            "candidatesTokenCount": 682,
+            "totalTokenCount": 112553,
+            "promptTokensDetails": [
+              {
+                "modality": "IMAGE",
+                "tokenCount": 79948
+              },
+              {
+                "modality": "TEXT",
+                "tokenCount": 29934
+              }
+            ],
+            "thoughtsTokenCount": 1989,
+            "serviceTier": "standard"
+          }
+        }
+      ]
+    },
+    {
+      "directory": "result/lnUHSWhQ-UI/video-aZCrbm",
+      "videoId": "lnUHSWhQ-UI",
+      "title": "내향적인 아이의 첫 심부름ㅣ아직 세상이 살만한 이유(feat.감동/대견/기특 주의)",
+      "promptFile": "/Users/chacha/src/youtube-describer-test/test_scripts/prompt_template_video_v13.txt",
+      "policyValidation": "bypassed",
+      "models": [
+        {
+          "requestedModel": "gemini-3.8-flash",
+          "outputFile": "gemini-3.8-flash.txt",
+          "durationMs": 20150,
+          "summary": {
+            "lines": 31,
+            "tagged": 31,
+            "tags": {
+              "v1": 15,
+              "v2": 12,
+              "v3": 0,
+              "txt": 4,
+              "trans": 0
+            }
+          },
+          "usage": {
+            "promptTokenCount": 78019,
+            "candidatesTokenCount": 841,
+            "totalTokenCount": 81463,
+            "promptTokensDetails": [
+              {
+                "modality": "TEXT",
+                "tokenCount": 27629
+              },
+              {
+                "modality": "VIDEO",
+                "tokenCount": 50390
+              }
+            ],
+            "thoughtsTokenCount": 2603,
+            "serviceTier": "standard"
+          }
+        }
+      ]
+    },
+    {
+      "directory": "result/lnUHSWhQ-UI/video-gspTkC",
+      "videoId": "lnUHSWhQ-UI",
+      "title": "내향적인 아이의 첫 심부름ㅣ아직 세상이 살만한 이유(feat.감동/대견/기특 주의)",
+      "promptFile": "/Users/chacha/src/youtube-describer-test/test_scripts/prompt_template_video_v13.txt",
+      "policyValidation": "bypassed",
+      "models": [
+        {
+          "requestedModel": "gemini-3.8-flash",
+          "outputFile": "gemini-3.8-flash.txt",
+          "durationMs": 17217,
+          "summary": {
+            "lines": 31,
+            "tagged": 0,
+            "tags": {
+              "v1": 0,
+              "v2": 0,
+              "v3": 0,
+              "txt": 0,
+              "trans": 0
+            }
+          },
+          "usage": {
+            "promptTokenCount": 78252,
+            "candidatesTokenCount": 801,
+            "totalTokenCount": 80991,
+            "promptTokensDetails": [
+              {
+                "modality": "TEXT",
+                "tokenCount": 27862
+              },
+              {
+                "modality": "VIDEO",
+                "tokenCount": 50390
+              }
+            ],
+            "thoughtsTokenCount": 1938,
+            "serviceTier": "standard"
+          }
+        }
+      ]
+    },
+    {
+      "directory": "result/yaWS2T8aKjY/review-NQDTXK",
+      "videoId": "yaWS2T8aKjY",
+      "title": "첨단기술이 현실을 만났을 때, 티웨이항공 737 광주공항 오착륙 사건",
+      "promptFile": "/Users/chacha/src/youtube-describer-test/test_scripts/prompt_template_writer_v13.txt",
+      "policyValidation": "bypassed",
+      "models": [
+        {
+          "requestedModel": "gemini-3.8-flash",
+          "outputFile": "gemini-3.8-flash.txt",
+          "durationMs": 66711,
+          "summary": {
+            "lines": 49,
+            "tagged": 49,
+            "tags": {
+              "v1": 3,
+              "v2": 3,
+              "v3": 3,
+              "txt": 40,
+              "trans": 0
+            }
+          },
+          "usage": {
+            "draft": {
+              "promptTokenCount": 95174,
+              "candidatesTokenCount": 1629,
+              "totalTokenCount": 104292,
+              "promptTokensDetails": [
+                {
+                  "modality": "IMAGE",
+                  "tokenCount": 83952
+                },
+                {
+                  "modality": "TEXT",
+                  "tokenCount": 11222
+                }
+              ],
+              "thoughtsTokenCount": 7489,
+              "serviceTier": "standard"
+            },
+            "review": {
+              "promptTokenCount": 97420,
+              "candidatesTokenCount": 1642,
+              "totalTokenCount": 101179,
+              "promptTokensDetails": [
+                {
+                  "modality": "IMAGE",
+                  "tokenCount": 83952
+                },
+                {
+                  "modality": "TEXT",
+                  "tokenCount": 13468
+                }
+              ],
+              "thoughtsTokenCount": 2117,
+              "serviceTier": "standard"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "directory": "result/yaWS2T8aKjY/run-K9mCXH",
+      "videoId": "yaWS2T8aKjY",
+      "title": "첨단기술이 현실을 만났을 때, 티웨이항공 737 광주공항 오착륙 사건",
+      "promptFile": "/Users/chacha/src/youtube-describer-test/test_scripts/prompt_template_writer_v15.txt",
+      "policyValidation": "bypassed",
+      "models": [
+        {
+          "requestedModel": "gemini-3.8-flash",
+          "outputFile": "gemini-3.8-flash.txt",
+          "durationMs": 38382,
+          "summary": {
+            "lines": 59,
+            "tagged": 59,
+            "tags": {
+              "v1": 4,
+              "v2": 5,
+              "v3": 2,
+              "txt": 48,
+              "trans": 0
+            }
+          },
+          "usage": {
+            "promptTokenCount": 93825,
+            "candidatesTokenCount": 2210,
+            "totalTokenCount": 102167,
+            "promptTokensDetails": [
+              {
+                "modality": "IMAGE",
+                "tokenCount": 83952
+              },
+              {
+                "modality": "TEXT",
+                "tokenCount": 9873
+              }
+            ],
+            "thoughtsTokenCount": 6132,
+            "serviceTier": "standard"
+          }
+        }
+      ]
+    },
+    {
+      "directory": "result/yaWS2T8aKjY/run-dyoJNv",
+      "videoId": "yaWS2T8aKjY",
+      "title": "첨단기술이 현실을 만났을 때, 티웨이항공 737 광주공항 오착륙 사건",
+      "promptFile": "/Users/chacha/src/youtube-describer-test/test_scripts/prompt_template_writer_v17.txt",
+      "policyValidation": "bypassed",
+      "models": [
+        {
+          "requestedModel": "gemini-3.8-flash",
+          "outputFile": "gemini-3.8-flash.txt",
+          "durationMs": 38350,
+          "summary": {
+            "lines": 77,
+            "tagged": 77,
+            "tags": {
+              "v1": 3,
+              "v2": 4,
+              "v3": 3,
+              "txt": 67,
+              "trans": 0
+            }
+          },
+          "usage": {
+            "promptTokenCount": 95402,
+            "candidatesTokenCount": 2626,
+            "totalTokenCount": 104558,
+            "promptTokensDetails": [
+              {
+                "modality": "TEXT",
+                "tokenCount": 11450
+              },
+              {
+                "modality": "IMAGE",
+                "tokenCount": 83952
+              }
+            ],
+            "thoughtsTokenCount": 6530,
+            "serviceTier": "standard"
+          }
+        }
+      ]
+    },
+    {
+      "directory": "result/yaWS2T8aKjY/run-pewTx6",
+      "videoId": "yaWS2T8aKjY",
+      "title": "첨단기술이 현실을 만났을 때, 티웨이항공 737 광주공항 오착륙 사건",
+      "promptFile": "/Users/chacha/src/youtube-describer-test/test_scripts/prompt_template_writer_v16.txt",
+      "policyValidation": "bypassed",
+      "models": [
+        {
+          "requestedModel": "gemini-3.8-flash",
+          "outputFile": "gemini-3.8-flash.txt",
+          "durationMs": 49216,
+          "summary": {
+            "lines": 69,
+            "tagged": 69,
+            "tags": {
+              "v1": 7,
+              "v2": 11,
+              "v3": 2,
+              "txt": 49,
+              "trans": 0
+            }
+          },
+          "usage": {
+            "promptTokenCount": 95499,
+            "candidatesTokenCount": 2362,
+            "totalTokenCount": 106169,
+            "promptTokensDetails": [
+              {
+                "modality": "IMAGE",
+                "tokenCount": 83952
+              },
+              {
+                "modality": "TEXT",
+                "tokenCount": 11547
+              }
+            ],
+            "thoughtsTokenCount": 8308,
+            "serviceTier": "standard"
+          }
+        }
+      ]
+    },
+    {
+      "directory": "result/yaWS2T8aKjY/run-pqKnRN",
+      "videoId": "yaWS2T8aKjY",
+      "title": "첨단기술이 현실을 만났을 때, 티웨이항공 737 광주공항 오착륙 사건",
+      "promptFile": "/Users/chacha/src/youtube-describer-test/test_scripts/prompt_template_writer_v13.txt",
+      "policyValidation": "bypassed",
+      "models": [
+        {
+          "requestedModel": "gemini-3.8-flash",
+          "outputFile": "gemini-3.8-flash.txt",
+          "durationMs": 35853,
+          "summary": {
+            "lines": 71,
+            "tagged": 71,
+            "tags": {
+              "v1": 3,
+              "v2": 7,
+              "v3": 3,
+              "txt": 58,
+              "trans": 0
+            }
+          },
+          "usage": {
+            "promptTokenCount": 95174,
+            "candidatesTokenCount": 2406,
+            "totalTokenCount": 103922,
+            "promptTokensDetails": [
+              {
+                "modality": "TEXT",
+                "tokenCount": 11222
+              },
+              {
+                "modality": "IMAGE",
+                "tokenCount": 83952
+              }
+            ],
+            "thoughtsTokenCount": 6342,
+            "serviceTier": "standard"
+          }
+        }
+      ]
+    },
+    {
+      "directory": "result/yaWS2T8aKjY/run-sMLlIk",
+      "videoId": "yaWS2T8aKjY",
+      "title": "첨단기술이 현실을 만났을 때, 티웨이항공 737 광주공항 오착륙 사건",
+      "promptFile": "/Users/chacha/src/youtube-describer-test/test_scripts/prompt_template_writer_v19.txt",
+      "policyValidation": "bypassed",
+      "models": [
+        {
+          "requestedModel": "gemini-3.8-flash",
+          "outputFile": "gemini-3.8-flash.txt",
+          "durationMs": 40292,
+          "summary": {
+            "lines": 69,
+            "tagged": 69,
+            "tags": {
+              "v1": 4,
+              "v2": 5,
+              "v3": 1,
+              "txt": 59,
+              "trans": 0
+            }
+          },
+          "usage": {
+            "promptTokenCount": 95424,
+            "candidatesTokenCount": 2322,
+            "totalTokenCount": 103711,
+            "promptTokensDetails": [
+              {
+                "modality": "TEXT",
+                "tokenCount": 11472
+              },
+              {
+                "modality": "IMAGE",
+                "tokenCount": 83952
+              }
+            ],
+            "thoughtsTokenCount": 5965,
+            "serviceTier": "standard"
+          }
+        }
+      ]
+    },
+    {
+      "directory": "result/zWXvDmO4cQ0/run-QkXuYs",
+      "videoId": "zWXvDmO4cQ0",
+      "title": "The Sound Card Wars: How a Free Chip Killed Sound Blaster",
+      "promptFile": "/Users/chacha/src/youtube-describer-test/test_scripts/prompt_template_writer_v13.txt",
+      "policyValidation": "bypassed",
+      "models": [
+        {
+          "requestedModel": "gemini-3.8-flash",
+          "outputFile": "gemini-3.8-flash.txt",
+          "durationMs": 115414,
+          "summary": {
+            "lines": 244,
+            "tagged": 244,
+            "tags": {
+              "v1": 19,
+              "v2": 89,
+              "v3": 40,
+              "txt": 13,
+              "trans": 83
+            }
+          },
+          "usage": {
+            "promptTokenCount": 243166,
+            "candidatesTokenCount": 7233,
+            "totalTokenCount": 261803,
+            "promptTokensDetails": [
+              {
+                "modality": "TEXT",
+                "tokenCount": 93214
+              },
+              {
+                "modality": "IMAGE",
+                "tokenCount": 149952
+              }
+            ],
+            "thoughtsTokenCount": 11404,
+            "serviceTier": "standard"
+          }
+        }
+      ]
+    },
+    {
+      "directory": "result/zWXvDmO4cQ0/run-WxsKn1",
+      "videoId": "zWXvDmO4cQ0",
+      "title": "The Sound Card Wars: How a Free Chip Killed Sound Blaster",
+      "promptFile": "/Users/chacha/src/youtube-describer-test/test_scripts/prompt_template_writer_v13.txt",
+      "policyValidation": "bypassed",
+      "models": [
+        {
+          "requestedModel": "gemini-3.8-flash",
+          "outputFile": "gemini-3.8-flash.txt",
+          "durationMs": 115068,
+          "summary": {
+            "lines": 204,
+            "tagged": 204,
+            "tags": {
+              "v1": 1,
+              "v2": 19,
+              "v3": 3,
+              "txt": 14,
+              "trans": 167
+            }
+          },
+          "usage": {
+            "promptTokenCount": 244194,
+            "candidatesTokenCount": 6489,
+            "totalTokenCount": 269931,
+            "promptTokensDetails": [
+              {
+                "modality": "IMAGE",
+                "tokenCount": 149952
+              },
+              {
+                "modality": "TEXT",
+                "tokenCount": 94242
+              }
+            ],
+            "thoughtsTokenCount": 19248,
+            "serviceTier": "standard"
+          }
+        }
+      ]
+    }
+  ]
+}

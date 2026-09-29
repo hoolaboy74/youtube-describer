@@ -1,0 +1,46 @@
+{
+  "workDir": "/Users/chacha/src/youtube-describer-test/test_scripts/result/lnUHSWhQ-UI/run-mWiE5W",
+  "videoId": "lnUHSWhQ-UI",
+  "title": "내향적인 아이의 첫 심부름ㅣ아직 세상이 살만한 이유(feat.감동/대견/기특 주의)",
+  "frameCount": 316,
+  "dialogueCount": 249,
+  "audioLanguage": "mixed",
+  "models": [
+    {
+      "provider": "gemini",
+      "requestedModel": "gemini-3.8-flash",
+      "outputFile": "gemini-3.8-flash.txt",
+      "model": "gemini-3.8-flash",
+      "durationMs": 19025,
+      "text": "[2][v1] 어린 리후가 엘리베이터 안에서 카메라를 들고 서 있습니다.\n[14][txt] 자막 안 터지는 무전기에 다시 불안해졌다가,,\n[36][v1] 건물 밖으로 나온 리후가 높은 아파트를 올려다봅니다.\n[60][txt] 자막 NEW FAMILY STORY EPISODE. 24-11\n[64][v1] 집 식탁에 앉은 리후가 음식을 먹으며 아빠와 이야기합니다.\n[238][v2] 리후가 작은 가방을 챙겨 들고 아빠에게 카드를 받습니다.\n[270][v1] 현관문을 나선 리후가 복도를 걸어가 엘리베이터 버튼을 누릅니다.\n[286][v2] 아빠가 문틈으로 복도 끝에 서 있는 리후를 지켜봅니다.\n[300][v1] 홀로 엘리베이터에 탄 리후가 긴장한 표정으로 층수 표시기를 바라봅니다.\n[356][v1] 일 층에 도착한 리후가 아파트 밖으로 걸어 나옵니다.\n[388][v1] 편의점 안으로 들어선 리후가 음료 냉장고 앞을 서성입니다.\n[424][v2] 지나가던 손님이 리후 대신 냉장고에서 아이스크림을 꺼내 줍니다.\n[442][txt] 자막 도움 주셔서 정말 감사합니다.\n[470][v2] 아이스크림을 가방에 넣고 나온 리후가 카메라를 보며 활짝 웃습니다.\n[482][v1] 집 창가에서 아빠가 마당을 힘차게 뛰어오는 리후를 내려다봅니다.\n[534][v1] 리후가 다시 엘리베이터를 타고 집으로 올라갑니다.\n[572][v1] 현관문이 열리자 리후가 환하게 웃으며 다가옵니다.\n[588][v2] 리후가 아이스크림이 든 심부름 가방을 아빠에게 건넵니다.\n[610][v2] 리후가 아빠 품에 꼭 안깁니다.",
+      "usage": {
+        "promptTokenCount": 110206,
+        "candidatesTokenCount": 515,
+        "totalTokenCount": 112076,
+        "promptTokensDetails": [
+          {
+            "modality": "IMAGE",
+            "tokenCount": 79948
+          },
+          {
+            "modality": "TEXT",
+            "tokenCount": 30258
+          }
+        ],
+        "thoughtsTokenCount": 1355,
+        "serviceTier": "standard"
+      },
+      "summary": {
+        "lines": 19,
+        "tagged": 19,
+        "tags": {
+          "v1": 10,
+          "v2": 6,
+          "v3": 0,
+          "txt": 3,
+          "trans": 0
+        }
+      }
+    }
+  ]
+}

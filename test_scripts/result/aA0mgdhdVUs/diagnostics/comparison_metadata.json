@@ -1,0 +1,103 @@
+{
+  "videoId": "aA0mgdhdVUs",
+  "title": "착한 척 (SUB)",
+  "duration": 714,
+  "backendCommit": "cc12cc755b724de31d42c2a9c5709cbcf9ef0d35",
+  "promptSha256": "40040811098c8270e6a6438aadefe3bbac196350283f70a19546f87a12e02c81",
+  "templateSha256": "d872fc8218a997448c5b1f860c00829e9a8c8131dc9e36251304660ad20cbd1e",
+  "samePromptFramesDialogue": true,
+  "models": [
+    {
+      "requestedModel": "gemini-3.8-flash",
+      "durationMs": 30907,
+      "usage": {
+        "promptTokenCount": 146666,
+        "candidatesTokenCount": 589,
+        "totalTokenCount": 150379,
+        "promptTokensDetails": [
+          {
+            "modality": "TEXT",
+            "tokenCount": 56092
+          },
+          {
+            "modality": "IMAGE",
+            "tokenCount": 90574
+          }
+        ],
+        "thoughtsTokenCount": 3124,
+        "serviceTier": "standard"
+      },
+      "summary": {
+        "lines": 22,
+        "tagged": 22,
+        "tags": {
+          "v1": 11,
+          "v2": 8,
+          "v3": 0,
+          "txt": 3,
+          "trans": 0
+        }
+      },
+      "run": "run-6yIcLW",
+      "rawFile": "gemini-3.8-flash.txt"
+    },
+    {
+      "requestedModel": "gpt-6-astra:medium",
+      "durationMs": 62078,
+      "usage": {
+        "input_tokens": 103247,
+        "input_tokens_details": {
+          "cache_write_tokens": 103244,
+          "cached_tokens": 0
+        },
+        "output_tokens": 2445,
+        "output_tokens_details": {
+          "reasoning_tokens": 259
+        },
+        "total_tokens": 105692
+      },
+      "summary": {
+        "lines": 88,
+        "tagged": 88,
+        "tags": {
+          "v1": 50,
+          "v2": 35,
+          "v3": 2,
+          "txt": 1,
+          "trans": 0
+        }
+      },
+      "run": "run-6yIcLW",
+      "rawFile": "gpt-6-astra.txt"
+    },
+    {
+      "requestedModel": "gpt-5.6-luna:high",
+      "durationMs": 64303,
+      "usage": {
+        "input_tokens": 103247,
+        "input_tokens_details": {
+          "cache_write_tokens": 103244,
+          "cached_tokens": 0
+        },
+        "output_tokens": 6191,
+        "output_tokens_details": {
+          "reasoning_tokens": 3624
+        },
+        "total_tokens": 109438
+      },
+      "summary": {
+        "lines": 115,
+        "tagged": 115,
+        "tags": {
+          "v1": 45,
+          "v2": 69,
+          "v3": 1,
+          "txt": 0,
+          "trans": 0
+        }
+      },
+      "run": "run-pXIffi",
+      "rawFile": "gpt-5.6-luna.txt"
+    }
+  ]
+}

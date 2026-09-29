@@ -1,0 +1,745 @@
+{
+  "videoId": "PDHIyrfMl_U",
+  "duration": 482,
+  "audioLanguage": "foreign",
+  "dialogueTrack": [],
+  "events": [
+    {
+      "timestamp": 7,
+      "tag": "v2",
+      "text": "주황색 넥타이를 맨 파란 남자가 컵을 들고 있습니다.",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-0006.jpg",
+            "timestamp": 6.92
+          }
+        ],
+        "source": "codex-astra-medium-demo-edit"
+      }
+    },
+    {
+      "timestamp": 12,
+      "tag": "v1",
+      "text": "남자가 초록색 가방에 책을 채웁니다.",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-0009.jpg",
+            "timestamp": 11.72
+          }
+        ],
+        "source": "codex-astra-medium-demo-edit"
+      }
+    },
+    {
+      "timestamp": 22,
+      "tag": "v1",
+      "text": "주황빛 아이가 뛰어옵니다.",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-0017.jpg",
+            "timestamp": 22.48
+          }
+        ],
+        "source": "codex-astra-medium-demo-edit"
+      }
+    },
+    {
+      "timestamp": 31,
+      "tag": "v1",
+      "text": "가방을 멘 아이가 남자 발치에 주저앉습니다.",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-0023.jpg",
+            "timestamp": 31.48
+          }
+        ],
+        "source": "codex-astra-medium-demo-edit"
+      }
+    },
+    {
+      "timestamp": 45,
+      "tag": "txt",
+      "text": "자막 얼라이크",
+      "provenance": {
+        "kind": "screen_text",
+        "frameEvidence": [
+          {
+            "id": "frame-0032.jpg",
+            "timestamp": 44.56
+          }
+        ],
+        "source": "codex-astra-medium-demo-edit",
+        "visibleTextEvidence": "Alike"
+      }
+    },
+    {
+      "timestamp": 55,
+      "tag": "v3",
+      "text": "잿빛 거리로 회색 사람들이 걸어갑니다.",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-0039.jpg",
+            "timestamp": 55.48
+          }
+        ],
+        "source": "codex-astra-medium-demo-edit"
+      }
+    },
+    {
+      "timestamp": 60,
+      "tag": "v3",
+      "text": "초록 잔디밭의 붉은 나무가 선명합니다.",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-0042.jpg",
+            "timestamp": 59.96
+          }
+        ],
+        "source": "codex-astra-medium-demo-edit"
+      }
+    },
+    {
+      "timestamp": 66,
+      "tag": "v1",
+      "text": "나무 아래 보랏빛 남자가 바이올린을 켭니다.",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-0046.jpg",
+            "timestamp": 65.8
+          }
+        ],
+        "source": "codex-astra-medium-demo-edit"
+      }
+    },
+    {
+      "timestamp": 73,
+      "tag": "v1",
+      "text": "아이가 연주자 쪽으로 돌아옵니다.",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-0051.jpg",
+            "timestamp": 72.72
+          }
+        ],
+        "source": "codex-astra-medium-demo-edit"
+      }
+    },
+    {
+      "timestamp": 79,
+      "tag": "v2",
+      "text": "아이가 눈을 감고 웃으며 몸을 흔듭니다.",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-0055.jpg",
+            "timestamp": 78.88
+          }
+        ],
+        "source": "codex-astra-medium-demo-edit"
+      }
+    },
+    {
+      "timestamp": 85,
+      "tag": "v1",
+      "text": "남자가 아이 앞에 책가방을 내밉니다.",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-0059.jpg",
+            "timestamp": 84.52
+          }
+        ],
+        "source": "codex-astra-medium-demo-edit"
+      }
+    },
+    {
+      "timestamp": 101,
+      "tag": "v2",
+      "text": "길을 사이에 두고 학교와 일터가 마주합니다.",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-0071.jpg",
+            "timestamp": 101.48
+          }
+        ],
+        "source": "codex-astra-medium-demo-edit"
+      }
+    },
+    {
+      "timestamp": 111,
+      "tag": "v1",
+      "text": "아이는 교실에, 남자는 사무실에 앉습니다.",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-0077.jpg",
+            "timestamp": 110.96
+          }
+        ],
+        "source": "codex-astra-medium-demo-edit"
+      }
+    },
+    {
+      "timestamp": 119,
+      "tag": "v1",
+      "text": "서류 더미 앞 남자의 몸이 회색으로 변합니다.",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-0082.jpg",
+            "timestamp": 119
+          }
+        ],
+        "source": "codex-astra-medium-demo-edit"
+      }
+    },
+    {
+      "timestamp": 134,
+      "tag": "v1",
+      "text": "아이의 종이에 붉은 나무와 연주자가 그려져 있습니다.",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-0092.jpg",
+            "timestamp": 133.6
+          }
+        ],
+        "source": "codex-astra-medium-demo-edit"
+      }
+    },
+    {
+      "timestamp": 144,
+      "tag": "v1",
+      "text": "아이가 알파벳을 동물과 나무 모양으로 꾸밉니다.",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-0100.jpg",
+            "timestamp": 144.48
+          }
+        ],
+        "source": "codex-astra-medium-demo-edit"
+      }
+    },
+    {
+      "timestamp": 156,
+      "tag": "v2",
+      "text": "서류 더미가 사라진 책상에서 남자가 가방을 듭니다.",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-0108.jpg",
+            "timestamp": 155.96
+          }
+        ],
+        "source": "codex-astra-medium-demo-edit"
+      }
+    },
+    {
+      "timestamp": 167,
+      "tag": "v1",
+      "text": "팔을 벌린 남자에게 아이가 달려갑니다.",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-0116.jpg",
+            "timestamp": 167.44
+          }
+        ],
+        "source": "codex-astra-medium-demo-edit"
+      }
+    },
+    {
+      "timestamp": 174,
+      "tag": "v1",
+      "text": "아이를 안은 남자의 몸에 파란빛이 돌아옵니다.",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-0120.jpg",
+            "timestamp": 173.88
+          }
+        ],
+        "source": "codex-astra-medium-demo-edit"
+      }
+    },
+    {
+      "timestamp": 180,
+      "tag": "v2",
+      "text": "두 사람이 벤치에 마주 앉아 있습니다.",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-0124.jpg",
+            "timestamp": 179.68
+          }
+        ],
+        "source": "codex-astra-medium-demo-edit"
+      }
+    },
+    {
+      "timestamp": 188,
+      "tag": "v1",
+      "text": "남자가 눈썹을 찌푸린 채 아이의 그림을 봅니다.",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-0129.jpg",
+            "timestamp": 187.52
+          }
+        ],
+        "source": "codex-astra-medium-demo-edit"
+      }
+    },
+    {
+      "timestamp": 201,
+      "tag": "v1",
+      "text": "일하는 남자의 몸이 다시 회색으로 변합니다.",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-0138.jpg",
+            "timestamp": 200.96
+          }
+        ],
+        "source": "codex-astra-medium-demo-edit"
+      }
+    },
+    {
+      "timestamp": 208,
+      "tag": "v2",
+      "text": "교실의 아이가 턱을 괴고 눈을 가늘게 뜹니다.",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-0143.jpg",
+            "timestamp": 208.24
+          }
+        ],
+        "source": "codex-astra-medium-demo-edit"
+      }
+    },
+    {
+      "timestamp": 218,
+      "tag": "v1",
+      "text": "팔을 벌린 남자에게 아이가 고개를 숙이고 다가갑니다.",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-0150.jpg",
+            "timestamp": 217.6
+          }
+        ],
+        "source": "codex-astra-medium-demo-edit"
+      }
+    },
+    {
+      "timestamp": 229,
+      "tag": "v1",
+      "text": "아이를 안은 남자의 몸이 다시 파랗게 물듭니다.",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-0158.jpg",
+            "timestamp": 229.28
+          }
+        ],
+        "source": "codex-astra-medium-demo-edit"
+      }
+    },
+    {
+      "timestamp": 244,
+      "tag": "v1",
+      "text": "아이가 연필로 알파벳을 줄마다 따라 씁니다.",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-0168.jpg",
+            "timestamp": 244.32
+          }
+        ],
+        "source": "codex-astra-medium-demo-edit"
+      }
+    },
+    {
+      "timestamp": 248,
+      "tag": "v1",
+      "text": "회색 아이들 사이에서 아이의 주황빛도 옅어집니다.",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-0171.jpg",
+            "timestamp": 248
+          }
+        ],
+        "source": "codex-astra-medium-demo-edit"
+      }
+    },
+    {
+      "timestamp": 254,
+      "tag": "v1",
+      "text": "아이가 남자의 손에 종이를 건넵니다.",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-0175.jpg",
+            "timestamp": 254
+          }
+        ],
+        "source": "codex-astra-medium-demo-edit"
+      }
+    },
+    {
+      "timestamp": 260,
+      "tag": "v1",
+      "text": "아이가 나무에서 떨어져 연주자를 바라봅니다.",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-0180.jpg",
+            "timestamp": 260.16
+          }
+        ],
+        "source": "codex-astra-medium-demo-edit"
+      }
+    },
+    {
+      "timestamp": 266,
+      "tag": "v2",
+      "text": "빛바랜 얼굴에 웃음이 없습니다.",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-0184.jpg",
+            "timestamp": 265.56
+          }
+        ],
+        "source": "codex-astra-medium-demo-edit"
+      }
+    },
+    {
+      "timestamp": 278,
+      "tag": "v2",
+      "text": "사무실의 남자가 타자기 앞에서 손을 멈춥니다.",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-0192.jpg",
+            "timestamp": 278.08
+          }
+        ],
+        "source": "codex-astra-medium-demo-edit"
+      }
+    },
+    {
+      "timestamp": 286,
+      "tag": "v1",
+      "text": "남자가 연습지를 넘겨 알파벳을 꾸민 그림들을 봅니다.",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-0197.jpg",
+            "timestamp": 285.76
+          }
+        ],
+        "source": "codex-astra-medium-demo-edit"
+      }
+    },
+    {
+      "timestamp": 300,
+      "tag": "v2",
+      "text": "거리에서 아이가 남자보다 몇 걸음 앞서 걷습니다.",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-0207.jpg",
+            "timestamp": 300.2
+          }
+        ],
+        "source": "codex-astra-medium-demo-edit"
+      }
+    },
+    {
+      "timestamp": 312,
+      "tag": "v1",
+      "text": "남자가 붉은 나무 그림을 들어 보이며 웃습니다.",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-0216.jpg",
+            "timestamp": 311.88
+          }
+        ],
+        "source": "codex-astra-medium-demo-edit"
+      }
+    },
+    {
+      "timestamp": 320,
+      "tag": "v1",
+      "text": "두 사람이 손을 잡고 걸어갑니다.",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-0222.jpg",
+            "timestamp": 320
+          }
+        ],
+        "source": "codex-astra-medium-demo-edit"
+      }
+    },
+    {
+      "timestamp": 328,
+      "tag": "v1",
+      "text": "붉은 나무 아래에 연주자가 없습니다.",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-0228.jpg",
+            "timestamp": 328.48
+          }
+        ],
+        "source": "codex-astra-medium-demo-edit"
+      }
+    },
+    {
+      "timestamp": 336,
+      "tag": "v1",
+      "text": "아이가 남자의 손을 놓습니다.",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-0233.jpg",
+            "timestamp": 335.88
+          }
+        ],
+        "source": "codex-astra-medium-demo-edit"
+      }
+    },
+    {
+      "timestamp": 346,
+      "tag": "v2",
+      "text": "돌아보는 아이의 입꼬리가 내려가 있습니다.",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-0241.jpg",
+            "timestamp": 346.48
+          }
+        ],
+        "source": "codex-astra-medium-demo-edit"
+      }
+    },
+    {
+      "timestamp": 356,
+      "tag": "v2",
+      "text": "남자가 나무 아래 잔디에 서류 가방을 내려놓습니다.",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-0249.jpg",
+            "timestamp": 355.96
+          }
+        ],
+        "source": "codex-astra-medium-demo-edit"
+      }
+    },
+    {
+      "timestamp": 367,
+      "tag": "v1",
+      "text": "남자가 빈손으로 바이올린을 켜는 시늉을 합니다.",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-0256.jpg",
+            "timestamp": 366.76
+          }
+        ],
+        "source": "codex-astra-medium-demo-edit"
+      }
+    },
+    {
+      "timestamp": 374,
+      "tag": "v2",
+      "text": "지나가던 회색 사람들이 멈춰 바라봅니다.",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-0261.jpg",
+            "timestamp": 373.68
+          }
+        ],
+        "source": "codex-astra-medium-demo-edit"
+      }
+    },
+    {
+      "timestamp": 384,
+      "tag": "v1",
+      "text": "아이의 얼굴에 환한 웃음이 돌아옵니다.",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-0268.jpg",
+            "timestamp": 384.12
+          }
+        ],
+        "source": "codex-astra-medium-demo-edit"
+      }
+    },
+    {
+      "timestamp": 391,
+      "tag": "v1",
+      "text": "남자의 얼굴이 다시 파란색으로 변합니다.",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-0273.jpg",
+            "timestamp": 391.12
+          }
+        ],
+        "source": "codex-astra-medium-demo-edit"
+      }
+    },
+    {
+      "timestamp": 396,
+      "tag": "v1",
+      "text": "남자가 주황빛 아이를 품에 안습니다.",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-0276.jpg",
+            "timestamp": 395.72
+          }
+        ],
+        "source": "codex-astra-medium-demo-edit"
+      }
+    },
+    {
+      "timestamp": 409,
+      "tag": "v3",
+      "text": "잿빛 도시 한가운데 초록 잔디와 붉은 나무가 보입니다.",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-0286.jpg",
+            "timestamp": 409.48
+          }
+        ],
+        "source": "codex-astra-medium-demo-edit"
+      }
+    },
+    {
+      "timestamp": 427,
+      "tag": "v2",
+      "text": "제작진 이름 아래 남자와 아이의 선화가 나타납니다.",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-0298.jpg",
+            "timestamp": 427.48
+          }
+        ],
+        "source": "codex-astra-medium-demo-edit"
+      }
+    },
+    {
+      "timestamp": 443,
+      "tag": "v2",
+      "text": "그림 속 아이가 안경 쓴 아이와 공을 가지고 놉니다.",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-0309.jpg",
+            "timestamp": 443.12
+          }
+        ],
+        "source": "codex-astra-medium-demo-edit"
+      }
+    },
+    {
+      "timestamp": 453,
+      "tag": "v2",
+      "text": "안경 쓴 아이의 몸이 분홍빛으로 물들어 있습니다.",
+      "provenance": {
+        "kind": "visual",
+        "frameEvidence": [
+          {
+            "id": "frame-0316.jpg",
+            "timestamp": 453.08
+          }
+        ],
+        "source": "codex-astra-medium-demo-edit"
+      }
+    },
+    {
+      "timestamp": 469,
+      "tag": "txt",
+      "text": "자막 우리가 색을 잃지 않도록 도와준 가족들에게",
+      "provenance": {
+        "kind": "screen_text",
+        "frameEvidence": [
+          {
+            "id": "frame-0326.jpg",
+            "timestamp": 468.68
+          }
+        ],
+        "source": "codex-astra-medium-demo-edit",
+        "visibleTextEvidence": "To our Families for helping us not to lose our colour"
+      }
+    }
+  ]
+}
