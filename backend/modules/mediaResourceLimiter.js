@@ -4,7 +4,7 @@ const { mediaDiskBudget, directoryBytes } = require('./mediaDiskBudget');
 
 function abortError() { return Object.assign(new Error('Media operation aborted'), { name: 'AbortError' }); }
 
-function createMediaResourceLimiter(limits = { download: 3, fullDownload: 1, ffmpeg: 3, backfill: 2, whisper: 2 }) {
+function createMediaResourceLimiter(limits = { download: 3, fullDownload: 1, ffmpeg: 3, backfill: 2, whisper: 3 }) {
     limits = { ...limits };
     for (const value of Object.values(limits)) if (!Number.isInteger(value) || value < 1) throw new Error('Invalid resource limit');
     const used = Object.fromEntries(Object.keys(limits).map(key => [key, 0]));
