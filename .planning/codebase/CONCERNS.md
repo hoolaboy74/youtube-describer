@@ -1,239 +1,143 @@
 # Codebase Concerns
 
-**Analysis Date:** 2026-08-31
+**Analysis Date:** 2026-09-30
 
 ## Tech Debt
 
-**Duplicated processing pipelines:**
-- Issue: Interactive processing, batch processing, and the CLI each implement their own download, media extraction, language detection, model invocation, and persistence flow. Policy fixes can therefore diverge between paths.
-- Files: `backend/videoProcessor.js`, `backend/process_video_cli.js`, `backend/modules/describer.js`, `backend/modules/synchronizer.js`
-- Impact: A fix to canonical validation, retries, cleanup, or resource limits can be bypassed by another entry point; behavior is difficult to reason about and test end to end.
-- Fix approach: Extract one orchestration service with shared acquisition, chunk, generation, validation, persistence, and recovery interfaces; keep CLI and HTTP layers as thin adapters.
+**Statistics have no source/metric coverage contract:**
+- Issue: Fixed queries and patterns omit QA receipts, daily QA ledgers, cache jobs, frames/subtitles, grounding, script validation/quarantine, donations and verification records.
+- Files: `.agents/skills/analyze_system_stats/scripts/stats_collector.js`, `backend/database.js`, `backend/modules/qaCacheStore.js`, `backend/modules/qaRequestReceipts.js`
+- Impact: A report can finish without explaining significant operational state or paid usage.
+- Fix approach: Maintain a schema/source coverage manifest with metric definitions, availability and reconciliation totals. The collector under audit is `/Users/chacha/src/youtube-describer/.agents/skills/analyze_system_stats/scripts/stats_collector.js`; report tooling and this test worktree are distinct targets.
 
-**Ad-hoc database migrations:**
-- Issue: Startup migrations in `init()` probe columns and issue individual `ALTER TABLE` statements without a schema version table or migration transaction.
-- Files: `backend/database.js`
-- Impact: A process interruption or partially applied migration can leave startup non-repeatable or the database in a mixed schema state.
-- Fix approach: Add versioned, transactional migrations with explicit compatibility checks and a tested backup/recovery procedure.
+**First-registration policy differs between skill and script:**
+- Issue: The skill promises a first-registration lower bound, but the script computes/prints it without enforcing it; default start is 1970-01-01.
+- Files: `.agents/skills/analyze_system_stats/SKILL.md`, `.agents/skills/analyze_system_stats/scripts/stats_collector.js`
+- Impact: Default reports include historical development data while claiming a membership-era cutoff.
+- Fix approach: Apply one explicit reporting policy and expose the effective interval.
 
-**Legacy compatibility is implemented as permissive defaults:**
-- Issue: Missing `validation_status` and `tts_eligible` values are interpreted as accepted and eligible, while provenance and policy metadata may be absent.
-- Files: `backend/database.js`, `backend/modules/ttsPolicy.js`, `backend/test_canonical_integration.js`
-- Impact: Legacy rows can enter the new playback/TTS path without the current evidence and language-policy guarantees.
-- Fix approach: Treat missing provenance as legacy-only, quarantine or revalidate it before TTS, and make the compatibility projection explicit at the API boundary.
-
-**Multiple authentication and password implementations:**
-- Issue: Password hashing is duplicated with a low PBKDF2 iteration count, admin authentication uses a password as a bearer credential, and old and active admin/player screens remain in parallel.
-- Files: `backend/database.js`, `backend/utils.js`, `backend/routes.js`, `frontend/src/Admin.js`, `frontend/src/screens/Admin.js`, `frontend/src/contexts/AuthContext.js`
-- Impact: Security fixes and behavior changes can be applied to one path while another path preserves the vulnerable contract.
-- Fix approach: Centralize credential hashing and session issuance, migrate to a strong password KDF, remove plaintext admin-token handling, and retire or clearly isolate duplicate screens.
-
-**Operational scripts bypass application boundaries:**
-- Issue: Diagnostic and CLI scripts can use old prompts, all-at-once generation, destructive cleanup, and shell-interpolated commands independently of the HTTP pipeline.
-- Files: `backend/process_video_cli.js`, `backend/run_batch_single.js`, `backend/test_matrix_runner.js`, `backend/clear-cache.js`
-- Impact: Production or test data can be mutated with behavior that does not satisfy the canonical policy or normal safety checks.
-- Fix approach: Route operational tools through the same service and policy modules, require explicit environment/target guards, and replace shell interpolation with argument arrays.
+**Startup initialization is unsuitable for read-only auditing:**
+- Issue: Initialization runs column migrations, QA schema creation and cache reconciliation.
+- Files: `backend/database.js`, `backend/modules/qaCacheStore.js`, `backend/modules/qaRequestReceipts.js`
+- Impact: Importing application database code can mutate operational state.
+- Fix approach: Use a separate SQLite read-only connection for reporting and schema inventory.
 
 ## Known Bugs
 
-**Canonical event IDs are not video-scoped:**
-- Symptoms: Two videos that produce the same normalized text, timestamp, tag, provenance, and interval can receive the same deterministic ID.
-- Files: `backend/modules/canonicalOutput.js`, `backend/database.js`
-- Trigger: The ID is generated without `videoId`, while `scripts.id` is a global primary key and accepted inserts use `INSERT OR IGNORE`.
-- Workaround: None; a colliding event can be silently ignored for the second video.
+**Database/log boundaries disagree about timezone:**
+- Symptoms: SQL compares local-looking dates directly to UTC CURRENT_TIMESTAMP strings; logs are bounded using +09:00, and costs also contain ISO strings. Receipts use epoch milliseconds.
+- Files: `.agents/skills/analyze_system_stats/scripts/stats_collector.js`, `backend/database.js`, `backend/logger.js`, `backend/modules/qaRequestReceipts.js`
+- Trigger: Korean monthly reporting or mixed SQL/ISO timestamps.
+- Workaround: Normalize instants per source; use half-open KST month boundaries converted to UTC, then convert grouping dates/hours to KST. Inclusive 23:59:59 loses fractional-second events.
 
-**No-frame and partial-generation results can be reported as complete:**
-- Symptoms: Interactive processing marks a video completed with an empty script when no frames are found; a response with some accepted events can also mark the whole video completed without coverage or chunk readiness checks.
-- Files: `backend/videoProcessor.js`, `backend/database.js`, `frontend/src/screens/PlayerScreenV2.js`
-- Trigger: The current status model has only pending/processing/completed/failed and does not represent ready-through coverage, incomplete chunks, or generation attempts.
-- Workaround: A user can retry generation manually, but the completed status can prevent batch regeneration and mislead the player.
+**Cross-correlation appends Z twice:**
+- Symptoms: SQL projections emit `%Y-%m-%dT%H:%M:%SZ`; JavaScript appends another Z, producing invalid Date values.
+- Files: `.agents/skills/analyze_system_stats/scripts/stats_collector.js`
+- Trigger: Parsing watchLogs or apiRequests for Nginx correlation.
+- Workaround: Parse normalized ISO strings once and count invalid dates explicitly.
 
-**CLI part processing can corrupt overall status and leak temporary files:**
-- Symptoms: A single `--part` invocation can mark the entire video completed or failed based only on that part; empty extracted chunks skip cleanup.
-- Files: `backend/process_video_cli.js`
-- Trigger: Overall status is updated from per-invocation accepted count, and the empty-frame branch continues before the chunk cleanup block.
-- Workaround: Avoid treating part-mode status as authoritative and remove abandoned chunk directories manually through a controlled maintenance operation.
+**One-to-many cost joins multiply videos:**
+- Symptoms: Top-requester COUNT(*) and SUM(video.duration) run after LEFT JOIN api_costs, while cost rows are not restricted by period/request type.
+- Files: `.agents/skills/analyze_system_stats/scripts/stats_collector.js`, `backend/database.js`
+- Trigger: Multiple paid attempts or QA costs share videoId.
+- Workaround: Aggregate video counts/duration separately; pre-aggregate period/type-filtered costs; attribute QA cost to its actual user, not the video requester.
 
-**Mixed-language translation can be omitted:**
-- Symptoms: Mixed audio prefers a Korean subtitle track and can produce no foreign-language intervals, even when foreign speech exists in the audio.
-- Files: `backend/videoProcessor.js`, `backend/modules/audioLanguageDetector.js`, `backend/modules/canonicalOutput.js`
-- Trigger: Detection samples only three coarse positions and subtitle selection returns the Korean VTT before segment-level foreign detection is available.
-- Workaround: None beyond supplying reliable foreign interval context; the conservative result is safe but incomplete.
+**Build latency uses a cost-record proxy:**
+- Symptoms: Video creation-to-each-cost-row timestamp differences are presented as processing latency and values over three hours are discarded.
+- Files: `.agents/skills/analyze_system_stats/scripts/stats_collector.js`, `backend/database.js`
+- Trigger: Reprocessing, QA usage or delayed cost persistence.
+- Workaround: Label the timing proxy explicitly until description attempt/start/completion events exist.
 
-**Timestamp zero is rejected despite player support:**
-- Symptoms: The canonical validator rejects timestamp `0`, while the player contains special handling for events at the beginning of playback.
-- Files: `backend/modules/canonicalOutput.js`, `frontend/src/screens/PlayerScreenV2.js`, `frontend/src/PlayerScreen.js`, `frontend/src/screens/PlayerScreen.js`
-- Trigger: Validation uses a non-positive timestamp rejection, so the first possible description cannot be persisted.
-- Workaround: Shift the event into the valid range, which can lose the intended timing.
+**Watch/favorite snapshots cannot count historical events:**
+- Symptoms: Watches upsert watchedAt on UNIQUE(userId, videoId) and retain only 20 per user; unlike removes a favorite row.
+- Files: `backend/database.js`, `.agents/skills/analyze_system_stats/scripts/stats_collector.js`
+- Trigger: `addWatchHistory()` repeats/prunes or `toggleFavorite()` deletes.
+- Workaround: Label surviving latest history/current favorites as snapshots. Add append-only events for future playback/like activity; requests are not completed-view evidence.
 
 ## Security Considerations
 
-**Admin credentials and bearer tokens are exposed in client-side storage and transport:**
-- Risk: Admin passwords are stored in plaintext settings and sent as bearer credentials; normal JWTs are long-lived, and SSE accepts tokens in query parameters. Browser history, proxy logs, referrers, local storage, or XSS can expose them.
-- Files: `backend/database.js`, `backend/routes.js`, `frontend/src/Admin.js`, `frontend/src/screens/Admin.js`, `frontend/src/contexts/AuthContext.js`, `frontend/src/screens/PlayerScreenV2.js`
-- Current mitigation: Password comparison and bearer checks exist, but there is no robust session revocation or query-token prohibition.
-- Recommendations: Hash all passwords/PINs, issue short-lived scoped sessions in secure HTTP-only cookies, remove query tokens, add revocation/rotation, and never return admin secrets from settings.
-
-**Stored XSS is possible in board content:**
-- Risk: Authenticated users can submit arbitrary post content and the active post screen renders it with `dangerouslySetInnerHTML`.
-- Files: `backend/routes.js`, `frontend/src/screens/PostScreen.js`, `frontend/src/PostScreen.js`
-- Current mitigation: Newline replacement is applied, but it is not HTML sanitization.
-- Recommendations: Render text as text or sanitize against an allowlist on write and read; add an authenticated-post XSS regression test.
-
-**Unauthenticated work and TTS are cost-abuse surfaces:**
-- Risk: Public batch processing starts background generation without identity, quota, balance, idempotency, or rate limiting; public TTS can invoke a paid provider for arbitrary eligible events.
-- Files: `backend/routes.js`, `backend/videoProcessor.js`, `backend/modules/ttsPolicy.js`, `frontend/src/screens/PlayerScreenV2.js`
-- Current mitigation: URL validation, cache lookup, and model calls exist, but they do not establish caller accountability or concurrency budgets.
-- Recommendations: Authenticate or tightly rate-limit these endpoints, create durable user-owned jobs, enforce quotas and provider budgets, and make TTS cache writes atomic and deduplicated.
-
-**PII and sensitive artifacts are retained or logged broadly:**
-- Risk: User phone, birthdate, PIN, ID-card images, IP addresses, guest IDs, watch history, raw request paths, download/model errors, and external responses can enter SQLite, logs, telemetry, or notifications.
-- Files: `backend/routes.js`, `backend/database.js`, `backend/utils.js`, `backend/logger.js`, `backend/index.js`, `backend/my_cookies.txt`, `backend/.env`, `backend/.env.bak`
-- Current mitigation: Sensitive local files are ignored by `.gitignore`; file existence and permissions still require deployment review, and the application has no documented retention or redaction policy.
-- Recommendations: Remove PINs from response payloads, encrypt or minimize identity data, redact logs and Telegram notifications, define retention/deletion jobs, restrict local file permissions, and scan artifacts before deployment.
-
-**Trust and input boundaries are too broad:**
-- Risk: All-origin CORS, a 50 MB request-body limit, unconditional proxy trust, raw forwarded IP usage, and unbounded search/API telemetry increase abuse and spoofing exposure.
-- Files: `backend/index.js`, `backend/routes.js`, `backend/database.js`
-- Current mitigation: Some routes require bearer authentication and YouTube URLs are validated, but there is no consistent per-route input/rate policy.
-- Recommendations: Allowlist origins, configure trusted proxy hops, cap fields and pagination, rate-limit expensive/auth endpoints, validate forwarded identity data, and add telemetry retention limits.
-
-**Downloader and prompt inputs remain hostile-boundary concerns:**
-- Risk: Downloading uses `--no-check-certificate`, browser cookie files, and proxy settings; captions, OCR text, titles, and dialogue are inserted into prompts and can contain prompt-injection instructions.
-- Files: `backend/videoProcessor.js`, `backend/modules/promptPolicy.js`, `backend/utils.js`, `backend/process_video_cli.js`
-- Current mitigation: Canonical validation constrains output tags, evidence, and language policy, but acquisition and model-input sanitization are not isolated.
-- Recommendations: Restore certificate verification, protect and rotate cookies, constrain outbound destinations, delimit/untrust all source text in prompts, and add adversarial-input tests.
+**Identity estimates and personal telemetry:**
+- Risk: Shared/changing IP addresses and current lastLoginIp misclassify historical membership. Raw user/guest/IP exports and audio capability URLs can expose sensitive information.
+- Files: `backend/routes.js`, `backend/database.js`, `.agents/skills/analyze_system_stats/scripts/stats_collector.js`
+- Current mitigation: Middleware redacts QA audio tickets; collector masks requester name/email; api_requests records userId/guestId.
+- Recommendations: Aggregate server-side, prefer authenticated request identity, preserve ticket redaction and label IP-based estimates. The collector already queries api_requests; its gap is incomplete aggregation/use, not complete omission.
 
 ## Performance Bottlenecks
 
-**Production generation is still all-at-once:**
-- Problem: The HTTP pipeline extracts the full video and reads every JPEG into base64 memory for one model request; it buffers the complete streamed response before canonicalization.
-- Files: `backend/videoProcessor.js`, `backend/modules/describer.js`, `backend/modules/synchronizer.js`
-- Cause: The planned durable approximately 15-minute chunk/job architecture is not used by `processVideo()` or `processVideoBatch()`.
-- Improvement path: Chunk acquisition and model context, bound frame counts/tokens, persist validated partial output, and merge ordered chunks with explicit global memory.
+**Whole-file synchronous log analysis:**
+- Problem: Entire logs are read/gunzipped synchronously, each access file parsed twice, and raw period request rows exported.
+- Files: `.agents/skills/analyze_system_stats/scripts/stats_collector.js`, `backend/database.js`
+- Cause: In-memory arrays/correlation instead of grouped SQL and streaming.
+- Improvement path: Return aggregates plus bounded diagnostics; stream parsing and record rejected/read-error counts.
 
-**External and media work has no global resource scheduler:**
-- Problem: FFmpeg, Whisper, downloads, model calls, and frame backfills run concurrently per request or batch job.
-- Files: `backend/videoProcessor.js`, `backend/modules/audioLanguageDetector.js`
-- Cause: Local `Promise.all` and fixed per-job concurrency exist without process-wide semaphores, queue limits, cancellation, or provider backoff.
-- Improvement path: Add bounded queues for each resource, timeouts with process reaping, exponential backoff/circuit breaking, and visible saturation metrics.
-
-**Frame-gap analysis can become unnecessarily expensive:**
-- Problem: Long-video keyframe backfill repeatedly searches the accumulated frame list for each target, producing avoidable quadratic behavior.
-- Files: `backend/videoProcessor.js`
-- Cause: Gap detection uses repeated nearest-frame scans rather than indexed timestamps.
-- Improvement path: Sort/index timestamps once, use binary search, and cap backfill work per chunk.
-
-**Runtime artifacts grow without complete retention control:**
-- Problem: API request telemetry, logs, quarantine rows, SQLite WAL state, temporary workspaces, and TTS audio are not governed by a unified retention or quota policy.
-- Files: `backend/database.js`, `backend/logger.js`, `backend/index.js`, `backend/videoProcessor.js`
-- Cause: Cleanup only targets selected TTS cache files once daily; it does not remove abandoned jobs/temp data or bound database/log tables.
-- Improvement path: Add ownership and expiry metadata, scheduled bounded cleanup, WAL/checkpoint monitoring, disk-pressure admission control, and atomic cache writes.
+**Disk measurements cannot establish cache hit rate:**
+- Problem: Current du/file counts and surviving files selected by mtime are treated as monthly cache creation/success evidence.
+- Files: `.agents/skills/analyze_system_stats/scripts/stats_collector.js`, `backend/index.js`, `backend/modules/qaCacheManager.js`
+- Cause: Cleanup removes files; mtime is not request/generation/hit history, and QA cache/TTS mechanisms differ.
+- Improvement path: Label disk data as collection-time inventory; derive true hits/misses from explicit events with coverage and denominator.
 
 ## Fragile Areas
 
-**In-memory locks and shared workspaces are not restart-safe:**
-- Files: `backend/videoProcessor.js`, `backend/routes.js`, `backend/index.js`
-- Why fragile: `processingLocks` exists only in one Node process, batch processing has no matching lock, and concurrent work can share `backend/temp/<videoId>`.
-- Safe modification: Introduce durable job/attempt/lease records, unique workspace paths per attempt, startup recovery, and idempotent cleanup before changing concurrency.
-- Test coverage: No deterministic restart, duplicate-request, cross-process, or workspace-collision tests are present.
+**Incomplete log collection appears successful:**
+- Files: `.agents/skills/analyze_system_stats/scripts/stats_collector.js`, `backend/logger.js`
+- Why fragile: Nginx read/gzip errors are silently caught, missing daily files skipped, and PM2 logs/Nginx error logs omitted. Existing parseError fields do not define full coverage.
+- Safe modification: Record inventory, observed interval, missing files, invalid lines and failures; preserve unavailable separately from zero.
+- Test coverage: No collector fixtures demonstrate corrupted gzip, rotation overlap, missing periods or partial source failures.
 
-**SSE is tied to a request lifetime rather than a recoverable job:**
-- Files: `backend/routes.js`, `frontend/src/screens/PlayerScreenV2.js`, `frontend/src/PlayerScreen.js`, `frontend/src/screens/PlayerScreen.js`
-- Why fragile: Disconnect only clears the heartbeat; processing continues without a durable event cursor, and the client closes on error without reconnect or replay.
-- Safe modification: Return a job ID, persist event sequence/progress, support status polling and `Last-Event-ID`, and distinguish cancellation from client disconnect.
-- Test coverage: No browser or network-disconnect tests verify reconnect, duplicate event delivery, or partial playback recovery.
-
-**Persistence can erase valid output during retries:**
-- Files: `backend/database.js`, `backend/videoProcessor.js`, `backend/process_video_cli.js`
-- Why fragile: `saveVideo()` deletes every existing script for a video before reinserting a supplied batch, while chunk publishing and final publishing are separate operations.
-- Safe modification: Use generation/version and chunk keys, transactional upserts, immutable accepted events, and an explicit publish cursor; never replace complete output with an unverified partial set.
-- Test coverage: Existing integration tests cover accepted/quarantined inserts but not failure between chunk publish and final status or concurrent replacement.
-
-**Child-process cleanup is incomplete:**
-- Files: `backend/videoProcessor.js`, `backend/modules/audioLanguageDetector.js`, `backend/process_video_cli.js`
-- Why fragile: Several spawned processes have timeouts but no consistent error/close handling, cancellation propagation, or orphan verification; abrupt CLI exits can bypass cleanup.
-- Safe modification: Centralize subprocess execution with kill escalation, settled-close semantics, bounded output, and finally-based workspace cleanup.
-- Test coverage: No process-timeout, SIGTERM, orphan, disk-full, or partial-download tests are present.
-
-**Evidence and player policy are not aligned end to end:**
-- Files: `backend/modules/canonicalOutput.js`, `backend/videoProcessor.js`, `backend/modules/ttsPolicy.js`, `frontend/src/screens/PlayerScreenV2.js`
-- Why fragile: Interactive visual events carry timestamp-only frame evidence, `[txt]` lacks the required screen-text evidence, TTS checks flags rather than the complete policy contract, and the player still applies legacy collision filtering.
-- Safe modification: Define one validated event contract containing evidence, policy version, audio language, and playback eligibility; make the player consume it without reinterpreting safety rules.
-- Test coverage: Deterministic backend policy tests pass, but no real-frame, screen-reader, browser timing, or audio-overlap verification exists.
+**QA ledgers have different denominators:**
+- Files: `backend/modules/qaRequestReceipts.js`, `backend/modules/qaRequestStore.js`, `backend/modules/qaGeneration.js`, `backend/database.js`, `backend/modules/qaMedia.js`
+- Why fragile: Endpoint counts include SSE/audio/polling/cancel, receipts represent incremental accepted requests, and legacy daily costs can cover another path. Cancellation can still consume recorded paid usage.
+- Safe modification: Count routes, receipts, terminal statuses, usage statuses, paid calls and daily aggregates separately; reconcile receipts by costId where available; never sum duplicate ledgers.
+- Test coverage: `backend/tests/qaRequestReceipts.test.js`, `backend/tests/qaIncremental.test.js` cover lifecycle, not monthly reporting reconciliation.
 
 ## Scaling Limits
 
-**Single-process SQLite is the coordination bottleneck:**
-- Current capacity: The application uses one local SQLite database with WAL and synchronous per-request API telemetry inserts.
-- Limit: Concurrent jobs, admin traffic, and generation writes contend on one file; there is no durable queue, lease, worker pool, or horizontal coordination.
-- Scaling path: Move job state to a durable queue/store or implement transactional leases and bounded workers before adding process replicas; retain SQLite only with measured write contention and backup controls.
+**API request rows do not encode response outcomes:**
+- Current capacity: api_requests stores timestamp/path/IP/user/guest, without method, response status, duration, requestId or completion outcome.
+- Files: `backend/database.js`, `backend/routes.js`
+- Limit: These rows alone cannot prove successful answers, paid generations, completed viewing or latency. Scan routes are also logged.
+- Scaling path: Use bounded Nginx response metrics and add structured request/terminal correlation for future operational metrics.
 
-**The current duration limit conflicts with universal chunking:**
-- Current capacity: The API path enforces a configured maximum duration whose default is approximately 30 minutes, while the direction requires approximately 15-minute chunks and restartable long-video processing.
-- Limit: Longer inputs are rejected rather than admitted as chunked jobs, and accepted inputs still send full-video context through the current path.
-- Scaling path: Make duration admission and chunk scheduling job-based, with per-chunk budgets and resumable global memory.
-
-**Paid-provider capacity is not enforced:**
-- Current capacity: Gemini, Google TTS, Whisper, FFmpeg, downloads, and frame work can each run concurrently for multiple callers.
-- Limit: A burst of public batch/TTS requests can exhaust provider quotas, CPU, RAM, disk, or monthly budget before application status reflects the problem.
-- Scaling path: Add per-resource concurrency, per-user quotas, cost accounting, circuit breakers, and admission control tied to disk/RAM/provider health.
+**Remote collector output has a fixed buffer:**
+- Current capacity: execSync uses a 128 MiB buffer with raw request arrays and complete retained-log processing.
+- Files: `.agents/skills/analyze_system_stats/scripts/stats_collector.js`
+- Limit: Request growth can exceed memory/buffer even when aggregates are small.
+- Scaling path: Aggregate on the server and expose query/export limits and collection durations.
 
 ## Dependencies at Risk
 
-**Runtime media tooling is machine-specific:**
-- Risk: `yt-dlp`, `ffmpeg`, `deno`, Whisper/model paths, cookies, proxies, and Gemini/Google credentials are assumed at runtime or resolved from host-specific defaults.
-- Impact: A new host or worker can fail at import/startup, use incompatible command flags, or lack the required model/binary without a clear health check.
-- Migration plan: Add startup capability checks, pinned/versioned tool configuration, explicit dependency injection, and a worker image or documented provisioned runtime.
-
-**Model and pricing assumptions are hard-coded:**
-- Risk: Model names and token pricing are embedded in processing code rather than versioned configuration with provider limits.
-- Impact: Provider model retirement, pricing changes, output-format drift, or quota behavior can silently change cost and canonical output quality.
-- Migration plan: Version provider adapters and prompt-policy hashes, validate structured output at the boundary, and record model/config versions with every job and event.
+**Collection depends on fixed host layout and shell date interpretation:**
+- Risk: Absolute remote paths/module location, find date parsing, du formatting and host timezone are embedded assumptions.
+- Files: `.agents/skills/analyze_system_stats/scripts/stats_collector.js`
+- Impact: Host/runtime changes alter or break collection without compatibility checks.
+- Migration plan: Parameterize layout, inspect schema read-only, normalize time explicitly and capture schema/source hashes.
 
 ## Missing Critical Features
 
-**Durable jobs, recovery, and truthful progress:**
-- Problem: There is no durable job ID, attempt/lease, per-chunk state, retry policy, startup recovery, ready-through cursor, or replayable progress stream.
-- Blocks: Reliable restart behavior, truthful partial playback, safe duplicate requests, bounded retries, and horizontal workers.
-- Files: `backend/routes.js`, `backend/videoProcessor.js`, `backend/database.js`, `frontend/src/screens/PlayerScreenV2.js`
+**QA and policy report sections:**
+- Problem: Receipts/usage uncertainty, cache leases/retries/frames/subtitles, QA-MEDIA/QA-GENERATION events, grounding costs and script acceptance/quarantine are not separately reported.
+- Files: `.agents/skills/analyze_system_stats/scripts/stats_collector.js`, `backend/modules/qaCacheStore.js`, `backend/modules/qaGeneration.js`, `backend/modules/canonicalOutput.js`
+- Blocks: Detection of unfinished QA, cache stalls, uncertain paid usage and policy rejection.
 
-**Policy-aware playback scheduling:**
-- Problem: The player polls every 250 ms and triggers TTS from event timestamps without duration-aware scheduling, dialogue occupancy, cancellation, or a durable audio identity/cache lifecycle.
-- Blocks: Predictable non-overlap behavior, safe seek/pause semantics, and accessible progressive playback under mixed speech and visual events.
-- Files: `frontend/src/screens/PlayerScreenV2.js`, `frontend/src/contexts/AuthContext.js`, `backend/routes.js`, `backend/modules/ttsPolicy.js`
-
-**Genre classification and evaluation gates:**
-- Problem: The analyzer still uses a legacy analyzer prompt and falls back to a general genre without a confidence/allowlist contract; browser, audio, accessibility, and large-input evaluation gates are not automated.
-- Blocks: Genre-specific policy enforcement, quality regression detection, and objective release readiness for the current milestone direction.
-- Files: `backend/modules/analyzer.js`, `backend/prompts/stage1_analyzer.txt`, `.planning/REQUIREMENTS.md`, `.planning/phases/01-canonical-output-provenance-v2-policy/01-VERIFICATION.md`
+**Historical transitions and date-aware inventory:**
+- Problem: Mutable video/user/history/favorite/cache rows do not establish historical event counts. The production read-only inventory collected at 2026-09-30T02:11:30.649Z lists 120860 API rows, 4873 costs, 453 receipts, 549 cache jobs, 70202 frames, 124 subtitles, 97 QA daily rows and 239 quarantine rows; these are current inventories.
+- Files: `backend/database.js`, `backend/modules/qaCacheStore.js`, `/Users/chacha/src/youtube-describer/prod_report/stats_coverage_inventory_20260930.json`
+- Blocks: Exact past play/like/auth/cache transitions cannot be recovered with COUNT alone. QA routes/costs/receipts are observed only in September; the 31 August daily files contain no QA-MEDIA/QA-GENERATION markers. This is evidence of no observed August activity in those sources, not proof every possible historical QA path was unused. Costs mix 4339 SQL and 534 ISO timestamps.
 
 ## Test Coverage Gaps
 
-**Backend test command is not configured:**
-- What's not tested: The package test script exits with “no test specified”; only direct Node test invocations cover the current canonical fixtures.
-- Files: `backend/package.json`, `backend/test_canonical_output.js`, `backend/test_audio_language_policy.js`, `backend/test_prompt_policy.js`, `backend/test_canonical_integration.js`
-- Risk: CI can report no meaningful suite, and integration/restart/resource regressions can land unnoticed.
-- Priority: High
+**Statistics correctness fixtures:**
+- What's not tested: KST month edges, ISO/SQL coexistence, epoch receipts, duplicate-Z parsing, join multiplication, QA reconciliation, snapshot labels and source failures.
+- Files: `.agents/skills/analyze_system_stats/scripts/stats_collector.js`, `backend/tests/qaRequestReceipts.test.js`, `backend/tests/geminiCost.test.js`
+- Risk: A successful report can contain systematic measurement errors.
+- Priority: High; introduce deterministic synthetic DB/log fixtures before relying on revised sponsor metrics.
 
-**Frontend verification is blocked and lacks behavioral coverage:**
-- What's not tested: The existing frontend test cannot resolve `react-router-dom` under the current Jest setup, and there are no tests for SSE recovery, TTS races, seeking, keyboard controls, or screen-reader state.
-- Files: `frontend/package.json`, `frontend/src/App.test.js`, `frontend/src/App.js`, `frontend/src/screens/PlayerScreenV2.js`
-- Risk: Accessibility and playback regressions are likely to reach users despite the service’s accessibility-critical purpose.
-- Priority: High
-
-**Reliability and security scenarios are absent:**
-- What's not tested: Duplicate jobs, process restart, client disconnect, provider timeout, child-process orphaning, disk pressure, cache races, global ID collision, query-token leakage, stored XSS, quota abuse, and PII redaction.
-- Files: `backend/routes.js`, `backend/videoProcessor.js`, `backend/database.js`, `backend/logger.js`, `frontend/src/screens/PostScreen.js`
-- Risk: The highest-impact concerns remain unverified in the failure modes that the next phases are intended to address.
-- Priority: High
-
-**Policy tests do not cover real evidence and full lifecycle behavior:**
-- What's not tested: The deterministic suite does not exercise actual frame/image provenance, screen-text extraction, segment-level mixed audio, persisted cross-chunk duplicate suppression, or player/TTS interpretation of accepted canonical events.
-- Files: `backend/modules/canonicalOutput.js`, `backend/modules/audioLanguageDetector.js`, `backend/videoProcessor.js`, `frontend/src/screens/PlayerScreenV2.js`, `backend/test_canonical_integration.js`
-- Risk: A green parser suite can coexist with unsafe or unusable end-to-end output.
-- Priority: Medium
+**Backend npm test does not execute existing suites:**
+- What's not tested: npm test remains a placeholder despite direct Node tests for QA, latency, cache and resource limits.
+- Files: `backend/package.json`, `backend/tests/qaLatencyBenchmark.test.js`, `backend/tests/qaCacheManager.test.js`, `backend/tests/mediaResourceLimiter.test.js`
+- Risk: Routine package testing skips backend verification.
+- Priority: Medium; configure deterministic suites separately from external/media benchmarks.
 
 ---
 
-*Concerns audit: 2026-08-31*
+*Concerns audit: 2026-09-30*

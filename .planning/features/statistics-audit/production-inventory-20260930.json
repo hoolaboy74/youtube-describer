@@ -1,0 +1,3658 @@
+{
+  "collectedAt": "2026-09-30T02:11:30.649Z",
+  "source": "mom production (read only)",
+  "tables": [
+    {
+      "name": "api_costs",
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER"
+        },
+        {
+          "name": "videoId",
+          "type": "TEXT"
+        },
+        {
+          "name": "model_used",
+          "type": "TEXT"
+        },
+        {
+          "name": "image_tokens",
+          "type": "INTEGER"
+        },
+        {
+          "name": "text_tokens",
+          "type": "INTEGER"
+        },
+        {
+          "name": "cost",
+          "type": "REAL"
+        },
+        {
+          "name": "createdAt",
+          "type": "DATETIME"
+        },
+        {
+          "name": "request_type",
+          "type": "TEXT"
+        },
+        {
+          "name": "userId",
+          "type": "TEXT"
+        },
+        {
+          "name": "input_tokens",
+          "type": "INTEGER"
+        },
+        {
+          "name": "output_tokens",
+          "type": "INTEGER"
+        },
+        {
+          "name": "thinking_tokens",
+          "type": "INTEGER"
+        },
+        {
+          "name": "cached_tokens",
+          "type": "INTEGER"
+        },
+        {
+          "name": "tool_tokens",
+          "type": "INTEGER"
+        },
+        {
+          "name": "search_queries",
+          "type": "INTEGER"
+        },
+        {
+          "name": "input_cost",
+          "type": "REAL"
+        },
+        {
+          "name": "output_cost",
+          "type": "REAL"
+        },
+        {
+          "name": "cached_cost",
+          "type": "REAL"
+        },
+        {
+          "name": "tool_cost",
+          "type": "REAL"
+        },
+        {
+          "name": "search_cost",
+          "type": "REAL"
+        },
+        {
+          "name": "pricing_version",
+          "type": "TEXT"
+        }
+      ],
+      "rows": 4873
+    },
+    {
+      "name": "api_requests",
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER"
+        },
+        {
+          "name": "userId",
+          "type": "TEXT"
+        },
+        {
+          "name": "guestId",
+          "type": "TEXT"
+        },
+        {
+          "name": "ip",
+          "type": "TEXT"
+        },
+        {
+          "name": "apiPath",
+          "type": "TEXT"
+        },
+        {
+          "name": "createdAt",
+          "type": "DATETIME"
+        }
+      ],
+      "rows": 120860
+    },
+    {
+      "name": "comments",
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER"
+        },
+        {
+          "name": "videoId",
+          "type": "TEXT"
+        },
+        {
+          "name": "nickname",
+          "type": "TEXT"
+        },
+        {
+          "name": "password",
+          "type": "TEXT"
+        },
+        {
+          "name": "content",
+          "type": "TEXT"
+        },
+        {
+          "name": "createdAt",
+          "type": "DATETIME"
+        },
+        {
+          "name": "userId",
+          "type": "TEXT"
+        }
+      ],
+      "rows": 40
+    },
+    {
+      "name": "donations",
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER"
+        },
+        {
+          "name": "donator_name",
+          "type": "TEXT"
+        },
+        {
+          "name": "amount",
+          "type": "INTEGER"
+        },
+        {
+          "name": "donation_date",
+          "type": "DATETIME"
+        },
+        {
+          "name": "message",
+          "type": "TEXT"
+        },
+        {
+          "name": "createdAt",
+          "type": "DATETIME"
+        }
+      ],
+      "rows": 8
+    },
+    {
+      "name": "gemini_monthly_grounding_usage",
+      "columns": [
+        {
+          "name": "billingMonth",
+          "type": "TEXT"
+        },
+        {
+          "name": "searchQueries",
+          "type": "INTEGER"
+        },
+        {
+          "name": "updatedAt",
+          "type": "DATETIME"
+        }
+      ],
+      "rows": 1
+    },
+    {
+      "name": "post_comments",
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER"
+        },
+        {
+          "name": "postId",
+          "type": "INTEGER"
+        },
+        {
+          "name": "nickname",
+          "type": "TEXT"
+        },
+        {
+          "name": "password",
+          "type": "TEXT"
+        },
+        {
+          "name": "content",
+          "type": "TEXT"
+        },
+        {
+          "name": "createdAt",
+          "type": "DATETIME"
+        },
+        {
+          "name": "userId",
+          "type": "TEXT"
+        }
+      ],
+      "rows": 8
+    },
+    {
+      "name": "posts",
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER"
+        },
+        {
+          "name": "title",
+          "type": "TEXT"
+        },
+        {
+          "name": "content",
+          "type": "TEXT"
+        },
+        {
+          "name": "nickname",
+          "type": "TEXT"
+        },
+        {
+          "name": "password",
+          "type": "TEXT"
+        },
+        {
+          "name": "createdAt",
+          "type": "DATETIME"
+        },
+        {
+          "name": "is_notice",
+          "type": "INTEGER"
+        },
+        {
+          "name": "userId",
+          "type": "TEXT"
+        }
+      ],
+      "rows": 8
+    },
+    {
+      "name": "qa_cache_jobs",
+      "columns": [
+        {
+          "name": "videoId",
+          "type": "TEXT"
+        },
+        {
+          "name": "cacheVersion",
+          "type": "TEXT"
+        },
+        {
+          "name": "state",
+          "type": "TEXT"
+        },
+        {
+          "name": "owner",
+          "type": "TEXT"
+        },
+        {
+          "name": "leaseUntil",
+          "type": "INTEGER"
+        },
+        {
+          "name": "fencingToken",
+          "type": "INTEGER"
+        },
+        {
+          "name": "retryAfter",
+          "type": "INTEGER"
+        },
+        {
+          "name": "lastError",
+          "type": "TEXT"
+        },
+        {
+          "name": "lastAccessAt",
+          "type": "INTEGER"
+        }
+      ],
+      "rows": 549
+    },
+    {
+      "name": "qa_frame_assets",
+      "columns": [
+        {
+          "name": "videoId",
+          "type": "TEXT"
+        },
+        {
+          "name": "cacheVersion",
+          "type": "TEXT"
+        },
+        {
+          "name": "sourcePtsMs",
+          "type": "INTEGER"
+        },
+        {
+          "name": "originPtsMs",
+          "type": "INTEGER"
+        },
+        {
+          "name": "timestampMs",
+          "type": "INTEGER"
+        },
+        {
+          "name": "relativePath",
+          "type": "TEXT"
+        },
+        {
+          "name": "sourceKind",
+          "type": "TEXT"
+        },
+        {
+          "name": "checksum",
+          "type": "TEXT"
+        },
+        {
+          "name": "width",
+          "type": "INTEGER"
+        },
+        {
+          "name": "height",
+          "type": "INTEGER"
+        }
+      ],
+      "rows": 70202
+    },
+    {
+      "name": "qa_request_receipts",
+      "columns": [
+        {
+          "name": "requestId",
+          "type": "TEXT"
+        },
+        {
+          "name": "userId",
+          "type": "TEXT"
+        },
+        {
+          "name": "fingerprint",
+          "type": "TEXT"
+        },
+        {
+          "name": "status",
+          "type": "TEXT"
+        },
+        {
+          "name": "usageStatus",
+          "type": "TEXT"
+        },
+        {
+          "name": "usageJson",
+          "type": "TEXT"
+        },
+        {
+          "name": "costId",
+          "type": "INTEGER"
+        },
+        {
+          "name": "createdAt",
+          "type": "INTEGER"
+        },
+        {
+          "name": "updatedAt",
+          "type": "INTEGER"
+        }
+      ],
+      "rows": 453
+    },
+    {
+      "name": "qa_subtitle_assets",
+      "columns": [
+        {
+          "name": "videoId",
+          "type": "TEXT"
+        },
+        {
+          "name": "cacheVersion",
+          "type": "TEXT"
+        },
+        {
+          "name": "state",
+          "type": "TEXT"
+        },
+        {
+          "name": "relativePath",
+          "type": "TEXT"
+        },
+        {
+          "name": "checksum",
+          "type": "TEXT"
+        },
+        {
+          "name": "originalLanguage",
+          "type": "TEXT"
+        },
+        {
+          "name": "audioClassification",
+          "type": "TEXT"
+        },
+        {
+          "name": "sourceType",
+          "type": "TEXT"
+        },
+        {
+          "name": "provenance",
+          "type": "TEXT"
+        },
+        {
+          "name": "checkedAt",
+          "type": "INTEGER"
+        },
+        {
+          "name": "retryAfter",
+          "type": "INTEGER"
+        }
+      ],
+      "rows": 124
+    },
+    {
+      "name": "qa_user_daily_costs",
+      "columns": [
+        {
+          "name": "userId",
+          "type": "INTEGER"
+        },
+        {
+          "name": "videoId",
+          "type": "TEXT"
+        },
+        {
+          "name": "logDate",
+          "type": "TEXT"
+        },
+        {
+          "name": "queryCount",
+          "type": "INTEGER"
+        },
+        {
+          "name": "promptTokens",
+          "type": "INTEGER"
+        },
+        {
+          "name": "completionTokens",
+          "type": "INTEGER"
+        },
+        {
+          "name": "totalCost",
+          "type": "REAL"
+        },
+        {
+          "name": "updatedAt",
+          "type": "DATETIME"
+        },
+        {
+          "name": "thinkingTokens",
+          "type": "INTEGER"
+        },
+        {
+          "name": "cachedTokens",
+          "type": "INTEGER"
+        },
+        {
+          "name": "toolTokens",
+          "type": "INTEGER"
+        },
+        {
+          "name": "searchQueries",
+          "type": "INTEGER"
+        },
+        {
+          "name": "searchCost",
+          "type": "REAL"
+        }
+      ],
+      "rows": 97
+    },
+    {
+      "name": "script_quarantine",
+      "columns": [
+        {
+          "name": "id",
+          "type": "TEXT"
+        },
+        {
+          "name": "videoId",
+          "type": "TEXT"
+        },
+        {
+          "name": "raw_line",
+          "type": "TEXT"
+        },
+        {
+          "name": "candidate_json",
+          "type": "TEXT"
+        },
+        {
+          "name": "reason_code",
+          "type": "TEXT"
+        },
+        {
+          "name": "reason_detail",
+          "type": "TEXT"
+        },
+        {
+          "name": "createdAt",
+          "type": "DATETIME"
+        }
+      ],
+      "rows": 239
+    },
+    {
+      "name": "scripts",
+      "columns": [
+        {
+          "name": "id",
+          "type": "TEXT"
+        },
+        {
+          "name": "videoId",
+          "type": "TEXT"
+        },
+        {
+          "name": "timestamp",
+          "type": "INTEGER"
+        },
+        {
+          "name": "text",
+          "type": "TEXT"
+        },
+        {
+          "name": "verbosity",
+          "type": "TEXT"
+        },
+        {
+          "name": "tag",
+          "type": "TEXT"
+        },
+        {
+          "name": "provenance_json",
+          "type": "TEXT"
+        },
+        {
+          "name": "validation_status",
+          "type": "TEXT"
+        },
+        {
+          "name": "validation_reasons_json",
+          "type": "TEXT"
+        },
+        {
+          "name": "tts_eligible",
+          "type": "INTEGER"
+        },
+        {
+          "name": "policy_version",
+          "type": "TEXT"
+        }
+      ],
+      "rows": 477178
+    },
+    {
+      "name": "settings",
+      "columns": [
+        {
+          "name": "key",
+          "type": "TEXT"
+        },
+        {
+          "name": "value",
+          "type": "TEXT"
+        }
+      ],
+      "rows": 7
+    },
+    {
+      "name": "user_favorites",
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER"
+        },
+        {
+          "name": "userId",
+          "type": "TEXT"
+        },
+        {
+          "name": "videoId",
+          "type": "TEXT"
+        },
+        {
+          "name": "createdAt",
+          "type": "DATETIME"
+        }
+      ],
+      "rows": 57
+    },
+    {
+      "name": "user_verifications",
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER"
+        },
+        {
+          "name": "userId",
+          "type": "TEXT"
+        },
+        {
+          "name": "verificationMethod",
+          "type": "TEXT"
+        },
+        {
+          "name": "status",
+          "type": "TEXT"
+        },
+        {
+          "name": "details",
+          "type": "TEXT"
+        },
+        {
+          "name": "verifiedAt",
+          "type": "DATETIME"
+        },
+        {
+          "name": "createdAt",
+          "type": "DATETIME"
+        }
+      ],
+      "rows": 92
+    },
+    {
+      "name": "user_watch_histories",
+      "columns": [
+        {
+          "name": "id",
+          "type": "INTEGER"
+        },
+        {
+          "name": "userId",
+          "type": "TEXT"
+        },
+        {
+          "name": "videoId",
+          "type": "TEXT"
+        },
+        {
+          "name": "watchedAt",
+          "type": "DATETIME"
+        }
+      ],
+      "rows": 527
+    },
+    {
+      "name": "users",
+      "columns": [
+        {
+          "name": "id",
+          "type": "TEXT"
+        },
+        {
+          "name": "email",
+          "type": "TEXT"
+        },
+        {
+          "name": "password",
+          "type": "TEXT"
+        },
+        {
+          "name": "name",
+          "type": "TEXT"
+        },
+        {
+          "name": "phone",
+          "type": "TEXT"
+        },
+        {
+          "name": "birthdate",
+          "type": "TEXT"
+        },
+        {
+          "name": "pin",
+          "type": "TEXT"
+        },
+        {
+          "name": "is_blind",
+          "type": "INTEGER"
+        },
+        {
+          "name": "createdAt",
+          "type": "DATETIME"
+        },
+        {
+          "name": "updatedAt",
+          "type": "DATETIME"
+        },
+        {
+          "name": "is_active",
+          "type": "INTEGER"
+        },
+        {
+          "name": "lastLoginIp",
+          "type": "TEXT"
+        },
+        {
+          "name": "lastLoginAt",
+          "type": "DATETIME"
+        },
+        {
+          "name": "blind_auth_method",
+          "type": "TEXT"
+        }
+      ],
+      "rows": 92
+    },
+    {
+      "name": "videos",
+      "columns": [
+        {
+          "name": "videoId",
+          "type": "TEXT"
+        },
+        {
+          "name": "title",
+          "type": "TEXT"
+        },
+        {
+          "name": "createdAt",
+          "type": "DATETIME"
+        },
+        {
+          "name": "duration",
+          "type": "INTEGER"
+        },
+        {
+          "name": "status",
+          "type": "TEXT"
+        },
+        {
+          "name": "fail_reason",
+          "type": "TEXT"
+        },
+        {
+          "name": "filesize",
+          "type": "INTEGER"
+        },
+        {
+          "name": "is_featured",
+          "type": "INTEGER"
+        },
+        {
+          "name": "requested_by",
+          "type": "TEXT"
+        },
+        {
+          "name": "audio_language",
+          "type": "TEXT"
+        }
+      ],
+      "rows": 5061
+    }
+  ],
+  "apiRequests": [
+    {
+      "prefix": "/",
+      "requests": 46820,
+      "earliest": "2026-07-20 04:03:51",
+      "latest": "2026-09-30 01:28:49"
+    },
+    {
+      "prefix": "/script/",
+      "requests": 23085,
+      "earliest": "2026-07-20 04:04:08",
+      "latest": "2026-09-30 02:07:26"
+    },
+    {
+      "prefix": "/comments/",
+      "requests": 22829,
+      "earliest": "2026-07-20 04:04:08",
+      "latest": "2026-09-30 02:07:25"
+    },
+    {
+      "prefix": "/qa/",
+      "requests": 18194,
+      "earliest": "2026-09-14 12:55:25",
+      "latest": "2026-09-29 18:33:20"
+    },
+    {
+      "prefix": "/users/",
+      "requests": 3323,
+      "earliest": "2026-07-20 04:04:08",
+      "latest": "2026-09-29 18:31:03"
+    },
+    {
+      "prefix": "/videos/",
+      "requests": 3227,
+      "earliest": "2026-07-20 04:03:51",
+      "latest": "2026-09-30 01:28:49"
+    },
+    {
+      "prefix": "/auth/",
+      "requests": 2086,
+      "earliest": "2026-07-20 04:03:51",
+      "latest": "2026-09-30 01:28:49"
+    },
+    {
+      "prefix": "/admin/",
+      "requests": 387,
+      "earliest": "2026-07-20 05:27:04",
+      "latest": "2026-09-28 15:04:12"
+    },
+    {
+      "prefix": "/board/",
+      "requests": 295,
+      "earliest": "2026-07-20 09:07:30",
+      "latest": "2026-09-29 21:16:50"
+    },
+    {
+      "prefix": "/v1/",
+      "requests": 221,
+      "earliest": "2026-07-20 07:07:33",
+      "latest": "2026-09-29 21:48:35"
+    },
+    {
+      "prefix": "/v2/",
+      "requests": 95,
+      "earliest": "2026-07-20 07:07:34",
+      "latest": "2026-09-29 21:48:18"
+    },
+    {
+      "prefix": "/dev/",
+      "requests": 32,
+      "earliest": "2026-07-23 15:33:54",
+      "latest": "2026-09-24 19:31:33"
+    },
+    {
+      "prefix": "/v3/",
+      "requests": 31,
+      "earliest": "2026-09-02 02:36:40",
+      "latest": "2026-09-24 19:31:33"
+    },
+    {
+      "prefix": "/staging/",
+      "requests": 31,
+      "earliest": "2026-09-02 02:36:40",
+      "latest": "2026-09-24 19:31:34"
+    },
+    {
+      "prefix": "/session/",
+      "requests": 23,
+      "earliest": "2026-09-02 02:03:37",
+      "latest": "2026-09-28 23:49:12"
+    },
+    {
+      "prefix": "/w/",
+      "requests": 21,
+      "earliest": "2026-09-13 09:12:33",
+      "latest": "2026-09-29 21:48:25"
+    },
+    {
+      "prefix": "/templates/",
+      "requests": 20,
+      "earliest": "2026-09-16 19:57:38",
+      "latest": "2026-09-29 21:48:33"
+    },
+    {
+      "prefix": "/designer/",
+      "requests": 20,
+      "earliest": "2026-09-16 19:57:33",
+      "latest": "2026-09-29 21:48:32"
+    },
+    {
+      "prefix": "/fs/",
+      "requests": 14,
+      "earliest": "2026-09-03 09:35:30",
+      "latest": "2026-09-29 21:48:32"
+    },
+    {
+      "prefix": "/console/",
+      "requests": 13,
+      "earliest": "2026-09-20 13:59:08",
+      "latest": "2026-09-29 21:48:26"
+    },
+    {
+      "prefix": "/.env/",
+      "requests": 12,
+      "earliest": "2026-08-27 02:43:27",
+      "latest": "2026-09-29 21:48:24"
+    },
+    {
+      "prefix": "/.git/",
+      "requests": 9,
+      "earliest": "2026-08-05 00:40:57",
+      "latest": "2026-09-28 23:53:57"
+    },
+    {
+      "prefix": "/.aws/",
+      "requests": 9,
+      "earliest": "2026-08-05 02:07:40",
+      "latest": "2026-09-14 04:42:58"
+    },
+    {
+      "prefix": "/4/",
+      "requests": 6,
+      "earliest": "2026-09-20 13:59:00",
+      "latest": "2026-09-29 21:48:20"
+    },
+    {
+      "prefix": "/v0/",
+      "requests": 5,
+      "earliest": "2026-08-10 16:05:41",
+      "latest": "2026-09-14 04:43:11"
+    },
+    {
+      "prefix": "/shared/",
+      "requests": 5,
+      "earliest": "2026-07-23 15:33:20",
+      "latest": "2026-09-18 18:10:59"
+    },
+    {
+      "prefix": "/frontend/",
+      "requests": 5,
+      "earliest": "2026-09-13 01:46:13",
+      "latest": "2026-09-19 06:17:49"
+    },
+    {
+      "prefix": "/aws/",
+      "requests": 5,
+      "earliest": "2026-08-12 05:57:05",
+      "latest": "2026-09-18 18:11:03"
+    },
+    {
+      "prefix": "/sysConfig/",
+      "requests": 3,
+      "earliest": "2026-09-20 13:59:01",
+      "latest": "2026-09-24 08:00:56"
+    },
+    {
+      "prefix": "/actuator/",
+      "requests": 3,
+      "earliest": "2026-09-13 19:04:45",
+      "latest": "2026-09-13 19:04:45"
+    },
+    {
+      "prefix": "/system/",
+      "requests": 2,
+      "earliest": "2026-07-24 20:40:57",
+      "latest": "2026-07-24 20:41:00"
+    },
+    {
+      "prefix": "/rsc/",
+      "requests": 2,
+      "earliest": "2026-07-24 20:39:44",
+      "latest": "2026-07-24 20:39:56"
+    },
+    {
+      "prefix": "/http/",
+      "requests": 2,
+      "earliest": "2026-09-13 19:04:45",
+      "latest": "2026-09-13 19:04:45"
+    },
+    {
+      "prefix": "/global/",
+      "requests": 2,
+      "earliest": "2026-07-24 20:41:03",
+      "latest": "2026-09-19 06:17:50"
+    },
+    {
+      "prefix": "/config/",
+      "requests": 2,
+      "earliest": "2026-07-23 15:33:54",
+      "latest": "2026-07-23 15:41:08"
+    },
+    {
+      "prefix": "/ai/",
+      "requests": 2,
+      "earliest": "2026-09-13 19:04:45",
+      "latest": "2026-09-13 19:04:45"
+    },
+    {
+      "prefix": "/2.0/",
+      "requests": 2,
+      "earliest": "2026-07-24 20:40:47",
+      "latest": "2026-07-24 20:40:54"
+    },
+    {
+      "prefix": "/..;/",
+      "requests": 2,
+      "earliest": "2026-08-12 05:57:08",
+      "latest": "2026-08-18 21:42:59"
+    },
+    {
+      "prefix": "/test/",
+      "requests": 1,
+      "earliest": "2026-07-23 15:33:55",
+      "latest": "2026-07-23 15:33:55"
+    },
+    {
+      "prefix": "/src/",
+      "requests": 1,
+      "earliest": "2026-09-13 12:58:26",
+      "latest": "2026-09-13 12:58:26"
+    },
+    {
+      "prefix": "/public/",
+      "requests": 1,
+      "earliest": "2026-09-19 06:17:51",
+      "latest": "2026-09-19 06:17:51"
+    },
+    {
+      "prefix": "/mail/",
+      "requests": 1,
+      "earliest": "2026-09-13 19:04:46",
+      "latest": "2026-09-13 19:04:46"
+    },
+    {
+      "prefix": "/llm/",
+      "requests": 1,
+      "earliest": "2026-09-13 19:04:46",
+      "latest": "2026-09-13 19:04:46"
+    },
+    {
+      "prefix": "/jenkins/",
+      "requests": 1,
+      "earliest": "2026-09-13 19:04:46",
+      "latest": "2026-09-13 19:04:46"
+    },
+    {
+      "prefix": "/index.php/",
+      "requests": 1,
+      "earliest": "2026-08-12 21:27:07",
+      "latest": "2026-08-12 21:27:07"
+    },
+    {
+      "prefix": "/graphql/",
+      "requests": 1,
+      "earliest": "2026-09-13 19:04:45",
+      "latest": "2026-09-13 19:04:45"
+    },
+    {
+      "prefix": "/email/",
+      "requests": 1,
+      "earliest": "2026-09-13 19:04:45",
+      "latest": "2026-09-13 19:04:45"
+    },
+    {
+      "prefix": "/core/",
+      "requests": 1,
+      "earliest": "2026-07-23 15:33:54",
+      "latest": "2026-07-23 15:33:54"
+    },
+    {
+      "prefix": "/beta/",
+      "requests": 1,
+      "earliest": "2026-07-23 15:33:54",
+      "latest": "2026-07-23 15:33:54"
+    },
+    {
+      "prefix": "/app/",
+      "requests": 1,
+      "earliest": "2026-07-23 15:33:53",
+      "latest": "2026-07-23 15:33:53"
+    },
+    {
+      "prefix": "/_next/",
+      "requests": 1,
+      "earliest": "2026-09-13 19:04:45",
+      "latest": "2026-09-13 19:04:45"
+    },
+    {
+      "prefix": "/.well-known/",
+      "requests": 1,
+      "earliest": "2026-09-13 19:04:44",
+      "latest": "2026-09-13 19:04:44"
+    },
+    {
+      "prefix": "/.codex/",
+      "requests": 1,
+      "earliest": "2026-09-24 04:00:42",
+      "latest": "2026-09-24 04:00:42"
+    }
+  ],
+  "costs": [
+    {
+      "month": "2025-11",
+      "request_type": "description",
+      "calls": 513,
+      "cost": 34.85825875,
+      "inputTokens": 0,
+      "outputTokens": 0,
+      "thinkingTokens": 0,
+      "cachedTokens": 0,
+      "searchQueries": 0,
+      "searchCost": 0
+    },
+    {
+      "month": "2025-12",
+      "request_type": "description",
+      "calls": 500,
+      "cost": 35.67875875,
+      "inputTokens": 0,
+      "outputTokens": 0,
+      "thinkingTokens": 0,
+      "cachedTokens": 0,
+      "searchQueries": 0,
+      "searchCost": 0
+    },
+    {
+      "month": "2026-01",
+      "request_type": "description",
+      "calls": 651,
+      "cost": 138.57503,
+      "inputTokens": 0,
+      "outputTokens": 0,
+      "thinkingTokens": 0,
+      "cachedTokens": 0,
+      "searchQueries": 0,
+      "searchCost": 0
+    },
+    {
+      "month": "2026-02",
+      "request_type": "description",
+      "calls": 517,
+      "cost": 134.0303075,
+      "inputTokens": 0,
+      "outputTokens": 0,
+      "thinkingTokens": 0,
+      "cachedTokens": 0,
+      "searchQueries": 0,
+      "searchCost": 0
+    },
+    {
+      "month": "2026-03",
+      "request_type": "description",
+      "calls": 458,
+      "cost": 98.74045625,
+      "inputTokens": 0,
+      "outputTokens": 0,
+      "thinkingTokens": 0,
+      "cachedTokens": 0,
+      "searchQueries": 0,
+      "searchCost": 0
+    },
+    {
+      "month": "2026-04",
+      "request_type": "description",
+      "calls": 375,
+      "cost": 80.3896825,
+      "inputTokens": 0,
+      "outputTokens": 0,
+      "thinkingTokens": 0,
+      "cachedTokens": 0,
+      "searchQueries": 0,
+      "searchCost": 0
+    },
+    {
+      "month": "2026-05",
+      "request_type": "description",
+      "calls": 237,
+      "cost": 47.264355,
+      "inputTokens": 0,
+      "outputTokens": 0,
+      "thinkingTokens": 0,
+      "cachedTokens": 0,
+      "searchQueries": 0,
+      "searchCost": 0
+    },
+    {
+      "month": "2026-06",
+      "request_type": "description",
+      "calls": 296,
+      "cost": 46.79273625,
+      "inputTokens": 0,
+      "outputTokens": 0,
+      "thinkingTokens": 0,
+      "cachedTokens": 0,
+      "searchQueries": 0,
+      "searchCost": 0
+    },
+    {
+      "month": "2026-07",
+      "request_type": "description",
+      "calls": 506,
+      "cost": 199.756992,
+      "inputTokens": 0,
+      "outputTokens": 0,
+      "thinkingTokens": 0,
+      "cachedTokens": 0,
+      "searchQueries": 0,
+      "searchCost": 0
+    },
+    {
+      "month": "2026-08",
+      "request_type": "description",
+      "calls": 209,
+      "cost": 129.080974,
+      "inputTokens": 0,
+      "outputTokens": 0,
+      "thinkingTokens": 0,
+      "cachedTokens": 0,
+      "searchQueries": 0,
+      "searchCost": 0
+    },
+    {
+      "month": "2026-09",
+      "request_type": "description",
+      "calls": 188,
+      "cost": 47.47453875,
+      "inputTokens": 21430915,
+      "outputTokens": 527397,
+      "thinkingTokens": 369952,
+      "cachedTokens": 0,
+      "searchQueries": 0,
+      "searchCost": 0
+    },
+    {
+      "month": "2026-09",
+      "request_type": "qa",
+      "calls": 423,
+      "cost": 2.20453256,
+      "inputTokens": 6993167,
+      "outputTokens": 35630,
+      "thinkingTokens": 0,
+      "cachedTokens": 583582,
+      "searchQueries": 21,
+      "searchCost": 0
+    }
+  ],
+  "costFormats": [
+    {
+      "format": "ISO",
+      "rows": 534
+    },
+    {
+      "format": "SQL",
+      "rows": 4339
+    }
+  ],
+  "qaApiRequests": [
+    {
+      "month": "2026-09",
+      "route": "audio-fetch",
+      "calls": 909,
+      "users": 0
+    },
+    {
+      "month": "2026-09",
+      "route": "audio-request",
+      "calls": 4,
+      "users": 2
+    },
+    {
+      "month": "2026-09",
+      "route": "cancel",
+      "calls": 53,
+      "users": 9
+    },
+    {
+      "month": "2026-09",
+      "route": "events-connection",
+      "calls": 453,
+      "users": 20
+    },
+    {
+      "month": "2026-09",
+      "route": "incremental-request",
+      "calls": 453,
+      "users": 20
+    },
+    {
+      "month": "2026-09",
+      "route": "other-qa",
+      "calls": 16322,
+      "users": 28
+    }
+  ],
+  "qaDaily": [
+    {
+      "month": "2026-09",
+      "queries": 395,
+      "cost": 2.0696661,
+      "users": 19,
+      "videos": 83
+    }
+  ],
+  "qaReceipts": [
+    {
+      "month": "2026-09",
+      "status": "canceled",
+      "usageStatus": "recorded",
+      "n": 3
+    },
+    {
+      "month": "2026-09",
+      "status": "canceled",
+      "usageStatus": "unconfirmed",
+      "n": 15
+    },
+    {
+      "month": "2026-09",
+      "status": "completed",
+      "usageStatus": "recorded",
+      "n": 420
+    },
+    {
+      "month": "2026-09",
+      "status": "failed",
+      "usageStatus": "not_started",
+      "n": 12
+    },
+    {
+      "month": "2026-09",
+      "status": "failed",
+      "usageStatus": "unconfirmed",
+      "n": 3
+    }
+  ],
+  "qaCacheJobs": [
+    {
+      "state": "downloading",
+      "n": 134
+    },
+    {
+      "state": "queued",
+      "n": 267
+    },
+    {
+      "state": "ready",
+      "n": 129
+    },
+    {
+      "state": "retryable_failed",
+      "n": 19
+    }
+  ],
+  "qaSubtitles": [
+    {
+      "state": "absent",
+      "n": 8
+    },
+    {
+      "state": "ready",
+      "n": 115
+    },
+    {
+      "state": "retryable_failed",
+      "n": 1
+    }
+  ],
+  "quarantine": [
+    {
+      "reason_code": "DIALOGUE_LANGUAGE_CONFLICT",
+      "n": 4
+    },
+    {
+      "reason_code": "DUPLICATE_EVENT",
+      "n": 1
+    },
+    {
+      "reason_code": "EMPTY_TEXT",
+      "n": 4
+    },
+    {
+      "reason_code": "INVALID_TIMESTAMP",
+      "n": 4
+    },
+    {
+      "reason_code": "MISSING_PROVENANCE",
+      "n": 42
+    },
+    {
+      "reason_code": "TEXT_TOO_LONG",
+      "n": 2
+    },
+    {
+      "reason_code": "TIMESTAMP_OUT_OF_RANGE",
+      "n": 34
+    },
+    {
+      "reason_code": "TRANSLATION_NOT_ALLOWED_KOREAN",
+      "n": 4
+    },
+    {
+      "reason_code": "TRANS_REQUIRES_FOREIGN_DIALOGUE",
+      "n": 38
+    },
+    {
+      "reason_code": "UNCERTAIN_MIXED_INTERVAL",
+      "n": 102
+    },
+    {
+      "reason_code": "UNSUPPORTED_TAG",
+      "n": 4
+    }
+  ],
+  "grounding": [
+    {
+      "billingMonth": "2026-09",
+      "searchQueries": 21,
+      "updatedAt": "2026-09-29 07:56:47"
+    }
+  ],
+  "logSources": {
+    "/app/youtube-describer/backend/logs": [
+      {
+        "name": "2025-10-16.log",
+        "bytes": 16907
+      },
+      {
+        "name": "2025-10-17.log",
+        "bytes": 12632
+      },
+      {
+        "name": "2025-10-18.log",
+        "bytes": 1593
+      },
+      {
+        "name": "2025-10-19.log",
+        "bytes": 22648
+      },
+      {
+        "name": "2025-10-20.log",
+        "bytes": 2696
+      },
+      {
+        "name": "2025-10-21.log",
+        "bytes": 2272
+      },
+      {
+        "name": "2025-10-22.log",
+        "bytes": 10494
+      },
+      {
+        "name": "2025-10-23.log",
+        "bytes": 12527
+      },
+      {
+        "name": "2025-10-24.log",
+        "bytes": 3101
+      },
+      {
+        "name": "2025-10-25.log",
+        "bytes": 941
+      },
+      {
+        "name": "2025-10-26.log",
+        "bytes": 2683
+      },
+      {
+        "name": "2025-10-27.log",
+        "bytes": 5139
+      },
+      {
+        "name": "2025-10-28.log",
+        "bytes": 8153
+      },
+      {
+        "name": "2025-10-29.log",
+        "bytes": 15176
+      },
+      {
+        "name": "2025-10-30.log",
+        "bytes": 67
+      },
+      {
+        "name": "2025-10-31.log",
+        "bytes": 67
+      },
+      {
+        "name": "2025-11-01.log",
+        "bytes": 1012
+      },
+      {
+        "name": "2025-11-02.log",
+        "bytes": 67
+      },
+      {
+        "name": "2025-11-03.log",
+        "bytes": 67
+      },
+      {
+        "name": "2025-11-04.log",
+        "bytes": 13220
+      },
+      {
+        "name": "2025-11-05.log",
+        "bytes": 2184
+      },
+      {
+        "name": "2025-11-06.log",
+        "bytes": 3963
+      },
+      {
+        "name": "2025-11-07.log",
+        "bytes": 3776
+      },
+      {
+        "name": "2025-11-08.log",
+        "bytes": 226
+      },
+      {
+        "name": "2025-11-09.log",
+        "bytes": 226
+      },
+      {
+        "name": "2025-11-10.log",
+        "bytes": 8346
+      },
+      {
+        "name": "2025-11-11.log",
+        "bytes": 1719
+      },
+      {
+        "name": "2025-11-12.log",
+        "bytes": 1479
+      },
+      {
+        "name": "2025-11-13.log",
+        "bytes": 2961
+      },
+      {
+        "name": "2025-11-14.log",
+        "bytes": 861858
+      },
+      {
+        "name": "2025-11-15.log",
+        "bytes": 125363
+      },
+      {
+        "name": "2025-11-16.log",
+        "bytes": 84424
+      },
+      {
+        "name": "2025-11-17.log",
+        "bytes": 389051
+      },
+      {
+        "name": "2025-11-18.log",
+        "bytes": 47636
+      },
+      {
+        "name": "2025-11-19.log",
+        "bytes": 39440
+      },
+      {
+        "name": "2025-11-20.log",
+        "bytes": 48189
+      },
+      {
+        "name": "2025-11-21.log",
+        "bytes": 32329
+      },
+      {
+        "name": "2025-11-22.log",
+        "bytes": 28995
+      },
+      {
+        "name": "2025-11-23.log",
+        "bytes": 66308
+      },
+      {
+        "name": "2025-11-24.log",
+        "bytes": 73033
+      },
+      {
+        "name": "2025-11-25.log",
+        "bytes": 42064
+      },
+      {
+        "name": "2025-11-26.log",
+        "bytes": 104093
+      },
+      {
+        "name": "2025-11-27.log",
+        "bytes": 54698
+      },
+      {
+        "name": "2025-11-28.log",
+        "bytes": 36111
+      },
+      {
+        "name": "2025-11-29.log",
+        "bytes": 50245
+      },
+      {
+        "name": "2025-11-30.log",
+        "bytes": 40534
+      },
+      {
+        "name": "2025-12-01.log",
+        "bytes": 28773
+      },
+      {
+        "name": "2025-12-02.log",
+        "bytes": 37780
+      },
+      {
+        "name": "2025-12-03.log",
+        "bytes": 28500
+      },
+      {
+        "name": "2025-12-04.log",
+        "bytes": 28869
+      },
+      {
+        "name": "2025-12-05.log",
+        "bytes": 18783
+      },
+      {
+        "name": "2025-12-06.log",
+        "bytes": 27770
+      },
+      {
+        "name": "2025-12-07.log",
+        "bytes": 15749
+      },
+      {
+        "name": "2025-12-08.log",
+        "bytes": 25559
+      },
+      {
+        "name": "2025-12-09.log",
+        "bytes": 21839
+      },
+      {
+        "name": "2025-12-10.log",
+        "bytes": 4248
+      },
+      {
+        "name": "2025-12-11.log",
+        "bytes": 22586
+      },
+      {
+        "name": "2025-12-12.log",
+        "bytes": 45880
+      },
+      {
+        "name": "2025-12-13.log",
+        "bytes": 8505
+      },
+      {
+        "name": "2025-12-14.log",
+        "bytes": 26263
+      },
+      {
+        "name": "2025-12-15.log",
+        "bytes": 53240
+      },
+      {
+        "name": "2025-12-16.log",
+        "bytes": 3856
+      },
+      {
+        "name": "2025-12-17.log",
+        "bytes": 26586
+      },
+      {
+        "name": "2025-12-18.log",
+        "bytes": 25311
+      },
+      {
+        "name": "2025-12-19.log",
+        "bytes": 43793
+      },
+      {
+        "name": "2025-12-20.log",
+        "bytes": 12358
+      },
+      {
+        "name": "2025-12-21.log",
+        "bytes": 15422
+      },
+      {
+        "name": "2025-12-22.log",
+        "bytes": 14524
+      },
+      {
+        "name": "2025-12-23.log",
+        "bytes": 226
+      },
+      {
+        "name": "2025-12-24.log",
+        "bytes": 226
+      },
+      {
+        "name": "2025-12-25.log",
+        "bytes": 5590
+      },
+      {
+        "name": "2025-12-26.log",
+        "bytes": 4829
+      },
+      {
+        "name": "2025-12-27.log",
+        "bytes": 2953
+      },
+      {
+        "name": "2025-12-28.log",
+        "bytes": 11891
+      },
+      {
+        "name": "2025-12-29.log",
+        "bytes": 4658
+      },
+      {
+        "name": "2025-12-30.log",
+        "bytes": 24754
+      },
+      {
+        "name": "2025-12-31.log",
+        "bytes": 65475
+      },
+      {
+        "name": "2026-01-01.log",
+        "bytes": 22382
+      },
+      {
+        "name": "2026-01-02.log",
+        "bytes": 19215
+      },
+      {
+        "name": "2026-01-03.log",
+        "bytes": 88774
+      },
+      {
+        "name": "2026-01-04.log",
+        "bytes": 68537
+      },
+      {
+        "name": "2026-01-05.log",
+        "bytes": 69651
+      },
+      {
+        "name": "2026-01-06.log",
+        "bytes": 23324
+      },
+      {
+        "name": "2026-01-07.log",
+        "bytes": 42155
+      },
+      {
+        "name": "2026-01-08.log",
+        "bytes": 19823
+      },
+      {
+        "name": "2026-01-09.log",
+        "bytes": 39421
+      },
+      {
+        "name": "2026-01-10.log",
+        "bytes": 10843
+      },
+      {
+        "name": "2026-01-11.log",
+        "bytes": 19665
+      },
+      {
+        "name": "2026-01-12.log",
+        "bytes": 17868
+      },
+      {
+        "name": "2026-01-13.log",
+        "bytes": 14593
+      },
+      {
+        "name": "2026-01-14.log",
+        "bytes": 73819
+      },
+      {
+        "name": "2026-01-15.log",
+        "bytes": 73988
+      },
+      {
+        "name": "2026-01-16.log",
+        "bytes": 28739
+      },
+      {
+        "name": "2026-01-17.log",
+        "bytes": 8659
+      },
+      {
+        "name": "2026-01-18.log",
+        "bytes": 7064
+      },
+      {
+        "name": "2026-01-19.log",
+        "bytes": 18667
+      },
+      {
+        "name": "2026-01-20.log",
+        "bytes": 17310
+      },
+      {
+        "name": "2026-01-21.log",
+        "bytes": 7966
+      },
+      {
+        "name": "2026-01-22.log",
+        "bytes": 26997
+      },
+      {
+        "name": "2026-01-23.log",
+        "bytes": 13921
+      },
+      {
+        "name": "2026-01-24.log",
+        "bytes": 4066
+      },
+      {
+        "name": "2026-01-25.log",
+        "bytes": 8867
+      },
+      {
+        "name": "2026-01-26.log",
+        "bytes": 24343
+      },
+      {
+        "name": "2026-01-27.log",
+        "bytes": 25651
+      },
+      {
+        "name": "2026-01-28.log",
+        "bytes": 38834
+      },
+      {
+        "name": "2026-01-29.log",
+        "bytes": 26414
+      },
+      {
+        "name": "2026-01-30.log",
+        "bytes": 29506
+      },
+      {
+        "name": "2026-01-31.log",
+        "bytes": 31805
+      },
+      {
+        "name": "2026-02-01.log",
+        "bytes": 28279
+      },
+      {
+        "name": "2026-02-02.log",
+        "bytes": 30524
+      },
+      {
+        "name": "2026-02-03.log",
+        "bytes": 30573
+      },
+      {
+        "name": "2026-02-04.log",
+        "bytes": 33973
+      },
+      {
+        "name": "2026-02-05.log",
+        "bytes": 36322
+      },
+      {
+        "name": "2026-02-06.log",
+        "bytes": 63995
+      },
+      {
+        "name": "2026-02-07.log",
+        "bytes": 14399
+      },
+      {
+        "name": "2026-02-08.log",
+        "bytes": 9273
+      },
+      {
+        "name": "2026-02-09.log",
+        "bytes": 11655
+      },
+      {
+        "name": "2026-02-10.log",
+        "bytes": 28081
+      },
+      {
+        "name": "2026-02-11.log",
+        "bytes": 32761
+      },
+      {
+        "name": "2026-02-12.log",
+        "bytes": 17521
+      },
+      {
+        "name": "2026-02-13.log",
+        "bytes": 6105
+      },
+      {
+        "name": "2026-02-14.log",
+        "bytes": 14688
+      },
+      {
+        "name": "2026-02-15.log",
+        "bytes": 16553
+      },
+      {
+        "name": "2026-02-16.log",
+        "bytes": 27553
+      },
+      {
+        "name": "2026-02-17.log",
+        "bytes": 19320
+      },
+      {
+        "name": "2026-02-18.log",
+        "bytes": 20457
+      },
+      {
+        "name": "2026-02-19.log",
+        "bytes": 14672
+      },
+      {
+        "name": "2026-02-20.log",
+        "bytes": 27997
+      },
+      {
+        "name": "2026-02-21.log",
+        "bytes": 20545
+      },
+      {
+        "name": "2026-02-22.log",
+        "bytes": 28828
+      },
+      {
+        "name": "2026-02-23.log",
+        "bytes": 16982
+      },
+      {
+        "name": "2026-02-24.log",
+        "bytes": 17444
+      },
+      {
+        "name": "2026-02-25.log",
+        "bytes": 9444
+      },
+      {
+        "name": "2026-02-26.log",
+        "bytes": 25270
+      },
+      {
+        "name": "2026-02-27.log",
+        "bytes": 39484
+      },
+      {
+        "name": "2026-02-28.log",
+        "bytes": 13993
+      },
+      {
+        "name": "2026-03-01.log",
+        "bytes": 34485
+      },
+      {
+        "name": "2026-03-02.log",
+        "bytes": 28926
+      },
+      {
+        "name": "2026-03-03.log",
+        "bytes": 21346
+      },
+      {
+        "name": "2026-03-04.log",
+        "bytes": 20154
+      },
+      {
+        "name": "2026-03-05.log",
+        "bytes": 27570
+      },
+      {
+        "name": "2026-03-06.log",
+        "bytes": 32155
+      },
+      {
+        "name": "2026-03-07.log",
+        "bytes": 8408
+      },
+      {
+        "name": "2026-03-08.log",
+        "bytes": 31056
+      },
+      {
+        "name": "2026-03-09.log",
+        "bytes": 14600
+      },
+      {
+        "name": "2026-03-10.log",
+        "bytes": 8928
+      },
+      {
+        "name": "2026-03-11.log",
+        "bytes": 33195
+      },
+      {
+        "name": "2026-03-12.log",
+        "bytes": 17453
+      },
+      {
+        "name": "2026-03-13.log",
+        "bytes": 19665
+      },
+      {
+        "name": "2026-03-14.log",
+        "bytes": 12344
+      },
+      {
+        "name": "2026-03-15.log",
+        "bytes": 30707
+      },
+      {
+        "name": "2026-03-16.log",
+        "bytes": 10915
+      },
+      {
+        "name": "2026-03-17.log",
+        "bytes": 16897
+      },
+      {
+        "name": "2026-03-18.log",
+        "bytes": 13374
+      },
+      {
+        "name": "2026-03-19.log",
+        "bytes": 15040
+      },
+      {
+        "name": "2026-03-20.log",
+        "bytes": 18535
+      },
+      {
+        "name": "2026-03-21.log",
+        "bytes": 10607
+      },
+      {
+        "name": "2026-03-22.log",
+        "bytes": 19203
+      },
+      {
+        "name": "2026-03-23.log",
+        "bytes": 12392
+      },
+      {
+        "name": "2026-03-24.log",
+        "bytes": 16601
+      },
+      {
+        "name": "2026-03-25.log",
+        "bytes": 10828
+      },
+      {
+        "name": "2026-03-26.log",
+        "bytes": 18173
+      },
+      {
+        "name": "2026-03-27.log",
+        "bytes": 12878
+      },
+      {
+        "name": "2026-03-28.log",
+        "bytes": 16981
+      },
+      {
+        "name": "2026-03-29.log",
+        "bytes": 9629
+      },
+      {
+        "name": "2026-03-30.log",
+        "bytes": 10947
+      },
+      {
+        "name": "2026-03-31.log",
+        "bytes": 14167
+      },
+      {
+        "name": "2026-04-01.log",
+        "bytes": 18755
+      },
+      {
+        "name": "2026-04-02.log",
+        "bytes": 23177
+      },
+      {
+        "name": "2026-04-03.log",
+        "bytes": 23116
+      },
+      {
+        "name": "2026-04-04.log",
+        "bytes": 10853
+      },
+      {
+        "name": "2026-04-05.log",
+        "bytes": 27427
+      },
+      {
+        "name": "2026-04-06.log",
+        "bytes": 18846
+      },
+      {
+        "name": "2026-04-07.log",
+        "bytes": 6036
+      },
+      {
+        "name": "2026-04-08.log",
+        "bytes": 42497
+      },
+      {
+        "name": "2026-04-09.log",
+        "bytes": 23006
+      },
+      {
+        "name": "2026-04-10.log",
+        "bytes": 14618
+      },
+      {
+        "name": "2026-04-11.log",
+        "bytes": 10778
+      },
+      {
+        "name": "2026-04-12.log",
+        "bytes": 18706
+      },
+      {
+        "name": "2026-04-13.log",
+        "bytes": 20618
+      },
+      {
+        "name": "2026-04-14.log",
+        "bytes": 9614
+      },
+      {
+        "name": "2026-04-15.log",
+        "bytes": 9118
+      },
+      {
+        "name": "2026-04-16.log",
+        "bytes": 19431
+      },
+      {
+        "name": "2026-04-17.log",
+        "bytes": 4138
+      },
+      {
+        "name": "2026-04-18.log",
+        "bytes": 10064
+      },
+      {
+        "name": "2026-04-19.log",
+        "bytes": 8295
+      },
+      {
+        "name": "2026-04-20.log",
+        "bytes": 16865
+      },
+      {
+        "name": "2026-04-21.log",
+        "bytes": 17176
+      },
+      {
+        "name": "2026-04-22.log",
+        "bytes": 24045
+      },
+      {
+        "name": "2026-04-23.log",
+        "bytes": 12538
+      },
+      {
+        "name": "2026-04-24.log",
+        "bytes": 18799
+      },
+      {
+        "name": "2026-04-25.log",
+        "bytes": 10797
+      },
+      {
+        "name": "2026-04-26.log",
+        "bytes": 8999
+      },
+      {
+        "name": "2026-04-27.log",
+        "bytes": 7075
+      },
+      {
+        "name": "2026-04-28.log",
+        "bytes": 12982
+      },
+      {
+        "name": "2026-04-29.log",
+        "bytes": 9192
+      },
+      {
+        "name": "2026-04-30.log",
+        "bytes": 5261
+      },
+      {
+        "name": "2026-05-01.log",
+        "bytes": 14956
+      },
+      {
+        "name": "2026-05-02.log",
+        "bytes": 15750
+      },
+      {
+        "name": "2026-05-03.log",
+        "bytes": 11484
+      },
+      {
+        "name": "2026-05-04.log",
+        "bytes": 13037
+      },
+      {
+        "name": "2026-05-05.log",
+        "bytes": 33385
+      },
+      {
+        "name": "2026-05-06.log",
+        "bytes": 107414
+      },
+      {
+        "name": "2026-05-07.log",
+        "bytes": 27172
+      },
+      {
+        "name": "2026-05-08.log",
+        "bytes": 13527
+      },
+      {
+        "name": "2026-05-09.log",
+        "bytes": 7645
+      },
+      {
+        "name": "2026-05-10.log",
+        "bytes": 9580
+      },
+      {
+        "name": "2026-05-11.log",
+        "bytes": 13920
+      },
+      {
+        "name": "2026-05-12.log",
+        "bytes": 13140
+      },
+      {
+        "name": "2026-05-13.log",
+        "bytes": 10138
+      },
+      {
+        "name": "2026-05-14.log",
+        "bytes": 40532
+      },
+      {
+        "name": "2026-05-15.log",
+        "bytes": 28578
+      },
+      {
+        "name": "2026-05-16.log",
+        "bytes": 1775
+      },
+      {
+        "name": "2026-05-17.log",
+        "bytes": 15561
+      },
+      {
+        "name": "2026-05-18.log",
+        "bytes": 22591
+      },
+      {
+        "name": "2026-05-19.log",
+        "bytes": 14409
+      },
+      {
+        "name": "2026-05-20.log",
+        "bytes": 47941
+      },
+      {
+        "name": "2026-05-21.log",
+        "bytes": 9762
+      },
+      {
+        "name": "2026-05-22.log",
+        "bytes": 20077
+      },
+      {
+        "name": "2026-05-23.log",
+        "bytes": 6749
+      },
+      {
+        "name": "2026-05-24.log",
+        "bytes": 3571
+      },
+      {
+        "name": "2026-05-25.log",
+        "bytes": 24951
+      },
+      {
+        "name": "2026-05-26.log",
+        "bytes": 13717
+      },
+      {
+        "name": "2026-05-27.log",
+        "bytes": 3578
+      },
+      {
+        "name": "2026-05-28.log",
+        "bytes": 13361
+      },
+      {
+        "name": "2026-05-29.log",
+        "bytes": 8576
+      },
+      {
+        "name": "2026-05-30.log",
+        "bytes": 5126
+      },
+      {
+        "name": "2026-05-31.log",
+        "bytes": 14816
+      },
+      {
+        "name": "2026-06-01.log",
+        "bytes": 20616
+      },
+      {
+        "name": "2026-06-02.log",
+        "bytes": 20658
+      },
+      {
+        "name": "2026-06-03.log",
+        "bytes": 19841
+      },
+      {
+        "name": "2026-06-04.log",
+        "bytes": 14967
+      },
+      {
+        "name": "2026-06-05.log",
+        "bytes": 3535
+      },
+      {
+        "name": "2026-06-06.log",
+        "bytes": 12721
+      },
+      {
+        "name": "2026-06-07.log",
+        "bytes": 6892
+      },
+      {
+        "name": "2026-06-08.log",
+        "bytes": 24799
+      },
+      {
+        "name": "2026-06-09.log",
+        "bytes": 40724
+      },
+      {
+        "name": "2026-06-10.log",
+        "bytes": 29501
+      },
+      {
+        "name": "2026-06-11.log",
+        "bytes": 14826
+      },
+      {
+        "name": "2026-06-12.log",
+        "bytes": 41623
+      },
+      {
+        "name": "2026-06-13.log",
+        "bytes": 17940
+      },
+      {
+        "name": "2026-06-14.log",
+        "bytes": 12024
+      },
+      {
+        "name": "2026-06-15.log",
+        "bytes": 32288
+      },
+      {
+        "name": "2026-06-16.log",
+        "bytes": 26460
+      },
+      {
+        "name": "2026-06-17.log",
+        "bytes": 28664
+      },
+      {
+        "name": "2026-06-18.log",
+        "bytes": 37419
+      },
+      {
+        "name": "2026-06-19.log",
+        "bytes": 19889
+      },
+      {
+        "name": "2026-06-20.log",
+        "bytes": 24543
+      },
+      {
+        "name": "2026-06-21.log",
+        "bytes": 7673
+      },
+      {
+        "name": "2026-06-22.log",
+        "bytes": 21311
+      },
+      {
+        "name": "2026-06-23.log",
+        "bytes": 33558
+      },
+      {
+        "name": "2026-06-24.log",
+        "bytes": 6610
+      },
+      {
+        "name": "2026-06-25.log",
+        "bytes": 16651
+      },
+      {
+        "name": "2026-06-26.log",
+        "bytes": 16225
+      },
+      {
+        "name": "2026-06-27.log",
+        "bytes": 12939
+      },
+      {
+        "name": "2026-06-28.log",
+        "bytes": 19722
+      },
+      {
+        "name": "2026-06-29.log",
+        "bytes": 19171
+      },
+      {
+        "name": "2026-06-30.log",
+        "bytes": 35906
+      },
+      {
+        "name": "2026-07-01.log",
+        "bytes": 35323
+      },
+      {
+        "name": "2026-07-02.log",
+        "bytes": 120782
+      },
+      {
+        "name": "2026-07-03.log",
+        "bytes": 82727
+      },
+      {
+        "name": "2026-07-04.log",
+        "bytes": 49859
+      },
+      {
+        "name": "2026-07-05.log",
+        "bytes": 46732
+      },
+      {
+        "name": "2026-07-06.log",
+        "bytes": 42958
+      },
+      {
+        "name": "2026-07-07.log",
+        "bytes": 24417
+      },
+      {
+        "name": "2026-07-08.log",
+        "bytes": 18820
+      },
+      {
+        "name": "2026-07-09.log",
+        "bytes": 79970
+      },
+      {
+        "name": "2026-07-10.log",
+        "bytes": 31139
+      },
+      {
+        "name": "2026-07-11.log",
+        "bytes": 57373
+      },
+      {
+        "name": "2026-07-12.log",
+        "bytes": 18631
+      },
+      {
+        "name": "2026-07-13.log",
+        "bytes": 20532
+      },
+      {
+        "name": "2026-07-14.log",
+        "bytes": 25302
+      },
+      {
+        "name": "2026-07-15.log",
+        "bytes": 10136
+      },
+      {
+        "name": "2026-07-16.log",
+        "bytes": 26477
+      },
+      {
+        "name": "2026-07-17.log",
+        "bytes": 26905
+      },
+      {
+        "name": "2026-07-18.log",
+        "bytes": 26488
+      },
+      {
+        "name": "2026-07-19.log",
+        "bytes": 29572
+      },
+      {
+        "name": "2026-07-20.log",
+        "bytes": 14681
+      },
+      {
+        "name": "2026-07-21.log",
+        "bytes": 19973
+      },
+      {
+        "name": "2026-07-22.log",
+        "bytes": 21630
+      },
+      {
+        "name": "2026-07-23.log",
+        "bytes": 25717
+      },
+      {
+        "name": "2026-07-24.log",
+        "bytes": 21146
+      },
+      {
+        "name": "2026-07-25.log",
+        "bytes": 32362
+      },
+      {
+        "name": "2026-07-26.log",
+        "bytes": 38648
+      },
+      {
+        "name": "2026-07-27.log",
+        "bytes": 41390
+      },
+      {
+        "name": "2026-07-28.log",
+        "bytes": 51628
+      },
+      {
+        "name": "2026-07-29.log",
+        "bytes": 24740
+      },
+      {
+        "name": "2026-07-30.log",
+        "bytes": 28577
+      },
+      {
+        "name": "2026-07-31.log",
+        "bytes": 31271
+      },
+      {
+        "name": "2026-08-01.log",
+        "bytes": 25020
+      },
+      {
+        "name": "2026-08-02.log",
+        "bytes": 17601
+      },
+      {
+        "name": "2026-08-03.log",
+        "bytes": 33340
+      },
+      {
+        "name": "2026-08-04.log",
+        "bytes": 24916
+      },
+      {
+        "name": "2026-08-05.log",
+        "bytes": 9188
+      },
+      {
+        "name": "2026-08-06.log",
+        "bytes": 10045
+      },
+      {
+        "name": "2026-08-07.log",
+        "bytes": 23513
+      },
+      {
+        "name": "2026-08-08.log",
+        "bytes": 26207
+      },
+      {
+        "name": "2026-08-09.log",
+        "bytes": 28569
+      },
+      {
+        "name": "2026-08-10.log",
+        "bytes": 19866
+      },
+      {
+        "name": "2026-08-11.log",
+        "bytes": 226
+      },
+      {
+        "name": "2026-08-12.log",
+        "bytes": 17794
+      },
+      {
+        "name": "2026-08-13.log",
+        "bytes": 23532
+      },
+      {
+        "name": "2026-08-14.log",
+        "bytes": 34768
+      },
+      {
+        "name": "2026-08-15.log",
+        "bytes": 22506
+      },
+      {
+        "name": "2026-08-16.log",
+        "bytes": 17750
+      },
+      {
+        "name": "2026-08-17.log",
+        "bytes": 20871
+      },
+      {
+        "name": "2026-08-18.log",
+        "bytes": 33016
+      },
+      {
+        "name": "2026-08-19.log",
+        "bytes": 34237
+      },
+      {
+        "name": "2026-08-20.log",
+        "bytes": 5061
+      },
+      {
+        "name": "2026-08-21.log",
+        "bytes": 9329
+      },
+      {
+        "name": "2026-08-22.log",
+        "bytes": 6253
+      },
+      {
+        "name": "2026-08-23.log",
+        "bytes": 13582
+      },
+      {
+        "name": "2026-08-24.log",
+        "bytes": 30739
+      },
+      {
+        "name": "2026-08-25.log",
+        "bytes": 7836
+      },
+      {
+        "name": "2026-08-26.log",
+        "bytes": 26995
+      },
+      {
+        "name": "2026-08-27.log",
+        "bytes": 7722
+      },
+      {
+        "name": "2026-08-28.log",
+        "bytes": 26200
+      },
+      {
+        "name": "2026-08-29.log",
+        "bytes": 9028
+      },
+      {
+        "name": "2026-08-30.log",
+        "bytes": 18473
+      },
+      {
+        "name": "2026-08-31.log",
+        "bytes": 22544
+      },
+      {
+        "name": "2026-09-01.log",
+        "bytes": 20012
+      },
+      {
+        "name": "2026-09-02.log",
+        "bytes": 19783
+      },
+      {
+        "name": "2026-09-03.log",
+        "bytes": 5830
+      },
+      {
+        "name": "2026-09-04.log",
+        "bytes": 10922
+      },
+      {
+        "name": "2026-09-05.log",
+        "bytes": 5640
+      },
+      {
+        "name": "2026-09-06.log",
+        "bytes": 21449
+      },
+      {
+        "name": "2026-09-07.log",
+        "bytes": 12312
+      },
+      {
+        "name": "2026-09-08.log",
+        "bytes": 38745
+      },
+      {
+        "name": "2026-09-09.log",
+        "bytes": 27761
+      },
+      {
+        "name": "2026-09-10.log",
+        "bytes": 5435
+      },
+      {
+        "name": "2026-09-11.log",
+        "bytes": 10619
+      },
+      {
+        "name": "2026-09-12.log",
+        "bytes": 5351
+      },
+      {
+        "name": "2026-09-13.log",
+        "bytes": 26031
+      },
+      {
+        "name": "2026-09-14.log",
+        "bytes": 234409
+      },
+      {
+        "name": "2026-09-15.log",
+        "bytes": 67899
+      },
+      {
+        "name": "2026-09-16.log",
+        "bytes": 90227
+      },
+      {
+        "name": "2026-09-17.log",
+        "bytes": 140655
+      },
+      {
+        "name": "2026-09-18.log",
+        "bytes": 116688
+      },
+      {
+        "name": "2026-09-19.log",
+        "bytes": 58538
+      },
+      {
+        "name": "2026-09-20.log",
+        "bytes": 47642
+      },
+      {
+        "name": "2026-09-21.log",
+        "bytes": 44121
+      },
+      {
+        "name": "2026-09-22.log",
+        "bytes": 36762
+      },
+      {
+        "name": "2026-09-23.log",
+        "bytes": 47846
+      },
+      {
+        "name": "2026-09-24.log",
+        "bytes": 19479
+      },
+      {
+        "name": "2026-09-25.log",
+        "bytes": 64056
+      },
+      {
+        "name": "2026-09-26.log",
+        "bytes": 37368
+      },
+      {
+        "name": "2026-09-27.log",
+        "bytes": 156294
+      },
+      {
+        "name": "2026-09-28.log",
+        "bytes": 66974
+      },
+      {
+        "name": "2026-09-29.log",
+        "bytes": 44510
+      }
+    ],
+    "/var/log/nginx": [
+      {
+        "name": "access.log",
+        "bytes": 638278
+      },
+      {
+        "name": "access.log.1",
+        "bytes": 1308524
+      },
+      {
+        "name": "access.log.10.gz",
+        "bytes": 77972
+      },
+      {
+        "name": "access.log.11.gz",
+        "bytes": 100852
+      },
+      {
+        "name": "access.log.12.gz",
+        "bytes": 117793
+      },
+      {
+        "name": "access.log.13.gz",
+        "bytes": 145533
+      },
+      {
+        "name": "access.log.14.gz",
+        "bytes": 182302
+      },
+      {
+        "name": "access.log.15.gz",
+        "bytes": 178483
+      },
+      {
+        "name": "access.log.16.gz",
+        "bytes": 243148
+      },
+      {
+        "name": "access.log.17.gz",
+        "bytes": 125673
+      },
+      {
+        "name": "access.log.18.gz",
+        "bytes": 148590
+      },
+      {
+        "name": "access.log.19.gz",
+        "bytes": 196929
+      },
+      {
+        "name": "access.log.2.gz",
+        "bytes": 91152
+      },
+      {
+        "name": "access.log.20.gz",
+        "bytes": 87239
+      },
+      {
+        "name": "access.log.21.gz",
+        "bytes": 87558
+      },
+      {
+        "name": "access.log.22.gz",
+        "bytes": 288958
+      },
+      {
+        "name": "access.log.23.gz",
+        "bytes": 151554
+      },
+      {
+        "name": "access.log.24.gz",
+        "bytes": 121162
+      },
+      {
+        "name": "access.log.25.gz",
+        "bytes": 140739
+      },
+      {
+        "name": "access.log.26.gz",
+        "bytes": 257578
+      },
+      {
+        "name": "access.log.27.gz",
+        "bytes": 149343
+      },
+      {
+        "name": "access.log.28.gz",
+        "bytes": 193818
+      },
+      {
+        "name": "access.log.29.gz",
+        "bytes": 235676
+      },
+      {
+        "name": "access.log.3.gz",
+        "bytes": 99018
+      },
+      {
+        "name": "access.log.30.gz",
+        "bytes": 135010
+      },
+      {
+        "name": "access.log.31.gz",
+        "bytes": 312316
+      },
+      {
+        "name": "access.log.32.gz",
+        "bytes": 176048
+      },
+      {
+        "name": "access.log.33.gz",
+        "bytes": 168763
+      },
+      {
+        "name": "access.log.34.gz",
+        "bytes": 120716
+      },
+      {
+        "name": "access.log.35.gz",
+        "bytes": 92686
+      },
+      {
+        "name": "access.log.36.gz",
+        "bytes": 108819
+      },
+      {
+        "name": "access.log.37.gz",
+        "bytes": 178987
+      },
+      {
+        "name": "access.log.38.gz",
+        "bytes": 152884
+      },
+      {
+        "name": "access.log.39.gz",
+        "bytes": 109518
+      },
+      {
+        "name": "access.log.4.gz",
+        "bytes": 140863
+      },
+      {
+        "name": "access.log.40.gz",
+        "bytes": 60660
+      },
+      {
+        "name": "access.log.41.gz",
+        "bytes": 52989
+      },
+      {
+        "name": "access.log.42.gz",
+        "bytes": 113355
+      },
+      {
+        "name": "access.log.43.gz",
+        "bytes": 66843
+      },
+      {
+        "name": "access.log.44.gz",
+        "bytes": 71292
+      },
+      {
+        "name": "access.log.45.gz",
+        "bytes": 103113
+      },
+      {
+        "name": "access.log.46.gz",
+        "bytes": 93728
+      },
+      {
+        "name": "access.log.47.gz",
+        "bytes": 91046
+      },
+      {
+        "name": "access.log.48.gz",
+        "bytes": 106724
+      },
+      {
+        "name": "access.log.49.gz",
+        "bytes": 118429
+      },
+      {
+        "name": "access.log.5.gz",
+        "bytes": 108251
+      },
+      {
+        "name": "access.log.50.gz",
+        "bytes": 141109
+      },
+      {
+        "name": "access.log.51.gz",
+        "bytes": 125082
+      },
+      {
+        "name": "access.log.52.gz",
+        "bytes": 199795
+      },
+      {
+        "name": "access.log.53.gz",
+        "bytes": 134627
+      },
+      {
+        "name": "access.log.54.gz",
+        "bytes": 248403
+      },
+      {
+        "name": "access.log.55.gz",
+        "bytes": 54102
+      },
+      {
+        "name": "access.log.56.gz",
+        "bytes": 60517
+      },
+      {
+        "name": "access.log.57.gz",
+        "bytes": 59797
+      },
+      {
+        "name": "access.log.58.gz",
+        "bytes": 131068
+      },
+      {
+        "name": "access.log.59.gz",
+        "bytes": 73363
+      },
+      {
+        "name": "access.log.6.gz",
+        "bytes": 99361
+      },
+      {
+        "name": "access.log.60.gz",
+        "bytes": 59818
+      },
+      {
+        "name": "access.log.61.gz",
+        "bytes": 81798
+      },
+      {
+        "name": "access.log.62.gz",
+        "bytes": 77229
+      },
+      {
+        "name": "access.log.63.gz",
+        "bytes": 62842
+      },
+      {
+        "name": "access.log.64.gz",
+        "bytes": 80963
+      },
+      {
+        "name": "access.log.65.gz",
+        "bytes": 70862
+      },
+      {
+        "name": "access.log.66.gz",
+        "bytes": 192473
+      },
+      {
+        "name": "access.log.67.gz",
+        "bytes": 62791
+      },
+      {
+        "name": "access.log.68.gz",
+        "bytes": 118801
+      },
+      {
+        "name": "access.log.69.gz",
+        "bytes": 145106
+      },
+      {
+        "name": "access.log.7.gz",
+        "bytes": 94271
+      },
+      {
+        "name": "access.log.70.gz",
+        "bytes": 98595
+      },
+      {
+        "name": "access.log.71.gz",
+        "bytes": 100944
+      },
+      {
+        "name": "access.log.72.gz",
+        "bytes": 79059
+      },
+      {
+        "name": "access.log.73.gz",
+        "bytes": 76871
+      },
+      {
+        "name": "access.log.74.gz",
+        "bytes": 100269
+      },
+      {
+        "name": "access.log.75.gz",
+        "bytes": 137817
+      },
+      {
+        "name": "access.log.76.gz",
+        "bytes": 104203
+      },
+      {
+        "name": "access.log.77.gz",
+        "bytes": 92212
+      },
+      {
+        "name": "access.log.78.gz",
+        "bytes": 69153
+      },
+      {
+        "name": "access.log.79.gz",
+        "bytes": 113363
+      },
+      {
+        "name": "access.log.8.gz",
+        "bytes": 123739
+      },
+      {
+        "name": "access.log.80.gz",
+        "bytes": 71088
+      },
+      {
+        "name": "access.log.81.gz",
+        "bytes": 64286
+      },
+      {
+        "name": "access.log.82.gz",
+        "bytes": 110792
+      },
+      {
+        "name": "access.log.83.gz",
+        "bytes": 135821
+      },
+      {
+        "name": "access.log.84.gz",
+        "bytes": 120266
+      },
+      {
+        "name": "access.log.85.gz",
+        "bytes": 48937
+      },
+      {
+        "name": "access.log.86.gz",
+        "bytes": 69829
+      },
+      {
+        "name": "access.log.87.gz",
+        "bytes": 105533
+      },
+      {
+        "name": "access.log.88.gz",
+        "bytes": 160827
+      },
+      {
+        "name": "access.log.89.gz",
+        "bytes": 133065
+      },
+      {
+        "name": "access.log.9.gz",
+        "bytes": 90030
+      },
+      {
+        "name": "access.log.90.gz",
+        "bytes": 97543
+      },
+      {
+        "name": "error.log",
+        "bytes": 44875
+      },
+      {
+        "name": "error.log.1",
+        "bytes": 127475
+      },
+      {
+        "name": "error.log.10.gz",
+        "bytes": 339
+      },
+      {
+        "name": "error.log.11.gz",
+        "bytes": 7748
+      },
+      {
+        "name": "error.log.12.gz",
+        "bytes": 3726
+      },
+      {
+        "name": "error.log.13.gz",
+        "bytes": 9799
+      },
+      {
+        "name": "error.log.14.gz",
+        "bytes": 15199
+      },
+      {
+        "name": "error.log.15.gz",
+        "bytes": 11126
+      },
+      {
+        "name": "error.log.16.gz",
+        "bytes": 15064
+      },
+      {
+        "name": "error.log.17.gz",
+        "bytes": 13054
+      },
+      {
+        "name": "error.log.18.gz",
+        "bytes": 27821
+      },
+      {
+        "name": "error.log.19.gz",
+        "bytes": 8615
+      },
+      {
+        "name": "error.log.2.gz",
+        "bytes": 3686
+      },
+      {
+        "name": "error.log.20.gz",
+        "bytes": 7415
+      },
+      {
+        "name": "error.log.21.gz",
+        "bytes": 10660
+      },
+      {
+        "name": "error.log.22.gz",
+        "bytes": 20042
+      },
+      {
+        "name": "error.log.23.gz",
+        "bytes": 47038
+      },
+      {
+        "name": "error.log.24.gz",
+        "bytes": 32738
+      },
+      {
+        "name": "error.log.25.gz",
+        "bytes": 85316
+      },
+      {
+        "name": "error.log.26.gz",
+        "bytes": 243755
+      },
+      {
+        "name": "error.log.27.gz",
+        "bytes": 60166
+      },
+      {
+        "name": "error.log.28.gz",
+        "bytes": 139844
+      },
+      {
+        "name": "error.log.29.gz",
+        "bytes": 74643
+      },
+      {
+        "name": "error.log.3.gz",
+        "bytes": 6241
+      },
+      {
+        "name": "error.log.30.gz",
+        "bytes": 40907
+      },
+      {
+        "name": "error.log.31.gz",
+        "bytes": 67953
+      },
+      {
+        "name": "error.log.32.gz",
+        "bytes": 37621
+      },
+      {
+        "name": "error.log.33.gz",
+        "bytes": 46751
+      },
+      {
+        "name": "error.log.34.gz",
+        "bytes": 38458
+      },
+      {
+        "name": "error.log.35.gz",
+        "bytes": 28783
+      },
+      {
+        "name": "error.log.36.gz",
+        "bytes": 31507
+      },
+      {
+        "name": "error.log.37.gz",
+        "bytes": 19629
+      },
+      {
+        "name": "error.log.38.gz",
+        "bytes": 29218
+      },
+      {
+        "name": "error.log.39.gz",
+        "bytes": 4945
+      },
+      {
+        "name": "error.log.4.gz",
+        "bytes": 5483
+      },
+      {
+        "name": "error.log.40.gz",
+        "bytes": 14264
+      },
+      {
+        "name": "error.log.41.gz",
+        "bytes": 10113
+      },
+      {
+        "name": "error.log.42.gz",
+        "bytes": 23603
+      },
+      {
+        "name": "error.log.43.gz",
+        "bytes": 7435
+      },
+      {
+        "name": "error.log.44.gz",
+        "bytes": 15056
+      },
+      {
+        "name": "error.log.45.gz",
+        "bytes": 17126
+      },
+      {
+        "name": "error.log.46.gz",
+        "bytes": 10810
+      },
+      {
+        "name": "error.log.47.gz",
+        "bytes": 6307
+      },
+      {
+        "name": "error.log.48.gz",
+        "bytes": 20408
+      },
+      {
+        "name": "error.log.49.gz",
+        "bytes": 28064
+      },
+      {
+        "name": "error.log.5.gz",
+        "bytes": 10681
+      },
+      {
+        "name": "error.log.50.gz",
+        "bytes": 28780
+      },
+      {
+        "name": "error.log.51.gz",
+        "bytes": 37094
+      },
+      {
+        "name": "error.log.52.gz",
+        "bytes": 33245
+      },
+      {
+        "name": "error.log.53.gz",
+        "bytes": 32054
+      },
+      {
+        "name": "error.log.54.gz",
+        "bytes": 30658
+      },
+      {
+        "name": "error.log.55.gz",
+        "bytes": 11038
+      },
+      {
+        "name": "error.log.56.gz",
+        "bytes": 8255
+      },
+      {
+        "name": "error.log.57.gz",
+        "bytes": 7974
+      },
+      {
+        "name": "error.log.58.gz",
+        "bytes": 7339
+      },
+      {
+        "name": "error.log.59.gz",
+        "bytes": 7350
+      },
+      {
+        "name": "error.log.6.gz",
+        "bytes": 3189
+      },
+      {
+        "name": "error.log.60.gz",
+        "bytes": 6081
+      },
+      {
+        "name": "error.log.61.gz",
+        "bytes": 13929
+      },
+      {
+        "name": "error.log.62.gz",
+        "bytes": 5421
+      },
+      {
+        "name": "error.log.63.gz",
+        "bytes": 9621
+      },
+      {
+        "name": "error.log.64.gz",
+        "bytes": 11294
+      },
+      {
+        "name": "error.log.65.gz",
+        "bytes": 6531
+      },
+      {
+        "name": "error.log.66.gz",
+        "bytes": 12458
+      },
+      {
+        "name": "error.log.67.gz",
+        "bytes": 10249
+      },
+      {
+        "name": "error.log.68.gz",
+        "bytes": 27691
+      },
+      {
+        "name": "error.log.69.gz",
+        "bytes": 32202
+      },
+      {
+        "name": "error.log.7.gz",
+        "bytes": 8849
+      },
+      {
+        "name": "error.log.70.gz",
+        "bytes": 36438
+      },
+      {
+        "name": "error.log.71.gz",
+        "bytes": 30978
+      },
+      {
+        "name": "error.log.72.gz",
+        "bytes": 17663
+      },
+      {
+        "name": "error.log.73.gz",
+        "bytes": 8953
+      },
+      {
+        "name": "error.log.74.gz",
+        "bytes": 12130
+      },
+      {
+        "name": "error.log.75.gz",
+        "bytes": 11793
+      },
+      {
+        "name": "error.log.76.gz",
+        "bytes": 10888
+      },
+      {
+        "name": "error.log.77.gz",
+        "bytes": 10833
+      },
+      {
+        "name": "error.log.78.gz",
+        "bytes": 12962
+      },
+      {
+        "name": "error.log.79.gz",
+        "bytes": 9861
+      },
+      {
+        "name": "error.log.8.gz",
+        "bytes": 2017
+      },
+      {
+        "name": "error.log.80.gz",
+        "bytes": 11604
+      },
+      {
+        "name": "error.log.81.gz",
+        "bytes": 12631
+      },
+      {
+        "name": "error.log.82.gz",
+        "bytes": 9997
+      },
+      {
+        "name": "error.log.83.gz",
+        "bytes": 25153
+      },
+      {
+        "name": "error.log.84.gz",
+        "bytes": 11621
+      },
+      {
+        "name": "error.log.85.gz",
+        "bytes": 4568
+      },
+      {
+        "name": "error.log.86.gz",
+        "bytes": 12369
+      },
+      {
+        "name": "error.log.87.gz",
+        "bytes": 16244
+      },
+      {
+        "name": "error.log.88.gz",
+        "bytes": 10972
+      },
+      {
+        "name": "error.log.89.gz",
+        "bytes": 9727
+      },
+      {
+        "name": "error.log.9.gz",
+        "bytes": 10606
+      },
+      {
+        "name": "error.log.90.gz",
+        "bytes": 12702
+      }
+    ],
+    "/home/chacha/.pm2/logs": [
+      {
+        "name": "pot-provider-error.log",
+        "bytes": 0
+      },
+      {
+        "name": "pot-provider-out.log",
+        "bytes": 3102
+      },
+      {
+        "name": "qa-youtube-describer-backend-error.log",
+        "bytes": 13104
+      },
+      {
+        "name": "qa-youtube-describer-backend-out.log",
+        "bytes": 129983
+      },
+      {
+        "name": "test-youtube-describer-backend-error.log",
+        "bytes": 358828
+      },
+      {
+        "name": "test-youtube-describer-backend-out.log",
+        "bytes": 260335
+      },
+      {
+        "name": "youtube-describer-backend-error.log",
+        "bytes": 1771
+      },
+      {
+        "name": "youtube-describer-backend-out.log",
+        "bytes": 6583072
+      },
+      {
+        "name": "youtube-describer-error.log",
+        "bytes": 56813
+      },
+      {
+        "name": "youtube-describer-out.log",
+        "bytes": 1285369
+      }
+    ]
+  },
+  "sourceHashes": {
+    "backend/database.js": "96dd683a67770d726fc608dfe2c0af406ba33807095b5b7985e7f431ff860091",
+    "backend/routes.js": "45ebf9455d2cb76434c50a9d1c9a35f6454b33c0f3c11e5d8a6d41b4a98ba648",
+    "backend/logger.js": "cd6fd444546831ef087ac44ef4e6069e1a34618e572f17eea0d63d55e3bebb59",
+    "backend/modules/qaRoutes.js": "8318a7591f0ab20dc09281f9d184c42314551f30a5558d396cdeacca64bbbc27",
+    "backend/modules/qaGeneration.js": "bfc2ceddff1a9ae6bbfad81efa7d43164d08e2f4b13f8abc523488b5594af26b",
+    ".agents/skills/analyze_system_stats/scripts/stats_collector.js": {
+      "error": "ENOENT"
+    }
+  },
+  "qaLogs": {
+    "2026-08": {
+      "files": 31,
+      "markers": {},
+      "events": {}
+    },
+    "2026-09": {
+      "files": 29,
+      "markers": {
+        "QA-MEDIA": 3575,
+        "QA-GENERATION": 1343
+      },
+      "events": {
+        "QA-MEDIA:work_started": 1314,
+        "QA-MEDIA:work_completed": 1284,
+        "QA-MEDIA:pipeline_subtitle_missing": 15,
+        "QA-MEDIA:subtitle_miss": 32,
+        "QA-MEDIA:prepare": 229,
+        "QA-MEDIA:window_hit": 200,
+        "QA-MEDIA:subtitle_absent": 9,
+        "QA-MEDIA:prepared": 223,
+        "QA-GENERATION:evidence_ready": 441,
+        "QA-GENERATION:model_started": 441,
+        "QA-GENERATION:model_completed": 423,
+        "QA-MEDIA:subtitle_hit": 197,
+        "QA-MEDIA:window_miss": 29,
+        "QA-GENERATION:failed": 38,
+        "QA-MEDIA:window_source_fallback": 4,
+        "QA-MEDIA:work_failed": 30,
+        "QA-MEDIA:warming_failed": 7,
+        "QA-MEDIA:subtitle_failed": 2
+      }
+    }
+  }
+}

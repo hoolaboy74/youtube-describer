@@ -1,12 +1,12 @@
 # Coding Conventions
 
-**Analysis Date:** 2026-08-31
+**Analysis Date:** 2026-09-30
 
 ## Naming Patterns
 
 **Files:**
 - Backend implementation modules use lower camel case, for example `backend/modules/canonicalOutput.js`, `backend/modules/promptPolicy.js`, and `backend/modules/audioLanguageDetector.js`.
-- Backend tests and operational probes use the `test_*.js` prefix, for example `backend/test_canonical_output.js` and `backend/test_full_workflow.js`; preserve that convention for new backend tests.
+- Use `backend/tests/<subject>.test.js` for new Q&A/resource/accounting tests, following `backend/tests/qaRequestReceipts.test.js` and `backend/tests/geminiCost.test.js`. Root `backend/test_*.js` retains policy/integration tests and some operational probes; distinguish deterministic `node:test` files from live executables.
 - React components and screens use PascalCase filenames with colocated CSS, for example `frontend/src/screens/PlayerScreenV2.js` and `frontend/src/screens/PlayerScreenV2.css`; shared contexts live under `frontend/src/contexts/`.
 
 **Functions:**
@@ -35,7 +35,7 @@
 **Linting:**
 - Frontend linting is configured inline in `frontend/package.json` with Create React App presets `react-app` and `react-app/jest`, and runs `eslint src --max-warnings 0`.
 - Backend has no lint script or backend ESLint configuration in `backend/package.json`; use `node --check` for syntax checks and the existing Node test files for behavior.
-- The configured frontend zero-warning gate reports a missing `videoId` dependency at `frontend/src/PlayerScreen.js:527`; new hooks should satisfy `react-hooks/exhaustive-deps` rather than suppressing it.
+- New hooks should satisfy `react-hooks/exhaustive-deps`, as configured through `frontend/package.json`; historical lint outcomes do not establish the current gate result without running it.
 
 ## Import Organization
 
@@ -57,6 +57,8 @@
 - Database write functions log and rethrow so the owning request path can decide whether to emit an SSE error, as in `backend/database.js` and `backend/videoProcessor.js`.
 - Optional operational failures are deliberately downgraded to safe fallbacks: language detection returns `unknown` in `backend/modules/audioLanguageDetector.js`, and genre analysis returns a conservative default in `backend/modules/analyzer.js`.
 - React async operations catch errors, update local UI state, and use accessibility announcements where appropriate in `frontend/src/contexts/AuthContext.js`, `frontend/src/screens/HomeScreen.js`, and `frontend/src/screens/PlayerScreenV2.js`.
+- Q&A routes preserve structured `code`/`status` errors, owner isolation, cancellation and replay contracts in `backend/modules/qaRoutes.js` and `backend/modules/qaRequestStore.js`. Use injected dependencies when extending these factories.
+- `backend/modules/qaGeneration.js` classifies provider errors into safe `PROVIDER_*` codes. `backend/modules/qaMedia.js` records classified diagnostics rather than raw provider stderr.
 
 ## Logging
 
@@ -69,6 +71,9 @@
 - Log stage transitions, fallback decisions, durations, and provider failures in the processor; use `logger.info` for normal stages, `logger.warn` for recoverable degradation, and `logger.error` for failed operations, as shown in `backend/videoProcessor.js`.
 - Pass `Error` objects to `logger.error` when possible; `backend/logger.js` expands their stack while normalizing other arguments to strings.
 - Do not put raw prompts or unbounded evidence into new logs. The canonical persistence boundary already bounds quarantine text/evidence in `backend/database.js`.
+- Q&A telemetry uses tagged JSON messages: `[QA-GENERATION]` in `backend/modules/qaGeneration.js` and `[QA-MEDIA]` in `backend/modules/qaMedia.js`. Preserve `event`, request/video identifiers and safe duration/count/status fields when adding events; backend date-prefix timestamps are KST in `backend/logger.js`.
+- Client playback instrumentation is opt-in and uses monotonic `performance.now()` plus an allowlist in `frontend/src/services/qaLatencyTrace.js`. Treat browser records as client-local measurements; do not infer production playback completion from text generation or server audio issuance.
+- Record Gemini usage through `recordGeminiUsage` in `backend/database.js`; keep historical `api_costs.cost` alongside token/search breakdowns and `qa_user_daily_costs`. `backend/modules/qaRequestReceipts.js` uses the same SQLite transaction for durable receipt and ledger writes.
 
 ## Comments
 
@@ -86,6 +91,7 @@
 **Size:**
 - Prefer small pure helpers for normalization, lookup, classification, and validation, following `backend/modules/canonicalOutput.js` and `backend/modules/cliCanonicalOutput.js`.
 - Existing orchestration functions are large and stateful: `processVideo`/`processVideoBatch` in `backend/videoProcessor.js`, route registration in `backend/routes.js`, and large React screens such as `frontend/src/screens/Admin.js`. Avoid expanding these further when a module-level helper is practical.
+- Q&A factories accept `now`, stores, media adapters, model/speech clients, limiters and `log` callbacks in `backend/modules/qaRequestStore.js`, `backend/modules/qaGeneration.js` and `backend/modules/qaMedia.js`. Preserve this dependency-injection surface for deterministic tests.
 
 **Parameters:**
 - Use a single options object for functions with several related values (`validateCandidate(candidate, context)`, `createTtsHandler({ database, client, cacheRoot })`) in `backend/modules/canonicalOutput.js` and `backend/routes.js`.
@@ -107,4 +113,4 @@
 
 ---
 
-*Convention analysis: 2026-08-31*
+*Convention analysis: 2026-09-30*
