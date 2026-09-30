@@ -4,6 +4,76 @@ const fs=require('node:fs'), path=require('node:path'), os=require('node:os'), z
 const Database=require('../../../../backend/node_modules/better-sqlite3');
 const {parseInstant,dateStart,makeRange,parseNginx,collectStats,routeGroup,formatReport}=require('./stats_core');
 
+test('activity distinguishes requests, unique active members, core use and mature onboarding cohorts',async()=>{
+    const f=fixture();try {
+        const db=new Database(f.config.dbPath);
+        db.exec(`ALTER TABLE users ADD COLUMN name TEXT; ALTER TABLE users ADD COLUMN email TEXT;
+          UPDATE users SET name='Active Member',email='active@example.test' WHERE id='private-user';
+          INSERT INTO users VALUES('fresh','2026-08-04 15:00:00',1,'siloam_api','Fresh Member','fresh@example.test'),('late','2026-08-28 15:00:00',1,'siloam_api','Late Member','late@example.test');
+          INSERT INTO api_requests VALUES
+          ('private-user',NULL,'1.2.3.4','/process','2026-07-30 15:00:00'),
+          ('private-user',NULL,'1.2.3.4','/process','2026-07-31 15:01:00'),
+          ('private-user',NULL,'1.2.3.4','/process','2026-07-31 15:01:01'),
+          ('private-user',NULL,'1.2.3.4','/script/AAAAAAAAAAA','2026-08-01 15:00:00'),
+          ('private-user',NULL,'1.2.3.4','/qa/requests/private-id/events','2026-08-02 15:00:00'),
+          ('private-new',NULL,'1.2.3.4','/auth/profile','2026-07-31 15:00:00'),
+          ('fresh',NULL,'1.2.3.4','/tts','2026-08-05 15:00:00'),
+          ('fresh',NULL,'1.2.3.4','/tts','2026-08-07 15:00:00'),
+          ('late',NULL,'1.2.3.4','/tts','2026-08-29 15:00:00'),
+          ('late',NULL,'1.2.3.4','/tts','2026-08-30 15:00:00'),
+          ('late',NULL,'1.2.3.4','/tts','2026-08-31 15:00:00');`);
+        db.close();const before=fs.readFileSync(f.config.dbPath),r=await collectStats(f.config),a=r.data.activity;
+        assert.equal(a.summary.apiActiveMembers,4);assert.equal(a.summary.coreActiveMembers,3);
+        assert.equal(a.daily.length,31);assert.equal(a.daily[0].apiUsers,2);assert.equal(a.daily[0].coreUsers,1);
+        assert.equal(a.daily[3].apiUsers,0);assert.equal(a.daily[3].coreUsers,0);
+        assert.equal(a.monthly[0].apiMau,4);assert.equal(a.monthly[0].coreMau,3);assert.equal(a.monthly[0].completeCalendarMonth,true);
+        assert.equal(a.weekly[0].completeCalendarWeek,false);assert.equal(a.weekly[1].completeCalendarWeek,true);
+        assert.equal(a.repeat.apiRepeatUsers,3);assert.equal(a.repeat.coreRepeatUsers,3);
+        assert.equal(a.topActiveMembers[0].name,'Active Member');assert.equal(a.topActiveMembers[0].coreRequests,4);
+        assert.equal(a.topActiveMembers[0].apiActiveDays,3);assert.equal(a.topActiveMembers[0].coreActiveDays,2);
+        assert.equal(a.topActiveMembers[0].registeredVideos,2);assert.equal(a.topActiveMembers[0].registeredVideoList.length,2);
+        assert.equal(a.onboarding.newMembers,3);assert.equal(a.onboarding.coreUsedMembers,2);assert.equal(a.onboarding.coreRepeatMembers,2);
+        assert.equal(a.onboarding.eligible7DayMembers,1);assert.equal(a.onboarding.returnedWithin7DayMembers,1);assert.equal(a.onboarding.returnWithin7DayRate,100);
+        assert.equal(a.onboarding.firstCoreDelayAverageSeconds,86400);
+        assert.equal(a.monthlyRetention[0].completeWindows,false);assert.equal(a.monthlyRetention[0].apiReturnRate,null);
+        assert.equal(a.videoActivity[0].videoId,'AAAAAAAAAAA');assert.equal(a.videoActivity[0].scriptUsers,1);
+        assert.equal(a.functionDaily.filter(x=>x.route==='description.request'&&x.date==='2026-08-01')[0].apiRequests,2);
+        assert.equal(r.data.engagement.apiActiveMembers,4);assert.equal(r.data.engagement.actualPlaybackActiveMembers,null);
+        const txt=formatReport(r);assert.ok(txt.includes('1위. Active Member (active@example.test)'));assert.ok(txt.includes('핵심 기능: 4건 / 2일'));
+        assert.ok(!/private-user|private-id|1\.2\.3\.4/.test(JSON.stringify(a)+txt));assert.deepEqual(fs.readFileSync(f.config.dbPath),before);
+    }finally{fs.rmSync(f.root,{recursive:true,force:true});}
+});
+
+test('calendar month boundaries, rolling seven days and previous-month retention count unique IDs',()=>{
+    const {analyzeActivity,kstDate}=require('./stats_core');
+    const row=(userId,createdAt,apiPath='/tts')=>({userId,createdAt,apiPath});
+    const rows=[row('a','2026-07-01 00:00:00'),row('a','2026-07-29 15:00:00'),row('a','2026-07-31 15:00:00'),row('a','2026-08-30 15:00:00'),row('b','2026-08-31T14:59:59.999Z'),row('b','2026-08-31 15:00:00')];
+    const deps={parseInstant,dateStart,kstDate,routeGroup},config={rows,profiles:[],registrations:[],range:makeRange('2026-08-01','2026-08-31',null),now:dateStart('2026-10-01'),earliest:'2026-06-01 00:00:00'};
+    const a=analyzeActivity(config,deps);
+    assert.equal(a.summary.apiActiveMembers,2);assert.equal(a.daily[0].rolling7CoreUsers,1);assert.equal(a.daily[0].rolling7CompleteWindow,true);
+    assert.equal(a.monthlyRetention[0].previousCoreUsers,1);assert.equal(a.monthlyRetention[0].returningCoreUsers,1);assert.equal(a.monthlyRetention[0].coreReturnRate,100);
+    assert.equal(a.summary.averageApiDau,3/31);
+    const spanning=analyzeActivity({...config,range:makeRange('2026-08-31','2026-09-01',null)},deps);
+    assert.equal(spanning.monthly.length,2);assert.equal(spanning.monthly[0].apiMau,2);assert.equal(spanning.monthly[1].apiMau,1);
+    assert.equal(spanning.summary.apiActiveMembers,2);assert.ok(spanning.monthly.every(x=>!x.completeCalendarMonth));
+    assert.ok(spanning.monthlyRetention.every(x=>x.coreReturnRate===null));
+    const empty=analyzeActivity({...config,rows:[]},deps);assert.equal(empty.summary.apiActiveMembers,0);assert.equal(empty.summary.top10CoreRequestShare,null);assert.equal(empty.onboarding.coreActivationRate,null);
+});
+
+test('top activity caps at ten core users and missing API data never becomes zero activity',async()=>{
+    const {analyzeActivity,kstDate}=require('./stats_core'),deps={parseInstant,dateStart,kstDate,routeGroup};
+    const rows=[];for(let i=0;i<12;i++)for(let j=0;j<=i;j++)rows.push({userId:'user-'+i,apiPath:'/tts',createdAt:'2026-08-05 00:00:00'});
+    rows.push({userId:'auth-only',apiPath:'/auth/profile',createdAt:'2026-08-05 00:00:00'});
+    rows.push({userId:null,guestId:'guest',apiPath:'/tts',createdAt:'2026-08-05 00:00:00'});
+    rows.push({userId:'invalid-date',apiPath:'/tts',createdAt:'bad'});
+    const a=analyzeActivity({rows,profiles:[],registrations:null,range:makeRange('2026-08-01','2026-08-31',null),now:dateStart('2026-09-01'),earliest:'2026-07-01 00:00:00'},deps);
+    assert.equal(a.summary.apiActiveMembers,13);assert.equal(a.summary.coreActiveMembers,12);
+    assert.equal(a.topActiveMembers.length,10);assert.equal(a.topActiveMembers[0].coreRequests,12);
+    assert.equal(a.topActiveMembers[0].registeredVideos,null);assert.equal(a.topActiveMembers[0].registeredVideoList,null);
+    assert.ok(!JSON.stringify(a.topActiveMembers).includes('user-'));
+    const f=fixture();try{const db=new Database(f.config.dbPath);db.exec('DROP TABLE api_requests');db.close();const r=await collectStats(f.config);assert.equal(r.data.api,null);assert.equal(r.data.activity,null);assert.equal(r.data.engagement.apiActiveMembers,undefined);}finally{fs.rmSync(f.root,{recursive:true,force:true});}
+});
+
 test('strict calendar dates, KST exclusive boundary, registration cutoff, mixed timestamp formats',()=>{
     assert.throws(()=>dateStart('2026-02-29'));assert.throws(()=>dateStart('2026-08-32'));assert.throws(()=>makeRange('2026-09-01','2026-08-31',null));
     const r=makeRange('2026-08-01','2026-08-31','2026-07-02 02:27:51');

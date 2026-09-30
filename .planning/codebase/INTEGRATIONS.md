@@ -109,9 +109,10 @@
 
 ## Operational Statistics Coverage
 
-- Current reporting source is the test branch's `.agents/skills/analyze_system_stats/scripts/stats_collector.js` and `stats_core.js`; the shared monthly skill delegates to this source. Service deployment is not needed for a read-only reporting tool.
+- Current reporting source is the test branch's `.agents/skills/analyze_system_stats/scripts/stats_collector.js`, `stats_core.js`, `stats_activity.js` and `stats_text.js`; the shared monthly skill delegates to this source. Service deployment is not needed for a read-only reporting tool.
 - SQLite is opened read-only with a schema manifest covering all 20 current tables; new/unavailable tables and failed queries produce warnings.
 - API route/day/user aggregates, QA receipts and usage states, detailed/daily QA ledger reconciliation, description/QA cost separation, token/search/pricing availability and grounding counters are reported without double summing ledgers.
+- Activity aggregates include API/core DAU, calendar and rolling-7-day WAU, calendar MAU, repeat-day distributions, comparable-week/month retention and observed new-member onboarding. Internal JSON/TXT contains the requested top ten members' names/emails, per-function counts and registered videos; sponsor HTML/PPTX excludes these identities. Missing historical windows prevent retention rates from being presented as complete.
 - Current QA job/lease/frame/subtitle file inventory, script validation/provenance/TTS snapshots, quarantine, verification attempts/decisions and donation income are included.
 - KST half-open periods normalize SQLite SQL/ISO UTC dates and receipt epoch milliseconds. Description costs are pre-aggregated before video rankings; recorded cost delay is a proxy, not actual build latency.
 - Nginx access/error gzip files and backend QA tagged events are streamed. Production-only PM2 files are inspected, but untimed lines cannot be assigned to a month. Source inventories and missing observed days are exposed.

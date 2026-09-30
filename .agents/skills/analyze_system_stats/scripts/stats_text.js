@@ -11,6 +11,12 @@ const values={completed:'완료',failed:'실패',queued:'대기',downloading:'�
 const label=k=>names[k]||sections[k]||values[k]||k;
 Object.assign(names,{completedDuration:'완료 영상 길이 범위',other_or_unknown:'기타·원인 불명',download:'다운로드 실패',error:'오류',crit:'심각한 오류',upstream_connection:'백엔드 연결 오류',INFO:'일반 정보',ERROR:'오류',WARN:'주의'});
 Object.assign(values,{korean:'한국어',mixed:'한국어·외국어 혼합',foreign:'외국어',under5min:'5분 미만','5to15min':'5분 이상 ~ 15분 미만','15to30min':'15분 이상 ~ 30분 미만','30minPlus':'30분 이상',RECORDED:'세부 기록 있음',PARTIAL:'세부 기록 일부 있음'});
+Object.assign(sections,{activity:'활성 회원·반복 이용·신규 회원 정착 및 상위 10명'});
+Object.assign(names,{
+    actualPlaybackActiveMembers:'실제 청취 기준 활성 회원',apiActiveMembers:'기간 내 API 활성 회원(명)',coreActiveMembers:'기간 내 핵심 기능 활성 회원(명)',averageApiDau:'일평균 API DAU(명)',averageCoreDau:'일평균 핵심 기능 DAU(명)',maxApiDau:'최대 API DAU(명)',maxCoreDau:'최대 핵심 기능 DAU(명)',averageDauCompleteWindow:'일평균의 전체 관측 구간 확보',coreMemberRequests:'회원 핵심 기능 요청(건)',top10CoreRequestShare:'상위 10명의 핵심 요청 비중',apiUsers:'API 활성 회원(명)',coreUsers:'핵심 기능 활성 회원(명)',apiRequests:'전체 API 요청(건)',coreRequests:'핵심 기능 요청(건)',rolling7ApiUsers:'최근 7일 API WAU(명)',rolling7CoreUsers:'최근 7일 핵심 기능 WAU(명)',completeWindow:'관측 구간 확보',rolling7CompleteWindow:'최근 7일 관측 구간 확보',weekly:'달력 주별 WAU(기간 밖 제외)',monthly:'달력 월별 MAU(기간 밖 제외)',month:'월',weekStart:'달력 주 시작일',startDate:'집계 시작일',endDate:'집계 종료일',apiMau:'API MAU(명)',coreMau:'핵심 기능 MAU(명)',apiWau:'API WAU(명)',coreWau:'핵심 기능 WAU(명)',completeCalendarMonth:'월 전체 관측 구간 확보',completeCalendarWeek:'주 전체 관측 구간 확보',repeat:'기간 내 반복 이용',apiRepeatUsers:'2일 이상 API 이용 회원(명)',coreRepeatUsers:'2일 이상 핵심 기능 이용 회원(명)',apiRepeatRate:'API 반복 이용 회원 비율',coreRepeatRate:'핵심 기능 반복 이용 회원 비율',activeDayDistribution:'회원별 이용 일수 분포',weeklyRetention:'다음 주 재이용',monthlyRetention:'다음 달 재이용',nextWeekStart:'다음 주 시작일',completeWindows:'두 구간의 전체 관측 범위 확보',apiCohort:'기준 주 API 이용 회원(명)',apiReturned:'다음 주 API 재이용 회원(명)',apiReturnRate:'API 재이용률',coreCohort:'기준 주 핵심 이용 회원(명)',coreReturned:'다음 주 핵심 재이용 회원(명)',coreReturnRate:'핵심 기능 재이용률',previousMonth:'직전 월',previousApiUsers:'직전 월 API 이용 회원(명)',returningApiUsers:'현재 월 API 재이용 회원(명)',previousCoreUsers:'직전 월 핵심 이용 회원(명)',returningCoreUsers:'현재 월 핵심 재이용 회원(명)',onboarding:'기간 내 신규 회원 정착',newMembers:'신규 가입 회원(명)',apiUsedMembers:'가입 후 API 이용 회원(명)',coreUsedMembers:'가입 후 핵심 기능 이용 회원(명)',coreRepeatMembers:'가입 후 2일 이상 핵심 이용 회원(명)',eligible7DayMembers:'첫 핵심 이용 후 7일 관측한 회원(명)',returnedWithin7DayMembers:'다른 날짜에 7일 안에 핵심 재이용한 회원(명)',uncoveredRegistrations:'로그 시작 이전 가입으로 첫 이용 미확인 회원(명)',firstCoreDelaySamples:'첫 핵심 이용 지연 표본(명)',firstCoreDelayAverageSeconds:'가입부터 첫 핵심 이용까지 평균',firstCoreDelayMedianSeconds:'가입부터 첫 핵심 이용까지 중앙값',coreActivationRate:'신규 회원 핵심 기능 이용률',returnWithin7DayRate:'7일 관측 회원의 핵심 재이용률',functions:'기능별 기간 이용 현황',activeDays:'회원 이용이 기록된 날짜(일)',topActiveMembers:'기간 내 상위 10명 액티브 사용자',name:'이름',email:'이메일',apiActiveDays:'API 이용 일수(일)',coreActiveDays:'핵심 기능 이용 일수(일)',coreRequestShare:'회원 전체 핵심 요청 중 비중',firstActivityAt:'기간 내 최초 API 이용',lastActivityAt:'기간 내 마지막 API 이용',registeredVideos:'등록 영상(개)',failedVideos:'현재 실패 영상(개)',registeredVideoList:'기간 내 등록 영상 목록',videoId:'영상 ID',title:'영상 제목',status:'현재 상태',durationSeconds:'영상 길이',registeredAt:'등록 시각',videoActivity:'영상별 경로 이용(실제 청취 횟수 아님)',scriptRequests:'대본 조회 요청(건)',scriptUsers:'대본 조회 회원(명)',historyQueryAvailable:'이전 기간 API 조회 성공',definitions:'집계 기준',summary:'활성 이용 요약',apiActive:'API 활성 기준',coreActive:'핵심 기능 활성 기준',coreRoutes:'핵심 기능 경로',calendar:'날짜 경계',retention:'재이용률 기준',ranking:'상위 회원 선정 기준',coverage:'관측 범위 해석',identity:'회원 식별정보 범위'
+});
+Object.assign(values,{comments:'영상 댓글 조회','qa.request':'Q&A 요청','qa.question.legacy':'기존 Q&A 질문','qa.audio':'Q&A 음성 요청','qa.audio.fetch':'Q&A 음성 가져오기','qa.tts.legacy':'기존 Q&A 음성 요청','qa.events':'Q&A 이벤트 연결','qa.cancel':'Q&A 취소','qa.presence':'Q&A 접속 유지','qa.config':'Q&A 설정','qa.other':'기타 Q&A'});
+Object.assign(names,{functionDaily:'기능별 일별 이용 현황'});
 const number=(n,d=2)=>n.toLocaleString('ko-KR',{maximumFractionDigits:d});
 const duration=n=>{const sec=Math.round(n),h=Math.floor(sec/3600),m=Math.floor(sec%3600/60);return [h?`${h}시간`:null,m?`${m}분`:null,`${sec%60}초`].filter(Boolean).join(' ');};
 function timestamp(v) {
@@ -25,7 +31,7 @@ function scalar(v,k='',context='') {
     if(typeof v==='number') {
         if(/Seconds$|^completedDuration$/.test(k))return duration(v);
         if(k==='firstAudioMsAverage')return number(v)+' ms';
-        if(/Rate$|^hitRate$/.test(k))return number(v)+'%';
+        if(/Rate$|Share$|^hitRate$/.test(k))return number(v)+'%';
         if(k==='amountKRW')return number(v)+'원';
         if((/cost/i.test(k)&&k!=='missingDescriptionCost')||(k==='total'&&context==='costs'))return '$'+number(v,6);
         if(/Bytes$|^bytes$/.test(k))return number(v/1024**3,3)+' GiB ('+number(v,0)+'바이트)';
@@ -34,7 +40,7 @@ function scalar(v,k='',context='') {
         if(k==='value'&&context==='ttsEligibility')return v===1?'TTS 가능':'TTS 제외';
         return number(v);
     }
-    if(['earliest','latest','updatedAt'].includes(k))return timestamp(v);
+    if(['earliest','latest','updatedAt','firstActivityAt','lastActivityAt','registeredAt'].includes(k))return timestamp(v);
     if(k==='weekday')return ['일요일','월요일','화요일','수요일','목요일','금요일','토요일'][Number(v)]||String(v);
     return values[v]||String(v).replace(/[\r\n\t]/g,' ');
 }
@@ -49,6 +55,11 @@ function formatReport(report) {
     summary('완료 영상 총 길이',v.completedSeconds,'completedSeconds');summary('현재 완료 상태 비율',v.successRate,'successRate');
     summary('AI API 기록 비용',cost.total==null?null:'$'+cost.total.toLocaleString('ko-KR',{minimumFractionDigits:2,maximumFractionDigits:2}));summary('비용 원장 호출(건)',cost.calls);
     summary('API 요청(건)',api.requests);summary('고유 인증 회원(명)',api.uniqueAuthenticatedUsers);
+    if(d.activity) {
+        summary('핵심 기능 이용 회원(명)',d.activity.summary.coreActiveMembers);
+        summary('일평균 API DAU / 핵심 기능 DAU(명)',[d.activity.summary.averageApiDau,d.activity.summary.averageCoreDau].map(n=>scalar(n)).join(' / '));
+        summary('2일 이상 핵심 기능 이용 회원(명)',d.activity.repeat.coreRepeatUsers);
+    }
     summary('보존된 시청 이력 / 즐겨찾기(건)',[e.retainedWatchRows,e.retainedFavorites].map(n=>scalar(n)).join(' / '));
     lines.push('','※ 영상·인증 상태는 수집 시점 기준입니다. 시청 이력·즐겨찾기는 실제 재생·클릭 횟수가 아닙니다.');
     if(d.qaReceipts?.periodEvidence)lines.push('※ Q&A: '+scalar(d.qaReceipts.periodEvidence));
@@ -85,6 +96,52 @@ function formatReport(report) {
     let i=1;
     for(const [key,value] of Object.entries(d)) {
         lines.push('',`${i++}. ${sections[key]||key}`,'-'.repeat(48));
+        if(key==='activity'&&value) {
+            const order=['definitions','summary','daily','weekly','monthly','repeat','weeklyRetention','monthlyRetention','onboarding','topActiveMembers','functions','functionDaily','videoActivity','historyQueryAvailable'];
+            for(const k of [...order,...Object.keys(value).filter(k=>!order.includes(k))]) {
+                if(!(k in value))continue;
+                const val=value[k];
+                if(k==='videoActivity') {
+                    const memberVideos=val.filter(v=>v.users>0),selected=memberVideos.sort((a,b)=>b.scriptUsers-a.scriptUsers||b.scriptRequests-a.scriptRequests||a.videoId.localeCompare(b.videoId)).slice(0,30);
+                    lines.push('',names.videoActivity,`  경로에 영상 ID가 기록된 영상: ${number(val.length)}개 / 회원 요청이 있는 영상: ${number(memberVideos.length)}개`);
+                    lines.push('  아래는 회원 요청이 있는 영상 중 대본 조회 회원 수·대본 요청 수 순 상위 30개입니다. 전체 목록은 JSON에 있습니다.');
+                    if(!selected.length)lines.push('  회원 요청이 기록된 영상 없음');
+                    for(const [index,v] of selected.entries()) {
+                        lines.push(`  ${index+1}. ${scalar(v.title)}`);
+                        lines.push(`     대본 조회 회원 ${number(v.scriptUsers)}명 / 대본 요청(회원·비회원) ${number(v.scriptRequests)}건 / 기록된 경로의 전체 요청 ${number(v.requests)}건`);
+                        lines.push(`     https://www.youtube.com/watch?v=${encodeURIComponent(v.videoId)}`);
+                    }
+                    continue;
+                }
+                if(k==='daily') {
+                    render(val.map(({date,apiUsers,coreUsers,rolling7ApiUsers,rolling7CoreUsers})=>({date,apiUsers,coreUsers,rolling7ApiUsers,rolling7CoreUsers})),k);
+                    const missing=val.filter(r=>!r.completeWindow),rollingMissing=val.filter(r=>!r.rolling7CompleteWindow);
+                    lines.push('  일별 관측 구간 미확보: '+(missing.length?missing.map(r=>r.date).join(', '):'없음'));
+                    lines.push('  최근 7일 관측 구간 미확보: '+(rollingMissing.length?rollingMissing.map(r=>r.date).join(', '):'없음'));
+                    lines.push('  ※ 일별 요청 수는 API 일별 집계에, 관측 범위 플래그는 JSON에 있습니다.');
+                    continue;
+                }
+                if(k!=='topActiveMembers'){render(val,k,0,key);continue;}
+                lines.push('',names.topActiveMembers,'※ '+value.definitions.ranking,'※ 이름·이메일은 내부 검토용 회원 식별정보입니다.');
+                if(!val.length)lines.push('해당 기간 핵심 기능 이용 회원 없음');
+                for(const user of val) {
+                    lines.push('',`${user.rank}위. ${scalar(user.name)} (${scalar(user.email)})`);
+                    lines.push(`  핵심 기능: ${number(user.coreRequests)}건 / ${number(user.coreActiveDays)}일 | 전체 API: ${number(user.apiRequests)}건 / ${number(user.apiActiveDays)}일`);
+                    lines.push(`  등록 영상: ${scalar(user.registeredVideos)}개 | 현재 완료: ${scalar(user.completedVideos)}개 | 실패: ${scalar(user.failedVideos)}개`);
+                    lines.push(`  회원 전체 핵심 요청 중 비중: ${scalar(user.coreRequestShare,'coreRequestShare')}`);
+                    lines.push(`  최초 이용: ${timestamp(user.firstActivityAt)} / 마지막 이용: ${timestamp(user.lastActivityAt)}`);
+                    render(user.routes,'routes',1);
+                    lines.push('  기간 내 등록 영상 목록');
+                    if(user.registeredVideoList===null)lines.push('    조회 불가');
+                    else if(!user.registeredVideoList.length)lines.push('    기간 내 등록 영상 없음');
+                    else for(const [index,v] of user.registeredVideoList.entries()) {
+                        lines.push(`    ${index+1}. ${scalar(v.title)} [${scalar(v.status)} / ${scalar(v.durationSeconds,'durationSeconds')}]`);
+                        lines.push(`       등록: ${timestamp(v.registeredAt)} | https://www.youtube.com/watch?v=${encodeURIComponent(v.videoId)}`);
+                    }
+                }
+            }
+            continue;
+        }
         if(value&&typeof value==='object'&&!Array.isArray(value)){for(const [k,val] of Object.entries(value))render(val,k,0,key);}else render(value,key);
     }
     lines.push('','부록 A. 로그 수집 범위','-'.repeat(48));

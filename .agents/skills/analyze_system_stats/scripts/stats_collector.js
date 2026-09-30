@@ -31,14 +31,14 @@ async function main(argv = process.argv.slice(2)) {
     if(options.local)report=await core.collectStats(config);
     else{
         const host=options.host||'mom';if(!/^[A-Za-z0-9_.@-]+$/.test(host)||host.startsWith('-'))throw new Error('잘못된 SSH 대상');
-        const helpers=['parseInstant','dateStart','kstDate','makeRange','routeGroup','parseNginx','collectStats'];
+        const helpers=['parseInstant','dateStart','kstDate','makeRange','routeGroup','parseNginx','analyzeActivity','collectStats'];
         const code=helpers.map(name=>`const ${name}=${core[name].toString()};`).join('\n')+`\ncollectStats(${JSON.stringify(config)}).then(r=>process.stdout.write(JSON.stringify(r))).catch(e=>{process.stderr.write('Collection failed: '+e.message+'\\n');process.exitCode=1;});`;
         const remote=spawnSync('ssh',['-o','BatchMode=yes',host,'node'],{input:code,encoding:'utf8',maxBuffer:32*1024*1024,timeout:600000});
         if(remote.error||remote.status!==0)throw new Error('통계 수집 실패: '+(remote.error?.message||remote.stderr.trim()));
         report=JSON.parse(remote.stdout);
     }
     if(report.schemaVersion!==2)throw new Error('지원하지 않는 수집 결과 버전');
-    report.collector={version:2,sha256:crypto.createHash('sha256').update(fs.readFileSync(__filename)).update(fs.readFileSync(require.resolve('./stats_core'))).update(fs.readFileSync(require.resolve('./stats_text'))).digest('hex')};
+    report.collector={version:2,sha256:crypto.createHash('sha256').update(fs.readFileSync(__filename)).update(fs.readFileSync(require.resolve('./stats_core'))).update(fs.readFileSync(require.resolve('./stats_text'))).update(fs.readFileSync(require.resolve('./stats_activity'))).digest('hex')};
     const dir=path.resolve(options['output-dir']||path.join(process.cwd(),'prod_report'));fs.mkdirSync(dir,{recursive:true});
     const stem=`system_stats_report_${report.range.startDate.replaceAll('-','')}_${report.range.endDate.replaceAll('-','')}`;
     for(const [extension,body] of [['json',JSON.stringify(report,null,2)+'\n'],['txt',core.formatReport(report)]]){

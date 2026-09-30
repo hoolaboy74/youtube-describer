@@ -82,7 +82,7 @@ async function collectStats(config) {
     const warnings = [];
     const manifest = {
         videos: 'period registration/current status', users: 'period registrations/current authentication',
-        api_requests: 'period route/user/day requests', api_costs: 'period detailed cost ledger',
+        api_requests: 'period activity/DAU/WAU/MAU/repeat/cohorts/top members/video routes', api_costs: 'period detailed cost ledger',
         user_watch_histories: 'retained last-watch rows, not playback events', user_favorites: 'retained favorites, not click events',
         comments: 'retained comments', posts: 'retained posts/notices', post_comments: 'retained community comments',
         qa_user_daily_costs: 'period KST daily summary and reconciliation', qa_request_receipts: 'period request and accounting states',
@@ -114,7 +114,7 @@ async function collectStats(config) {
     const result = { schemaVersion: 2, collectedAt: new Date(now).toISOString(), range, coverage, warnings,
         limitations: [
             '월별 상태는 현재 보존된 DB·로그를 기준으로 하며 삭제된 과거 자료와 월말 상태를 복원하지 않습니다.',
-            '시청 이력은 회원별 최근 20개이며 재시청 시 갱신됩니다. 실제 재생 횟수·완주율·월간 활성 회원 수는 측정 불가입니다.',
+            '시청 이력은 회원별 최근 20개이며 재시청 시 갱신됩니다. 실제 재생 횟수·완주율·실제 청취 기준 활성 회원은 측정 불가입니다. API 이용 기준 DAU·WAU·MAU는 별도로 집계합니다.',
             '즐겨찾기는 현재 남아 있는 항목 수입니다. 추가/취소 클릭 이벤트 수는 측정 불가입니다.',
             'API 로그에는 method/status/duration/requestId가 없습니다. 요청은 성공 행동 수 또는 실제 청취 횟수가 아닙니다.',
             '캐시 파일 수·mtime와 API 요청 수로 실제 TTS HIT/MISS 비율 또는 합성 비용을 계산할 수 없습니다.',
@@ -191,7 +191,7 @@ async function collectStats(config) {
             watchUsers: read('user_watch_histories',()=>db.prepare(`SELECT COUNT(DISTINCT userId) AS n FROM user_watch_histories WHERE ${where('watchedAt')}`).get(...bounds).n),
             comments: countPeriod('comments'), posts: countPeriod('posts'), postComments: countPeriod('post_comments'),
             notices: has('posts','is_notice') ? read('posts',()=>db.prepare(`SELECT COUNT(*) AS n FROM posts WHERE ${where('createdAt')} AND is_notice=1`).get(...bounds).n) : null,
-            actualPlays: null, favoriteClicks: null, monthlyActiveMembers: null };
+            actualPlays: null, favoriteClicks: null, actualPlaybackActiveMembers: null };
         result.data.verifications = { attempts: countPeriod('user_verifications'), methods: group('user_verifications','verificationMethod',true),
             currentStatusesOfPeriodAttempts: group('user_verifications','status',true), decisionsInPeriod: has('user_verifications','verifiedAt') ? group('user_verifications','status',true,'verifiedAt') : null };
         result.data.donations = read('donations',()=>db.prepare(`SELECT COUNT(*) AS count,${zeroSum('amount')} AS amountKRW FROM donations WHERE ${where('donation_date')}`).get(...bounds));
@@ -222,6 +222,21 @@ async function collectStats(config) {
             earliest:earliestApi, routes:[...routeMap.values()].map(r=>({...r,users:r.users.size})).sort((a,b)=>b.requests-a.requests),
             daily:[...dayMap.values()].map(r=>({...r,users:r.users.size})),scope:'추적된 API 요청. 성공·실제 재생·고유 사람 수가 아님'} : null;
         if(!Number.isFinite(parseInstant(earliestApi)) || low<parseInstant(earliestApi))warnings.push({code:'API_LOGGING_NOT_AVAILABLE_FOR_FULL_PERIOD',source:'api_requests'});
+        const priorMonth=new Date(range.startDate.slice(0,7)+'-01T00:00:00Z');priorMonth.setUTCMonth(priorMonth.getUTCMonth()-1);
+        const historyStart=new Date(dateStart(priorMonth.toISOString().slice(0,10))).toISOString();
+        const earlierRows=read('api_requests',()=>db.prepare(`SELECT userId,apiPath,createdAt FROM api_requests WHERE julianday(createdAt)>=julianday(?) AND julianday(createdAt)<julianday(?)`).all(historyStart,range.start));
+        const profiles=read('users',()=>db.prepare(`SELECT id,createdAt,${has('users','name')?'name':'NULL AS name'},${has('users','email')?'email':'NULL AS email'} FROM users`).all());
+        const registrations=read('videos',()=>db.prepare(`SELECT videoId,${has('videos','title')?'title':'NULL AS title'},requested_by,status,duration,createdAt FROM videos WHERE ${where('createdAt')} ORDER BY createdAt,videoId`).all(...bounds));
+        const videoTitles=read('videos',()=>db.prepare(`SELECT videoId,${has('videos','title')?'title':'NULL AS title'} FROM videos`).all());
+        result.data.activity=apiRead===null?null:analyzeActivity({rows:[...(earlierRows||[]),...apiRows],profiles,registrations,videoTitles,range,now,earliest:earliestApi},{parseInstant,dateStart,kstDate,routeGroup});
+        if(result.data.activity) {
+            result.data.activity.historyQueryAvailable=earlierRows!==null;
+            if(earlierRows===null) {
+                for(const row of result.data.activity.monthlyRetention){row.completeWindows=false;row.apiReturnRate=null;row.coreReturnRate=null;}
+                for(const row of result.data.activity.daily){row.rolling7CompleteWindow=false;}
+            }
+            result.data.engagement.apiActiveMembers=result.data.activity.summary.apiActiveMembers;
+        }
         // Aggregate description costs before joining videos: never multiply video counts/durations.
         result.data.descriptionAccounting = read('api_costs',()=>{
             if(!schema.videos || !has('api_costs','request_type'))return null;
@@ -308,4 +323,5 @@ async function collectStats(config) {
 }
 
 const {formatReport}=require('./stats_text');
-module.exports={parseInstant,dateStart,kstDate,makeRange,routeGroup,parseNginx,collectStats,formatReport};
+const {analyzeActivity}=require('./stats_activity');
+module.exports={parseInstant,dateStart,kstDate,makeRange,routeGroup,parseNginx,collectStats,formatReport,analyzeActivity};
