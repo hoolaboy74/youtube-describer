@@ -207,8 +207,8 @@ await assert.rejects(
 ## Statistics Collector v2 Verification
 
 - `node --test .agents/skills/analyze_system_stats/scripts/stats_collector.test.js`: seven deterministic tests cover strict dates and registration cutoff, UTC SQL/ISO/epoch KST boundaries, nonmultiplying cost joins, QA reconciliation, request/usage states, gzip corruption, missing log days/tables, scope labels, privacy, read-only DB bytes and repeated collection. Activity fixtures also verify unique DAU/WAU/MAU versus duplicate requests, core-route exclusions, zero days, partial calendar windows, monthly retention, mature 7-day onboarding cohorts, ten-member ranking and missing API data staying null.
-- `python3 -m unittest discover -s .agents/skills/analyze_system_stats/scripts -p 'test_build_monthly_report.py'`: three tests verify single-pass substitutions, description-only ratios, missing-input rejection, HTML semantics, PPTX ZIP/XML packaging and source-hash provenance.
-- The 8 August slides were checked in headless Chrome for loaded cover/alt, no clipped slide content, no July sample values and keyboard Enter opening native details.
+- `python3 -m unittest discover -s .agents/skills/analyze_system_stats/scripts -p 'test_build_monthly_report.py'`: four v3 tests verify activity/retention/onboarding values, anonymous projection, comparable monthly history, missing/partial date rejection, three accessible charts, HTML semantics, PPTX slide relationship targets and text-body namespace, ZIP/XML packaging, privacy and source-hash provenance.
+- The 8 August v3 slides were checked in headless Chrome for loaded cover/alt, three charts, no clipped content or overlapping footnotes, 390px mobile layout without page overflow and keyboard Enter opening native details. Chart descriptions and daily data tables provide accessible numeric alternatives.
 - The collector-related gaps below describe the earlier audit baseline. V2 resolves basic aggregation/source/date correctness; actual browser playback/TTS HIT instrumentation and retained-source limitations remain.
 
 ## Coverage Gaps
