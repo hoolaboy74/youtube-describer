@@ -38,7 +38,7 @@ async function main(argv = process.argv.slice(2)) {
         report=JSON.parse(remote.stdout);
     }
     if(report.schemaVersion!==2)throw new Error('지원하지 않는 수집 결과 버전');
-    report.collector={version:2,sha256:crypto.createHash('sha256').update(fs.readFileSync(__filename)).update(fs.readFileSync(require.resolve('./stats_core'))).digest('hex')};
+    report.collector={version:2,sha256:crypto.createHash('sha256').update(fs.readFileSync(__filename)).update(fs.readFileSync(require.resolve('./stats_core'))).update(fs.readFileSync(require.resolve('./stats_text'))).digest('hex')};
     const dir=path.resolve(options['output-dir']||path.join(process.cwd(),'prod_report'));fs.mkdirSync(dir,{recursive:true});
     const stem=`system_stats_report_${report.range.startDate.replaceAll('-','')}_${report.range.endDate.replaceAll('-','')}`;
     for(const [extension,body] of [['json',JSON.stringify(report,null,2)+'\n'],['txt',core.formatReport(report)]]){

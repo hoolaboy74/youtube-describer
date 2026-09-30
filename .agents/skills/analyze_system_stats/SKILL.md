@@ -14,6 +14,14 @@ node /Users/chacha/src/youtube-describer-test/.agents/skills/analyze_system_stat
 
 출력은 `system_stats_report_YYYYMMDD_YYYYMMDD.json`과 `.txt`입니다. JSON이 후원 리포트의 입력이며, TXT는 같은 수집 결과를 사람이 검토하기 위한 문서입니다. 날짜는 실제 YYYY-MM-DD 달력 날짜로 검증하고 한국 시간의 시작일부터 종료일 다음날 00:00까지의 반개방 범위를 UTC로 변환합니다. 최초 가입일 이전 요청은 실제 가입 순간으로 보정합니다. 인자 생략 시 최초 가입부터 현재 한국 날짜까지 조회합니다.
 
+TXT는 핵심 요약 → 해석 기준·수집 경고 → 기능별 상세 통계 → 수집 출처·테이블 부록 순서입니다. 한글 항목명, 천 단위 구분, 시간·비용·비율 단위와 정렬된 표를 사용합니다. 비정상 요청 방식의 긴 원문은 합계로 묶고 상세 원자료는 JSON에 보존합니다. 미측정 값을 0으로 바꾸지 않습니다.
+
+기존 JSON으로 TXT의 형식만 다시 적용할 때는 아래 명령을 사용합니다. 원자료의 수집 시각·값과 HTML/PPTX는 바뀌지 않습니다.
+
+```bash
+node /Users/chacha/src/youtube-describer-test/.agents/skills/analyze_system_stats/scripts/stats_text.js /Users/chacha/src/youtube-describer/prod_report/system_stats_report_20260801_20260831.json
+```
+
 ## 수집 범위
 
 - 가입자, 현재 인증 상태, 인증 시도/결정, 등록 영상 상태·길이·일/요일/시간대·실패 분류.

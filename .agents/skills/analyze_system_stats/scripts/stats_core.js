@@ -307,21 +307,5 @@ async function collectStats(config) {
     return result;
 }
 
-function formatReport(report) {
-    const labels={members:'회원 가입 및 현재 인증 상태',videos:'기간 내 등록 영상 및 현재 처리 상태',costs:'AI API 상세 비용 원장',qaDaily:'Q&A 일별 요약',qaReceipts:'Q&A 요청 영수증',qaReconciliation:'Q&A 비용 원장 대조',grounding:'검색 grounding 월별 한도 원장',engagement:'보존된 시청·즐겨찾기·커뮤니티 이력',verifications:'인증 이력',donations:'후원금 수입',settings:'현재 운영 설정',scriptsSnapshot:'현재 전체 대본 검증 상태',quarantine:'기간 내 검증 격리',qaCacheSnapshot:'현재 Q&A 캐시 상태',api:'API 경로별 요청 및 인증 사용자',descriptionAccounting:'영상별 설명 비용 및 기록 지연 참고치',nginx:'Nginx 접속 요청',backend:'백엔드 기능별 로그',pm2:'PM2 로그 관측 상태',nginxErrors:'Nginx 오류 로그',disk:'현재 디스크·캐시 파일',tts:'TTS 실측 가능 범위'};
-    const lines=['운영 서버 종합 서비스 통계 보고서 v2','',`요청 기간: ${report.range.startDate} ~ ${report.range.endDate} (한국 시간)`,`실제 UTC 범위: ${report.range.start} <= 시각 < ${report.range.endExclusive}`,`수집 시각: ${report.collectedAt}`,'','집계 해석'];
-    const names={registered:'등록 영상 수',completed:'완료 상태 영상 수',failed:'실패 상태 영상 수',completedSeconds:'완료 영상 총 길이(초)',averageSeconds:'평균 길이(초)',new:'신규 회원 수',verifiedNew:'현재 인증된 신규 회원 수',total:'기록 비용 합계(달러)',descriptionCost:'설명 API 비용(달러)',qaCost:'Q&A API 비용(달러)',calls:'원장 호출 수',requests:'요청 수',uniqueAuthenticatedUsers:'고유 인증 회원 수',retainedWatchRows:'보존된 시청 이력 수',retainedFavorites:'보존된 즐겨찾기 수',actualPlays:'실제 재생 횟수',favoriteClicks:'즐겨찾기 클릭 횟수',scope:'집계 범위',date:'한국 날짜',count:'건수',amountKRW:'후원금 수입(원)',hitRate:'실제 TTS 적중률',synthesisCost:'TTS 합성 비용',readErrors:'읽기 실패 수',missingObservedDays:'로그 미관측 날짜',missingDateFiles:'없는 일별 로그 파일',periodModifiedFiles:'현재 남아 있는 파일 중 기간 내 수정 파일 수'};
-    function render(value,depth=1){
-        const pad='  '.repeat(depth);
-        if(value==null)return[pad+'측정 불가 또는 자료 없음'];
-        if(Array.isArray(value)){if(!value.length)return[pad+'보존된 해당 자료 없음'];return value.flatMap((row,index)=>typeof row==='object'&&row!==null?[pad+`${index+1}번째 항목`,...render(row,depth+1)]:[pad+String(row)]);}
-        if(typeof value==='object')return Object.entries(value).flatMap(([key,v])=>typeof v==='object'&&v!==null?[pad+(names[key]||key),...render(v,depth+1)]:[pad+(names[key]||key)+': '+(v==null?'측정 불가 또는 자료 없음':String(v))]);
-        return[pad+String(value)];
-    }
-    lines.push(...report.limitations.map(s=>'  '+s),'');
-    let i=1;for(const [key,value] of Object.entries(report.data)){lines.push(`${i++}. ${labels[key]||key}`,'',...render(value),'');}
-    lines.push('수집 출처 및 날짜별 관측 상태','',...render(report.sources),'','테이블 수집 범위','',...render(report.coverage),'','경고','',...render(report.warnings),'');
-    return lines.join('\n');
-}
-
+const {formatReport}=require('./stats_text');
 module.exports={parseInstant,dateStart,kstDate,makeRange,routeGroup,parseNginx,collectStats,formatReport};
