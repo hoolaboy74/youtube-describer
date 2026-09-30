@@ -1,51 +1,49 @@
 ---
 name: analyze_system_stats
-description: 운영 서버(mom)의 SQLite DB 및 Nginx access.log를 SSH 연계 수집하여, 회원 가입 시점 이후의 영상 해설 생성 현황, 사용자 요청 랭킹, 플랫폼 접속 환경(모바일 vs PC) 통계를 분석하고 일반 텍스트 보고서로 작성하는 스킬입니다.
+description: 운영 서버 mom의 읽기 전용 DB와 로그·캐시를 수집해 기능별 통계, 수집 범위와 측정 한계를 JSON/TXT로 작성합니다.
 ---
-# 시스템 통계 분석 스킬 (analyze_system_stats)
+# 시스템 통계 분석 v2
 
-이 스킬은 유튜브 영상 해설 서비스의 운영 지표 분석, 플랫폼 유입 분석, 회원/비회원 활동 및 커뮤니티 성과 지표 가공을 완전히 자동화합니다.
+소스는 test 브랜치의 `/Users/chacha/src/youtube-describer-test`에서 관리합니다. 운영 DB를 수정하거나 서버의 database.js를 import하지 않습니다.
 
-## 구성 요소
+## 실행
 
-- **scripts/stats_collector.js**: 원격 운영 서버(`mom`)의 SQLite DB, Nginx access.log, 백엔드 logs/*.log, 그리고 TTS 캐시 디렉토리를 종합 연계 분석하여 다음 지표들을 도출하고 `prod_report/system_stats_report_[시작일]_[종료일].txt` 일반 텍스트 파일로 작성하는 Node.js 유틸리티입니다:
-  1. 회원 가입 추이 및 인증 경로별(실로암 API, 복지카드 OCR, 관리자 승인) 가용 현황
-  2. 비디오 해설 빌드 성공률, 영상 길이 분포 및 평균/최단/최장 영상 빌드 소요 시간(Latency)
-  3. 회원 그룹 세그먼트별(시각장애인 인증 회원, 대기 회원, 일반 회원 등) 비디오 생성 요청 수, 작성 댓글 수, 게시글 수, 시청 이력 점유율 분석
-  4. Nginx 트래픽 분석(총 아웃바운드 데이터(GB), HTTP 응답 상태 코드 분포, 최다 요청 IP Top 10)
-  5. 검색어 트렌드 분석(GET /api/search의 검색 키워드 분석 및 Top 10 랭킹)
-  6. 하이브리드 TTS 캐시 시스템 분석(누적 캐시 개수/용량, 신규 생성 캐시 파일 수 및 Nginx 요청 대비 TTS 캐시 히트율(Cache Hit Rate))
-  7. 백엔드 시스템 logs/*.log 예외 분석(INFO/WARN/ERROR 총 건수 및 다발적 에러 패턴 Top 5)
-
-## 작동 방식
-
-1. 로컬 환경에서 `stats_collector.js`를 실행하면 SSH 커넥션을 이용해 원격 서버 `mom`으로 내장 통계 쿼리를 표준 입력으로 보냅니다.
-2. 원격 서버에서 데이터를 집계(SQLite cache.db 조회, Nginx 로그 및 백엔드 로그 파싱, TTS 캐시 파일 추적)한 뒤 JSON 문자열로 로컬에 리턴합니다.
-3. 로컬에서 수신된 데이터를 바탕으로 통합 일반 텍스트 리포트(`.txt`)를 `prod_report/` 디렉토리에 자동 생성합니다.
-4. 모든 조사는 사용자가 날짜 인자를 어떻게 입력하든 관계없이 무조건 **최초 회원가입 시점(2026-07-02 02:27:51)** 이후의 데이터만을 강제 한계선(하한선)으로 설정하여 필터링합니다. (그 이전의 개발/테스트 데이터는 제외됨)
-
-## 실행 방법
-
-### 1. 기본 실행 (전체 기간 조회)
-최초 회원 가입 시점부터 현재 시점까지의 전체 데이터를 수집합니다.
 ```bash
-node .agents/skills/analyze_system_stats/scripts/stats_collector.js
+node /Users/chacha/src/youtube-describer-test/.agents/skills/analyze_system_stats/scripts/stats_collector.js 2026-08-01 2026-08-31 --output-dir /Users/chacha/src/youtube-describer/prod_report
 ```
 
-### 2. 특정 기간 조회
-명령행 파라미터로 시작일과 종료일을 입력하여 조회 범위를 동적으로 지정할 수 있습니다.
-- 인자 형식: `node stats_collector.js [YYYY-MM-DD] [YYYY-MM-DD]`
-- 시작일이 최초 회원가입 이전일 경우, 강제로 최초 회원가입일(`2026-07-02 02:27:51`)부터 데이터가 집계됩니다.
-- 입력하지 않은 값에 대해서는 시작일의 경우 `최초 회원 가입일`, 종료일의 경우 `현재 시각`이 기본 적용됩니다.
+출력은 `system_stats_report_YYYYMMDD_YYYYMMDD.json`과 `.txt`입니다. JSON이 후원 리포트의 입력이며, TXT는 같은 수집 결과를 사람이 검토하기 위한 문서입니다. 날짜는 실제 YYYY-MM-DD 달력 날짜로 검증하고 한국 시간의 시작일부터 종료일 다음날 00:00까지의 반개방 범위를 UTC로 변환합니다. 최초 가입일 이전 요청은 실제 가입 순간으로 보정합니다. 인자 생략 시 최초 가입부터 현재 한국 날짜까지 조회합니다.
 
-예시 1: 7월 한 달간 조회 (7월 1일부터 7월 31일까지)
-```bash
-node .agents/skills/analyze_system_stats/scripts/stats_collector.js 2026-07-01 2026-07-31
-```
-(이 경우 시작일 7월 1일은 최초 가입일 이전이므로 7월 2일 02:27:51부터 자동으로 보정되어 수집됩니다.)
+## 수집 범위
 
-예시 2: 7월 2일부터 7월 4일까지 조회
+- 가입자, 현재 인증 상태, 인증 시도/결정, 등록 영상 상태·길이·일/요일/시간대·실패 분류.
+- API 기능별 요청·고유 인증 회원·일별 이용. DB에는 method/status/latency가 없으므로 성공 행동 횟수로 해석하지 않습니다.
+- 설명/Q&A 상세 비용, 모델·토큰·thinking/cached/tool/search·가격 버전, Q&A 일별 요약과 대조 경고. 상세 원장과 요약 원장을 중복 합산하지 않습니다.
+- Q&A 요청 영수증의 완료/실패/취소/사용량 불확실 상태, 현재 캐시 작업/lease/프레임/자막·참조 파일 상태.
+- 대본 태그·정책·근거·TTS 적격성의 현재 전체 현황, 기간 내 검증 격리, 후원금 수입과 허용된 운영 설정.
+- Nginx access/error 압축 로그, 일별 backend 로그의 QA-MEDIA/QA-GENERATION/QA-TTS/QA-COST 등 이벤트, 운영 서비스에 한정된 PM2 로그.
+- 일반/Q&A TTS, Q&A 미디어, temp의 현재 디스크 및 파일 mtime 현황.
+
+현재 20개 테이블의 처리 범위를 manifest로 기록합니다. 새 테이블, 누락 테이블/컬럼, 쿼리/파일 읽기 실패, 로그 미관측 날짜, 원장 불일치를 경고합니다. 개인정보·IP·질문/답변 원문·오디오 티켓·민감한 settings 값은 출력하지 않습니다.
+
+## 해석 규칙
+
+시청은 최근 20개 제한의 현재 보존 이력이며 반복 재생 시 갱신됩니다. 즐겨찾기는 현재 남아 있는 항목입니다. 실제 재생·클릭 횟수·완주율·실제 TTS HIT/MISS·합성 비용·브라우저 첫 음성 지연은 기록되지 않아 null/측정 불가로 표시합니다. 캐시 스냅샷을 월간 발생 횟수로 사용하지 않습니다. IP 방문과 인증 회원 수를 합산해 사람 수를 만들지 않습니다. 비용 기록 지연을 실제 빌드 완료 시간으로 표시하지 않습니다.
+
+## 후원 리포트
+
 ```bash
-node .agents/skills/analyze_system_stats/scripts/stats_collector.js 2026-07-02 2026-07-04
+bash /Users/chacha/src/youtube-describer-test/.agents/skills/analyze_system_stats/scripts/run_monthly_report.sh 2026-08-01 2026-08-31
 ```
-생성되는 리포트는 날짜가 표시되어 다른 기간 파일들과 구분되어 `prod_report/` 디렉토리에 저장됩니다 (예: `prod_report/system_stats_report_20260702_20260704.txt`).
+
+항상 새로 수집한 v2 JSON으로 같은 디자인의 HTML/PPTX와 입력 SHA-256 manifest를 생성합니다. 서버 배포는 별도 요청이 있어야 합니다.
+
+## 검증
+
+```bash
+cd /Users/chacha/src/youtube-describer-test
+node --test .agents/skills/analyze_system_stats/scripts/stats_collector.test.js
+python3 -m unittest discover -s .agents/skills/analyze_system_stats/scripts -p 'test_build_monthly_report.py'
+```
+
+`--local --db PATH --sqlite-module PATH`와 로그/캐시 경로 옵션으로 격리 fixture를 검사할 수 있습니다. 실제 API/AI 호출은 하지 않습니다.

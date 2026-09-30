@@ -204,6 +204,13 @@ await assert.rejects(
 - Assert stable domain codes and response status codes rather than provider-specific error text, following `backend/test_prompt_policy.js` and `backend/test_canonical_integration.js`.
 - For policy failures, assert the exact reason code and `ttsEligible: false`; this is the safety pattern in `backend/test_canonical_output.js` and `backend/test_audio_language_policy.js`.
 
+## Statistics Collector v2 Verification
+
+- `node --test .agents/skills/analyze_system_stats/scripts/stats_collector.test.js`: four deterministic tests cover strict dates and registration cutoff, UTC SQL/ISO/epoch KST boundaries, nonmultiplying cost joins, QA reconciliation, request/usage states, gzip corruption, missing log days/tables, scope labels, privacy, read-only DB bytes and repeated collection.
+- `python3 -m unittest discover -s .agents/skills/analyze_system_stats/scripts -p 'test_build_monthly_report.py'`: three tests verify single-pass substitutions, description-only ratios, missing-input rejection, HTML semantics, PPTX ZIP/XML packaging and source-hash provenance.
+- The 8 August slides were checked in headless Chrome for loaded cover/alt, no clipped slide content, no July sample values and keyboard Enter opening native details.
+- The collector-related gaps below describe the earlier audit baseline. V2 resolves basic aggregation/source/date correctness; actual browser playback/TTS HIT instrumentation and retained-source limitations remain.
+
 ## Coverage Gaps
 
 - No deterministic collector test is detected for `.agents/skills/analyze_system_stats/scripts/stats_collector.js`. It performs SSH and output writes at module load, preventing simple import-only unit tests; separate parsing/aggregation from remote execution before adding fixtures.

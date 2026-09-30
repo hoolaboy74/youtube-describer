@@ -109,14 +109,14 @@
 
 ## Operational Statistics Coverage
 
-- Collector audited: `/Users/chacha/src/youtube-describer/.agents/skills/analyze_system_stats/scripts/stats_collector.js`; map source: `/Users/chacha/src/youtube-describer-test` branch test. Production schema and deployed source hashes have been verified against main; test-only additions still require separate deployment checks.
-- Collector reads legacy api_costs totals/model image/text tokens, without request_type or component token/cost breakdown: `/Users/chacha/src/youtube-describer/.agents/skills/analyze_system_stats/scripts/stats_collector.js`.
-- Collector reads api_requests for IP/time member correlation, but does not summarize endpoint activity, member/guest request volume, or Q&A usage from that table: `/Users/chacha/src/youtube-describer/.agents/skills/analyze_system_stats/scripts/stats_collector.js`.
-- Collector omits qa_user_daily_costs, gemini_monthly_grounding_usage, QA cache tables and request receipts: `/Users/chacha/src/youtube-describer/.agents/skills/analyze_system_stats/scripts/stats_collector.js`.
-- Direct video-to-cost joins multiply ranking video counts/durations when a video has multiple calls; cost creation time does not establish description completion latency: `/Users/chacha/src/youtube-describer/.agents/skills/analyze_system_stats/scripts/stats_collector.js`.
-- Current disk/cache state cannot reconstruct deleted monthly assets: `/Users/chacha/src/youtube-describer/.agents/skills/analyze_system_stats/scripts/stats_collector.js`, `backend/index.js`.
-- Skill/comments claim registration lower-bound enforcement, but inspected collector uses requested start or 1970: `/Users/chacha/src/youtube-describer/.agents/skills/analyze_system_stats/scripts/stats_collector.js`, `.agents/skills/analyze_system_stats/SKILL.md`.
-- SQLite CURRENT_TIMESTAMP is UTC; logger emits KST; collector uses plain SQL date bounds. Align monthly boundaries: `backend/database.js`, `backend/logger.js`, `/Users/chacha/src/youtube-describer/.agents/skills/analyze_system_stats/scripts/stats_collector.js`.
+- Current reporting source is the test branch's `.agents/skills/analyze_system_stats/scripts/stats_collector.js` and `stats_core.js`; the shared monthly skill delegates to this source. Service deployment is not needed for a read-only reporting tool.
+- SQLite is opened read-only with a schema manifest covering all 20 current tables; new/unavailable tables and failed queries produce warnings.
+- API route/day/user aggregates, QA receipts and usage states, detailed/daily QA ledger reconciliation, description/QA cost separation, token/search/pricing availability and grounding counters are reported without double summing ledgers.
+- Current QA job/lease/frame/subtitle file inventory, script validation/provenance/TTS snapshots, quarantine, verification attempts/decisions and donation income are included.
+- KST half-open periods normalize SQLite SQL/ISO UTC dates and receipt epoch milliseconds. Description costs are pre-aggregated before video rankings; recorded cost delay is a proxy, not actual build latency.
+- Nginx access/error gzip files and backend QA tagged events are streamed. Production-only PM2 files are inspected, but untimed lines cannot be assigned to a month. Source inventories and missing observed days are exposed.
+- Disk/mtime values are current snapshots. Actual play/click/TTS HIT rates and deleted past transitions cannot be reconstructed; unavailable measurements stay null.
+- Raw JSON/TXT and sponsor HTML/PPTX share one collection; a manifest binds input SHA-256 and collector SHA-256. Source paths and usage are in `.agents/skills/analyze_system_stats/SKILL.md`.
 
 ---
 

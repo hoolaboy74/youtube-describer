@@ -2,6 +2,8 @@
 
 **Analysis Date:** 2026-09-30
 
+**Statistics follow-up (2026-09-30):** The statistics defects below describe the legacy main collector audited earlier. The test branch now contains collector v2 in `.agents/skills/analyze_system_stats/scripts/stats_collector.js` and `stats_core.js`: 20-table coverage, read-only database, normalized KST half-open boundaries, nonmultiplying description cost joins, API/QA aggregation, source warnings, streaming logs and scoped snapshots. Deterministic collector and report-builder tests pass. The monthly skill delegates to this test-branch source; the legacy main file was not merged. See `.planning/features/statistics-audit/IMPLEMENTATION.md`. Remaining issues are missing historical event instrumentation, mutable source data, legacy token breakdowns, untimed PM2 lines and absent cache roots.
+
 ## Tech Debt
 
 **Statistics have no source/metric coverage contract:**
