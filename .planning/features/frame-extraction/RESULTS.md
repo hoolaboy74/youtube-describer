@@ -41,7 +41,7 @@ Initial backend suite: 130/130 passed. After the last additions, 132/133 passed,
 
 ## Test deployment
 
-Deployed application revision: **d28ae3d79abda95725f2820c202c966f3bf22838**. Test site: https://test.blindmom.org/. Deployment script completed successfully including frontend build. Test PM2 backend online (PID 2521788). Deployed source hashes match the local committed frame extractor, limiter, QA media and video processor.
+Initial deployed application revision: **d28ae3d79abda95725f2820c202c966f3bf22838**. Test site: https://test.blindmom.org/. Deployment script completed successfully including frontend build. Test PM2 backend online (PID 2521788). Deployed source hashes match the local committed frame extractor, limiter, QA media and video processor.
 
 HTTP checks: home 200, featured-videos API 200, unauthenticated auth/me 401 as expected. Served index.html hash matches the built artifact.
 
@@ -71,4 +71,4 @@ User explicitly requested reuse of all existing saved caches on 2026-10-01. Reve
 
 Read-only test-server inventory before this correction: 3,553 frames-v1 assets and no frames-v2 assets. Regression fixtures cover literal frames-v1 data surviving coordinator restart, cache-only summaries and ordinary QA with default warming doing zero downloads/extractions, unchanged stored rows/job state, and new pipeline frames saved alongside existing assets in frames-v1.
 
-Correction local validation: 51/51 passed (`qaMedia`, `frameExtraction`, `mediaResourceLimiter`, `qaPipelineFoundation`, `qaRoutes`). Test redeployment verification follows.
+Correction local validation: 51/51 passed (`qaMedia`, `frameExtraction`, `mediaResourceLimiter`, `qaPipelineFoundation`, `qaRoutes`). Test redeployment completed at application revision **92b5aa5**. On-server focused tests: **51/51 passed**. Home and featured-videos API both returned HTTP 200. QA media source SHA256 matches the local commit. Test backend online (PID 2524202). Cache inventory remains exactly 3,553 frames-v1 assets; no cache data was migrated or regenerated. Production backend PID 2257014 and recorded production source hashes remain unchanged.
