@@ -1,0 +1,122 @@
+{
+  "reports": [
+    {
+      "case": "orchestra",
+      "skipKeyClockReliable": false,
+      "sameClock": false,
+      "ordered": false,
+      "packetKeysRetainedBySinglePass": 76,
+      "wallSeconds": 0.26830143108963966,
+      "packetKeyframesAfter1sSelection": 76,
+      "plannedBackfills": 122,
+      "actualExtractedKeyframes": 74,
+      "actualBackfills": 124,
+      "countsMatch": false
+    },
+    {
+      "case": "choir",
+      "skipKeyClockReliable": true,
+      "sameClock": true,
+      "ordered": true,
+      "packetKeysRetainedBySinglePass": 42,
+      "wallSeconds": 0.270407659932971,
+      "packetKeyframesAfter1sSelection": 42,
+      "plannedBackfills": 166,
+      "actualExtractedKeyframes": 42,
+      "actualBackfills": 166,
+      "countsMatch": true
+    },
+    {
+      "case": "music-video",
+      "skipKeyClockReliable": false,
+      "sameClock": false,
+      "ordered": false,
+      "packetKeysRetainedBySinglePass": 124,
+      "wallSeconds": 0.1709755714982748,
+      "packetKeyframesAfter1sSelection": 124,
+      "plannedBackfills": 39,
+      "actualExtractedKeyframes": 106,
+      "actualBackfills": 58,
+      "countsMatch": false
+    },
+    {
+      "case": "long-talk",
+      "skipKeyClockReliable": true,
+      "sameClock": true,
+      "ordered": true,
+      "packetKeysRetainedBySinglePass": 242,
+      "wallSeconds": 0.6008585803210735,
+      "packetKeyframesAfter1sSelection": 242,
+      "plannedBackfills": 725,
+      "actualExtractedKeyframes": 242,
+      "actualBackfills": 725,
+      "countsMatch": true
+    },
+    {
+      "case": "gop2s-control",
+      "skipKeyClockReliable": true,
+      "sameClock": true,
+      "ordered": true,
+      "packetKeysRetainedBySinglePass": 30,
+      "wallSeconds": 0.14535977598279715,
+      "packetKeyframesAfter1sSelection": 30,
+      "plannedBackfills": 0,
+      "actualExtractedKeyframes": 30,
+      "actualBackfills": 0,
+      "countsMatch": true
+    },
+    {
+      "case": "sparse-3",
+      "skipKeyClockReliable": true,
+      "sameClock": true,
+      "ordered": true,
+      "packetKeysRetainedBySinglePass": 298,
+      "wallSeconds": 0.6750277718529105,
+      "packetKeyframesAfter1sSelection": 298,
+      "plannedBackfills": 3,
+      "actualExtractedKeyframes": 298,
+      "actualBackfills": 3,
+      "countsMatch": true
+    },
+    {
+      "case": "sparse-12",
+      "skipKeyClockReliable": true,
+      "sameClock": true,
+      "ordered": true,
+      "packetKeysRetainedBySinglePass": 292,
+      "wallSeconds": 0.6584841730073094,
+      "packetKeyframesAfter1sSelection": 292,
+      "plannedBackfills": 12,
+      "actualExtractedKeyframes": 292,
+      "actualBackfills": 12,
+      "countsMatch": true
+    },
+    {
+      "case": "sparse-60",
+      "skipKeyClockReliable": true,
+      "sameClock": true,
+      "ordered": true,
+      "packetKeysRetainedBySinglePass": 260,
+      "wallSeconds": 0.6627118336036801,
+      "packetKeyframesAfter1sSelection": 260,
+      "plannedBackfills": 60,
+      "actualExtractedKeyframes": 260,
+      "actualBackfills": 60,
+      "countsMatch": true
+    },
+    {
+      "case": "sparse-180",
+      "skipKeyClockReliable": true,
+      "sameClock": true,
+      "ordered": true,
+      "packetKeysRetainedBySinglePass": 180,
+      "wallSeconds": 0.6167222103103995,
+      "packetKeyframesAfter1sSelection": 180,
+      "plannedBackfills": 180,
+      "actualExtractedKeyframes": 180,
+      "actualBackfills": 180,
+      "countsMatch": true
+    }
+  ],
+  "note": "Compressed packet flags used only for planning; actual images still decoded and validated"
+}
