@@ -41,4 +41,26 @@ Initial backend suite: 130/130 passed. After the last additions, 132/133 passed,
 
 ## Test deployment
 
-Pending final regression run and test deployment. Production hashes/PID were captured before deployment for verification.
+Deployed application revision: **d28ae3d79abda95725f2820c202c966f3bf22838**. Test site: https://test.blindmom.org/. Deployment script completed successfully including frontend build. Test PM2 backend online (PID 2521788). Deployed source hashes match the local committed frame extractor, limiter, QA media and video processor.
+
+HTTP checks: home 200, featured-videos API 200, unauthenticated auth/me 401 as expected. Served index.html hash matches the built artifact.
+
+On-server focused tests: **44/44 passed**. Deployed module single-run extraction plus independent reference verification passed for all nine fixtures, including a two-second-GOP control with zero backfills. These post-deployment wall times are single-run smoke measurements under live host load and are separate from the three-run medians above.
+
+| Deployed fixture | Single-run seconds | Strategy | Source verification |
+|---|---:|---|---:|
+| orchestra | 9.568 | single-pass | 218/218 |
+| choir | 7.625 | single-pass | 167/167 |
+| music-video | 5.994 | single-pass | 232/232 |
+| long-talk | 25.436 | single-pass | 870/870 |
+| sparse-3 | 5.722 | key-seek | 301/301 |
+| sparse-12 | 7.112 | key-seek | 304/304 |
+| sparse-60 | 11.851 | single-pass | 300/300 |
+| sparse-180 | 11.622 | single-pass | 300/300 |
+| gop2s-control | 0.931 | key-seek | 30/30 |
+
+Artifacts: /home/chacha/frame-implementation-20261001/deploy-test.log, deployed-tests.log and deployed-results/summary.json; local copies under /tmp/youtube-frame-implementation/.
+
+Production remained on PID 2257014 throughout deployment. Production extractor SHA256 0045fd50f2b3c7a9a400bb0220588c5a93f0dbc84047836c6d22081160f76753 and QA media SHA256 b6b67be5a824c865c4f33c4866e4dd3f80d2806ef203eaac6eadced58b89b586 are unchanged. No main merge or production deployment was performed.
+
+User acceptance: use a video without an existing generated-script cache to observe fresh extraction. Check wait until AI starts, visual description of static scenes, and QA frame timing. Await the user’s confirmation before main integration/production deployment.
