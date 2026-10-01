@@ -12,20 +12,39 @@ const { runMediaProcess } = require('./mediaResourceLimiter');
 const COVERAGE_GAP_MS = 2000;
 const PTS_ROUNDING_HEADROOM_MS = 100;
 
+// Round rational source ticks once. Floating-point multiplication can move an
+// exact half-millisecond boundary down by 1ms (observed in a 1/24000 stream).
+function ptsToMilliseconds(pts, num, den) {
+    if (![pts, num, den].every(Number.isSafeInteger) || num <= 0 || den <= 0) throw new Error('Invalid source time base');
+    const shifted = BigInt(pts) * BigInt(num) * 2000n + BigInt(den);
+    const divisor = BigInt(den) * 2n;
+    let rounded = shifted / divisor;
+    if (shifted < 0 && shifted % divisor !== 0n) rounded--;
+    const value = Number(rounded);
+    if (!Number.isSafeInteger(value)) throw new Error('Invalid source timestamp');
+    return value;
+}
+
 // Buffer lines across arbitrary stderr chunks; never derive PTS from file order.
 function createShowinfoParser() {
     const decoder = new StringDecoder('utf8');
     let pending = '';
     const frames = new Map();
+    const keyframes = new Set();
+    let timeBase;
     function consume(line) {
-        const match = line.match(/\bn:\s*(\d+)\s+pts:\s*-?\d+\s+pts_time:\s*(-?[\d.eE+-]+)/);
+        const config = line.match(/config in time_base:\s*(\d+)\/(\d+)/);
+        if (config) timeBase = [Number(config[1]), Number(config[2])];
+        const match = line.match(/\bn:\s*(\d+)\s+pts:\s*(-?\d+)\s+pts_time:\s*(-?[\d.eE+-]+)/);
         if (!match) return;
         const index = Number(match[1]);
-        const sourcePtsMs = Math.round(Number(match[2]) * 1000);
+        const sourcePtsMs = timeBase ? ptsToMilliseconds(Number(match[2]), ...timeBase) : Math.round(Number(match[3]) * 1000);
         if (!Number.isSafeInteger(sourcePtsMs) || frames.has(index)) throw new Error('Invalid or duplicate frame PTS');
         frames.set(index, sourcePtsMs);
+        if (/\biskey:\s*1\b/.test(line)) keyframes.add(index);
     }
     return {
+        keyframes,
         push(chunk) {
             pending += decoder.write(chunk);
             const lines = pending.split(/\r?\n/); pending = lines.pop();
@@ -59,17 +78,48 @@ function findCoverageHoles(frames, durationMs) {
     return holes;
 }
 
-async function extractFrames({ inputPath, outputDir, durationMs, signal, onFrame, priorityTimestampMs = 0, run = runMediaProcess }) {
+// Conservative cost estimate from the 600s sparse-GOP benchmark. The crossover
+// scales with duration, rather than assuming one backfill count fits all videos.
+function chooseExtractionStrategy(durationMs, backfillCount, safeKeyTimeline) {
+    if (!safeKeyTimeline) return 'single-pass';
+    const seconds = durationMs / 1000;
+    return backfillCount * 0.11 <= seconds * 0.01 + 0.3 ? 'key-seek' : 'single-pass';
+}
+
+function inspectKeyTimeline(metadata, stderr, originPtsMs, durationMs) {
+    const stream = metadata.streams?.[0];
+    const [num, den] = String(stream?.time_base).split('/').map(Number);
+    if (!(num > 0 && den > 0) || !metadata.frames?.length || /illegal short term buffer|error|invalid/i.test(stderr || '')) return { safe: false, points: [] };
+    const points = [];
+    let previous = -Infinity, selected = -Infinity;
+    for (const frame of metadata.frames) {
+        if (frame.key_frame !== 1 || !Number.isSafeInteger(frame.pts) || frame.pts !== frame.best_effort_timestamp || frame.pts <= previous) return { safe: false, points: [] };
+        previous = frame.pts;
+        const sourcePtsMs = ptsToMilliseconds(frame.pts, num, den);
+        const timestampMs = sourcePtsMs - originPtsMs;
+        if (timestampMs < 0 || timestampMs >= durationMs || sourcePtsMs - selected < 1000) continue;
+        selected = sourcePtsMs;
+        points.push({ sourcePtsMs, timestampMs });
+    }
+    return { safe: points.length > 0, points };
+}
+
+async function extractFrames({ inputPath, outputDir, durationMs, signal, onFrame, priorityTimestampMs = 0, strategy = 'auto', run = runMediaProcess }) {
     if (!Number.isSafeInteger(durationMs) || durationMs <= 0 || durationMs > 24 * 3600 * 1000) throw new Error('Invalid media duration');
+    if (!['auto', 'key-seek', 'single-pass'].includes(strategy)) throw new Error('Invalid extraction strategy');
+    const started = performance.now();
     await fs.mkdir(outputDir, { recursive: true });
     const staging = await fs.mkdtemp(path.join(outputDir, '.extract-'));
     const frames = new Map();
     try {
-        const probe = await run('ffprobe', ['-v', 'error', '-select_streams', 'v:0', '-show_entries', 'stream=start_time', '-of', 'json', inputPath],
+        const probe = await run('ffprobe', ['-v', 'error', '-select_streams', 'v:0', '-show_entries', 'stream=start_time,start_pts,time_base', '-of', 'json', inputPath],
             { needs: { ffmpeg: 1 }, signal, timeoutMs: 15000 });
         const startTime = JSON.parse(probe.stdout).streams?.[0]?.start_time;
         if (startTime === undefined || !Number.isFinite(Number(startTime))) throw new Error('Missing source stream origin');
-        const originPtsMs = Math.round(Number(startTime) * 1000);
+        const stream = JSON.parse(probe.stdout).streams[0];
+        const originTimeBase = String(stream.time_base).split('/').map(Number);
+        const originPtsMs = Number.isSafeInteger(stream.start_pts) && originTimeBase.length === 2
+            ? ptsToMilliseconds(stream.start_pts, ...originTimeBase) : Math.round(Number(startTime) * 1000);
         const publish = async (file, sourcePtsMs, sourceKind) => {
             if (signal?.aborted) throw Object.assign(new Error('Frame extraction aborted'), { name: 'AbortError' });
             const timestampMs = sourcePtsMs - originPtsMs;
@@ -88,20 +138,59 @@ async function extractFrames({ inputPath, outputDir, durationMs, signal, onFrame
             frames.set(sourcePtsMs, frame);
             await onFrame?.(frame);
         };
-        const parser = createShowinfoParser();
-        await run('ffmpeg', ['-hide_banner', '-nostdin', '-copyts', '-skip_frame', 'nokey', '-i', inputPath,
-            '-map', '0:v:0', '-vf', "select='isnan(prev_selected_t)+gte(t-prev_selected_t,1)',scale=640:-1,showinfo", '-fps_mode', 'passthrough', '-q:v', '5', path.join(staging, 'key-%08d.jpg')],
-            { needs: { ffmpeg: 1 }, signal, timeoutMs: 180000, maxOutputBytes: 16 * 1024 * 1024, disk: { root: outputDir, maxBytes: 1024 ** 3 }, onStderr: chunk => parser.push(chunk) });
-        const pts = parser.end();
-        const files = (await fs.readdir(staging)).filter(name => /^key-\d{8}\.jpg$/.test(name)).sort();
-        if (files.length !== pts.size) throw new Error('Frame file/PTS count mismatch');
-        for (const file of files) {
-            const index = Number(file.slice(4, 12)) - 1;
-            if (!pts.has(index)) throw new Error('Frame PTS missing');
-            await publish(path.join(staging, file), pts.get(index), 'keyframe');
+        let timeline = { safe: false, points: [] };
+        try {
+            const metadata = await run('ffprobe', ['-v', 'warning', '-skip_frame', 'nokey', '-select_streams', 'v:0',
+                '-show_frames', '-show_entries', 'frame=pts,best_effort_timestamp,key_frame:stream=time_base', '-of', 'json', inputPath],
+                { needs: { ffmpeg: 1 }, signal, timeoutMs: 180000, maxOutputBytes: 16 * 1024 * 1024 });
+            timeline = inspectKeyTimeline(JSON.parse(metadata.stdout), metadata.stderr, originPtsMs, durationMs);
+        } catch (error) {
+            if (error.name === 'AbortError' || signal?.aborted) throw error;
+            // Unsupported/missing original key PTS must never reach publication.
         }
-        const holes = findCoverageHoles([...frames.values()], durationMs)
-            .sort((a, b) => Math.abs(a - priorityTimestampMs) - Math.abs(b - priorityTimestampMs) || a - b);
+        const predictedHoles = timeline.safe ? findCoverageHoles(timeline.points, durationMs) : [];
+        let selectedStrategy = strategy === 'auto' ? chooseExtractionStrategy(durationMs, predictedHoles.length, timeline.safe) : strategy;
+        if (!timeline.safe) selectedStrategy = 'single-pass';
+        let fallbackReason = timeline.safe ? null : 'unsafe-key-timeline';
+        if (selectedStrategy === 'key-seek') {
+            const parser = createShowinfoParser();
+            const decoded = await run('ffmpeg', ['-hide_banner', '-nostdin', '-copyts', '-skip_frame', 'nokey', '-i', inputPath,
+                '-map', '0:v:0', '-vf', "select='isnan(prev_selected_t)+gte(t-prev_selected_t,1)',scale=640:-1,showinfo", '-fps_mode', 'passthrough', '-q:v', '5', path.join(staging, 'key-%08d.jpg')],
+                { needs: { ffmpeg: 1 }, signal, timeoutMs: 180000, maxOutputBytes: 16 * 1024 * 1024, disk: { root: outputDir, maxBytes: 1024 ** 3 }, onStderr: chunk => parser.push(chunk) });
+            const pts = parser.end();
+            const files = (await fs.readdir(staging)).filter(name => /^key-\d{8}\.jpg$/.test(name)).sort();
+            // Independently prove the entire key timeline before publishing any JPEG.
+            if (files.length !== pts.size || pts.size !== timeline.points.length ||
+                timeline.points.some((point, index) => pts.get(index) !== point.sourcePtsMs) ||
+                /illegal short term buffer|error|invalid/i.test(decoded.stderr || '')) {
+                selectedStrategy = 'single-pass';
+                fallbackReason = 'key-output-mismatch';
+            } else {
+                for (const [index, file] of files.entries()) await publish(path.join(staging, file), pts.get(index), 'keyframe');
+            }
+        }
+        if (selectedStrategy === 'single-pass') {
+            const parser = createShowinfoParser();
+            const origin = Number(startTime);
+            const grid = `if(gte(t-(${origin}),ld(0)*2),st(0,ld(0)+1)*0+1,0)`;
+            const expression = `if(eq(key,1)*gte(t-(${origin}),ld(1)),st(1,t-(${origin})+1)*0+if(gte(t-(${origin}),ld(0)*2),st(0,ld(0)+1)*0+1,1),${grid})`;
+            await run('ffmpeg', ['-hide_banner', '-nostdin', '-copyts', '-i', inputPath,
+                '-map', '0:v:0', '-vf', `select='${expression}',scale=640:-1,showinfo`, '-fps_mode', 'passthrough', '-q:v', '5', path.join(staging, 'sample-%08d.jpg')],
+                { needs: { ffmpeg: 1, fullDecode: 1 }, signal, timeoutMs: 240000, maxOutputBytes: 16 * 1024 * 1024,
+                    disk: { root: outputDir, maxBytes: 1024 ** 3 }, onStderr: chunk => parser.push(chunk) });
+            const pts = parser.end();
+            const files = (await fs.readdir(staging)).filter(name => /^sample-\d{8}\.jpg$/.test(name)).sort();
+            if (files.length !== pts.size) throw new Error('Frame file/PTS count mismatch');
+            let previous = -Infinity;
+            for (const [index, file] of files.entries()) {
+                const sourcePtsMs = pts.get(index);
+                if (!Number.isSafeInteger(sourcePtsMs) || sourcePtsMs <= previous) throw new Error('Invalid full decode timeline');
+                previous = sourcePtsMs;
+                await publish(path.join(staging, file), sourcePtsMs, parser.keyframes.has(index) ? 'keyframe' : 'backfill');
+            }
+        }
+        const holes = selectedStrategy === 'key-seek' ? findCoverageHoles([...frames.values()], durationMs)
+            .sort((a, b) => Math.abs(a - priorityTimestampMs) - Math.abs(b - priorityTimestampMs) || a - b) : [];
         const failedTargets = [];
         // Reserve FFmpeg + backfill atomically; other videos share the same limit.
         for (let i = 0; i < holes.length; i += 2) {
@@ -128,10 +217,11 @@ async function extractFrames({ inputPath, outputDir, durationMs, signal, onFrame
         }
         const sorted = [...frames.values()].sort((a, b) => a.timestampMs - b.timestampMs);
         const coverageHoles = findCoverageHoles(sorted, durationMs);
-        return { frames: sorted, coverageHoles, failedTargets, ready: coverageHoles.length === 0 && failedTargets.length === 0 };
+        return { frames: sorted, coverageHoles, failedTargets, ready: coverageHoles.length === 0 && failedTargets.length === 0,
+            strategy: selectedStrategy, predictedBackfills: timeline.safe ? predictedHoles.length : null, fallbackReason, elapsedMs: Math.round(performance.now() - started) };
     } finally { await fs.rm(staging, { recursive: true, force: true }); }
 }
-module.exports = { createShowinfoParser, findCoverageHoles, extractFrames };
+module.exports = { createShowinfoParser, findCoverageHoles, chooseExtractionStrategy, inspectKeyTimeline, ptsToMilliseconds, extractFrames };
 
 // A section's first PTS is NOT the original timeline origin. The downloader
 // supplies the independently probed source origin when passing a section.
