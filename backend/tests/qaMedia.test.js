@@ -224,3 +224,21 @@ test('opening summaries use only a verified cached window and never start media 
     assert.equal(result.subtitles.state, 'unknown');
     assert.deepEqual(calls, { section: 0, full: 0, subtitles: 0, extract: 0 });
 });
+
+test('previous frame cache version is excluded until newly verified frames are published', async t => {
+    const { manager, frame } = await setup(t); const id = 'abcdefghijk';
+    assert.equal(FRAME_VERSION, 'frames-v2');
+    const old = manager.store.claim(id, 'frames-v1', 'old-extractor');
+    for (let ms = 8000; ms <= 16000; ms += 1000) await manager.publishFrame(old, frame(ms), 'frames-v1');
+    manager.store.release(old);
+    const service = createQaMedia({ manager, adapter: {
+        section() { throw new Error('cache-only must not download'); },
+        full() { throw new Error('cache-only must not download'); },
+    } });
+    await assert.rejects(service.prepareCacheOnly(id, 12500, 20000), { code: 'QA_OPENING_SUMMARY_CACHE_MISS' });
+    assert.ok(manager.framesInRange(id, 'frames-v1', 8000, 16000, 12500).length);
+    const fresh = manager.store.claim(id, FRAME_VERSION, 'new-extractor');
+    for (let ms = 8000; ms <= 16000; ms += 1000) await manager.publishFrame(fresh, frame(ms), FRAME_VERSION);
+    manager.store.release(fresh);
+    assert.ok((await service.prepareCacheOnly(id, 12500, 20000)).frames.length);
+});

@@ -82,3 +82,16 @@ test('invalid or inherited resource names cannot create a waiter that never reso
     await assert.rejects(limiter.acquire({ toString: 1 }));
     assert.equal(limiter.snapshot().queued, 0);
 });
+
+test('full-frame decoders are bounded to two and do not occupy permits while queued', async () => {
+    const limiter = createMediaResourceLimiter();
+    const first = await limiter.acquire({ ffmpeg: 1, fullDecode: 1 });
+    const second = await limiter.acquire({ ffmpeg: 1, fullDecode: 1 });
+    let started = false;
+    const third = limiter.acquire({ ffmpeg: 1, fullDecode: 1 }).then(release => { started = true; release(); });
+    const window = await limiter.acquire({ ffmpeg: 1 });
+    assert.equal(started, false);
+    assert.equal(limiter.snapshot().used.fullDecode, 2);
+    window(); first(); await third; second();
+    assert.ok(Object.values(limiter.snapshot().used).every(value => value === 0));
+});

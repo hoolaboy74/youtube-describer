@@ -165,7 +165,7 @@ async function extractKeyframesHybrid({ tempVideoPath, baseTempDir, totalDuratio
     for (const [index, frame] of result.frames.entries()) {
         await fs.promises.rename(frame.path, path.join(baseTempDir, `frame-${String(index + 1).padStart(4, '0')}.jpg`));
     }
-    logger.info(`[${requestHash}] Extracted ${result.frames.length} frames with verified source PTS.`);
+    logger.info(`[${requestHash}] Extracted ${result.frames.length} frames with verified source PTS. strategy=${result.strategy}, predictedBackfills=${result.predictedBackfills}, fallback=${result.fallbackReason || 'none'}, extractionMs=${result.elapsedMs}.`);
     return result.frames.map(frame => frame.timestampMs / 1000);
 }
 

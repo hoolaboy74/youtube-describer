@@ -9,7 +9,7 @@ const { extractFrames, extractFrameWindow } = require('./frameExtraction');
 const { FRAME_RADIUS_MS } = require('./qaContext');
 const { createSubtitleReader, parseVtt } = require('./qaSubtitles');
 const { getIsImpersonateAvailable } = require('../utils');
-const FRAME_VERSION = 'frames-v1', SUB_VERSION = 'subtitles-v1';
+const FRAME_VERSION = 'frames-v2', SUB_VERSION = 'subtitles-v1';
 const abortError = () => Object.assign(new Error('Q&A media canceled'), { name: 'AbortError' });
 function classifyYtdlpFailure(error) {
     const message = String(error?.stderr || error?.message || '').toLowerCase();
