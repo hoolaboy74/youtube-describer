@@ -225,20 +225,46 @@ test('opening summaries use only a verified cached window and never start media 
     assert.deepEqual(calls, { section: 0, full: 0, subtitles: 0, extract: 0 });
 });
 
-test('previous frame cache version is excluded until newly verified frames are published', async t => {
-    const { manager, frame } = await setup(t); const id = 'abcdefghijk';
-    assert.equal(FRAME_VERSION, 'frames-v2');
+test('existing frames-v1 cache survives restart and answers without downloading or extracting', async t => {
+    const { manager, frame, root } = await setup(t); const id = 'abcdefghijk';
+    assert.equal(FRAME_VERSION, 'frames-v1');
     const old = manager.store.claim(id, 'frames-v1', 'old-extractor');
-    for (let ms = 8000; ms <= 16000; ms += 1000) await manager.publishFrame(old, frame(ms), 'frames-v1');
+    manager.store.transition(old, 'extracting');
+    for (let ms = 0; ms < 20000; ms += 2000) await manager.publishFrame(old, frame(ms), 'frames-v1');
+    manager.markReady(old, 20000);
+    const subtitles = manager.store.claim(id, 'subtitles-v1', 'old-extractor');
+    manager.subtitleUnavailable(subtitles, 'absent');
+    manager.store.release(subtitles);
+    const saved = manager.store.listFrames(id, 'frames-v1');
+    const savedJob = manager.store.job(id, 'frames-v1');
+    const calls = { full: 0, section: 0, subtitles: 0, extract: 0, window: 0 };
+    const unexpected = kind => () => { calls[kind]++; throw new Error(`Unexpected ${kind} for existing cache`); };
+    const restartedManager = createQaCacheManager({ db: manager.store.db, root });
+    const service = createQaMedia({ manager: restartedManager, adapter: {
+        full: unexpected('full'), section: unexpected('section'), subtitles: unexpected('subtitles'),
+    }, extract: unexpected('extract'), windowExtract: unexpected('window') });
+    const opening = await service.prepareCacheOnly(id, 12500, 20000);
+    assert.equal(opening.fromCache, true);
+    const answer = await service.prepare(id, 12500, 20000); // Default warm=true must not rebuild a ready cache.
+    await service.ensureFullCache(id, 20000);
+    assert.equal(answer.fromCache, true);
+    assert.ok(answer.frames.some(f => f.timestampMs === 12000));
+    assert.deepEqual(calls, { full: 0, section: 0, subtitles: 0, extract: 0, window: 0 });
+    assert.deepEqual(manager.store.listFrames(id, 'frames-v1'), saved);
+    assert.deepEqual(manager.store.job(id, 'frames-v1'), savedJob);
+});
+
+test('new generator frames use frames-v1 alongside existing cached frames', async t => {
+    const { manager, frame } = await setup(t); const id = 'abcdefghijk';
+    const old = manager.store.claim(id, 'frames-v1', 'old-extractor');
+    const saved = await manager.publishFrame(old, frame(12000), 'frames-v1');
     manager.store.release(old);
-    const service = createQaMedia({ manager, adapter: {
-        section() { throw new Error('cache-only must not download'); },
-        full() { throw new Error('cache-only must not download'); },
-    } });
-    await assert.rejects(service.prepareCacheOnly(id, 12500, 20000), { code: 'QA_OPENING_SUMMARY_CACHE_MISS' });
-    assert.ok(manager.framesInRange(id, 'frames-v1', 8000, 16000, 12500).length);
-    const fresh = manager.store.claim(id, FRAME_VERSION, 'new-extractor');
-    for (let ms = 8000; ms <= 16000; ms += 1000) await manager.publishFrame(fresh, frame(ms), FRAME_VERSION);
-    manager.store.release(fresh);
-    assert.ok((await service.prepareCacheOnly(id, 12500, 20000)).frames.length);
+    const service = createQaMedia({ manager });
+    const pipeline = service.beginPipeline(id);
+    await pipeline.publish(frame(14000));
+    await pipeline.complete();
+    await pipeline.finish();
+    assert.deepEqual(manager.store.listFrames(id, 'frames-v1').map(f => f.timestampMs), [12000, 14000]);
+    assert.deepEqual(manager.store.listFrames(id, 'frames-v1')[0], saved);
+    assert.deepEqual(manager.store.listFrames(id, 'frames-v2'), []);
 });
