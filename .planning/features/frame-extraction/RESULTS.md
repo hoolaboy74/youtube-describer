@@ -27,7 +27,7 @@ Orchestra/MV key-only PTS are unsafe and select full decoding automatically. A s
 
 ## Regression checks
 
-Tests cover VFR/nonzero origin, static B-frame cadence, key thinning, integer/rational PTS, unsafe preflight, decoder/preflight mismatch before publication, duplicate/replay behavior, incomplete coverage, publication failure, cancellation/staging cleanup, shared full-decode permits and exclusion of frames-v1 cache.
+Tests cover VFR/nonzero origin, static B-frame cadence, key thinning, integer/rational PTS, unsafe preflight, decoder/preflight mismatch before publication, duplicate/replay behavior, incomplete coverage, publication failure, cancellation/staging cleanup, shared full-decode permits and existing frames-v1 cache reuse (updated per user request below).
 
 Initial backend suite: 130/130 passed. After the last additions, 132/133 passed, with one existing real-time deadline test delayed for 617 seconds during an observed local execution pause/SSH disconnection. That test passed when rerun (46.1 seconds). Additional canonical/CLI/subtitle/prompt suites: 24/24 passed. Final combined release run (`node --test backend/tests/*.test.js backend/test_*.js`): **157/157 passed**, 46.44 seconds, no failures or skips.
 
@@ -37,7 +37,7 @@ Initial backend suite: 130/130 passed. After the last additions, 132/133 passed,
 - Reproduction: backend/bin/benchmark-frame-extraction.js FIXTURE_ROOT OUTPUT_ROOT 3. BENCH_CASES selects comma-separated fixture names.
 - Server fixtures/results: /home/chacha/frame-methods-20261001-uCtxnH and /home/chacha/frame-implementation-20261001/results-final.
 - Local benchmark JSON: /tmp/youtube-frame-implementation/summary.json.
-- Previous frames-v1 are preserved but not selected for new QA evidence; raw-source/subtitle cache versions are preserved.
+- Final cache policy: continue reading/writing frames-v1. Existing stored frames and ready jobs are reused; no bulk regeneration or migration. Raw-source/subtitle cache versions are preserved.
 
 ## Test deployment
 
@@ -64,3 +64,11 @@ Artifacts: /home/chacha/frame-implementation-20261001/deploy-test.log, deployed-
 Production remained on PID 2257014 throughout deployment. Production extractor SHA256 0045fd50f2b3c7a9a400bb0220588c5a93f0dbc84047836c6d22081160f76753 and QA media SHA256 b6b67be5a824c865c4f33c4866e4dd3f80d2806ef203eaac6eadced58b89b586 are unchanged. No main merge or production deployment was performed.
 
 User acceptance: use a video without an existing generated-script cache to observe fresh extraction. Check wait until AI starts, visual description of static scenes, and QA frame timing. Await the user’s confirmation before main integration/production deployment.
+
+## Existing-cache compatibility correction
+
+User explicitly requested reuse of all existing saved caches on 2026-10-01. Reverted the frame cache namespace to frames-v1 while retaining the new extraction strategies and timestamp checks for newly extracted media. Existing files/rows/ready jobs are used as saved, with the pre-existing file/checksum validation. No cache purge, migration or timestamp rewrite.
+
+Read-only test-server inventory before this correction: 3,553 frames-v1 assets and no frames-v2 assets. Regression fixtures cover literal frames-v1 data surviving coordinator restart, cache-only summaries and ordinary QA with default warming doing zero downloads/extractions, unchanged stored rows/job state, and new pipeline frames saved alongside existing assets in frames-v1.
+
+Correction local validation: 51/51 passed (`qaMedia`, `frameExtraction`, `mediaResourceLimiter`, `qaPipelineFoundation`, `qaRoutes`). Test redeployment verification follows.
