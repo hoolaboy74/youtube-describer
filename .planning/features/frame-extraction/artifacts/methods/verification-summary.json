@@ -1,0 +1,1438 @@
+{
+  "cases": [
+    {
+      "reference": "Independent full decode; integer PTS/time_base ground truth; allow 5ms for printed showinfo precision; scale and JPEG settings same as benchmark",
+      "uniqueReferenceFrames": 420,
+      "verification": [
+        {
+          "variant": "direct",
+          "mode": "direct",
+          "total": 144,
+          "matched": 144,
+          "ptsAbsent": 0,
+          "imageMismatch": 0,
+          "maxTimestampErrorMs": 0,
+          "examples": [],
+          "sourceEvidenceVerified": true,
+          "productionCoverageHoles": 0,
+          "maxGapMs": 2002,
+          "startGapMs": 0,
+          "endGapMs": 376,
+          "keyGapMedianMs": null,
+          "keyGapMaxMs": null,
+          "uniqueImageHashes": 144
+        },
+        {
+          "variant": "legacy-current",
+          "mode": "legacy-current",
+          "total": 144,
+          "matched": 4,
+          "ptsAbsent": 95,
+          "imageMismatch": 45,
+          "maxTimestampErrorMs": 0,
+          "examples": [
+            {
+              "timestampMs": 2000,
+              "ptsExists": true,
+              "imageMatches": false
+            },
+            {
+              "timestampMs": 4000,
+              "ptsExists": true,
+              "imageMatches": false
+            },
+            {
+              "timestampMs": 6000,
+              "ptsExists": false,
+              "imageMatches": false
+            },
+            {
+              "timestampMs": 8000,
+              "ptsExists": false,
+              "imageMatches": false
+            },
+            {
+              "timestampMs": 10000,
+              "ptsExists": false,
+              "imageMatches": false
+            },
+            {
+              "timestampMs": 12000,
+              "ptsExists": false,
+              "imageMatches": false
+            },
+            {
+              "timestampMs": 14000,
+              "ptsExists": false,
+              "imageMatches": false
+            },
+            {
+              "timestampMs": 16000,
+              "ptsExists": false,
+              "imageMatches": false
+            },
+            {
+              "timestampMs": 18000,
+              "ptsExists": false,
+              "imageMatches": false
+            },
+            {
+              "timestampMs": 20000,
+              "ptsExists": false,
+              "imageMatches": false
+            }
+          ],
+          "sourceEvidenceVerified": false,
+          "productionCoverageHoles": 0,
+          "maxGapMs": 2015,
+          "startGapMs": 0,
+          "endGapMs": 376,
+          "keyGapMedianMs": 2000,
+          "keyGapMaxMs": 2000,
+          "uniqueImageHashes": 71
+        },
+        {
+          "variant": "current",
+          "mode": "current",
+          "total": 198,
+          "matched": 135,
+          "ptsAbsent": 0,
+          "imageMismatch": 63,
+          "maxTimestampErrorMs": 0,
+          "examples": [
+            {
+              "timestampMs": 55489,
+              "ptsExists": true,
+              "imageMatches": false
+            },
+            {
+              "timestampMs": 58559,
+              "ptsExists": true,
+              "imageMatches": false
+            },
+            {
+              "timestampMs": 60360,
+              "ptsExists": true,
+              "imageMatches": false
+            },
+            {
+              "timestampMs": 64531,
+              "ptsExists": true,
+              "imageMatches": false
+            },
+            {
+              "timestampMs": 67601,
+              "ptsExists": true,
+              "imageMatches": false
+            },
+            {
+              "timestampMs": 70137,
+              "ptsExists": true,
+              "imageMatches": false
+            },
+            {
+              "timestampMs": 74074,
+              "ptsExists": true,
+              "imageMatches": false
+            },
+            {
+              "timestampMs": 79880,
+              "ptsExists": true,
+              "imageMatches": false
+            },
+            {
+              "timestampMs": 81081,
+              "ptsExists": true,
+              "imageMatches": false
+            },
+            {
+              "timestampMs": 84885,
+              "ptsExists": true,
+              "imageMatches": false
+            }
+          ],
+          "sourceEvidenceVerified": false,
+          "productionCoverageHoles": 0,
+          "maxGapMs": 2068,
+          "startGapMs": 0,
+          "endGapMs": 1443,
+          "keyGapMedianMs": 3603,
+          "keyGapMaxMs": 9610,
+          "uniqueImageHashes": 198
+        },
+        {
+          "variant": "batch",
+          "mode": "batch",
+          "total": 198,
+          "matched": 135,
+          "ptsAbsent": 0,
+          "imageMismatch": 63,
+          "maxTimestampErrorMs": 0,
+          "examples": [
+            {
+              "timestampMs": 55489,
+              "ptsExists": true,
+              "imageMatches": false
+            },
+            {
+              "timestampMs": 58559,
+              "ptsExists": true,
+              "imageMatches": false
+            },
+            {
+              "timestampMs": 60360,
+              "ptsExists": true,
+              "imageMatches": false
+            },
+            {
+              "timestampMs": 64531,
+              "ptsExists": true,
+              "imageMatches": false
+            },
+            {
+              "timestampMs": 67601,
+              "ptsExists": true,
+              "imageMatches": false
+            },
+            {
+              "timestampMs": 70137,
+              "ptsExists": true,
+              "imageMatches": false
+            },
+            {
+              "timestampMs": 74074,
+              "ptsExists": true,
+              "imageMatches": false
+            },
+            {
+              "timestampMs": 79880,
+              "ptsExists": true,
+              "imageMatches": false
+            },
+            {
+              "timestampMs": 81081,
+              "ptsExists": true,
+              "imageMatches": false
+            },
+            {
+              "timestampMs": 84885,
+              "ptsExists": true,
+              "imageMatches": false
+            }
+          ],
+          "sourceEvidenceVerified": false,
+          "productionCoverageHoles": 0,
+          "maxGapMs": 2068,
+          "startGapMs": 0,
+          "endGapMs": 1443,
+          "keyGapMedianMs": 3603,
+          "keyGapMaxMs": 9610,
+          "uniqueImageHashes": 198
+        },
+        {
+          "variant": "single-pass-hybrid",
+          "mode": "single-pass-hybrid",
+          "total": 218,
+          "matched": 218,
+          "ptsAbsent": 0,
+          "imageMismatch": 0,
+          "maxTimestampErrorMs": 0,
+          "examples": [],
+          "sourceEvidenceVerified": true,
+          "productionCoverageHoles": 0,
+          "maxGapMs": 2002,
+          "startGapMs": 0,
+          "endGapMs": 376,
+          "keyGapMedianMs": null,
+          "keyGapMaxMs": null,
+          "uniqueImageHashes": 218
+        },
+        {
+          "variant": "direct-bounded",
+          "mode": "direct",
+          "total": 144,
+          "matched": 144,
+          "ptsAbsent": 0,
+          "imageMismatch": 0,
+          "maxTimestampErrorMs": 0,
+          "examples": [],
+          "sourceEvidenceVerified": true,
+          "productionCoverageHoles": 0,
+          "maxGapMs": 2002,
+          "startGapMs": 0,
+          "endGapMs": 376,
+          "keyGapMedianMs": null,
+          "keyGapMaxMs": null,
+          "uniqueImageHashes": 144
+        }
+      ],
+      "case": "orchestra",
+      "repeatStable": {
+        "batch": true,
+        "direct-bounded": true,
+        "direct": true,
+        "legacy-current": true,
+        "current": true,
+        "single-pass-hybrid": true
+      }
+    },
+    {
+      "reference": "Independent full decode; integer PTS/time_base ground truth; allow 5ms for printed showinfo precision; scale and JPEG settings same as benchmark",
+      "uniqueReferenceFrames": 292,
+      "verification": [
+        {
+          "variant": "direct",
+          "mode": "direct",
+          "total": 167,
+          "matched": 167,
+          "ptsAbsent": 0,
+          "imageMismatch": 0,
+          "maxTimestampErrorMs": 0,
+          "examples": [],
+          "sourceEvidenceVerified": true,
+          "productionCoverageHoles": 0,
+          "maxGapMs": 2000,
+          "startGapMs": 0,
+          "endGapMs": 788,
+          "keyGapMedianMs": null,
+          "keyGapMaxMs": null,
+          "uniqueImageHashes": 167
+        },
+        {
+          "variant": "legacy-current",
+          "mode": "legacy-current",
+          "total": 167,
+          "matched": 44,
+          "ptsAbsent": 0,
+          "imageMismatch": 123,
+          "maxTimestampErrorMs": 0,
+          "examples": [
+            {
+              "timestampMs": 2000,
+              "ptsExists": true,
+              "imageMatches": false
+            },
+            {
+              "timestampMs": 4000,
+              "ptsExists": true,
+              "imageMatches": false
+            },
+            {
+              "timestampMs": 6000,
+              "ptsExists": true,
+              "imageMatches": false
+            },
+            {
+              "timestampMs": 10000,
+              "ptsExists": true,
+              "imageMatches": false
+            },
+            {
+              "timestampMs": 12000,
+              "ptsExists": true,
+              "imageMatches": false
+            },
+            {
+              "timestampMs": 14000,
+              "ptsExists": true,
+              "imageMatches": false
+            },
+            {
+              "timestampMs": 18000,
+              "ptsExists": true,
+              "imageMatches": false
+            },
+            {
+              "timestampMs": 20000,
+              "ptsExists": true,
+              "imageMatches": false
+            },
+            {
+              "timestampMs": 22000,
+              "ptsExists": true,
+              "imageMatches": false
+            },
+            {
+              "timestampMs": 26000,
+              "ptsExists": true,
+              "imageMatches": false
+            }
+          ],
+          "sourceEvidenceVerified": false,
+          "productionCoverageHoles": 0,
+          "maxGapMs": 2000,
+          "startGapMs": 0,
+          "endGapMs": 788,
+          "keyGapMedianMs": 2000,
+          "keyGapMaxMs": 2000,
+          "uniqueImageHashes": 44
+        },
+        {
+          "variant": "current",
+          "mode": "current",
+          "total": 208,
+          "matched": 208,
+          "ptsAbsent": 0,
+          "imageMismatch": 0,
+          "maxTimestampErrorMs": 0,
+          "examples": [],
+          "sourceEvidenceVerified": true,
+          "productionCoverageHoles": 0,
+          "maxGapMs": 2000,
+          "startGapMs": 0,
+          "endGapMs": 1788,
+          "keyGapMedianMs": 8000,
+          "keyGapMaxMs": 8000,
+          "uniqueImageHashes": 208
+        },
+        {
+          "variant": "batch",
+          "mode": "batch",
+          "total": 208,
+          "matched": 208,
+          "ptsAbsent": 0,
+          "imageMismatch": 0,
+          "maxTimestampErrorMs": 0,
+          "examples": [],
+          "sourceEvidenceVerified": true,
+          "productionCoverageHoles": 0,
+          "maxGapMs": 2000,
+          "startGapMs": 0,
+          "endGapMs": 1788,
+          "keyGapMedianMs": 8000,
+          "keyGapMaxMs": 8000,
+          "uniqueImageHashes": 208
+        },
+        {
+          "variant": "single-pass-hybrid",
+          "mode": "single-pass-hybrid",
+          "total": 167,
+          "matched": 167,
+          "ptsAbsent": 0,
+          "imageMismatch": 0,
+          "maxTimestampErrorMs": 0,
+          "examples": [],
+          "sourceEvidenceVerified": true,
+          "productionCoverageHoles": 0,
+          "maxGapMs": 2000,
+          "startGapMs": 0,
+          "endGapMs": 788,
+          "keyGapMedianMs": null,
+          "keyGapMaxMs": null,
+          "uniqueImageHashes": 167
+        },
+        {
+          "variant": "direct-bounded",
+          "mode": "direct",
+          "total": 167,
+          "matched": 167,
+          "ptsAbsent": 0,
+          "imageMismatch": 0,
+          "maxTimestampErrorMs": 0,
+          "examples": [],
+          "sourceEvidenceVerified": true,
+          "productionCoverageHoles": 0,
+          "maxGapMs": 2000,
+          "startGapMs": 0,
+          "endGapMs": 788,
+          "keyGapMedianMs": null,
+          "keyGapMaxMs": null,
+          "uniqueImageHashes": 167
+        }
+      ],
+      "case": "choir",
+      "repeatStable": {
+        "batch": true,
+        "direct-bounded": true,
+        "direct": true,
+        "legacy-current": true,
+        "current": true,
+        "single-pass-hybrid": true
+      }
+    },
+    {
+      "reference": "Independent full decode; integer PTS/time_base ground truth; allow 5ms for printed showinfo precision; scale and JPEG settings same as benchmark",
+      "uniqueReferenceFrames": 446,
+      "verification": [
+        {
+          "variant": "direct",
+          "mode": "direct",
+          "total": 114,
+          "matched": 114,
+          "ptsAbsent": 0,
+          "imageMismatch": 0,
+          "maxTimestampErrorMs": 0,
+          "examples": [],
+          "sourceEvidenceVerified": true,
+          "productionCoverageHoles": 0,
+          "maxGapMs": 2002,
+          "startGapMs": 0,
+          "endGapMs": 1724,
+          "keyGapMedianMs": null,
+          "keyGapMaxMs": null,
+          "uniqueImageHashes": 114
+        },
+        {
+          "variant": "legacy-current",
+          "mode": "legacy-current",
+          "total": 114,
+          "matched": 4,
+          "ptsAbsent": 82,
+          "imageMismatch": 28,
+          "maxTimestampErrorMs": 1,
+          "examples": [
+            {
+              "timestampMs": 2000,
+              "ptsExists": true,
+              "imageMatches": false
+            },
+            {
+              "timestampMs": 4000,
+              "ptsExists": true,
+              "imageMatches": false
+            },
+            {
+              "timestampMs": 6000,
+              "ptsExists": false,
+              "imageMatches": false
+            },
+            {
+              "timestampMs": 8000,
+              "ptsExists": false,
+              "imageMatches": false
+            },
+            {
+              "timestampMs": 10000,
+              "ptsExists": false,
+              "imageMatches": false
+            },
+            {
+              "timestampMs": 12000,
+              "ptsExists": false,
+              "imageMatches": false
+            },
+            {
+              "timestampMs": 14000,
+              "ptsExists": false,
+              "imageMatches": false
+            },
+            {
+              "timestampMs": 16000,
+              "ptsExists": false,
+              "imageMatches": false
+            },
+            {
+              "timestampMs": 18000,
+              "ptsExists": false,
+              "imageMatches": false
+            },
+            {
+              "timestampMs": 20000,
+              "ptsExists": false,
+              "imageMatches": false
+            }
+          ],
+          "sourceEvidenceVerified": false,
+          "productionCoverageHoles": 0,
+          "maxGapMs": 2015,
+          "startGapMs": 0,
+          "endGapMs": 1724,
+          "keyGapMedianMs": 2000,
+          "keyGapMaxMs": 2000,
+          "uniqueImageHashes": 92
+        },
+        {
+          "variant": "current",
+          "mode": "current",
+          "total": 164,
+          "matched": 67,
+          "ptsAbsent": 0,
+          "imageMismatch": 97,
+          "maxTimestampErrorMs": 0,
+          "examples": [
+            {
+              "timestampMs": 24149,
+              "ptsExists": true,
+              "imageMatches": false
+            },
+            {
+              "timestampMs": 25484,
+              "ptsExists": true,
+              "imageMatches": false
+            },
+            {
+              "timestampMs": 26485,
+              "ptsExists": true,
+              "imageMatches": false
+            },
+            {
+              "timestampMs": 28070,
+              "ptsExists": true,
+              "imageMatches": false
+            },
+            {
+              "timestampMs": 29238,
+              "ptsExists": true,
+              "imageMatches": false
+            },
+            {
+              "timestampMs": 31406,
+              "ptsExists": true,
+              "imageMatches": false
+            },
+            {
+              "timestampMs": 33200,
+              "ptsExists": true,
+              "imageMatches": false
+            },
+            {
+              "timestampMs": 35369,
+              "ptsExists": true,
+              "imageMatches": false
+            },
+            {
+              "timestampMs": 36537,
+              "ptsExists": true,
+              "imageMatches": false
+            },
+            {
+              "timestampMs": 38080,
+              "ptsExists": true,
+              "imageMatches": false
+            }
+          ],
+          "sourceEvidenceVerified": false,
+          "productionCoverageHoles": 0,
+          "maxGapMs": 2086,
+          "startGapMs": 0,
+          "endGapMs": 931,
+          "keyGapMedianMs": 1710,
+          "keyGapMaxMs": 6089,
+          "uniqueImageHashes": 164
+        },
+        {
+          "variant": "batch",
+          "mode": "batch",
+          "total": 164,
+          "matched": 67,
+          "ptsAbsent": 0,
+          "imageMismatch": 97,
+          "maxTimestampErrorMs": 0,
+          "examples": [
+            {
+              "timestampMs": 24149,
+              "ptsExists": true,
+              "imageMatches": false
+            },
+            {
+              "timestampMs": 25484,
+              "ptsExists": true,
+              "imageMatches": false
+            },
+            {
+              "timestampMs": 26485,
+              "ptsExists": true,
+              "imageMatches": false
+            },
+            {
+              "timestampMs": 28070,
+              "ptsExists": true,
+              "imageMatches": false
+            },
+            {
+              "timestampMs": 29238,
+              "ptsExists": true,
+              "imageMatches": false
+            },
+            {
+              "timestampMs": 31406,
+              "ptsExists": true,
+              "imageMatches": false
+            },
+            {
+              "timestampMs": 33200,
+              "ptsExists": true,
+              "imageMatches": false
+            },
+            {
+              "timestampMs": 35369,
+              "ptsExists": true,
+              "imageMatches": false
+            },
+            {
+              "timestampMs": 36537,
+              "ptsExists": true,
+              "imageMatches": false
+            },
+            {
+              "timestampMs": 38080,
+              "ptsExists": true,
+              "imageMatches": false
+            }
+          ],
+          "sourceEvidenceVerified": false,
+          "productionCoverageHoles": 0,
+          "maxGapMs": 2086,
+          "startGapMs": 0,
+          "endGapMs": 931,
+          "keyGapMedianMs": 1710,
+          "keyGapMaxMs": 6089,
+          "uniqueImageHashes": 164
+        },
+        {
+          "variant": "single-pass-hybrid",
+          "mode": "single-pass-hybrid",
+          "total": 232,
+          "matched": 232,
+          "ptsAbsent": 0,
+          "imageMismatch": 0,
+          "maxTimestampErrorMs": 0,
+          "examples": [],
+          "sourceEvidenceVerified": true,
+          "productionCoverageHoles": 0,
+          "maxGapMs": 2002,
+          "startGapMs": 0,
+          "endGapMs": 1724,
+          "keyGapMedianMs": null,
+          "keyGapMaxMs": null,
+          "uniqueImageHashes": 232
+        },
+        {
+          "variant": "direct-bounded",
+          "mode": "direct",
+          "total": 114,
+          "matched": 114,
+          "ptsAbsent": 0,
+          "imageMismatch": 0,
+          "maxTimestampErrorMs": 0,
+          "examples": [],
+          "sourceEvidenceVerified": true,
+          "productionCoverageHoles": 0,
+          "maxGapMs": 2002,
+          "startGapMs": 0,
+          "endGapMs": 1724,
+          "keyGapMedianMs": null,
+          "keyGapMaxMs": null,
+          "uniqueImageHashes": 114
+        },
+        {
+          "variant": "current-thread1",
+          "mode": "current",
+          "total": 164,
+          "matched": 67,
+          "ptsAbsent": 0,
+          "imageMismatch": 97,
+          "maxTimestampErrorMs": 0,
+          "examples": [
+            {
+              "timestampMs": 24149,
+              "ptsExists": true,
+              "imageMatches": false
+            },
+            {
+              "timestampMs": 25484,
+              "ptsExists": true,
+              "imageMatches": false
+            },
+            {
+              "timestampMs": 26485,
+              "ptsExists": true,
+              "imageMatches": false
+            },
+            {
+              "timestampMs": 28070,
+              "ptsExists": true,
+              "imageMatches": false
+            },
+            {
+              "timestampMs": 29238,
+              "ptsExists": true,
+              "imageMatches": false
+            },
+            {
+              "timestampMs": 31406,
+              "ptsExists": true,
+              "imageMatches": false
+            },
+            {
+              "timestampMs": 33200,
+              "ptsExists": true,
+              "imageMatches": false
+            },
+            {
+              "timestampMs": 35369,
+              "ptsExists": true,
+              "imageMatches": false
+            },
+            {
+              "timestampMs": 36537,
+              "ptsExists": true,
+              "imageMatches": false
+            },
+            {
+              "timestampMs": 38080,
+              "ptsExists": true,
+              "imageMatches": false
+            }
+          ],
+          "sourceEvidenceVerified": false,
+          "productionCoverageHoles": 0,
+          "maxGapMs": 2086,
+          "startGapMs": 0,
+          "endGapMs": 931,
+          "keyGapMedianMs": 1710,
+          "keyGapMaxMs": 6089,
+          "uniqueImageHashes": 164
+        },
+        {
+          "variant": "corrected-current",
+          "mode": "corrected-current",
+          "total": 164,
+          "matched": 164,
+          "ptsAbsent": 0,
+          "imageMismatch": 0,
+          "maxTimestampErrorMs": 0,
+          "examples": [],
+          "sourceEvidenceVerified": true,
+          "productionCoverageHoles": 0,
+          "maxGapMs": 2085,
+          "startGapMs": 0,
+          "endGapMs": 889,
+          "keyGapMedianMs": 1626,
+          "keyGapMaxMs": 6090,
+          "uniqueImageHashes": 164
+        }
+      ],
+      "case": "music-video",
+      "repeatStable": {
+        "batch": true,
+        "direct-bounded": true,
+        "direct": true,
+        "legacy-current": true,
+        "current": true,
+        "single-pass-hybrid": true
+      }
+    },
+    {
+      "reference": "Independent full decode; integer PTS/time_base ground truth; allow 5ms for printed showinfo precision; scale and JPEG settings same as benchmark",
+      "uniqueReferenceFrames": 1591,
+      "verification": [
+        {
+          "variant": "direct",
+          "mode": "direct",
+          "total": 631,
+          "matched": 631,
+          "ptsAbsent": 0,
+          "imageMismatch": 0,
+          "maxTimestampErrorMs": 0,
+          "examples": [],
+          "sourceEvidenceVerified": true,
+          "productionCoverageHoles": 0,
+          "maxGapMs": 2000,
+          "startGapMs": 0,
+          "endGapMs": 983,
+          "keyGapMedianMs": null,
+          "keyGapMaxMs": null,
+          "uniqueImageHashes": 628
+        },
+        {
+          "variant": "legacy-current",
+          "mode": "legacy-current",
+          "total": 631,
+          "matched": 11,
+          "ptsAbsent": 0,
+          "imageMismatch": 620,
+          "maxTimestampErrorMs": 0,
+          "examples": [
+            {
+              "timestampMs": 2000,
+              "ptsExists": true,
+              "imageMatches": false
+            },
+            {
+              "timestampMs": 4000,
+              "ptsExists": true,
+              "imageMatches": false
+            },
+            {
+              "timestampMs": 6000,
+              "ptsExists": true,
+              "imageMatches": false
+            },
+            {
+              "timestampMs": 8000,
+              "ptsExists": true,
+              "imageMatches": false
+            },
+            {
+              "timestampMs": 10000,
+              "ptsExists": true,
+              "imageMatches": false
+            },
+            {
+              "timestampMs": 12000,
+              "ptsExists": true,
+              "imageMatches": false
+            },
+            {
+              "timestampMs": 14000,
+              "ptsExists": true,
+              "imageMatches": false
+            },
+            {
+              "timestampMs": 16000,
+              "ptsExists": true,
+              "imageMatches": false
+            },
+            {
+              "timestampMs": 18000,
+              "ptsExists": true,
+              "imageMatches": false
+            },
+            {
+              "timestampMs": 20000,
+              "ptsExists": true,
+              "imageMatches": false
+            }
+          ],
+          "sourceEvidenceVerified": false,
+          "productionCoverageHoles": 0,
+          "maxGapMs": 2000,
+          "startGapMs": 0,
+          "endGapMs": 983,
+          "keyGapMedianMs": 2000,
+          "keyGapMaxMs": 2000,
+          "uniqueImageHashes": 242
+        },
+        {
+          "variant": "current",
+          "mode": "current",
+          "total": 967,
+          "matched": 967,
+          "ptsAbsent": 0,
+          "imageMismatch": 0,
+          "maxTimestampErrorMs": 0,
+          "examples": [],
+          "sourceEvidenceVerified": true,
+          "productionCoverageHoles": 0,
+          "maxGapMs": 1533,
+          "startGapMs": 0,
+          "endGapMs": 650,
+          "keyGapMedianMs": 5200,
+          "keyGapMaxMs": 5466,
+          "uniqueImageHashes": 959
+        },
+        {
+          "variant": "batch",
+          "mode": "batch",
+          "total": 967,
+          "matched": 967,
+          "ptsAbsent": 0,
+          "imageMismatch": 0,
+          "maxTimestampErrorMs": 0,
+          "examples": [],
+          "sourceEvidenceVerified": true,
+          "productionCoverageHoles": 0,
+          "maxGapMs": 1533,
+          "startGapMs": 0,
+          "endGapMs": 650,
+          "keyGapMedianMs": 5200,
+          "keyGapMaxMs": 5466,
+          "uniqueImageHashes": 959
+        },
+        {
+          "variant": "single-pass-hybrid",
+          "mode": "single-pass-hybrid",
+          "total": 870,
+          "matched": 870,
+          "ptsAbsent": 0,
+          "imageMismatch": 0,
+          "maxTimestampErrorMs": 0,
+          "examples": [],
+          "sourceEvidenceVerified": true,
+          "productionCoverageHoles": 0,
+          "maxGapMs": 2000,
+          "startGapMs": 0,
+          "endGapMs": 983,
+          "keyGapMedianMs": null,
+          "keyGapMaxMs": null,
+          "uniqueImageHashes": 860
+        },
+        {
+          "variant": "direct-bounded",
+          "mode": "direct",
+          "total": 631,
+          "matched": 631,
+          "ptsAbsent": 0,
+          "imageMismatch": 0,
+          "maxTimestampErrorMs": 0,
+          "examples": [],
+          "sourceEvidenceVerified": true,
+          "productionCoverageHoles": 0,
+          "maxGapMs": 2000,
+          "startGapMs": 0,
+          "endGapMs": 983,
+          "keyGapMedianMs": null,
+          "keyGapMaxMs": null,
+          "uniqueImageHashes": 628
+        }
+      ],
+      "case": "long-talk",
+      "repeatStable": {
+        "batch": true,
+        "hybrid-thread0": true,
+        "hybrid-thread2": true,
+        "direct-bounded": true,
+        "direct": true,
+        "legacy-current": true,
+        "current": true,
+        "single-pass-hybrid": true,
+        "hybrid-thread1": true
+      }
+    },
+    {
+      "reference": "Independent full decode; integer PTS/time_base ground truth; allow 5ms for printed showinfo precision; scale and JPEG settings same as benchmark",
+      "uniqueReferenceFrames": 30,
+      "verification": [
+        {
+          "variant": "direct",
+          "mode": "direct",
+          "total": 30,
+          "matched": 30,
+          "ptsAbsent": 0,
+          "imageMismatch": 0,
+          "maxTimestampErrorMs": 0,
+          "examples": [],
+          "sourceEvidenceVerified": true,
+          "productionCoverageHoles": 0,
+          "maxGapMs": 2000,
+          "startGapMs": 0,
+          "endGapMs": 2000,
+          "keyGapMedianMs": null,
+          "keyGapMaxMs": null,
+          "uniqueImageHashes": 30
+        },
+        {
+          "variant": "legacy-current",
+          "mode": "legacy-current",
+          "total": 30,
+          "matched": 30,
+          "ptsAbsent": 0,
+          "imageMismatch": 0,
+          "maxTimestampErrorMs": 0,
+          "examples": [],
+          "sourceEvidenceVerified": true,
+          "productionCoverageHoles": 0,
+          "maxGapMs": 2000,
+          "startGapMs": 0,
+          "endGapMs": 2000,
+          "keyGapMedianMs": 2000,
+          "keyGapMaxMs": 2000,
+          "uniqueImageHashes": 30
+        },
+        {
+          "variant": "current",
+          "mode": "current",
+          "total": 30,
+          "matched": 30,
+          "ptsAbsent": 0,
+          "imageMismatch": 0,
+          "maxTimestampErrorMs": 0,
+          "examples": [],
+          "sourceEvidenceVerified": true,
+          "productionCoverageHoles": 0,
+          "maxGapMs": 2000,
+          "startGapMs": 0,
+          "endGapMs": 2000,
+          "keyGapMedianMs": 2000,
+          "keyGapMaxMs": 2000,
+          "uniqueImageHashes": 30
+        },
+        {
+          "variant": "batch",
+          "mode": "batch",
+          "total": 30,
+          "matched": 30,
+          "ptsAbsent": 0,
+          "imageMismatch": 0,
+          "maxTimestampErrorMs": 0,
+          "examples": [],
+          "sourceEvidenceVerified": true,
+          "productionCoverageHoles": 0,
+          "maxGapMs": 2000,
+          "startGapMs": 0,
+          "endGapMs": 2000,
+          "keyGapMedianMs": 2000,
+          "keyGapMaxMs": 2000,
+          "uniqueImageHashes": 30
+        },
+        {
+          "variant": "single-pass-hybrid",
+          "mode": "single-pass-hybrid",
+          "total": 30,
+          "matched": 30,
+          "ptsAbsent": 0,
+          "imageMismatch": 0,
+          "maxTimestampErrorMs": 0,
+          "examples": [],
+          "sourceEvidenceVerified": true,
+          "productionCoverageHoles": 0,
+          "maxGapMs": 2000,
+          "startGapMs": 0,
+          "endGapMs": 2000,
+          "keyGapMedianMs": null,
+          "keyGapMaxMs": null,
+          "uniqueImageHashes": 30
+        }
+      ],
+      "case": "gop2s-control",
+      "repeatStable": {
+        "batch": true,
+        "direct": true,
+        "legacy-current": true,
+        "current": true,
+        "single-pass-hybrid": true
+      }
+    },
+    {
+      "reference": "Independent full decode; integer PTS/time_base ground truth; allow 5ms for printed showinfo precision; scale and JPEG settings same as benchmark",
+      "uniqueReferenceFrames": 303,
+      "verification": [
+        {
+          "variant": "direct",
+          "mode": "direct",
+          "total": 300,
+          "matched": 300,
+          "ptsAbsent": 0,
+          "imageMismatch": 0,
+          "maxTimestampErrorMs": 0,
+          "examples": [],
+          "sourceEvidenceVerified": true,
+          "productionCoverageHoles": 0,
+          "maxGapMs": 2000,
+          "startGapMs": 0,
+          "endGapMs": 2000,
+          "keyGapMedianMs": null,
+          "keyGapMaxMs": null,
+          "uniqueImageHashes": 33
+        },
+        {
+          "variant": "current",
+          "mode": "current",
+          "total": 301,
+          "matched": 301,
+          "ptsAbsent": 0,
+          "imageMismatch": 0,
+          "maxTimestampErrorMs": 0,
+          "examples": [],
+          "sourceEvidenceVerified": true,
+          "productionCoverageHoles": 0,
+          "maxGapMs": 2000,
+          "startGapMs": 0,
+          "endGapMs": 2000,
+          "keyGapMedianMs": 2000,
+          "keyGapMaxMs": 6000,
+          "uniqueImageHashes": 34
+        },
+        {
+          "variant": "batch",
+          "mode": "batch",
+          "total": 301,
+          "matched": 301,
+          "ptsAbsent": 0,
+          "imageMismatch": 0,
+          "maxTimestampErrorMs": 0,
+          "examples": [],
+          "sourceEvidenceVerified": true,
+          "productionCoverageHoles": 0,
+          "maxGapMs": 2000,
+          "startGapMs": 0,
+          "endGapMs": 2000,
+          "keyGapMedianMs": 2000,
+          "keyGapMaxMs": 6000,
+          "uniqueImageHashes": 34
+        },
+        {
+          "variant": "single-pass-hybrid",
+          "mode": "single-pass-hybrid",
+          "total": 300,
+          "matched": 300,
+          "ptsAbsent": 0,
+          "imageMismatch": 0,
+          "maxTimestampErrorMs": 0,
+          "examples": [],
+          "sourceEvidenceVerified": true,
+          "productionCoverageHoles": 0,
+          "maxGapMs": 2000,
+          "startGapMs": 0,
+          "endGapMs": 2000,
+          "keyGapMedianMs": null,
+          "keyGapMaxMs": null,
+          "uniqueImageHashes": 33
+        }
+      ],
+      "case": "sparse-3",
+      "repeatStable": {
+        "batch": true,
+        "direct": true,
+        "current": true,
+        "single-pass-hybrid": true
+      }
+    },
+    {
+      "reference": "Independent full decode; integer PTS/time_base ground truth; allow 5ms for printed showinfo precision; scale and JPEG settings same as benchmark",
+      "uniqueReferenceFrames": 312,
+      "verification": [
+        {
+          "variant": "direct",
+          "mode": "direct",
+          "total": 300,
+          "matched": 300,
+          "ptsAbsent": 0,
+          "imageMismatch": 0,
+          "maxTimestampErrorMs": 0,
+          "examples": [],
+          "sourceEvidenceVerified": true,
+          "productionCoverageHoles": 0,
+          "maxGapMs": 2000,
+          "startGapMs": 0,
+          "endGapMs": 2000,
+          "keyGapMedianMs": null,
+          "keyGapMaxMs": null,
+          "uniqueImageHashes": 39
+        },
+        {
+          "variant": "current",
+          "mode": "current",
+          "total": 304,
+          "matched": 304,
+          "ptsAbsent": 0,
+          "imageMismatch": 0,
+          "maxTimestampErrorMs": 0,
+          "examples": [],
+          "sourceEvidenceVerified": true,
+          "productionCoverageHoles": 0,
+          "maxGapMs": 2000,
+          "startGapMs": 0,
+          "endGapMs": 2000,
+          "keyGapMedianMs": 2000,
+          "keyGapMaxMs": 6000,
+          "uniqueImageHashes": 43
+        },
+        {
+          "variant": "batch",
+          "mode": "batch",
+          "total": 304,
+          "matched": 304,
+          "ptsAbsent": 0,
+          "imageMismatch": 0,
+          "maxTimestampErrorMs": 0,
+          "examples": [],
+          "sourceEvidenceVerified": true,
+          "productionCoverageHoles": 0,
+          "maxGapMs": 2000,
+          "startGapMs": 0,
+          "endGapMs": 2000,
+          "keyGapMedianMs": 2000,
+          "keyGapMaxMs": 6000,
+          "uniqueImageHashes": 43
+        },
+        {
+          "variant": "single-pass-hybrid",
+          "mode": "single-pass-hybrid",
+          "total": 300,
+          "matched": 300,
+          "ptsAbsent": 0,
+          "imageMismatch": 0,
+          "maxTimestampErrorMs": 0,
+          "examples": [],
+          "sourceEvidenceVerified": true,
+          "productionCoverageHoles": 0,
+          "maxGapMs": 2000,
+          "startGapMs": 0,
+          "endGapMs": 2000,
+          "keyGapMedianMs": null,
+          "keyGapMaxMs": null,
+          "uniqueImageHashes": 39
+        }
+      ],
+      "case": "sparse-12",
+      "repeatStable": {
+        "batch": true,
+        "direct": true,
+        "current": true,
+        "single-pass-hybrid": true
+      }
+    },
+    {
+      "reference": "Independent full decode; integer PTS/time_base ground truth; allow 5ms for printed showinfo precision; scale and JPEG settings same as benchmark",
+      "uniqueReferenceFrames": 360,
+      "verification": [
+        {
+          "variant": "direct",
+          "mode": "direct",
+          "total": 300,
+          "matched": 300,
+          "ptsAbsent": 0,
+          "imageMismatch": 0,
+          "maxTimestampErrorMs": 0,
+          "examples": [],
+          "sourceEvidenceVerified": true,
+          "productionCoverageHoles": 0,
+          "maxGapMs": 2000,
+          "startGapMs": 0,
+          "endGapMs": 2000,
+          "keyGapMedianMs": null,
+          "keyGapMaxMs": null,
+          "uniqueImageHashes": 39
+        },
+        {
+          "variant": "current",
+          "mode": "current",
+          "total": 320,
+          "matched": 320,
+          "ptsAbsent": 0,
+          "imageMismatch": 0,
+          "maxTimestampErrorMs": 0,
+          "examples": [],
+          "sourceEvidenceVerified": true,
+          "productionCoverageHoles": 0,
+          "maxGapMs": 2000,
+          "startGapMs": 0,
+          "endGapMs": 2000,
+          "keyGapMedianMs": 2000,
+          "keyGapMaxMs": 6000,
+          "uniqueImageHashes": 43
+        },
+        {
+          "variant": "batch",
+          "mode": "batch",
+          "total": 320,
+          "matched": 320,
+          "ptsAbsent": 0,
+          "imageMismatch": 0,
+          "maxTimestampErrorMs": 0,
+          "examples": [],
+          "sourceEvidenceVerified": true,
+          "productionCoverageHoles": 0,
+          "maxGapMs": 2000,
+          "startGapMs": 0,
+          "endGapMs": 2000,
+          "keyGapMedianMs": 2000,
+          "keyGapMaxMs": 6000,
+          "uniqueImageHashes": 43
+        },
+        {
+          "variant": "single-pass-hybrid",
+          "mode": "single-pass-hybrid",
+          "total": 300,
+          "matched": 300,
+          "ptsAbsent": 0,
+          "imageMismatch": 0,
+          "maxTimestampErrorMs": 0,
+          "examples": [],
+          "sourceEvidenceVerified": true,
+          "productionCoverageHoles": 0,
+          "maxGapMs": 2000,
+          "startGapMs": 0,
+          "endGapMs": 2000,
+          "keyGapMedianMs": null,
+          "keyGapMaxMs": null,
+          "uniqueImageHashes": 39
+        }
+      ],
+      "case": "sparse-60",
+      "repeatStable": {
+        "batch": true,
+        "direct": true,
+        "current": true,
+        "single-pass-hybrid": true
+      }
+    },
+    {
+      "reference": "Independent full decode; integer PTS/time_base ground truth; allow 5ms for printed showinfo precision; scale and JPEG settings same as benchmark",
+      "uniqueReferenceFrames": 480,
+      "verification": [
+        {
+          "variant": "direct",
+          "mode": "direct",
+          "total": 300,
+          "matched": 300,
+          "ptsAbsent": 0,
+          "imageMismatch": 0,
+          "maxTimestampErrorMs": 0,
+          "examples": [],
+          "sourceEvidenceVerified": true,
+          "productionCoverageHoles": 0,
+          "maxGapMs": 2000,
+          "startGapMs": 0,
+          "endGapMs": 2000,
+          "keyGapMedianMs": null,
+          "keyGapMaxMs": null,
+          "uniqueImageHashes": 33
+        },
+        {
+          "variant": "current",
+          "mode": "current",
+          "total": 360,
+          "matched": 360,
+          "ptsAbsent": 0,
+          "imageMismatch": 0,
+          "maxTimestampErrorMs": 0,
+          "examples": [],
+          "sourceEvidenceVerified": true,
+          "productionCoverageHoles": 0,
+          "maxGapMs": 2000,
+          "startGapMs": 0,
+          "endGapMs": 2000,
+          "keyGapMedianMs": 2000,
+          "keyGapMaxMs": 6000,
+          "uniqueImageHashes": 40
+        },
+        {
+          "variant": "batch",
+          "mode": "batch",
+          "total": 360,
+          "matched": 360,
+          "ptsAbsent": 0,
+          "imageMismatch": 0,
+          "maxTimestampErrorMs": 0,
+          "examples": [],
+          "sourceEvidenceVerified": true,
+          "productionCoverageHoles": 0,
+          "maxGapMs": 2000,
+          "startGapMs": 0,
+          "endGapMs": 2000,
+          "keyGapMedianMs": 2000,
+          "keyGapMaxMs": 6000,
+          "uniqueImageHashes": 40
+        },
+        {
+          "variant": "single-pass-hybrid",
+          "mode": "single-pass-hybrid",
+          "total": 300,
+          "matched": 300,
+          "ptsAbsent": 0,
+          "imageMismatch": 0,
+          "maxTimestampErrorMs": 0,
+          "examples": [],
+          "sourceEvidenceVerified": true,
+          "productionCoverageHoles": 0,
+          "maxGapMs": 2000,
+          "startGapMs": 0,
+          "endGapMs": 2000,
+          "keyGapMedianMs": null,
+          "keyGapMaxMs": null,
+          "uniqueImageHashes": 33
+        }
+      ],
+      "case": "sparse-180",
+      "repeatStable": {
+        "batch": true,
+        "direct": true,
+        "current": true,
+        "single-pass-hybrid": true
+      }
+    }
+  ]
+}

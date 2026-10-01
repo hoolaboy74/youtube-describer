@@ -1,0 +1,95 @@
+{
+  "reports": [
+    {
+      "threadCap": 0,
+      "jobs": 2,
+      "pairWallSeconds": 27.138291209936142,
+      "totalCpuSeconds": 87.63728900000002,
+      "peakCombinedProcessTreeRssMiB": 302.82421875,
+      "results": [
+        {
+          "mode": "single-pass-hybrid",
+          "durationMs": 1260983,
+          "wallSeconds": 26.748731625,
+          "threadCap": 0,
+          "ffmpegCount": 1,
+          "ffprobeCount": 1,
+          "frameCount": 870,
+          "keyframes": 0,
+          "backfills": 0,
+          "ready": true,
+          "failedTargets": [],
+          "maxGapMs": 2000,
+          "inRange": true,
+          "uniquePts": true,
+          "startGapMs": 0,
+          "endGapMs": 983
+        },
+        {
+          "mode": "single-pass-hybrid",
+          "durationMs": 1260983,
+          "wallSeconds": 26.762923692,
+          "threadCap": 0,
+          "ffmpegCount": 1,
+          "ffprobeCount": 1,
+          "frameCount": 870,
+          "keyframes": 0,
+          "backfills": 0,
+          "ready": true,
+          "failedTargets": [],
+          "maxGapMs": 2000,
+          "inRange": true,
+          "uniquePts": true,
+          "startGapMs": 0,
+          "endGapMs": 983
+        }
+      ]
+    },
+    {
+      "threadCap": 2,
+      "jobs": 2,
+      "pairWallSeconds": 30.013903786428273,
+      "totalCpuSeconds": 84.17689200000001,
+      "peakCombinedProcessTreeRssMiB": 286.90625,
+      "results": [
+        {
+          "mode": "single-pass-hybrid",
+          "durationMs": 1260983,
+          "wallSeconds": 29.647059114,
+          "threadCap": 2,
+          "ffmpegCount": 1,
+          "ffprobeCount": 1,
+          "frameCount": 870,
+          "keyframes": 0,
+          "backfills": 0,
+          "ready": true,
+          "failedTargets": [],
+          "maxGapMs": 2000,
+          "inRange": true,
+          "uniquePts": true,
+          "startGapMs": 0,
+          "endGapMs": 983
+        },
+        {
+          "mode": "single-pass-hybrid",
+          "durationMs": 1260983,
+          "wallSeconds": 29.711621687,
+          "threadCap": 2,
+          "ffmpegCount": 1,
+          "ffprobeCount": 1,
+          "frameCount": 870,
+          "keyframes": 0,
+          "backfills": 0,
+          "ready": true,
+          "failedTargets": [],
+          "maxGapMs": 2000,
+          "inRange": true,
+          "uniquePts": true,
+          "startGapMs": 0,
+          "endGapMs": 983
+        }
+      ]
+    }
+  ],
+  "note": "One pair per thread profile; inference about production concurrency is limited"
+}

@@ -1,0 +1,47 @@
+{
+  "note": "Isolated QA cache persistence timing of legacy fps frames; synthetic fps timestamps, not actual keyframe provenance",
+  "reports": [
+    {
+      "mode": "legacy-current",
+      "cacheMode": "cache",
+      "durationMs": 923458,
+      "wallSeconds": 8.237269177,
+      "cacheSeconds": 3.1747610569999947,
+      "ffmpegCount": 4,
+      "ffprobeCount": 1,
+      "frameCount": 462,
+      "keyframes": 459,
+      "backfills": 3,
+      "ready": true,
+      "coverageHoles": [],
+      "failedTargets": [],
+      "maxGapMs": 2000,
+      "inRange": true,
+      "uniquePts": true,
+      "persistedFrames": 462,
+      "label": "legacy-current-cache",
+      "cpuSeconds": 11.310568
+    },
+    {
+      "mode": "legacy-batch",
+      "cacheMode": "cache",
+      "durationMs": 923458,
+      "wallSeconds": 14.970615222,
+      "cacheSeconds": 3.1249385400000125,
+      "ffmpegCount": 2,
+      "ffprobeCount": 1,
+      "frameCount": 462,
+      "keyframes": 459,
+      "backfills": 3,
+      "ready": true,
+      "coverageHoles": [],
+      "failedTargets": [],
+      "maxGapMs": 2000,
+      "inRange": true,
+      "uniquePts": true,
+      "persistedFrames": 462,
+      "label": "legacy-batch-cache",
+      "cpuSeconds": 28.751563
+    }
+  ]
+}
