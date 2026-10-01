@@ -1,0 +1,290 @@
+[
+  {
+    "name": "orchestra",
+    "durationMs": 286395,
+    "runs": [
+      {
+        "elapsedMs": 7306,
+        "strategy": "single-pass",
+        "predictedBackfills": null,
+        "fallbackReason": "unsafe-key-timeline",
+        "frameCount": 218,
+        "ffmpegCalls": 1
+      },
+      {
+        "elapsedMs": 7149,
+        "strategy": "single-pass",
+        "predictedBackfills": null,
+        "fallbackReason": "unsafe-key-timeline",
+        "frameCount": 218,
+        "ffmpegCalls": 1
+      },
+      {
+        "elapsedMs": 7768,
+        "strategy": "single-pass",
+        "predictedBackfills": null,
+        "fallbackReason": "unsafe-key-timeline",
+        "frameCount": 218,
+        "ffmpegCalls": 1
+      }
+    ],
+    "medianMs": 7306,
+    "verified": {
+      "matched": 218,
+      "total": 218,
+      "timestampErrorMs": 0
+    }
+  },
+  {
+    "name": "choir",
+    "durationMs": 332788,
+    "runs": [
+      {
+        "elapsedMs": 6018,
+        "strategy": "single-pass",
+        "predictedBackfills": 166,
+        "fallbackReason": null,
+        "frameCount": 167,
+        "ffmpegCalls": 1
+      },
+      {
+        "elapsedMs": 6026,
+        "strategy": "single-pass",
+        "predictedBackfills": 166,
+        "fallbackReason": null,
+        "frameCount": 167,
+        "ffmpegCalls": 1
+      },
+      {
+        "elapsedMs": 6326,
+        "strategy": "single-pass",
+        "predictedBackfills": 166,
+        "fallbackReason": null,
+        "frameCount": 167,
+        "ffmpegCalls": 1
+      }
+    ],
+    "medianMs": 6026,
+    "verified": {
+      "matched": 167,
+      "total": 167,
+      "timestampErrorMs": 0
+    }
+  },
+  {
+    "name": "music-video",
+    "durationMs": 227741,
+    "runs": [
+      {
+        "elapsedMs": 4714,
+        "strategy": "single-pass",
+        "predictedBackfills": null,
+        "fallbackReason": "unsafe-key-timeline",
+        "frameCount": 232,
+        "ffmpegCalls": 1
+      },
+      {
+        "elapsedMs": 4754,
+        "strategy": "single-pass",
+        "predictedBackfills": null,
+        "fallbackReason": "unsafe-key-timeline",
+        "frameCount": 232,
+        "ffmpegCalls": 1
+      },
+      {
+        "elapsedMs": 4773,
+        "strategy": "single-pass",
+        "predictedBackfills": null,
+        "fallbackReason": "unsafe-key-timeline",
+        "frameCount": 232,
+        "ffmpegCalls": 1
+      }
+    ],
+    "medianMs": 4754,
+    "verified": {
+      "matched": 232,
+      "total": 232,
+      "timestampErrorMs": 0
+    }
+  },
+  {
+    "name": "long-talk",
+    "durationMs": 1260983,
+    "runs": [
+      {
+        "elapsedMs": 19021,
+        "strategy": "single-pass",
+        "predictedBackfills": 725,
+        "fallbackReason": null,
+        "frameCount": 870,
+        "ffmpegCalls": 1
+      },
+      {
+        "elapsedMs": 18826,
+        "strategy": "single-pass",
+        "predictedBackfills": 725,
+        "fallbackReason": null,
+        "frameCount": 870,
+        "ffmpegCalls": 1
+      },
+      {
+        "elapsedMs": 18589,
+        "strategy": "single-pass",
+        "predictedBackfills": 725,
+        "fallbackReason": null,
+        "frameCount": 870,
+        "ffmpegCalls": 1
+      }
+    ],
+    "medianMs": 18826,
+    "verified": {
+      "matched": 870,
+      "total": 870,
+      "timestampErrorMs": 0
+    }
+  },
+  {
+    "name": "sparse-3",
+    "durationMs": 600000,
+    "runs": [
+      {
+        "elapsedMs": 4893,
+        "strategy": "key-seek",
+        "predictedBackfills": 3,
+        "fallbackReason": null,
+        "frameCount": 301,
+        "ffmpegCalls": 4
+      },
+      {
+        "elapsedMs": 4682,
+        "strategy": "key-seek",
+        "predictedBackfills": 3,
+        "fallbackReason": null,
+        "frameCount": 301,
+        "ffmpegCalls": 4
+      },
+      {
+        "elapsedMs": 4561,
+        "strategy": "key-seek",
+        "predictedBackfills": 3,
+        "fallbackReason": null,
+        "frameCount": 301,
+        "ffmpegCalls": 4
+      }
+    ],
+    "medianMs": 4682,
+    "verified": {
+      "matched": 301,
+      "total": 301,
+      "timestampErrorMs": 0
+    }
+  },
+  {
+    "name": "sparse-12",
+    "durationMs": 600000,
+    "runs": [
+      {
+        "elapsedMs": 5508,
+        "strategy": "key-seek",
+        "predictedBackfills": 12,
+        "fallbackReason": null,
+        "frameCount": 304,
+        "ffmpegCalls": 13
+      },
+      {
+        "elapsedMs": 5176,
+        "strategy": "key-seek",
+        "predictedBackfills": 12,
+        "fallbackReason": null,
+        "frameCount": 304,
+        "ffmpegCalls": 13
+      },
+      {
+        "elapsedMs": 5144,
+        "strategy": "key-seek",
+        "predictedBackfills": 12,
+        "fallbackReason": null,
+        "frameCount": 304,
+        "ffmpegCalls": 13
+      }
+    ],
+    "medianMs": 5176,
+    "verified": {
+      "matched": 304,
+      "total": 304,
+      "timestampErrorMs": 0
+    }
+  },
+  {
+    "name": "sparse-60",
+    "durationMs": 600000,
+    "runs": [
+      {
+        "elapsedMs": 8295,
+        "strategy": "single-pass",
+        "predictedBackfills": 60,
+        "fallbackReason": null,
+        "frameCount": 300,
+        "ffmpegCalls": 1
+      },
+      {
+        "elapsedMs": 7998,
+        "strategy": "single-pass",
+        "predictedBackfills": 60,
+        "fallbackReason": null,
+        "frameCount": 300,
+        "ffmpegCalls": 1
+      },
+      {
+        "elapsedMs": 7910,
+        "strategy": "single-pass",
+        "predictedBackfills": 60,
+        "fallbackReason": null,
+        "frameCount": 300,
+        "ffmpegCalls": 1
+      }
+    ],
+    "medianMs": 7998,
+    "verified": {
+      "matched": 300,
+      "total": 300,
+      "timestampErrorMs": 0
+    }
+  },
+  {
+    "name": "sparse-180",
+    "durationMs": 600000,
+    "runs": [
+      {
+        "elapsedMs": 8188,
+        "strategy": "single-pass",
+        "predictedBackfills": 180,
+        "fallbackReason": null,
+        "frameCount": 300,
+        "ffmpegCalls": 1
+      },
+      {
+        "elapsedMs": 7934,
+        "strategy": "single-pass",
+        "predictedBackfills": 180,
+        "fallbackReason": null,
+        "frameCount": 300,
+        "ffmpegCalls": 1
+      },
+      {
+        "elapsedMs": 7910,
+        "strategy": "single-pass",
+        "predictedBackfills": 180,
+        "fallbackReason": null,
+        "frameCount": 300,
+        "ffmpegCalls": 1
+      }
+    ],
+    "medianMs": 7934,
+    "verified": {
+      "matched": 300,
+      "total": 300,
+      "timestampErrorMs": 0
+    }
+  }
+]
