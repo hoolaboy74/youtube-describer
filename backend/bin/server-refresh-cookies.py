@@ -109,7 +109,7 @@ def verify_cookie(cookie_path):
             "yt-dlp",
             "--no-check-certificate",
             "--cookies", cookie_path,
-            "-f", "bestaudio",
+            "-f", "bestaudio/best",
             "-g",
             "https://www.youtube.com/watch?v=sgL_waepEL4"
         ]

@@ -38,3 +38,6 @@ backend/*.nosub
 # Audit & Stats reports
 user_audit/
 prod_report/
+
+# Local audio-description experiments (prompts, results, reusable assets)
+/test_scripts/

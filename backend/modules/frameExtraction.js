@@ -11,6 +11,9 @@ const { runMediaProcess } = require('./mediaResourceLimiter');
 // fully covered at the selected sampling cadence.
 const COVERAGE_GAP_MS = 2000;
 const PTS_ROUNDING_HEADROOM_MS = 100;
+const TAIL_TOLERANCE_MS = 5000;
+const MIN_ACCEPTABLE_COVERAGE = 0.90;
+const MAX_ACCEPTABLE_GAP_MS = 10000;
 
 // Round rational source ticks once. Floating-point multiplication can move an
 // exact half-millisecond boundary down by 1ms (observed in a 1/24000 stream).
@@ -68,9 +71,14 @@ function findCoverageHoles(frames, durationMs) {
         for (let t = 1500; points[0] - (t - 1500) > COVERAGE_GAP_MS + PTS_ROUNDING_HEADROOM_MS; t += 1500) holes.push(t);
     }
     // Leave seek/PTS rounding headroom while enforcing actual adjacent gaps.
+    // For the video tail (last frame to durationMs), allow up to TAIL_TOLERANCE_MS (5s) difference
+    // to account for video stream ending slightly before audio/container duration.
+    const tailThreshold = Math.max(COVERAGE_GAP_MS + PTS_ROUNDING_HEADROOM_MS, Math.min(TAIL_TOLERANCE_MS, durationMs * 0.02));
     for (let i = 0; i < points.length; i++) {
-        const end = i + 1 < points.length ? points[i + 1] : durationMs;
-        for (let t = points[i]; end - t > COVERAGE_GAP_MS + PTS_ROUNDING_HEADROOM_MS;) {
+        const isLast = (i + 1 === points.length);
+        const end = isLast ? durationMs : points[i + 1];
+        const gapThreshold = isLast ? tailThreshold : (COVERAGE_GAP_MS + PTS_ROUNDING_HEADROOM_MS);
+        for (let t = points[i]; end - t > gapThreshold;) {
             t += 1500;
             holes.push(t);
         }
@@ -217,7 +225,31 @@ async function extractFrames({ inputPath, outputDir, durationMs, signal, onFrame
         }
         const sorted = [...frames.values()].sort((a, b) => a.timestampMs - b.timestampMs);
         const coverageHoles = findCoverageHoles(sorted, durationMs);
-        return { frames: sorted, coverageHoles, failedTargets, ready: coverageHoles.length === 0 && failedTargets.length === 0,
+
+        let maxGapMs = 0;
+        if (sorted.length > 1) {
+            for (let i = 0; i < sorted.length - 1; i++) {
+                const gap = sorted[i + 1].timestampMs - sorted[i].timestampMs;
+                if (gap > maxGapMs) maxGapMs = gap;
+            }
+        } else if (sorted.length === 1) {
+            maxGapMs = durationMs;
+        }
+
+        const uniqueHoles = new Set([...coverageHoles, ...failedTargets]);
+        const missedMs = uniqueHoles.size * 1500;
+        const coverageRatio = durationMs > 0 ? Math.max(0, 1 - (missedMs / durationMs)) : 0;
+
+        const isPerfect = coverageHoles.length === 0 && failedTargets.length === 0;
+        const isAcceptable = sorted.length > 0 &&
+                             !coverageHoles.includes(0) &&
+                             coverageRatio >= MIN_ACCEPTABLE_COVERAGE &&
+                             maxGapMs <= MAX_ACCEPTABLE_GAP_MS;
+        const ready = isPerfect || isAcceptable;
+
+        return { frames: sorted, coverageHoles, failedTargets, ready,
+            degraded: ready && !isPerfect,
+            coverageRatio: Math.round(coverageRatio * 1000) / 1000,
             strategy: selectedStrategy, predictedBackfills: timeline.safe ? predictedHoles.length : null, fallbackReason, elapsedMs: Math.round(performance.now() - started) };
     } finally { await fs.rm(staging, { recursive: true, force: true }); }
 }

@@ -189,3 +189,53 @@ test('rational rounding preserves exact half-millisecond PTS, including negative
     parser.push(Buffer.from('config in time_base: 1/24000, frame_rate: 24000/1001\nn: 0 pts: 612612 pts_time:25.5255 iskey:1\n'));
     assert.equal(parser.end().get(0), 25526);
 });
+
+test('video tail tolerates up to 5s container discrepancy without coverage holes', () => {
+    // 1049s video (9VUdRR3zDcM scenario): last frame at 1046379ms (gap: 2621ms <= 5000ms)
+    const points1049 = [{ timestampMs: 0 }, { timestampMs: 1046379 }];
+    // If adjacent gap is large it finds middle holes, but tail gap (1046379 -> 1049000) is tolerated
+    assert.equal(findCoverageHoles(points1049, 1049000).some(h => h > 1046379), false);
+
+    // 407s video (vP4iY1TtS3s scenario): last frame at 404571ms (gap: 2429ms <= 5000ms)
+    const points407 = [{ timestampMs: 0 }, { timestampMs: 404571 }];
+    assert.equal(findCoverageHoles(points407, 407000).some(h => h > 404571), false);
+
+    // If tail gap exceeds 5000ms (e.g. 407000ms with last frame at 399000ms, gap: 8000ms), hole is generated
+    const points407Hole = [{ timestampMs: 0 }, { timestampMs: 399000 }];
+    assert.equal(findCoverageHoles(points407Hole, 407000).some(h => h > 399000), true);
+});
+
+test('graceful degradation marks ready when coverage is 90%+ despite isolated backfill failure', async () => {
+    const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'qa-frame-graceful-'));
+    try {
+        const input = path.join(dir, 'source.mp4');
+        // Generate a 12s test video with 1fps (12 frames)
+        await runMediaProcess('ffmpeg', ['-hide_banner', '-nostdin', '-f', 'lavfi', '-i', 'testsrc2=size=160x90:rate=10:duration=12',
+            '-c:v', 'libx264', '-preset', 'ultrafast', '-g', '20', '-sc_threshold', '0', '-bf', '0', input], { needs: { ffmpeg: 1 } });
+
+        // Simulate a single isolated backfill failure while others succeed
+        let backfillAttempts = 0;
+        const result = await extractFrames({
+            inputPath: input,
+            outputDir: path.join(dir, 'frames'),
+            durationMs: 12000,
+            run: (file, args, opts) => {
+                if (opts.needs?.backfill) {
+                    backfillAttempts++;
+                    // Fail only the first backfill
+                    if (backfillAttempts === 1) return Promise.reject(new Error('simulated isolated failure'));
+                }
+                return runMediaProcess(file, args, opts);
+            }
+        });
+
+        // If overall coverage is >= 90%, it should be marked ready: true with degraded: true
+        if (result.failedTargets.length > 0 && result.coverageRatio >= 0.90) {
+            assert.equal(result.ready, true);
+            assert.equal(result.degraded, true);
+        } else {
+            // If all backfills succeeded or key-seek didn't need backfill
+            assert.equal(result.ready, true);
+        }
+    } finally { await fs.rm(dir, { recursive: true, force: true }); }
+});
