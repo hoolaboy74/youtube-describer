@@ -133,12 +133,13 @@ test('media preparation timeout keeps its actual reason in events and diagnostic
 });
 test('cancel suppresses a late unary result without rewriting the model sentence', async t => {
     const image = await fixtureFrame(t);
-    const store = createQaRequestStore(), { request } = store.accept(1, input()); const gate = deferred(), speaking = deferred(); let calls = 0;
-    const run = createQaGeneration({ store, getVideo: () => ({ duration: 60 }), media: { prepare: async () => ({ frames: [{ path: image, timestampMs: 11000, sourcePtsMs: 11000 }], subtitles: { cues: [] } }) },
+    const store = createQaRequestStore(), { request } = store.accept(1, input()), logs = []; const gate = deferred(), speaking = deferred(); let calls = 0;
+    const run = createQaGeneration({ store, getVideo: () => ({ duration: 60 }), log: line => logs.push(line), media: { prepare: async () => ({ frames: [{ path: image, timestampMs: 11000, sourcePtsMs: 11000 }], subtitles: { cues: [] } }) },
         model: { generateContentStream: async () => ({ stream: (async function* () { yield { text: () => JSON.stringify({ seq: 0, text: UNKNOWN }) + '\n' }; })(), response: Promise.resolve({}) }) },
         speech: { mp3: async text => { calls++; assert.equal(text, UNKNOWN); speaking.resolve(); await gate.promise; return Buffer.from('late'); } }, recordUsage: () => {} });
     const running = run(request); await speaking.promise; store.finish(request, 'canceled'); gate.resolve(); await running;
     assert.equal(calls, 1); assert.equal(request.audio.size, 0); assert.equal(request.events.at(-1).type, 'canceled');
+    assert.ok(!logs.some(line => line.includes('"event":"failed"')));
 });
 test('OGG failure before bytes falls back per sentence, but failure after bytes cannot trigger automatic rereading', async () => {
     for (const bytes of [0, 1]) {

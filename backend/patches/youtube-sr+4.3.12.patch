@@ -1,7 +1,16 @@
 diff --git a/node_modules/youtube-sr/dist/mod.js b/node_modules/youtube-sr/dist/mod.js
-index f7714a9..844d8bb 100644
+index f7714a9..516f5a0 100644
 --- a/node_modules/youtube-sr/dist/mod.js
 +++ b/node_modules/youtube-sr/dist/mod.js
+@@ -539,7 +539,7 @@ var _Util = class _Util {
+   static innertubeKey() {
+     return __async(this, null, function* () {
+       if (innertubeCache) return innertubeCache;
+-      return yield _Util.fetchInnerTubeKey();
++      return DEFAULT_INNERTUBE_KEY;
+     });
+   }
+   static get VideoRegex() {
 @@ -698,9 +698,9 @@ var _Util = class _Util {
          width: data.videoRenderer.thumbnail.thumbnails[data.videoRenderer.thumbnail.thumbnails.length - 1].width
        },
@@ -15,3 +24,48 @@ index f7714a9..844d8bb 100644
          icon: {
            url: ((_c = (_b = (_a = data.videoRenderer.channelThumbnail) == null ? void 0 : _a.thumbnails) == null ? void 0 : _b[0]) == null ? void 0 : _c.url) || ((_h = (_g = (_f = (_e = (_d = data.videoRenderer.channelThumbnailSupportedRenderers) == null ? void 0 : _d.channelThumbnailWithLinkRenderer) == null ? void 0 : _e.thumbnail) == null ? void 0 : _f.thumbnails) == null ? void 0 : _g[0]) == null ? void 0 : _h.url),
            width: ((_k = (_j = (_i = data.videoRenderer.channelThumbnail) == null ? void 0 : _i.thumbnails) == null ? void 0 : _j[0]) == null ? void 0 : _k.width) || ((_p = (_o = (_n = (_m = (_l = data.videoRenderer.channelThumbnailSupportedRenderers) == null ? void 0 : _l.channelThumbnailWithLinkRenderer) == null ? void 0 : _m.thumbnail) == null ? void 0 : _n.thumbnails) == null ? void 0 : _o[0]) == null ? void 0 : _p.width),
+@@ -1057,7 +1057,7 @@ var _Util = class _Util {
+   static makeRequest() {
+     return __async(this, arguments, function* (url = "", data = { data: {}, requestOptions: {} }) {
+       const key = yield _Util.innertubeKey();
+-      const res = yield _Util.getHTML(`https://youtube.com/youtubei/v1${url}?key=${key}`, __spreadValues({
++      const res = yield _Util.getHTML(`https://www.youtube.com/youtubei/v1${url}?key=${key}`, __spreadValues({
+         method: "POST",
+         headers: {
+           "Content-Type": "application/json",
+@@ -1071,7 +1071,7 @@ var _Util = class _Util {
+               gl: "US",
+               hl: "en",
+               clientName: "WEB",
+-              clientVersion: "1.20220406.00.00",
++              clientVersion: "2.20250101.00.00",
+               originalUrl: "https://www.youtube.com/"
+             }, data.clientCtx || {})
+           }, data.ctx || {})
+@@ -1103,21 +1103,22 @@ var _YouTube = class _YouTube {
+       options.type = options.type || "video";
+       const requestOptions = options.safeSearch ? __spreadProps(__spreadValues({}, options.requestOptions), { headers: { cookie: SAFE_SEARCH_COOKIE } }) : {};
+       try {
+-        const filter = options.type === "all" ? null : Util_default.filter(options.type);
++        const filter = options.type === "all" ? null : decodeURIComponent(decodeURIComponent(Util_default.filter(options.type)));
+         const res = yield Util_default.makeRequest("/search", {
+           data: {
+             params: filter,
+             query
+           },
+           clientCtx: {
+-            originalUrl: `https://youtube.com/results?search_query=${encodeURIComponent(query.trim()).replace(/%20/g, "+")}${filter}`
++            originalUrl: `https://www.youtube.com/results?search_query=${encodeURIComponent(query.trim()).replace(/%20/g, "+")}`
+           },
+           requestOptions
+         });
+-        return Formatter.formatSearchResult(res.contents.twoColumnSearchResultsRenderer.primaryContents.sectionListRenderer.contents[0].itemSectionRenderer.contents, options);
++        const items = res.contents.twoColumnSearchResultsRenderer.primaryContents.sectionListRenderer.contents.filter((x) => x.itemSectionRenderer).flatMap((x) => x.itemSectionRenderer.contents);
++        return Formatter.formatSearchResult(items, options);
+       } catch (e) {
+         const filter = options.type === "all" ? "" : `&sp=${Util_default.filter(options.type)}`;
+-        const url = `https://youtube.com/results?search_query=${encodeURIComponent(query.trim()).replace(/%20/g, "+")}&hl=en${filter}`;
++        const url = `https://www.youtube.com/results?search_query=${encodeURIComponent(query.trim()).replace(/%20/g, "+")}&hl=en${filter}`;
+         const html = yield Util_default.getHTML(url, requestOptions);
+         return Util_default.parseSearchResult(html, options);
+       }

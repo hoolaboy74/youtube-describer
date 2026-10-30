@@ -38,3 +38,43 @@ test('streaming search metadata survives an empty SDK final metadata object for 
     assert.equal(recorded.candidates[0].groundingMetadata.webSearchQueries[0], 'actual query');
     assert.equal(request.events.find(event => event.type === 'generation_done').data.sources[0].url, 'https://example.com/source');
 });
+test('patched youtube-sr search uses www InnerTube v1 with decoded filter params and skips homepage key scraping', async t => {
+    const YouTube = require('youtube-sr').default;
+    const { Util } = require('youtube-sr');
+    const calls = [];
+    t.mock.method(Util, 'getHTML', async (url, opts) => {
+        calls.push({ url, opts });
+        return JSON.stringify({
+            contents: {
+                twoColumnSearchResultsRenderer: {
+                    primaryContents: {
+                        sectionListRenderer: {
+                            contents: [{
+                                itemSectionRenderer: {
+                                    contents: [{
+                                        videoRenderer: {
+                                            videoId: 'gAV4xKN8w44',
+                                            title: { runs: [{ text: '아이폰 듀오 테스트' }] },
+                                            lengthText: { simpleText: '11:17' },
+                                            thumbnail: { thumbnails: [{ url: 'https://i.ytimg.com/vi/gAV4xKN8w44/hqdefault.jpg', width: 480, height: 360 }] },
+                                            ownerText: { runs: [{ text: '단독튜브', navigationEndpoint: { browseEndpoint: { browseId: 'UC123', canonicalBaseUrl: '/@dandok' } } }] },
+                                            viewCountText: { simpleText: '24,092 views' }
+                                        }
+                                    }]
+                                }
+                            }]
+                        }
+                    }
+                }
+            }
+        });
+    });
+    const results = await YouTube.search('단독튜브 아이폰듀오', { limit: 50, type: 'video' });
+    assert.equal(calls.length, 1);
+    assert.match(calls[0].url, /^https:\/\/www\.youtube\.com\/youtubei\/v1\/search\?key=/);
+    const body = JSON.parse(calls[0].opts.body);
+    assert.equal(body.params, 'EgIQAQ==');
+    assert.equal(body.context.client.clientVersion, '2.20250101.00.00');
+    assert.equal(results.length, 1);
+    assert.equal(results[0].id, 'gAV4xKN8w44');
+});

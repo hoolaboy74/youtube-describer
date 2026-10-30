@@ -85,7 +85,7 @@ function createQaGeneration({ store, media, model, speech, getVideo, recordUsage
                             try {
                                 ogg = await speech.ogg(signal); request.ogg = ogg;
                                 const activeOgg = ogg;
-                                ogg.done.catch(() => { if (!signal.aborted && activeOgg.bytes > 0) store.finish(request, 'error', { code: 'QA_TTS_FAILED' }); });
+                                ogg.done.catch(() => { if (!signal.aborted && activeOgg.bytes > 0) { timeoutCode ||= 'QA_TTS_FAILED'; store.finish(request, 'error', { code: 'QA_TTS_FAILED' }); } });
                                 request.emitter.emit('audio');
                                 await ogg.write(sentence.text);
                                 await Promise.race([ogg.firstByte, new Promise((resolve,reject) => { firstByteTimer=setTimeout(()=>reject(new Error('QA_TTS_FIRST_BYTE_TIMEOUT')),15000); })]);
@@ -103,8 +103,11 @@ function createQaGeneration({ store, media, model, speech, getVideo, recordUsage
                     signal.throwIfAborted(); store.putAudio(request, sentence.seq, bytes);
                     store.emit(request, 'sentence_audio', { seq: sentence.seq, path: `/api/qa/audio/${store.ticket(request, sentence.seq)}` });
                 });
-                audioChain.catch(() => { report('failed', { code: 'QA_TTS_FAILED' });
-                    if (!signal.aborted) store.finish(request, 'error', { code: 'QA_TTS_FAILED' }); });
+                audioChain.catch(() => {
+                    if (signal.aborted) return;
+                    timeoutCode ||= 'QA_TTS_FAILED';
+                    store.finish(request, 'error', { code: 'QA_TTS_FAILED' });
+                });
             }
             const parser = createSentenceParser(accept);
             report('model_started', { searchDecision: 'model' });
@@ -144,9 +147,11 @@ function createQaGeneration({ store, media, model, speech, getVideo, recordUsage
             if (ogg) { ogg.end(); await ogg.done; }
             signal.throwIfAborted(); store.finish(request, 'audio_done');
         } catch (error) {
-            const code = timeoutCode || (error.message?.startsWith('QA_') ? error.message : 'QA_GENERATION_FAILED');
-            report('failed', { code, errorType: /^[A-Za-z]+$/.test(error.name || '') ? error.name : 'Error', ...(code === 'QA_GENERATION_FAILED' ? { providerFailure: classifyProviderFailure(error) } : {}) });
-            if (!signal.aborted) store.finish(request, 'error', { code: error.message?.startsWith('QA_') ? error.message : 'QA_GENERATION_FAILED' });
+            if (request.status !== 'canceled') {
+                const code = timeoutCode || (error.message?.startsWith('QA_') ? error.message : 'QA_GENERATION_FAILED');
+                report('failed', { code, errorType: /^[A-Za-z]+$/.test(error.name || '') ? error.name : 'Error', ...(code === 'QA_GENERATION_FAILED' ? { providerFailure: classifyProviderFailure(error) } : {}) });
+                if (!signal.aborted) store.finish(request, 'error', { code });
+            }
         } finally {
             timers.forEach(clearTimeout); releaseModel?.();
             if (signal.aborted) ogg?.cancel();
