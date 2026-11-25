@@ -13,7 +13,9 @@ const {
     canonicalizeModelOutput,
     parseVttToDialogueTrack,
     selectDialogueSubtitle,
-    selectMixedEnglishReferenceSubtitle
+    selectMixedEnglishReferenceSubtitle,
+    enrichMixedDialogueTrackWithAudioSegments,
+    YTDLP_FORMAT_SELECTOR
 } = require('./videoProcessor');
 
 test('foreign and unknown audio prefer original English VTT over Korean translated VTT', () => {
@@ -303,4 +305,72 @@ test('mixed audio retains Korean VTT provenance without blocking a model transla
     } finally {
         fs.rmSync(directory, { recursive: true, force: true });
     }
+});
+
+test('YTDLP_FORMAT_SELECTOR prioritizes original audio tracks over single-file fallback', () => {
+    const branches = YTDLP_FORMAT_SELECTOR.split('/');
+    const origIdx = branches.findIndex(b => b.includes('format_note*=original'));
+    const prefIdx = branches.findIndex(b => b.includes('language_preference>=10'));
+    const singleFallbackIdx = branches.findIndex(b => b === 'best[height<=360][vcodec!=none][acodec!=none]');
+    assert.ok(origIdx >= 0 && origIdx < singleFallbackIdx);
+    assert.ok(prefIdx >= 0 && prefIdx < singleFallbackIdx);
+});
+
+test('enrichMixedDialogueTrackWithAudioSegments clamps bloated Korean tails, marks tagged English cues, and fills VTT gaps', () => {
+    const baseTrack = [
+        { start: 491, end: 510, sourceLanguage: 'ko', sourceText: '번역 속도는 더 빨라졌습니다.', confirmed: true },
+        { start: 510, end: 519, sourceLanguage: 'ko', sourceText: 'sentence [음악] structure what about this', confirmed: true }
+    ];
+    const foreignSegments = [{ start: 500, end: 525, lang: 'en', prob: 0.98 }];
+    const enriched = enrichMixedDialogueTrackWithAudioSegments(baseTrack, foreignSegments);
+
+    // Bloated Korean cue clamped to 500s
+    const koCue = enriched.find(item => item.sourceText.includes('번역 속도는'));
+    assert.equal(koCue.end, 500);
+
+    // Tagged English cue marked foreign: true
+    const enCue = enriched.find(item => item.sourceText.includes('sentence'));
+    assert.equal(enCue.foreign, true);
+    assert.equal(enCue.detectedLanguage, 'en');
+
+    // Missing foreign VTT windows (500-510s and 520-525s) receive whisper_audio_timeline markers
+    const markers = enriched.filter(item => item.source === 'whisper_audio_timeline');
+    assert.equal(markers.length, 2);
+    assert.deepEqual(markers.map(m => [m.start, m.end]), [[500, 510], [520, 525]]);
+    assert.ok(markers.every(m => m.confirmed === true && m.foreign === true));
+});
+
+test('mixed boundary provenance accepts [trans] within +/-2s of confirmed foreign audio with frame evidence, and rejects Korean gaps', () => {
+    const foreignAudioSegments = [{ start: 350, end: 360, lang: 'en', prob: 0.98 }];
+    const result = canonicalizeModelOutput([
+        '[361][trans] 문장 전체가 한 번에 전달되는 겁니다.',
+        '[200][trans] 한국어 구간의 빈 틈에서는 번역이 허용되면 안 됩니다.'
+    ].join('\n'), {
+        duration: 600,
+        audioLanguage: 'mixed',
+        dialogueTrack: [],
+        foreignAudioSegments,
+        dialogueTimestampTolerance: 1,
+        frameEvidence: [{ timestamp: 200 }, { timestamp: 361 }]
+    });
+
+    assert.equal(result.accepted.length, 1);
+    assert.equal(result.accepted[0].timestamp, 361);
+    assert.equal(result.accepted[0].provenance.source, 'whisper_audio_timeline');
+    assert.equal(result.accepted[0].provenance.dialogueInterval.foreign, true);
+
+    assert.equal(result.rejected.length, 1);
+    assert.equal(result.rejected[0].timestamp, 200);
+    assert.ok(result.rejected[0].validationReasons.includes('MISSING_PROVENANCE'));
+
+    // Pure Korean audio must still strictly reject [trans] even if segments were supplied
+    const koResult = canonicalizeModelOutput('[361][trans] 한국어 원음은 번역 금지입니다.', {
+        duration: 600,
+        audioLanguage: 'korean',
+        dialogueTrack: [],
+        foreignAudioSegments,
+        frameEvidence: [{ timestamp: 361 }]
+    });
+    assert.equal(koResult.accepted.length, 0);
+    assert.ok(koResult.rejected[0].validationReasons.includes('TRANSLATION_NOT_ALLOWED_KOREAN'));
 });

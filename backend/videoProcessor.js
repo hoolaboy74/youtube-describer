@@ -183,6 +183,15 @@ const parseISO8601Duration = (duration) => {
 };
 
 const MODEL_FRAME_EVIDENCE_MAX_DISTANCE_SECONDS = 1.5;
+const MIXED_FOREIGN_AUDIO_BOUNDARY_TOLERANCE_SECONDS = 2;
+const YTDLP_FORMAT_SELECTOR = [
+    'bestvideo[height<=360][vcodec^=avc1]+bestaudio[format_note*=original][ext=m4a]',
+    'bestvideo[height<=360][vcodec^=avc1]+bestaudio[language_preference>=10][ext=m4a]',
+    'bestvideo[height<=360]+bestaudio[format_note*=original]',
+    'bestvideo[height<=360]+bestaudio[language_preference>=10]',
+    'best[height<=360][vcodec!=none][acodec!=none]',
+    'best[height<=360]'
+].join('/');
 
 function nearestFrameEvidence(timestamp, context) {
     const frames = Array.isArray(context.frameEvidence)
@@ -237,27 +246,52 @@ function provenanceForModelCandidate(candidate, context) {
     }
     if (candidate.tag === 'trans') {
         const dialogueTrack = Array.isArray(context.dialogueTrack) ? context.dialogueTrack : [];
+        const audioLanguage = String(context.audioLanguage || context.audioClassification || 'unknown').toLowerCase();
         const interval = findDialogueInterval(
             timestamp,
             dialogueTrack,
             context.dialogueTimestampTolerance
         );
-        if (!interval) return null;
-        const audioLanguage = String(context.audioLanguage || context.audioClassification || 'unknown').toLowerCase();
-        return {
-            kind: 'foreign_dialogue',
-            dialogueInterval: {
-                ...interval,
-                start: Number(interval.start),
-                end: Number(interval.end),
-                confirmed: interval.confirmed !== false,
-                // `mixed` is ko-primary in this product. A Korean source VTT
-                // must not become foreign evidence merely because another
-                // sampled segment contained a non-Korean language.
-                foreign: interval.foreign === true ||
-                    (audioLanguage === 'foreign' && interval.sourceLanguage !== 'ko')
+        if (interval) {
+            return {
+                kind: 'foreign_dialogue',
+                dialogueInterval: {
+                    ...interval,
+                    start: Number(interval.start),
+                    end: Number(interval.end),
+                    confirmed: interval.confirmed !== false,
+                    // `mixed` is ko-primary in this product. A Korean source VTT
+                    // must not become foreign evidence merely because another
+                    // sampled segment contained a non-Korean language.
+                    foreign: interval.foreign === true ||
+                        (audioLanguage === 'foreign' && interval.sourceLanguage !== 'ko')
+                }
+            };
+        }
+        if (audioLanguage === 'mixed' && frameEvidence.length > 0 && Array.isArray(context.foreignAudioSegments)) {
+            const matchedSegment = context.foreignAudioSegments.find(seg =>
+                seg &&
+                Number.isFinite(Number(seg.start)) &&
+                Number.isFinite(Number(seg.end)) &&
+                timestamp >= Number(seg.start) - MIXED_FOREIGN_AUDIO_BOUNDARY_TOLERANCE_SECONDS &&
+                timestamp <= Number(seg.end) + MIXED_FOREIGN_AUDIO_BOUNDARY_TOLERANCE_SECONDS
+            );
+            if (matchedSegment) {
+                return {
+                    kind: 'foreign_dialogue',
+                    frameEvidence,
+                    source: 'whisper_audio_timeline',
+                    dialogueInterval: {
+                        start: Math.min(Number(matchedSegment.start), timestamp),
+                        end: Math.max(Number(matchedSegment.end), timestamp + 1),
+                        sourceLanguage: matchedSegment.lang || 'en',
+                        confirmed: true,
+                        foreign: true
+                    }
+                };
             }
-        };
+        }
+        return null;
     }
     return null;
 }
@@ -511,7 +545,8 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null, userId = nul
                 try {
                     await new Promise((resolve, reject) => {
                         const ytdlpArgs = [
-                            '-f', 'best[height<=360][vcodec!=none][acodec!=none]/best[height<=360]',
+                            '-f', YTDLP_FORMAT_SELECTOR,
+                            '--merge-output-format', 'mp4',
                             '-o', tempVideoFilename,
                             '--force-ipv4',
                             '--legacy-server-connect',
@@ -628,7 +663,7 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null, userId = nul
 
         // FFmpeg & Whisper: Process keyframe extraction and audio language detection in parallel
         logger.info(`[${requestHash}] Starting hybrid keyframe extraction and audio language detection in parallel...`);
-        const [allTimestamps, audioLanguage] = await Promise.all([
+        const [allTimestamps, audioDetection] = await Promise.all([
             extractKeyframesHybrid({
                 tempVideoPath,
                 qaPipeline,
@@ -638,8 +673,15 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null, userId = nul
                 requestHash,
                 sseHandler
             }),
-            audioLanguageDetector.detectLanguage(tempVideoPath, totalDuration, requestHash)
+            (async () => {
+                const detected = await audioLanguageDetector.detectLanguage(tempVideoPath, totalDuration, requestHash);
+                const foreignAudioSegments = detected === 'mixed'
+                    ? await audioLanguageDetector.detectForeignAudioSegments(tempVideoPath, totalDuration, requestHash)
+                    : [];
+                return { audioLanguage: detected, foreignAudioSegments };
+            })()
         ]);
+        const { audioLanguage, foreignAudioSegments } = audioDetection;
         
         // Load only a source-language dialogue track. For foreign/unknown audio,
         // a Korean VTT is commonly YouTube's translated caption track, not
@@ -673,6 +715,9 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null, userId = nul
             logger.info(`[${requestHash}] ${subtitleSelection.logLabel}: ${subtitleSelection.file}`);
         } else {
             logger.info(`[${requestHash}] No usable original-language subtitles found for ${audioLanguage}; dialogue track is empty.`);
+        }
+        if (audioLanguage === 'mixed' && foreignAudioSegments.length > 0) {
+            dialogueTrack = enrichMixedDialogueTrackWithAudioSegments(dialogueTrack, foreignAudioSegments);
         }
 
         // Publish downloaded captions to the same durable store used by Q&A.
@@ -732,6 +777,7 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null, userId = nul
             duration: Math.floor(totalDuration),
             audioLanguage,
             dialogueTrack,
+            foreignAudioSegments,
             dialogueTimestampTolerance: 1,
             frameEvidence: allTimestamps.map(timestamp => ({ timestamp }))
         });
@@ -932,7 +978,8 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
                 try {
                     await new Promise((resolve, reject) => {
                         const ytdlpArgs = [
-                            '-f', 'best[height<=360][vcodec!=none][acodec!=none]/best[height<=360]',
+                            '-f', YTDLP_FORMAT_SELECTOR,
+                            '--merge-output-format', 'mp4',
                             '-o', tempVideoFilename,
                             '--force-ipv4',
                             '--legacy-server-connect',
@@ -942,7 +989,6 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
                             '--js-runtimes', 'node',
                             ...impersonateArgs,
                             '--no-progress',
-                            '--write-auto-sub',
                             '--write-auto-sub',
                             '--write-sub',
                             '--sub-lang', 'ko,en',
@@ -1015,7 +1061,7 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
 
         // FFmpeg & Whisper: Process keyframe extraction and audio language detection in parallel
         logger.info(`[${requestHash}] Starting hybrid keyframe extraction and audio language detection in parallel (batch)...`);
-        const [allTimestamps, audioLanguage] = await Promise.all([
+        const [allTimestamps, audioDetection] = await Promise.all([
             extractKeyframesHybrid({
                 tempVideoPath,
                 qaPipeline,
@@ -1025,8 +1071,15 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
                 requestHash,
                 sseHandler: null
             }),
-            audioLanguageDetector.detectLanguage(tempVideoPath, totalDuration, requestHash)
+            (async () => {
+                const detected = await audioLanguageDetector.detectLanguage(tempVideoPath, totalDuration, requestHash);
+                const foreignAudioSegments = detected === 'mixed'
+                    ? await audioLanguageDetector.detectForeignAudioSegments(tempVideoPath, totalDuration, requestHash)
+                    : [];
+                return { audioLanguage: detected, foreignAudioSegments };
+            })()
         ]);
+        const { audioLanguage, foreignAudioSegments } = audioDetection;
 
         // Keep batch subtitle selection identical to the interactive path.
         const potentialSubtitles = fs.readdirSync(baseTempDir).filter(f => f.endsWith('.vtt'));
@@ -1058,6 +1111,9 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
             logger.info(`[${requestHash}] ${subtitleSelection.logLabel} (batch): ${subtitleSelection.file}`);
         } else {
             logger.info(`[${requestHash}] No usable original-language subtitles found for ${audioLanguage} (batch); dialogue track is empty.`);
+        }
+        if (audioLanguage === 'mixed' && foreignAudioSegments.length > 0) {
+            dialogueTrack = enrichMixedDialogueTrackWithAudioSegments(dialogueTrack, foreignAudioSegments);
         }
 
         // Publish downloaded captions to the same durable store used by Q&A.
@@ -1125,6 +1181,7 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
             duration: Math.floor(totalDuration),
             audioLanguage,
             dialogueTrack,
+            foreignAudioSegments,
             dialogueTimestampTolerance: 1,
             frameEvidence: allTimestamps.map(timestamp => ({ timestamp }))
         });
@@ -1206,17 +1263,100 @@ function parseVttToDialogueTrack(vttPath, sourceLang, options = {}) {
         : track;
 }
 
+function stripNonSpeechCaptionTags(text) {
+    return String(text || '')
+        .replace(/\[(음악|웃음|노래|박수|환호|music|laughter|laughs|applause|song)\]/gi, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+}
+
 function englishWordCount(text) {
     return (String(text || '').match(/[A-Za-z]+(?:['’][A-Za-z]+)*/g) || []).length;
 }
 
+function isKoreanCaptionText(text) {
+    return /[가-힣]/.test(stripNonSpeechCaptionTags(text));
+}
+
 function isEnglishSpeechCandidate(text) {
-    const value = String(text || '').trim();
+    const value = stripNonSpeechCaptionTags(text);
     // A product name, acronym, or a single English interjection in a Korean
     // sentence is not sufficient proof of a foreign-language speech interval.
     return value.length > 0 &&
         !/[가-힣]/.test(value) &&
         englishWordCount(value) >= 4;
+}
+
+function enrichMixedDialogueTrackWithAudioSegments(track, foreignAudioSegments) {
+    const items = Array.isArray(track) ? track : [];
+    const segments = Array.isArray(foreignAudioSegments)
+        ? foreignAudioSegments.filter(seg =>
+            seg && Number.isFinite(Number(seg.start)) && Number.isFinite(Number(seg.end)) && Number(seg.end) > Number(seg.start)
+        )
+        : [];
+    if (segments.length === 0) return items;
+
+    const adjusted = [];
+    for (const item of items) {
+        const clone = { ...item };
+        const hasKorean = isKoreanCaptionText(clone.sourceText);
+        const stripped = stripNonSpeechCaptionTags(clone.sourceText);
+        const hasEnglish = !hasKorean && englishWordCount(stripped) >= 3;
+
+        if (hasKorean && !hasEnglish) {
+            // Clamp bloated Korean VTT tails that stretch across a confirmed foreign speech segment.
+            for (const seg of segments) {
+                if (Number(clone.start) < Number(seg.start) && Number(clone.end) > Number(seg.start) + 1) {
+                    clone.end = Number(seg.start);
+                }
+            }
+            if (Number(clone.end) > Number(clone.start)) {
+                adjusted.push(clone);
+            }
+        } else if (hasEnglish) {
+            const matchedSeg = segments.find(seg => intervalsOverlap(clone, seg));
+            adjusted.push(matchedSeg ? {
+                ...clone,
+                foreign: true,
+                detectedLanguage: matchedSeg.lang || 'en',
+                sourceRole: 'confirmed_mixed_foreign_dialogue'
+            } : clone);
+        } else {
+            adjusted.push(clone);
+        }
+    }
+
+    for (const seg of segments) {
+        const segStart = Number(seg.start);
+        const segEnd = Number(seg.end);
+        for (let t = segStart; t < segEnd; t += 10) {
+            const bucketStart = parseFloat(t.toFixed(2));
+            const bucketEnd = parseFloat(Math.min(segEnd, t + 10).toFixed(2));
+            if (bucketEnd <= bucketStart) continue;
+            const coveredByForeignVtt = adjusted.some(item =>
+                item.foreign === true &&
+                Number(item.start) < bucketEnd &&
+                Number(item.end) > bucketStart &&
+                (Math.min(Number(item.end), bucketEnd) - Math.max(Number(item.start), bucketStart)) >= 4
+            );
+            if (!coveredByForeignVtt) {
+                adjusted.push({
+                    start: bucketStart,
+                    end: bucketEnd,
+                    sourceLanguage: seg.lang || 'en',
+                    sourceText: '[FOREIGN_AUDIO_CONFIRMED_VTT_MISSING]',
+                    source: 'whisper_audio_timeline',
+                    confirmed: true,
+                    foreign: true,
+                    detectedLanguage: seg.lang || 'en',
+                    sourceRole: 'confirmed_foreign_audio_segment'
+                });
+            }
+        }
+    }
+
+    adjusted.sort((a, b) => Number(a.start) - Number(b.start) || Number(a.end) - Number(b.end));
+    return adjusted;
 }
 
 function intervalsOverlap(left, right) {
@@ -1350,6 +1490,8 @@ module.exports = {
     parseVttToDialogueTrack,
     selectDialogueSubtitle,
     selectMixedEnglishReferenceSubtitle,
+    enrichMixedDialogueTrackWithAudioSegments,
+    YTDLP_FORMAT_SELECTOR,
     getSimilarity,
     canonicalizeModelOutput,
     publishCanonicalOutput
