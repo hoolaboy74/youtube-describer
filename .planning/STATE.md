@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-08-24)
 Phase: 01 (canonical-output-provenance-v2-policy) — EXECUTING
 Plan: 2 of 2
 Status: Phase complete — ready for verification
-Last activity: 2026-09-16 - Completed quick task 260916-mvw: cache-gated AI conversation opening summary
+Last activity: 2026-11-25 - Completed quick task 261125-nhn: fix mixed-audio auto-dubbing selection and VTT gap translation drops
 
 Progress: [██████████] 100%
 
@@ -80,6 +80,7 @@ None yet.
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
 | 260916-mvw | Cache-gated AI conversation opening summary | 2026-09-16 | 8bc6af6 | [260916-mvw-ai-q-a-ai](./quick/260916-mvw-ai-q-a-ai/) |
+| 261125-nhn | Fix mixed-audio auto-dubbing and VTT gap translation drops | 2026-11-25 | c85bbc2 | [261125-nhn-fix-mixed-audio-dubbing-and-vtt-gaps](./quick/261125-nhn-fix-mixed-audio-dubbing-and-vtt-gaps/) |
 
 ## Deferred Items
 
