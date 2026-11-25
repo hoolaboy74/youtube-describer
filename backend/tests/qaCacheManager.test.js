@@ -5,7 +5,7 @@ const os = require('node:os');
 const path = require('node:path');
 const Database = require('better-sqlite3');
 const sharp = require('sharp');
-const { createQaCacheManager } = require('../modules/qaCacheManager');
+const { createQaCacheManager, parseFrameFilename } = require('../modules/qaCacheManager');
 const { migrateQaCache, createQaCacheStore } = require('../modules/qaCacheStore');
 
 function fixture(t) {
@@ -24,11 +24,13 @@ async function image(dir, timestampMs = 0) {
     return { path: file, sourcePtsMs: timestampMs + 7000, originPtsMs: 7000, timestampMs, sourceKind: 'keyframe' };
 }
 
-test('additive migration is idempotent and preserves existing script rows', t => {
+test('migration is idempotent, drops legacy qa_frame_assets table, and preserves existing script rows', t => {
     const { db } = fixture(t);
     db.exec("CREATE TABLE scripts(id TEXT, text TEXT); INSERT INTO scripts VALUES('1','existing')");
+    db.exec("CREATE TABLE qa_frame_assets(videoId TEXT, checksum TEXT); INSERT INTO qa_frame_assets VALUES('v1','abc')");
     migrateQaCache(db); migrateQaCache(db);
     assert.deepEqual(db.prepare('SELECT * FROM scripts').all(), [{ id: '1', text: 'existing' }]);
+    assert.equal(db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='qa_frame_assets'").get(), undefined);
 });
 test('two SQLite connections share one claim; expired worker cannot publish or renew', async t => {
     const { manager, dir, advance, now } = fixture(t);
@@ -45,17 +47,19 @@ test('two SQLite connections share one claim; expired worker cannot publish or r
     assert.throws(() => manager.store.renew(old), { code: 'STALE_CACHE_LEASE' });
     assert.equal(manager.store.listFrames('video', 'pts-v1').length, 0);
 });
-test('publication validates bytes and PTS, deduplicates, and limits current context to the past', async t => {
+test('publication validates JPEG dimensions and PTS, deduplicates by timestampMs, and limits context to the past', async t => {
     const { manager, dir, root } = fixture(t);
     const lease = manager.store.claim('video', 'pts-v1', 'worker');
     const first = await image(dir);
-    await manager.publishFrame(lease, first);
+    const saved = await manager.publishFrame(lease, first);
+    assert.equal(saved.relativePath, path.join('assets', 'video', 'frames', 'pts-v1', '0.jpg'));
+    assert.equal(saved.checksum, undefined);
     await manager.publishFrame(lease, first);
     await manager.publishFrame(lease, await image(dir, 2000));
     assert.equal(manager.store.listFrames('video', 'pts-v1').length, 2);
     const selected = manager.framesBefore('video', 'pts-v1', 1999);
     assert.equal(selected.length, 1);
-    assert.equal(selected[0].sourcePtsMs, 7000);
+    assert.equal(selected[0].timestampMs, 0);
     assert.ok(fs.existsSync(path.join(root, selected[0].relativePath)));
     await assert.rejects(manager.publishFrame(lease, { ...first, timestampMs: 1 }), /provenance/);
     fs.writeFileSync(first.path, 'invalid JPEG');
@@ -99,7 +103,7 @@ test('subtitle absence and transient failures have separate retry lifetimes', t 
     assert.equal(manager.subtitleUnavailable(lease, 'absent').retryAfter, now() + 86400000);
     assert.equal(manager.subtitleUnavailable(lease, 'retryable_failed').retryAfter, now() + 60000);
 });
-test('restart reconciles corrupt/missing assets, expired owners and orphans without discarding valid assets', async t => {
+test('restart reconciles expired owners and pending orphans without scanning or deleting cached frame assets', async t => {
     const { manager, db, dir, root, advance, now } = fixture(t);
     const lease = manager.store.claim('video', 'pts-v1', 'worker');
     const first = await manager.publishFrame(lease, await image(dir));
@@ -110,10 +114,9 @@ test('restart reconciles corrupt/missing assets, expired owners and orphans with
     advance(3600001);
     const restarted = createQaCacheManager({ db, root, now });
     const report = restarted.reconcile();
-    assert.equal(report.removedFrames, 1);
     assert.equal(report.recoveredJobs, 1);
     assert.equal(report.removedOrphans, 1);
-    assert.equal(restarted.framesBefore('video', 'pts-v1', 3000)[0].checksum, second.checksum);
+    assert.equal(restarted.framesBefore('video', 'pts-v1', 3000)[0].relativePath, second.relativePath);
     assert.throws(() => restarted.store.renew(lease), { code: 'STALE_CACHE_LEASE' });
     assert.ok(restarted.store.claim('video', 'pts-v1', 'new-worker'));
 });
@@ -148,7 +151,7 @@ test('legacy filenames are indexed separately without inventing verified timing 
     assert.equal(manager.store.subtitle('video', 'legacy-v0').audioClassification, 'unknown');
 });
 
-test('corrupt persisted frames are not returned as current-question evidence', async t => {
+test('corrupt non-JPEG persisted frames are not returned as current-question evidence', async t => {
     const { manager, dir, root } = fixture(t);
     const lease = manager.store.claim('video', 'pts-v1', 'worker');
     const asset = await manager.publishFrame(lease, await image(dir));
@@ -156,30 +159,35 @@ test('corrupt persisted frames are not returned as current-question evidence', a
     assert.deepEqual(manager.framesBefore('video', 'pts-v1', 1000), []);
 });
 
+test('existing hashed frame filenames (<pts>-<sha256>.jpg) remain readable without DB rows and canonical <ts>.jpg takes precedence', async t => {
+    const { manager, dir, root } = fixture(t);
+    const framesDir = path.join(root, 'assets', '94L2Z6Xyoxc', 'frames', 'frames-v1');
+    fs.mkdirSync(framesDir, { recursive: true });
+    const sample = await image(dir, 4000);
+    const legacyHashed = `4000-${'a'.repeat(64)}.jpg`;
+    fs.copyFileSync(sample.path, path.join(framesDir, legacyHashed));
 
-test('readable paths include video ID and asset type; historical hashed assets still survive restart', async t => {
-    const {manager,db,dir,root,advance}=fixture(t);
-    const lease=manager.store.claim('94L2Z6Xyoxc','frames-v1','worker');
-    const asset=await manager.publishFrame(lease,await image(dir));
-    assert.ok(asset.relativePath.startsWith('assets/94L2Z6Xyoxc/frames/frames-v1/'));
-    manager.store.release(lease);
-    const subLease=manager.store.claim('94L2Z6Xyoxc','subtitles-v1','worker');
-    const vtt=path.join(dir,'captions.vtt');fs.writeFileSync(vtt,'WEBVTT\n\n');
-    const sub=await manager.publishSubtitle(subLease,vtt);
-    assert.ok(sub.relativePath.startsWith('assets/94L2Z6Xyoxc/subtitles/subtitles-v1/'));
-    manager.store.release(subLease);
-    const oldPath=path.join('assets',require('crypto').createHash('sha256').update('94L2Z6Xyoxc\0frames-v1').digest('hex'),path.basename(asset.relativePath));
-    fs.mkdirSync(path.dirname(path.join(root,oldPath)),{recursive:true});
-    fs.renameSync(path.join(root,asset.relativePath),path.join(root,oldPath));
-    db.prepare('UPDATE qa_frame_assets SET relativePath=? WHERE videoId=?').run(oldPath,'94L2Z6Xyoxc');
-    advance(3600001);
-    manager.reconcile();
-    assert.equal(manager.framesBefore('94L2Z6Xyoxc','frames-v1',1000)[0].relativePath,oldPath);
-    assert.ok(fs.existsSync(path.join(root,sub.relativePath)));
+    assert.deepEqual(parseFrameFilename('4000.jpg'), { timestampMs: 4000, sourcePtsMs: 4000, canonical: true });
+    assert.deepEqual(parseFrameFilename(legacyHashed), { timestampMs: 4000, sourcePtsMs: 4000, canonical: false });
+    assert.equal(parseFrameFilename('not-a-frame.jpg'), null);
+
+    const before = manager.framesBefore('94L2Z6Xyoxc', 'frames-v1', 5000);
+    assert.equal(before.length, 1);
+    assert.equal(before[0].timestampMs, 4000);
+    assert.ok(before[0].relativePath.endsWith(legacyHashed));
+
+    // Once canonical <ts>.jpg is written, it takes precedence over the legacy hashed filename
+    fs.copyFileSync(sample.path, path.join(framesDir, '4000.jpg'));
+    const after = manager.framesBefore('94L2Z6Xyoxc', 'frames-v1', 5000);
+    assert.equal(after.length, 1);
+    assert.ok(after[0].relativePath.endsWith('4000.jpg'));
+
+    manager.deleteVideoAssets('94L2Z6Xyoxc');
+    assert.equal(manager.listFrames('94L2Z6Xyoxc', 'frames-v1').length, 0);
 });
 
-test('cache path components cannot escape the asset root',async t=>{
-    const {manager,dir}=fixture(t);
-    const lease=manager.store.claim('video','frames-v1','worker');
-    await assert.rejects(manager.publishFrame(lease,await image(dir),'../escape'),/Invalid cache path component/);
+test('cache path components cannot escape the asset root', async t => {
+    const { manager, dir } = fixture(t);
+    const lease = manager.store.claim('video', 'frames-v1', 'worker');
+    await assert.rejects(manager.publishFrame(lease, await image(dir), '../escape'), /Invalid cache path component/);
 });

@@ -23,10 +23,20 @@ function classifyYtdlpFailure(error) {
     if (/timed out|network is unreachable|temporary failure|connection refused|name or service not known/.test(message)) return 'YTDLP_NETWORK';
     return 'YTDLP_UNKNOWN';
 }
-async function checksum(file) {
-    const hash = crypto.createHash('sha256');
-    for await (const chunk of require('node:fs').createReadStream(file)) hash.update(chunk);
-    return hash.digest('hex');
+async function isValidJpegFile(file) {
+    let handle;
+    try {
+        const stat = await fs.stat(file);
+        if (!stat.isFile() || stat.size < 3) return false;
+        handle = await fs.open(file, 'r');
+        const header = Buffer.allocUnsafe(2);
+        const { bytesRead } = await handle.read(header, 0, 2, 0);
+        return bytesRead === 2 && header[0] === 0xff && header[1] === 0xd8;
+    } catch {
+        return false;
+    } finally {
+        await handle?.close().catch(() => {});
+    }
 }
 const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
 function waitFor(promise, signal) {
@@ -168,7 +178,7 @@ function createQaMedia({ manager, adapter, log = message => logger.info(message)
                 if(data.sourceVersion!=='av-v1')continue;
                 const file=manager.assetPath(data.relativePath);
                 const stat=await fs.stat(file);
-                if(stat.size!==data.bytes || await checksum(file)!==data.checksum) continue;
+                if(!stat.isFile() || stat.size!==data.bytes) continue;
                 const source={file,owned:true,readers:0,manifest};sources.set(videoId,source);return source;
             } catch {}
         }
@@ -200,7 +210,7 @@ function createQaMedia({ manager, adapter, log = message => logger.info(message)
             if(!bytes||bytes>1024**3)throw Object.assign(new Error('Invalid source size'),{code:'SOURCE_SIZE_LIMIT'});
             const manifest=path.join(workRoot,idFolder(videoId),'source.json');
             const pending=manifest+'.'+lease.fencingToken;
-            await fs.writeFile(pending,JSON.stringify({sourceVersion:'av-v1',relativePath:path.relative(manager.root,file),bytes,checksum:await checksum(file)}));
+            await fs.writeFile(pending,JSON.stringify({sourceVersion:'av-v1',relativePath:path.relative(manager.root,file),bytes}));
             manager.store.fenced(lease,()=>require('node:fs').renameSync(pending,manifest));
             const source={file,owned:true,readers:0,manifest};sources.set(videoId,source);sourceEvents.emit(videoId,source);return source;
         });
@@ -446,8 +456,7 @@ function createQaMedia({ manager, adapter, log = message => logger.info(message)
                 // context builder can access them. No cache state is mutated.
                 const verified = await Promise.all(frames.map(async frame => {
                     const file = manager.assetPath(frame.relativePath);
-                    const stat = await fs.stat(file);
-                    if (!stat.isFile() || (frame.checksum && await checksum(file) !== frame.checksum)) throw new Error('invalid frame');
+                    if (!await isValidJpegFile(file)) throw new Error('invalid frame');
                     return { ...frame, path: file };
                 }));
                 return { fromCache: true, frames: verified, subtitles };

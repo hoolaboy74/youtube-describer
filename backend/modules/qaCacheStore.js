@@ -2,6 +2,8 @@
 
 function migrateQaCache(db) {
     db.exec(`
+        DROP INDEX IF EXISTS qa_frame_window;
+        DROP TABLE IF EXISTS qa_frame_assets;
         CREATE TABLE IF NOT EXISTS qa_cache_jobs (
             videoId TEXT NOT NULL, cacheVersion TEXT NOT NULL,
             state TEXT NOT NULL DEFAULT 'queued' CHECK(state IN ('queued','downloading','extracting','ready','retryable_failed')),
@@ -9,14 +11,6 @@ function migrateQaCache(db) {
             retryAfter INTEGER NOT NULL DEFAULT 0, lastError TEXT, lastAccessAt INTEGER NOT NULL,
             PRIMARY KEY(videoId, cacheVersion)
         );
-        CREATE TABLE IF NOT EXISTS qa_frame_assets (
-            videoId TEXT NOT NULL, cacheVersion TEXT NOT NULL, sourcePtsMs INTEGER NOT NULL,
-            originPtsMs INTEGER NOT NULL, timestampMs INTEGER NOT NULL CHECK(timestampMs >= 0),
-            relativePath TEXT NOT NULL, sourceKind TEXT NOT NULL CHECK(sourceKind IN ('keyframe','backfill','window','legacy')),
-            checksum TEXT NOT NULL, width INTEGER NOT NULL, height INTEGER NOT NULL,
-            PRIMARY KEY(videoId, cacheVersion, sourcePtsMs)
-        );
-        CREATE INDEX IF NOT EXISTS qa_frame_window ON qa_frame_assets(videoId, cacheVersion, timestampMs);
         CREATE TABLE IF NOT EXISTS qa_subtitle_assets (
             videoId TEXT NOT NULL, cacheVersion TEXT NOT NULL,
             state TEXT NOT NULL CHECK(state IN ('unknown','fetching','ready','absent','retryable_failed')),
@@ -74,18 +68,6 @@ function createQaCacheStore(db, { now = Date.now } = {}) {
                 db.prepare('UPDATE qa_cache_jobs SET state=?,retryAfter=?,lastError=?,leaseUntil=?,owner=? WHERE videoId=? AND cacheVersion=?')
                     .run(state, retryAfter, lastError, terminal ? 0 : current.leaseUntil, terminal ? null : current.owner, lease.videoId, lease.cacheVersion);
             });
-        },
-        listFrames(videoId, cacheVersion, beforeMs = Number.MAX_SAFE_INTEGER) {
-            return db.prepare('SELECT * FROM qa_frame_assets WHERE videoId=? AND cacheVersion=? AND timestampMs<=? ORDER BY timestampMs')
-                .all(videoId, cacheVersion, beforeMs);
-        },
-        insertFrame(lease, frame, assetVersion = lease.cacheVersion) {
-            assertLease(lease); // Caller owns a fenced transaction across rename + registration.
-            db.prepare(`INSERT OR IGNORE INTO qa_frame_assets(videoId,cacheVersion,sourcePtsMs,originPtsMs,timestampMs,relativePath,sourceKind,checksum,width,height)
-                VALUES(@videoId,@cacheVersion,@sourcePtsMs,@originPtsMs,@timestampMs,@relativePath,@sourceKind,@checksum,@width,@height)`)
-                .run({ ...frame, videoId: lease.videoId, cacheVersion: assetVersion });
-            return db.prepare('SELECT * FROM qa_frame_assets WHERE videoId=? AND cacheVersion=? AND sourcePtsMs=?')
-                .get(lease.videoId, assetVersion, frame.sourcePtsMs);
         },
         subtitle(videoId, cacheVersion) {
             return db.prepare('SELECT * FROM qa_subtitle_assets WHERE videoId=? AND cacheVersion=?').get(videoId, cacheVersion);

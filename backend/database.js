@@ -848,12 +848,14 @@ function deleteComment(commentId) {
 
 // 영상 삭제 (관련 스크립트와 댓글은 ON DELETE CASCADE로 자동 삭제됨)
 function deleteVideo(videoId) {
-  return db.transaction(() => {
-    for (const table of ['qa_frame_assets', 'qa_subtitle_assets', 'qa_cache_jobs']) {
+  const result = db.transaction(() => {
+    for (const table of ['qa_subtitle_assets', 'qa_cache_jobs']) {
       db.prepare(`DELETE FROM ${table} WHERE videoId = ?`).run(videoId);
     }
     return db.prepare('DELETE FROM videos WHERE videoId = ?').run(videoId);
   })();
+  getQaCacheManager().deleteVideoAssets(videoId);
+  return result;
 }
 
 // --- Admin Page Functions ---

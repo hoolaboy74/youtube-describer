@@ -43,7 +43,7 @@ console.log('Clearing database tables...');
 try {
     if (fs.existsSync(dbPath)) {
         const db = new Database(dbPath);
-        for (const table of ['qa_frame_assets', 'qa_subtitle_assets', 'qa_cache_jobs']) {
+        for (const table of ['qa_subtitle_assets', 'qa_cache_jobs']) {
             if (db.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name=?").get(table)) db.exec(`DELETE FROM ${table}`);
         }
         db.exec('DELETE FROM scripts;');
