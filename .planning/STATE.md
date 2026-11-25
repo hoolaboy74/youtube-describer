@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-08-24)
 Phase: 01 (canonical-output-provenance-v2-policy) — EXECUTING
 Plan: 2 of 2
 Status: Phase complete — ready for verification
-Last activity: 2026-11-25 - Completed quick task 261125-nhn: fix mixed-audio auto-dubbing selection and VTT gap translation drops
+Last activity: 2026-11-25 - Completed quick task 261125-oqy: replace local Whisper with single-pass Gemini 3.8 Flash audio analysis
 
 Progress: [██████████] 100%
 
@@ -81,6 +81,7 @@ None yet.
 |---|-------------|------|--------|-----------|
 | 260916-mvw | Cache-gated AI conversation opening summary | 2026-09-16 | 8bc6af6 | [260916-mvw-ai-q-a-ai](./quick/260916-mvw-ai-q-a-ai/) |
 | 261125-nhn | Fix mixed-audio auto-dubbing and VTT gap translation drops | 2026-11-25 | c85bbc2 | [261125-nhn-fix-mixed-audio-dubbing-and-vtt-gaps](./quick/261125-nhn-fix-mixed-audio-dubbing-and-vtt-gaps/) |
+| 261125-oqy | Replace local Whisper with Gemini 3.8 Flash audio analysis | 2026-11-25 | 3d1a94a | [261125-oqy-gemini-audio-language-analysis](./quick/261125-oqy-gemini-audio-language-analysis/) |
 
 ## Deferred Items
 
