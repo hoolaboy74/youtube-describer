@@ -2,142 +2,102 @@
 
 const test = require('node:test');
 const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const os = require('node:os');
+const path = require('node:path');
 
 const {
-    parseWhisperLanguageOutput,
-    computeSampleOffsets,
-    classifySamples,
+    analyzeAudioLanguage,
+    detectLanguage,
+    buildAudioAnalysisPrompt,
+    parseGeminiAudioAnalysisResponse,
+    parseTimestampValue,
+    formatSecondsAsMmSs,
     mergeForeignAudioSegments
 } = require('../modules/audioLanguageDetector');
 
-test('parseWhisperLanguageOutput extracts language code and confidence probability', () => {
-    assert.deepEqual(
-        parseWhisperLanguageOutput('whisper_full_with_state: auto-detected language: en (p = 0.996385)'),
-        { lang: 'en', prob: 0.996385 }
-    );
-    assert.deepEqual(
-        parseWhisperLanguageOutput('auto-detected language: ko'),
-        { lang: 'ko', prob: null }
-    );
-    assert.deepEqual(
-        parseWhisperLanguageOutput('no language line here'),
-        { lang: 'unknown', prob: null }
-    );
+test('parseTimestampValue and formatSecondsAsMmSs handle MM:SS, HH:MM:SS, and numeric seconds', () => {
+    assert.equal(parseTimestampValue('00:14'), 14);
+    assert.equal(parseTimestampValue('08:25'), 505);
+    assert.equal(parseTimestampValue('1:02:03.5'), 3723.5);
+    assert.equal(parseTimestampValue(124.5), 124.5);
+    assert.equal(parseTimestampValue('invalid'), null);
+    assert.equal(parseTimestampValue(-5), null);
+    assert.equal(formatSecondsAsMmSs(621), '10:21');
 });
 
-test('computeSampleOffsets adapts sample count to video duration (3 / 5 / 9 points)', () => {
-    assert.deepEqual(computeSampleOffsets(0), []);
-    assert.deepEqual(computeSampleOffsets(-10), []);
+test('parseGeminiAudioAnalysisResponse handles mixed JSON, fenced JSON, clamping, merging, and ko filtering', () => {
+    const raw = [
+        '```json',
+        JSON.stringify({
+            audioClassification: 'mixed',
+            foreignSegments: [
+                { start: '00:14', end: '00:40', lang: 'en' },
+                { start: '00:40', end: '00:42', lang: 'en' },
+                { start: '01:00', end: '01:30', lang: 'ko' },
+                { start: '08:15', end: '12:00', lang: 'EN' },
+                { start: '05:00', end: '04:50', lang: 'en' }
+            ]
+        }),
+        '```'
+    ].join('\n');
 
-    const shortOffsets = computeSampleOffsets(30);
-    assert.equal(shortOffsets.length, 3);
-    assert.deepEqual(shortOffsets, [6, 15, 24]);
-
-    const mediumOffsets = computeSampleOffsets(120);
-    assert.equal(mediumOffsets.length, 5);
-
-    const longOffsets = computeSampleOffsets(620.9);
-    assert.equal(longOffsets.length, 9);
-    assert.ok(longOffsets.every(o => o >= 0 && o <= 618.9));
+    const parsed = parseGeminiAudioAnalysisResponse(raw, 621);
+    assert.equal(parsed.audioLanguage, 'mixed');
+    assert.deepEqual(parsed.foreignAudioSegments, [
+        { start: 14, end: 42, lang: 'en' },
+        { start: 495, end: 621, lang: 'en' }
+    ]);
 });
 
-test('classifySamples shields pure Korean videos with BGM/noise from flipping to mixed', () => {
-    // Low-confidence BGM sample (< 0.70) ignored
-    const lowConfBgm = [
-        { lang: 'ko', prob: 0.99 },
-        { lang: 'ko', prob: 0.98 },
-        { lang: 'ko', prob: 0.97 },
-        { lang: 'ko', prob: 0.99 },
-        { lang: 'en', prob: 0.45 },
-        { lang: 'ko', prob: 0.99 },
-        { lang: 'ko', prob: 0.98 },
-        { lang: 'ko', prob: 0.97 },
-        { lang: 'ko', prob: 0.96 }
-    ];
-    assert.equal(classifySamples(lowConfBgm), 'korean');
+test('parseGeminiAudioAnalysisResponse clears foreignSegments for non-mixed classifications and falls back on malformed JSON', () => {
+    const koParsed = parseGeminiAudioAnalysisResponse(JSON.stringify({
+        audioClassification: 'korean',
+        foreignSegments: [{ start: '00:10', end: '00:20', lang: 'en' }]
+    }), 300);
+    assert.deepEqual(koParsed, { audioLanguage: 'korean', foreignAudioSegments: [] });
 
-    // Single moderate-confidence outlier (< 0.90) on 9-point run stays korean
-    const singleModerateOutlier = [
-        { lang: 'ko', prob: 0.99 },
-        { lang: 'ko', prob: 0.98 },
-        { lang: 'ko', prob: 0.99 },
-        { lang: 'ko', prob: 0.97 },
-        { lang: 'en', prob: 0.76 },
-        { lang: 'ko', prob: 0.99 },
-        { lang: 'ko', prob: 0.98 },
-        { lang: 'ko', prob: 0.99 },
-        { lang: 'ko', prob: 0.98 }
-    ];
-    assert.equal(classifySamples(singleModerateOutlier), 'korean');
+    const foreignParsed = parseGeminiAudioAnalysisResponse(JSON.stringify({
+        audioClassification: 'foreign',
+        foreignSegments: [{ start: '00:00', end: '05:00', lang: 'en' }]
+    }), 300);
+    assert.deepEqual(foreignParsed, { audioLanguage: 'foreign', foreignAudioSegments: [] });
+
+    const invalid = parseGeminiAudioAnalysisResponse('not json at all', 300);
+    assert.deepEqual(invalid, { audioLanguage: 'unknown', foreignAudioSegments: [] });
 });
 
-test('classifySamples shields pure English videos from flipping to mixed on a single noisy ko sample', () => {
-    const pureEnglishWithNoise = [
-        { lang: 'en', prob: 0.99 },
-        { lang: 'en', prob: 0.98 },
-        { lang: 'en', prob: 0.97 },
-        { lang: 'ko', prob: 0.78 },
-        { lang: 'en', prob: 0.99 },
-        { lang: 'en', prob: 0.98 },
-        { lang: 'en', prob: 0.96 },
-        { lang: 'en', prob: 0.99 },
-        { lang: 'en', prob: 0.97 }
-    ];
-    assert.equal(classifySamples(pureEnglishWithNoise), 'foreign');
-});
-
-test('classifySamples detects mixed audio for bilingual documentaries and high-confidence short foreign clips', () => {
-    // YXLWe_pqmjU 9-point empirical pattern
-    const docuSamples = [
-        { lang: 'en', prob: 0.99 },
-        { lang: 'en', prob: 0.99 },
-        { lang: 'ko', prob: 0.99 },
-        { lang: 'ko', prob: 0.99 },
-        { lang: 'en', prob: 0.98 },
-        { lang: 'ko', prob: 0.91 },
-        { lang: 'en', prob: 0.99 },
-        { lang: 'en', prob: 0.98 },
-        { lang: 'ko', prob: 0.98 }
-    ];
-    assert.equal(classifySamples(docuSamples), 'mixed');
-
-    // Single very high-confidence English interview (>= 0.90) in Korean video
-    const shortInterview = [
-        { lang: 'ko', prob: 0.99 },
-        { lang: 'ko', prob: 0.98 },
-        { lang: 'en', prob: 0.96 },
-        { lang: 'ko', prob: 0.99 },
-        { lang: 'ko', prob: 0.98 }
-    ];
-    assert.equal(classifySamples(shortInterview), 'mixed');
-
-    // Short 3-point video with both languages
-    assert.equal(classifySamples([
-        { lang: 'ko', prob: 0.95 },
-        { lang: 'ko', prob: 0.94 },
-        { lang: 'en', prob: 0.85 }
-    ]), 'mixed');
-
-    // All low-confidence -> unknown
-    assert.equal(classifySamples([
-        { lang: 'en', prob: 0.41 },
-        { lang: 'ko', prob: 0.52 },
-        { lang: 'en', prob: 0.38 }
-    ]), 'unknown');
-});
-
-test('mergeForeignAudioSegments merges adjacent high-confidence non-Korean intervals and drops Korean/low-conf', () => {
+test('mergeForeignAudioSegments merges adjacent intervals of the same language and keeps distinct languages separate', () => {
     const merged = mergeForeignAudioSegments([
-        { start: 0, end: 10, lang: 'ko', prob: 0.99 },
-        { start: 10, end: 20, lang: 'en', prob: 0.98 },
-        { start: 20, end: 30, lang: 'en', prob: 0.95 },
-        { start: 30, end: 40, lang: 'en', prob: 0.55 }, // below threshold
-        { start: 50, end: 60, lang: 'en', prob: 0.99 },
-        { start: 60, end: 70, lang: 'ja', prob: 0.92 }
+        { start: 10, end: 20, lang: 'en' },
+        { start: 21, end: 35, lang: 'en' },
+        { start: 35, end: 50, lang: 'ja' },
+        { start: 60, end: 70, lang: 'ko' }
     ]);
     assert.deepEqual(merged, [
-        { start: 10, end: 30, lang: 'en', prob: 0.98 },
-        { start: 50, end: 60, lang: 'en', prob: 0.99 },
-        { start: 60, end: 70, lang: 'ja', prob: 0.92 }
+        { start: 10, end: 35, lang: 'en' },
+        { start: 35, end: 50, lang: 'ja' }
     ]);
+});
+
+test('buildAudioAnalysisPrompt includes total duration and strict classification boundaries', () => {
+    const prompt = buildAudioAnalysisPrompt(621);
+    assert.match(prompt, /10:21 \(621초\)/);
+    assert.match(prompt, /"audioClassification"/);
+    assert.match(prompt, /"foreignSegments"/);
+});
+
+test('analyzeAudioLanguage and detectLanguage fail conservatively when file is missing or key is offline', async () => {
+    const missing = await analyzeAudioLanguage('/no/such/file.mp4', 60, 'test-missing', { apiKey: 'offline-test-key' });
+    assert.equal(missing.audioLanguage, 'unknown');
+    assert.deepEqual(missing.foreignAudioSegments, []);
+
+    const tmpFile = path.join(os.tmpdir(), `audio-detector-offline-${process.pid}.mp4`);
+    fs.writeFileSync(tmpFile, Buffer.from('dummy'));
+    try {
+        const lang = await detectLanguage(tmpFile, 60, 'test-offline', { apiKey: 'offline-test-key' });
+        assert.equal(lang, 'unknown');
+    } finally {
+        fs.rmSync(tmpFile, { force: true });
+    }
 });

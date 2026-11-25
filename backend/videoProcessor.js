@@ -661,8 +661,8 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null, userId = nul
 
         // sse status update omitted for high-speed extraction
 
-        // FFmpeg & Whisper: Process keyframe extraction and audio language detection in parallel
-        logger.info(`[${requestHash}] Starting hybrid keyframe extraction and audio language detection in parallel...`);
+        // FFmpeg & Gemini Audio: Process keyframe extraction and full-audio language analysis in parallel
+        logger.info(`[${requestHash}] Starting hybrid keyframe extraction and Gemini audio language analysis in parallel...`);
         const [allTimestamps, audioDetection] = await Promise.all([
             extractKeyframesHybrid({
                 tempVideoPath,
@@ -673,15 +673,23 @@ const processVideo = async (videoId, youtubeUrl, sseHandler = null, userId = nul
                 requestHash,
                 sseHandler
             }),
-            (async () => {
-                const detected = await audioLanguageDetector.detectLanguage(tempVideoPath, totalDuration, requestHash);
-                const foreignAudioSegments = detected === 'mixed'
-                    ? await audioLanguageDetector.detectForeignAudioSegments(tempVideoPath, totalDuration, requestHash)
-                    : [];
-                return { audioLanguage: detected, foreignAudioSegments };
-            })()
+            audioLanguageDetector.analyzeAudioLanguage(tempVideoPath, totalDuration, requestHash)
         ]);
         const { audioLanguage, foreignAudioSegments } = audioDetection;
+        if (audioDetection.usageMetadata) {
+            try {
+                const audioCost = db.recordGeminiUsage({
+                    videoId,
+                    userId,
+                    requestType: 'audio_analysis',
+                    modelName: audioDetection.modelName || MODEL_NAME,
+                    usageMetadata: audioDetection.usageMetadata
+                });
+                logger.info(`[${requestHash}] Logged audio analysis API cost: ${audioCost.totalCost.toFixed(6)} USD`);
+            } catch (costErr) {
+                logger.warn(`[${requestHash}] Failed to record audio analysis API cost: ${costErr.message}`);
+            }
+        }
         
         // Load only a source-language dialogue track. For foreign/unknown audio,
         // a Korean VTT is commonly YouTube's translated caption track, not
@@ -1059,8 +1067,8 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
             logger.info(`[${requestHash}] Downloaded video size: ${(filesize / 1024 / 1024).toFixed(2)} MB`);
         }
 
-        // FFmpeg & Whisper: Process keyframe extraction and audio language detection in parallel
-        logger.info(`[${requestHash}] Starting hybrid keyframe extraction and audio language detection in parallel (batch)...`);
+        // FFmpeg & Gemini Audio: Process keyframe extraction and full-audio language analysis in parallel
+        logger.info(`[${requestHash}] Starting hybrid keyframe extraction and Gemini audio language analysis in parallel (batch)...`);
         const [allTimestamps, audioDetection] = await Promise.all([
             extractKeyframesHybrid({
                 tempVideoPath,
@@ -1071,15 +1079,22 @@ const processVideoBatch = async (videoId, youtubeUrl) => {
                 requestHash,
                 sseHandler: null
             }),
-            (async () => {
-                const detected = await audioLanguageDetector.detectLanguage(tempVideoPath, totalDuration, requestHash);
-                const foreignAudioSegments = detected === 'mixed'
-                    ? await audioLanguageDetector.detectForeignAudioSegments(tempVideoPath, totalDuration, requestHash)
-                    : [];
-                return { audioLanguage: detected, foreignAudioSegments };
-            })()
+            audioLanguageDetector.analyzeAudioLanguage(tempVideoPath, totalDuration, requestHash)
         ]);
         const { audioLanguage, foreignAudioSegments } = audioDetection;
+        if (audioDetection.usageMetadata) {
+            try {
+                const audioCost = db.recordGeminiUsage({
+                    videoId,
+                    requestType: 'audio_analysis',
+                    modelName: audioDetection.modelName || MODEL_NAME,
+                    usageMetadata: audioDetection.usageMetadata
+                });
+                logger.info(`[${requestHash}] Logged audio analysis API cost (batch): ${audioCost.totalCost.toFixed(6)} USD`);
+            } catch (costErr) {
+                logger.warn(`[${requestHash}] Failed to record batch audio analysis API cost: ${costErr.message}`);
+            }
+        }
 
         // Keep batch subtitle selection identical to the interactive path.
         const potentialSubtitles = fs.readdirSync(baseTempDir).filter(f => f.endsWith('.vtt'));
